@@ -1,0 +1,40 @@
+.callout {
+  border-radius: var(--radius);
+  border: var(--hairline) solid var(--border-hairline);
+  border-left-width: 3px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+}
+
+.note {
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-wash) 40%, var(--surface));
+}
+.mark {
+  border-left-color: var(--mark);
+  background: color-mix(in srgb, var(--mark-wash) 40%, var(--surface));
+}
+.plain {
+  border-left-color: var(--border-strong);
+}
+
+.label {
+  display: block;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-1);
+}
+
+.body {
+  font-size: var(--fs-ui);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.body :global(strong) {
+  color: var(--text-primary);
+  font-weight: var(--fw-semibold);
+}

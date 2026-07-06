@@ -1,0 +1,17 @@
+.card {
+  border-radius: var(--radius-lg);
+  border: var(--hairline) solid var(--border-hairline);
+  padding: var(--space-5);
+}
+
+.raised {
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-card);
+  border-color: var(--border-hairline);
+}
+.sunken {
+  background: var(--surface-sunken);
+}
+.plain {
+  background: transparent;
+}

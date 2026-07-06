@@ -1,0 +1,58 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.intro {
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.endLabel {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-ui);
+}
+.table th {
+  font-family: var(--ff-ui);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-strong);
+}
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  color: var(--text-primary);
+}
+.numCol {
+  text-align: right !important;
+}
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: var(--space-2);
+  vertical-align: baseline;
+}

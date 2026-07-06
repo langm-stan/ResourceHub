@@ -1,0 +1,148 @@
+.grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.axisLine {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.tickLabel {
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-faint);
+}
+
+.leader {
+  stroke-width: 1;
+}
+.annLabel {
+  font-family: var(--ff-ui);
+  font-size: 12px;
+  font-weight: 500;
+}
+.annDot {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.annInk .leader {
+  stroke: var(--text-faint);
+}
+.annInk .annLabel {
+  fill: var(--text-primary);
+}
+.annInk .annDot {
+  fill: var(--text-primary);
+}
+
+.annMark .leader {
+  stroke: var(--mark);
+}
+.annMark .annLabel {
+  fill: var(--mark);
+}
+.annMark .annDot {
+  fill: var(--mark);
+}
+
+.annAccent .leader {
+  stroke: var(--accent);
+}
+.annAccent .annLabel {
+  fill: var(--accent);
+}
+.annAccent .annDot {
+  fill: var(--accent);
+}
+
+.markerLine {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.markerLabel {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  fill: var(--text-muted);
+}
+
+.endLabel {
+  font-family: var(--ff-ui);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.drawIn {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--dur-draw) var(--ease-out) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawIn {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---- Hover probe: crosshair + floating readout ---- */
+.probeLine {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.tip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--surface-raised);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--ff-ui);
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.tipTitle {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+}
+
+.tipSwatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.tipLabel {
+  flex: 1;
+  padding-right: var(--space-3);
+}
+
+.tipValue {
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+}

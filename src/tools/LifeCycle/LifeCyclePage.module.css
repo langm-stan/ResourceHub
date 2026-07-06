@@ -1,0 +1,303 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+/* Full-width header: title on the left, lead paragraph on the right. */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: var(--space-8);
+  align-items: end;
+  margin-bottom: var(--space-6);
+}
+.eyebrow {
+  grid-column: 1 / -1;
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: 0;
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+  padding-bottom: 4px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: var(--rail-width) 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+.railSticky {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  background: var(--surface-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: var(--hairline) solid var(--border-hairline);
+  padding: var(--space-5);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.tabBar {
+  position: sticky;
+  top: var(--space-5);
+  z-index: 5;
+  background: var(--surface);
+  padding-top: var(--space-1);
+}
+.panel {
+  min-height: 420px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  align-items: baseline;
+  margin-bottom: var(--space-5);
+}
+
+/* ---- Bracket "containers" visualization ---- */
+.brackets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.bracketRow {
+  display: grid;
+  grid-template-columns: 52px 1fr 110px;
+  align-items: center;
+  gap: var(--space-3);
+}
+.bracketRate {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  text-align: right;
+}
+.bracketRate.marginal {
+  color: var(--accent);
+}
+.bracketTrack {
+  position: relative;
+  height: 30px;
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+  border: var(--hairline) solid var(--border-hairline);
+  overflow: hidden;
+}
+.bracketFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--c-series-1) 45%, var(--surface-raised));
+  transition: width var(--dur-med) var(--ease-standard);
+}
+.bracketFill.marginal {
+  background: color-mix(in srgb, var(--accent) 55%, var(--surface-raised));
+}
+.bracketRange {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.bracketTax {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: right;
+}
+.bracketTax strong {
+  color: var(--text-primary);
+  font-weight: var(--fw-semibold);
+}
+
+.derivation {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+/* ---- Paycheck waterfall ---- */
+.paycheck {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.payRow {
+  display: grid;
+  grid-template-columns: 220px 1fr 110px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.payRow:last-child {
+  border-bottom: none;
+}
+.payLabel {
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+}
+.payNote {
+  display: block;
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+}
+.payBarTrack {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+.payBar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--dur-med) var(--ease-standard);
+}
+.payAmount {
+  text-align: right;
+  font-size: var(--fs-ui);
+}
+.takeHomeRow {
+  background: color-mix(in srgb, var(--c-series-1) 10%, var(--surface-raised));
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-2) calc(-1 * var(--space-3)) 0;
+}
+
+.rothControls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-5);
+  max-width: 560px;
+  margin-bottom: var(--space-5);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  max-width: 72ch;
+}
+
+@media (max-width: 920px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .railSticky {
+    position: static;
+  }
+  .bracketRow {
+    grid-template-columns: 44px 1fr 90px;
+  }
+  .payRow {
+    grid-template-columns: 1fr 90px;
+  }
+  .payBarTrack {
+    display: none;
+  }
+  .rothControls {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 920px) {
+  .intro {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-3);
+  }
+  .lead {
+    padding-bottom: 0;
+  }
+}
+
+
+/* ---- Horizontal controls band (replaces the side rail) ---- */
+.controls {
+  margin-bottom: var(--space-5);
+}
+/* Card header with the reset control on the right. */
+.controlsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* Small-caps heading over each row of related controls. */
+.groupLabel {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  font-weight: var(--fw-semibold);
+  margin: var(--space-5) 0 var(--space-3);
+}
+
+.controlsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-7);
+  /* Top-align so every control's label sits on the same line; notes hang
+     below without pushing neighbors around. */
+  align-items: start;
+}
+/* The scenario toggle sits on its own row beneath the numeric controls. */
+.toggleRow {
+  margin-top: var(--space-5);
+}
+
+/* The case study's spending-path switch. */
+.modeRow {
+  max-width: 560px;
+  margin-bottom: var(--space-5);
+}
+
+.controls .footnote {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--border-hairline);
+  max-width: none;
+}
+
+/* Deterministic column counts keep the control rows balanced at every width. */
+@media (max-width: 1200px) {
+  .controlsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .controlsGrid {
+    grid-template-columns: 1fr;
+  }
+}

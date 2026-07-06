@@ -1,0 +1,163 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+/* Full-width header: title on the left, lead paragraph on the right. */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  column-gap: var(--space-8);
+  align-items: end;
+  margin-bottom: var(--space-6);
+}
+.eyebrow {
+  grid-column: 1 / -1;
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: 0;
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+  padding-bottom: 4px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.tabBar {
+  position: sticky;
+  top: var(--space-5);
+  z-index: 5;
+  background: var(--surface);
+  padding-top: var(--space-1);
+}
+.panel {
+  min-height: 420px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  align-items: baseline;
+  margin-bottom: var(--space-5);
+}
+
+/* A tab's own control, sitting between the header and the chart. */
+.modeRow {
+  max-width: 560px;
+  margin-bottom: var(--space-5);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  max-width: 72ch;
+}
+
+@media (max-width: 920px) {
+  .intro {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-3);
+  }
+  .lead {
+    padding-bottom: 0;
+  }
+}
+
+/* ---- The pick grid ---- */
+.pickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+}
+.pickCard {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: var(--hairline) solid var(--border-hairline);
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+  font: inherit;
+  color: inherit;
+}
+.pickCard:hover {
+  border-color: var(--c-cardinal);
+  transform: translateY(-1px);
+}
+.pickTicker {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.1em;
+  color: var(--c-cardinal);
+  text-transform: uppercase;
+}
+.pickName {
+  font-weight: var(--fw-semibold);
+  margin: 2px 0;
+}
+.pickBlurb {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-muted);
+}
+.fundCard {
+  grid-column: 1 / -1;
+  background: color-mix(in srgb, var(--c-series-1) 7%, var(--surface-raised));
+}
+
+/* ---- What you own comparison ---- */
+.ownTable {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-5);
+}
+.ownRow {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  font-size: var(--fs-ui);
+}
+.ownRow:last-child {
+  border-bottom: none;
+}
+.ownHead {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+.ownLabel {
+  color: var(--text-faint);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+  .pickGrid {
+    grid-template-columns: 1fr;
+  }
+  .ownRow {
+    grid-template-columns: 110px 1fr 1fr;
+  }
+}

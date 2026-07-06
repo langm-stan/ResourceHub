@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Fonts: Inter Variable, self-hosted via @fontsource-variable/inter (imported
+ * in main.tsx). Typography and color come from the design tokens in
+ * styles/tokens.css + styles/toolkitBase.css — Tailwind is used for layout.
+ */
+
+#root {
+  min-height: 100vh;
+}

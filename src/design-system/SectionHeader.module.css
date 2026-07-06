@@ -1,0 +1,39 @@
+.root {
+  margin-bottom: var(--space-5);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.section {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.kicker {
+  font-family: var(--ff-ui);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.title {
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  margin-top: var(--space-3);
+  font-size: var(--fs-lead);
+  line-height: 1.45;
+  color: var(--text-muted);
+  max-width: var(--measure);
+  text-wrap: pretty;
+}

@@ -1,0 +1,20 @@
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.note {
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: var(--measure);
+  border-top: var(--hairline) solid var(--border-hairline);
+  padding-top: var(--space-4);
+}

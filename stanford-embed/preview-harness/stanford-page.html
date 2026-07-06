@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  Local stand-in for https://ifdm.stanford.edu/resourcehub/financial-statements
+  so the embed can be tested exactly as Stanford IT will install it: same
+  heading, same intro copy, and the same <iframe> snippet from README.md.
+  This file is for testing only and is not part of the deliverable zip.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Financial Statements | Stanford IFDM (embed test)</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; color: #2e2d29; background: #fff; }
+      .banner { background: #8c1515; color: #fff; padding: 10px 24px; font-size: 20px; font-weight: 700; }
+      .banner span { font-weight: 400; font-size: 14px; margin-left: 12px; opacity: 0.9; }
+      nav { border-bottom: 1px solid #d9d7ce; padding: 12px 24px; font-size: 14px; color: #8c1515; font-weight: 600; }
+      nav a { color: #8c1515; text-decoration: none; margin-right: 20px; }
+      .testnote { background: #fff8e1; border-bottom: 1px solid #e5d9a6; padding: 8px 24px; font-size: 13px; color: #6b5d1f; }
+      main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+      h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 42px; margin: 0 0 16px; }
+      .intro { max-width: 70ch; font-size: 17px; line-height: 1.6; color: #544f47; margin-bottom: 32px; }
+    </style>
+  </head>
+  <body>
+    <div class="banner">Stanford <span>Initiative for Financial Decision-Making</span></div>
+    <nav>
+      <a href="#">Home</a><a href="#">About</a><a href="#">Research</a><a href="#">Teaching</a>
+      <a href="#">Policy &amp; Programs</a><a href="#">Resource Hub</a><a href="#">Events</a><a href="#">News</a>
+    </nav>
+    <div class="testnote">
+      Embed test page. Everything above and around the frame imitates ifdm.stanford.edu; everything
+      inside the frame is the actual deliverable, served from the financial-statements folder.
+    </div>
+    <main>
+      <h1>Financial Statements</h1>
+      <p class="intro">
+        Personal financial statements help you understand your financial position so you can make
+        informed decisions. Use the tool below to take stock of your finances, track progress, and
+        create a plan to reach your goals.
+      </p>
+
+      <!-- The exact snippet from README.md, with the hosted URL filled in. -->
+      <iframe
+        src="../financial-statements/index.html"
+        title="Interactive balance sheet and budget"
+        width="100%"
+        height="1500"
+        style="border: none; max-width: 100%;"
+        loading="lazy"
+      ></iframe>
+    </main>
+  </body>
+</html>

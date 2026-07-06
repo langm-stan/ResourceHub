@@ -1,0 +1,76 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  /* A container query (rather than a viewport media query) so the grid
+     responds to the space it's actually given — this tool gets nested inside
+     the Resource Hub's own sidebar + this page's parameter rail, so the
+     available width is often much narrower than the viewport suggests. */
+  container-type: inline-size;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  border: var(--hairline) solid var(--border-hairline);
+  background: var(--surface);
+}
+
+.key {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+
+.keyHelp {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+  margin-bottom: var(--space-2);
+}
+
+.answer {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.answerValue {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  align-items: flex-end;
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+
+.timing {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+@container (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .answer {
+    grid-column: 1 / -1;
+  }
+}

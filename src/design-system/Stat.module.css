@@ -1,0 +1,33 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-family: var(--ff-ui);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  font-weight: var(--fw-medium);
+}
+
+.value {
+  font-size: var(--fs-h4);
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.emphasis .value {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-medium);
+}
+
+.note {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  margin-top: 2px;
+}

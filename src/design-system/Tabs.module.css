@@ -1,0 +1,31 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-ui);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+.tab:hover {
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.active,
+.active:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: var(--fw-medium);
+}

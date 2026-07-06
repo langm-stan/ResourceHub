@@ -1,0 +1,95 @@
+/*
+ * Toolkit base typography — the site-wide standard. Ported from the Toolkit's
+ * src/styles/base.css. Originally scoped under .toolkitScope while the rest of
+ * the Resource Hub still used Source Serif/Sans; now that the whole site runs
+ * on the same token system, these rules apply globally. `.toolkitScope`
+ * survives only as the wrapper the presentation zoom targets.
+ */
+
+body {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--ff-ui);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--ff-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-heading);
+  color: var(--text-primary);
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-display);
+  letter-spacing: -0.012em;
+}
+h2 {
+  font-size: var(--fs-h2);
+  letter-spacing: -0.008em;
+}
+h3 {
+  font-size: var(--fs-h3);
+}
+h4 {
+  font-size: var(--fs-h4);
+}
+
+p {
+  text-wrap: pretty;
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+/* Every number that can change/be compared aligns in columns and never jitters. */
+.tnum {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+::selection {
+  background: var(--accent-wash);
+  color: var(--text-primary);
+}
+
+/* Presentation / projection sizing — scales the tool (type, controls, charts,
+   spacing) uniformly so it reads from across a room. PresentationToggle sets
+   this attribute on <html>; scoped here so only the tool zooms, not the rest
+   of the Resource Hub around it. */
+html[data-present='1'] .toolkitScope {
+  zoom: 1.25;
+}
+html[data-present='2'] .toolkitScope {
+  zoom: 1.5;
+}
