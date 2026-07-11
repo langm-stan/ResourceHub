@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import SnapshotControls from '../components/checkup/SnapshotControls'
 import StorageNotice from '../components/checkup/StorageNotice'
 import { LineItemsEditor } from '../components/checkup/LineItemsEditor'
+import { PlanVsActual } from '../components/checkup/PlanVsActual'
 import { GoalChart } from '../components/checkup/GoalChart'
 import { useFinancialSnapshot } from '../hooks/useFinancialSnapshot'
 import { GROUP_HINTS, sumItems } from '../data/checkupData'
@@ -221,10 +222,12 @@ export default function FinancialStatements({ standalone = true }: { standalone?
               />
               <LineItemsEditor
                 title="Money out"
+                hint="The percent by each row is that expense's share of your total planned spending."
                 items={snapshot.expenses}
                 onChange={setExpenseItems}
                 accent={CARDINAL}
                 addLabel="Add expense"
+                showShare
               />
             </div>
             <div className="flex flex-wrap gap-x-12 gap-y-4 items-baseline border-t border-stone-200 mt-8 pt-6 mb-4">
@@ -253,6 +256,16 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 </>
               )}
             </Callout>
+          </Card>
+
+          <Card tone="raised">
+            <StepHeader
+              title="Plan versus actual"
+              hint="Fill in what you actually spent last month next to each planned amount. The table shows the gap in each category and each expense's share of real spending."
+            />
+            <div className="mt-6">
+              <PlanVsActual items={snapshot.expenses} onChange={setExpenseItems} />
+            </div>
           </Card>
 
           <SnapshotControls

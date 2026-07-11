@@ -64,10 +64,10 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
   }
 
   // Legacy shape: budget categories (budgeted/spent) + a single income number.
-  // Budgeted amounts become "money out" rows; the income number becomes one
-  // "money in" row.
+  // Budgeted amounts become "money out" rows (spent, when recorded, becomes
+  // the row's actual); the income number becomes one "money in" row.
   if (Array.isArray(p.budget)) {
-    type LegacyCategory = { key: string; label: string; budgeted: number }
+    type LegacyCategory = { key: string; label: string; budgeted: number; spent?: number }
     const income: LineItem[] =
       typeof p.income === 'number' && p.income !== 0
         ? [{ key: 'income', label: 'Monthly income', value: p.income }]
@@ -76,6 +76,7 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
       key: c.key,
       label: c.label,
       value: c.budgeted,
+      ...(typeof c.spent === 'number' && Number.isFinite(c.spent) && c.spent !== 0 ? { actual: c.spent } : null),
     }))
     return { assets, liabilities, income, expenses }
   }

@@ -1,4 +1,4 @@
-import { formatUSDWhole } from '../../lib/format'
+import { fmtPct, formatUSDWhole } from '../../lib/format'
 import { newLineItem, sumItems, type LineItem } from '../../data/checkupData'
 import styles from './LineItemsEditor.module.css'
 
@@ -10,6 +10,8 @@ interface LineItemsEditorProps {
   addLabel?: string
   /** Plain-language "what belongs here" line under the title. */
   hint?: string
+  /** Show each row's share of the group total, recomputed as the user types. */
+  showShare?: boolean
 }
 
 /**
@@ -24,6 +26,7 @@ export function LineItemsEditor({
   accent,
   addLabel = 'Add a row',
   hint,
+  showShare = false,
 }: LineItemsEditorProps) {
   function set(key: string, patch: Partial<LineItem>) {
     onChange(items.map((it) => (it.key === key ? { ...it, ...patch } : it)))
@@ -35,12 +38,14 @@ export function LineItemsEditor({
     onChange([...items, newLineItem()])
   }
 
+  const total = sumItems(items)
+
   return (
     <div className={styles.group}>
       <div className={styles.head}>
         <span className={styles.title}>{title}</span>
         <span className={`${styles.total} tnum`} style={accent ? { color: accent } : undefined}>
-          {formatUSDWhole(sumItems(items))}
+          {formatUSDWhole(total)}
         </span>
       </div>
       {hint && <p className={styles.hint}>{hint}</p>}
@@ -67,6 +72,11 @@ export function LineItemsEditor({
                 }}
               />
             </div>
+            {showShare && (
+              <span className={`${styles.share} tnum`} title="Share of the group total">
+                {total > 0 ? fmtPct((it.value / total) * 100, 0) : ''}
+              </span>
+            )}
             <button
               type="button"
               className={styles.remove}

@@ -1,0 +1,111 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Numeric columns size to their content so headers and amounts stay on one
+ * line; the label column absorbs the rest. Cells carry left padding instead
+ * of a column gap so the header and totals rules run unbroken. */
+.table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content max-content max-content max-content;
+  row-gap: var(--space-2);
+  align-items: center;
+  min-width: 420px;
+}
+
+/* Each logical row spans the grid via display: contents so the column
+ * template stays in one place. */
+.rowGroup {
+  display: contents;
+}
+
+.cell {
+  padding-left: var(--space-5);
+}
+
+.colHead {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: var(--fw-semibold);
+  color: var(--text-faint);
+  white-space: nowrap;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--hairline) solid var(--border-strong);
+}
+
+.itemLabel {
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right;
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.shareCell {
+  color: var(--text-muted);
+}
+
+.actualWrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 104px;
+  margin-left: auto;
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 8px var(--space-3);
+}
+.actualWrap:focus-within {
+  border-color: var(--accent);
+}
+.dollar {
+  color: var(--text-faint);
+  font-size: var(--fs-ui);
+}
+.actual {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.over {
+  color: var(--c-accent);
+  font-weight: var(--fw-semibold);
+}
+.under {
+  color: var(--c-series-1);
+}
+.even {
+  color: var(--text-muted);
+}
+
+.totals > * {
+  padding-top: var(--space-3);
+  border-top: var(--hairline) solid var(--border-strong);
+  font-weight: var(--fw-semibold);
+}
+
+.right {
+  text-align: right;
+}

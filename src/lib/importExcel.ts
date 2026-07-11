@@ -70,8 +70,13 @@ function parseGroupColumn(rows: Row[], col: number, template: AccountGroup[]): A
   }))
 }
 
-/** Collect simple label/amount rows between a section header and its total row. */
-function parseSection(rows: Row[], header: string, totalPrefix: string): LineItem[] {
+/**
+ * Collect simple label/amount rows between a section header and its total row.
+ * With `withActual`, a filled third column ("Actual" in the budget export)
+ * comes back as the row's actual spending; files from before that column
+ * existed simply leave it unset.
+ */
+function parseSection(rows: Row[], header: string, totalPrefix: string, withActual = false): LineItem[] {
   const items: LineItem[] = []
   let inSection = false
   for (const row of rows) {
@@ -84,7 +89,13 @@ function parseSection(rows: Row[], header: string, totalPrefix: string): LineIte
     }
     if (!inSection) continue
     if (lower.startsWith(totalPrefix)) break
-    items.push({ ...newLineItem(label, asAmount(row[1])) })
+    const item = { ...newLineItem(label, asAmount(row[1])) }
+    if (withActual) {
+      const raw = row[2]
+      const filled = typeof raw === 'number' || (typeof raw === 'string' && raw.trim() !== '')
+      if (filled) item.actual = asAmount(raw)
+    }
+    items.push(item)
   }
   return items
 }
@@ -110,7 +121,7 @@ export function parseStatementXlsx(data: ArrayBuffer): ParsedStatement | null {
       result.liabilities = parseGroupColumn(rows, 6, STARTER_LIABILITY_GROUPS)
     } else if (title === 'monthly budget') {
       result.income = parseSection(rows, 'money in', 'total income')
-      result.expenses = parseSection(rows, 'money out', 'total expenses')
+      result.expenses = parseSection(rows, 'money out', 'total expenses', true)
     }
   }
 

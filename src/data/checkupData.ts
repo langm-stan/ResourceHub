@@ -10,7 +10,9 @@
  * The budget is fully free-form: "money in" and "money out" line items.
  */
 
-export type LineItem = { key: string; label: string; value: number }
+/* `actual` only exists on budget expense rows: what was really spent, next to
+ * the planned amount. Balance-sheet and income rows never set it. */
+export type LineItem = { key: string; label: string; value: number; actual?: number }
 export type AccountGroup = { key: string; label: string; items: LineItem[] }
 
 export function newLineItem(label = '', value = 0): LineItem {
@@ -19,6 +21,14 @@ export function newLineItem(label = '', value = 0): LineItem {
 
 export function sumItems(items: LineItem[]): number {
   return items.reduce((s, i) => s + (Number.isFinite(i.value) ? i.value : 0), 0)
+}
+
+export function sumActuals(items: LineItem[]): number {
+  return items.reduce((s, i) => s + (typeof i.actual === 'number' && Number.isFinite(i.actual) ? i.actual : 0), 0)
+}
+
+export function hasActuals(items: LineItem[]): boolean {
+  return items.some((i) => typeof i.actual === 'number' && Number.isFinite(i.actual))
 }
 
 /* Plain-language "what belongs here" per balance-sheet group, keyed by group
@@ -173,10 +183,10 @@ export const INCOME_ITEMS: LineItem[] = [
 ]
 
 export const EXPENSE_ITEMS: LineItem[] = [
-  { key: 'rent', label: 'Rent', value: 1500 },
-  { key: 'groceries', label: 'Groceries', value: 500 },
-  { key: 'transportation', label: 'Transportation', value: 300 },
-  { key: 'utilities', label: 'Utilities & phone', value: 250 },
-  { key: 'debt', label: 'Debt payments', value: 400 },
-  { key: 'everything-else', label: 'Everything else', value: 600 },
+  { key: 'rent', label: 'Rent', value: 1500, actual: 1500 },
+  { key: 'groceries', label: 'Groceries', value: 500, actual: 640 },
+  { key: 'transportation', label: 'Transportation', value: 300, actual: 280 },
+  { key: 'utilities', label: 'Utilities & phone', value: 250, actual: 250 },
+  { key: 'debt', label: 'Debt payments', value: 400, actual: 400 },
+  { key: 'everything-else', label: 'Everything else', value: 600, actual: 810 },
 ]

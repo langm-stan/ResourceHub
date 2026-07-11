@@ -80,6 +80,14 @@
   text-align: right;
 }
 
+.share {
+  flex: none;
+  width: 38px;
+  text-align: right;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
 .remove {
   flex: none;
   width: 28px;

@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx'
-import { sumItems, type AccountGroup, type LineItem } from '../data/checkupData'
+import { hasActuals, sumActuals, sumItems, type AccountGroup, type LineItem } from '../data/checkupData'
 import { sumGroups } from '../hooks/useFinancialSnapshot'
 
 function groupSubtotal(g: AccountGroup) {
@@ -78,6 +78,8 @@ export function exportBalanceSheetXlsx(assets: AccountGroup[], liabilities: Acco
 export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[]) {
   const totalIncome = sumItems(income)
   const totalExpenses = sumItems(expenses)
+  const totalActual = sumActuals(expenses)
+  const anyActuals = hasActuals(expenses)
   const surplus = totalIncome - totalExpenses
 
   const rows: (string | number)[][] = [
@@ -87,16 +89,21 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[]) {
     ...income.map((i) => [i.label, i.value]),
     ['Total income', totalIncome],
     [],
-    ['Money Out', 'Amount'],
-    ...expenses.map((i) => [i.label, i.value]),
-    ['Total expenses', totalExpenses],
+    ['Money Out', 'Planned', 'Actual', 'Share of planned'],
+    ...expenses.map((i) => [
+      i.label,
+      i.value,
+      typeof i.actual === 'number' && Number.isFinite(i.actual) ? i.actual : '',
+      totalExpenses > 0 ? i.value / totalExpenses : 0,
+    ]),
+    ['Total expenses', totalExpenses, anyActuals ? totalActual : ''],
     [],
     ['Left over each month', surplus],
     ['Savings rate', totalIncome > 0 ? surplus / totalIncome : 0],
   ]
 
   const ws = XLSX.utils.aoa_to_sheet(rows)
-  ws['!cols'] = [{ wch: 28 }, { wch: 14 }]
+  ws['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 16 }]
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Budget')
