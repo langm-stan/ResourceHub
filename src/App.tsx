@@ -5,7 +5,7 @@ import Footer from './components/Footer'
 function App() {
   // ?embed=1 renders the page content alone, with no site chrome, so a tool
   // can live inside an <iframe> on a slide or another course page.
-  const { search } = useLocation()
+  const { pathname, search } = useLocation()
   const embed = new URLSearchParams(search).get('embed') === '1'
 
   if (embed) {
@@ -16,13 +16,17 @@ function App() {
     )
   }
 
+  // The teacher training pages are self-contained: no site footer (the header
+  // reduces itself to branding only, see Header.tsx).
+  const training = pathname.startsWith('/teacher-training')
+
   return (
     <div className="min-h-screen flex flex-col bg-stone-50">
       <Header />
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer />
+      {!training && <Footer />}
     </div>
   )
 }
