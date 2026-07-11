@@ -46,11 +46,12 @@ const STORIES = [
   },
 ]
 
-export default function BigThreeStories() {
+/** The stories body, shared by the Resource Hub page and the teacher training section. */
+export function BigThreeStoriesContent() {
   const [open, setOpen] = useState<string>(STORIES[0].key)
 
   return (
-    <ResourceHubShell title="The Big Three Stories">
+    <>
       <p className="max-w-3xl text-stone-700 leading-relaxed mb-8">
         Three stories in which characters apply fundamental financial concepts from the Big Three to make better
         decisions. Research shows that reading stories like these significantly improves understanding of these
@@ -93,6 +94,14 @@ export default function BigThreeStories() {
           )
         })}
       </div>
+    </>
+  )
+}
+
+export default function BigThreeStories() {
+  return (
+    <ResourceHubShell title="The Big Three Stories">
+      <BigThreeStoriesContent />
     </ResourceHubShell>
   )
 }

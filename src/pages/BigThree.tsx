@@ -32,9 +32,14 @@ const CARDS = [
   },
 ]
 
-export default function BigThree() {
+/**
+ * The overview body, shared by the Resource Hub page and the teacher training
+ * section. `base` prefixes the card links so each context keeps its own
+ * navigation (e.g. '/teacher-training').
+ */
+export function BigThreeContent({ base = '' }: { base?: string }) {
   return (
-    <ResourceHubShell title="The Big Three">
+    <>
       <div className="flex flex-col gap-6 max-w-3xl mb-10 text-stone-700 leading-relaxed">
         <p>
           For more than 20 years, the Big Three allowed us to gauge whether people understand the basic concepts
@@ -58,7 +63,7 @@ export default function BigThree() {
         {CARDS.map((c) => (
           <Link
             key={c.to}
-            to={c.to}
+            to={`${base}${c.to}`}
             className="group flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-6 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all"
           >
             <div
@@ -75,6 +80,14 @@ export default function BigThree() {
           </Link>
         ))}
       </div>
+    </>
+  )
+}
+
+export default function BigThree() {
+  return (
+    <ResourceHubShell title="The Big Three">
+      <BigThreeContent />
     </ResourceHubShell>
   )
 }

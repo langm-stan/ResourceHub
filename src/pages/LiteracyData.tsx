@@ -34,7 +34,11 @@ const OVERALL_CHARTS = [
 
 const pct = (v: number) => fmtPct(v, 0)
 
-export default function LiteracyData() {
+export const LITERACY_DATA_INTRO =
+  'Explore how well U.S. adults understand personal finance across eight functional areas, then drill down by gender or generation.'
+
+/** The data explorer body, shared by the Resource Hub page and the teacher training section. */
+export function LiteracyDataContent() {
   const [area, setArea] = useState<AreaKey>('earning')
   const [dimension, setDimension] = useState<Dimension>('gender')
 
@@ -43,10 +47,7 @@ export default function LiteracyData() {
   const drillData = useMemo(() => dim.data[area], [dim, area])
 
   return (
-    <ResourceHubShell
-      title="Financial Literacy Data"
-      intro="Explore how well U.S. adults understand personal finance across eight functional areas, then drill down by gender or generation."
-    >
+    <>
       <div className="mb-6 flex items-start justify-between gap-4">
         <Callout tone="plain" label="Source">
           <strong>TIAA Institute–GFLEC Personal Finance Index (P-Fin Index), 2026</strong>: "A Decade of
@@ -188,6 +189,14 @@ export default function LiteracyData() {
           </Card>
         ))}
       </div>
+    </>
+  )
+}
+
+export default function LiteracyData() {
+  return (
+    <ResourceHubShell title="Financial Literacy Data" intro={LITERACY_DATA_INTRO}>
+      <LiteracyDataContent />
     </ResourceHubShell>
   )
 }

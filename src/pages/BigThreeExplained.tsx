@@ -78,9 +78,10 @@ function ResponseBar({ responses: r }: { responses: { correct: number; incorrect
   )
 }
 
-export default function BigThreeExplained() {
+/** The explained body, shared by the Resource Hub page and the teacher training section. */
+export function BigThreeExplainedContent() {
   return (
-    <ResourceHubShell title="The Big Three Explained">
+    <>
       <p className="max-w-3xl text-stone-700 leading-relaxed mb-10">
         The Big Three, a trio of financial literacy questions, evaluate understanding of compound interest,
         inflation, and risk diversification, three fundamental financial concepts that we encourage you to learn
@@ -137,6 +138,14 @@ export default function BigThreeExplained() {
           is unchanged from the 2021 wave.
         </p>
       </div>
+    </>
+  )
+}
+
+export default function BigThreeExplained() {
+  return (
+    <ResourceHubShell title="The Big Three Explained">
+      <BigThreeExplainedContent />
     </ResourceHubShell>
   )
 }

@@ -22,6 +22,26 @@ import BigThreeQuiz from './pages/BigThreeQuiz.tsx'
 import BigThreeExplained from './pages/BigThreeExplained.tsx'
 import BigThreeStories from './pages/BigThreeStories.tsx'
 import FacultyInsights from './pages/FacultyInsights.tsx'
+import TeacherTraining from './pages/TeacherTraining.tsx'
+import TeacherTrainingSection from './pages/TeacherTrainingSection.tsx'
+
+// One route per teacher training section; the component maps slugs to the
+// shared content behind the equivalent Resource Hub pages.
+const TEACHER_TRAINING_SECTIONS = [
+  'big-three',
+  'big-three/quiz',
+  'big-three/explained',
+  'big-three/stories',
+  'literacy-data',
+  'checklist',
+  'budget',
+  'compound-interest',
+  'borrow-save',
+  'lifecycle',
+  'gambling-investing',
+  'taxes',
+  'housing',
+] as const
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -41,6 +61,14 @@ createRoot(document.getElementById('root')!).render(
           <Route path="lessons" element={<Lessons />} />
           <Route path="investing" element={<Investing />} />
           <Route path="faculty-insights" element={<FacultyInsights />} />
+          <Route path="teacher-training" element={<TeacherTraining />} />
+          {TEACHER_TRAINING_SECTIONS.map((slug) => (
+            <Route
+              key={slug}
+              path={`teacher-training/${slug}`}
+              element={<TeacherTrainingSection slug={slug} />}
+            />
+          ))}
           {/* Preview of the standalone embed handed to Stanford IT (see
               stanford-embed/). The embed build renders this same component. */}
           <Route

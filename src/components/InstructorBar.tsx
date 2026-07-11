@@ -10,16 +10,21 @@ export default function InstructorBar({
   route,
   toolKey,
   toolLabel,
+  path,
 }: {
   /** Hash route the tool lives under, e.g. "calculators" or "lessons". */
-  route: string
-  toolKey: string
+  route?: string
+  toolKey?: string
   toolLabel: string
+  /** Full hash path override for tools that live outside the ?tool= pages, e.g. "teacher-training/gambling-investing". */
+  path?: string
 }) {
   const [copied, setCopied] = useState<'embed' | 'link' | null>(null)
 
-  const baseUrl = `${window.location.origin}${window.location.pathname}#/${route}?tool=${toolKey}`
-  const embedCode = `<iframe src="${baseUrl}&embed=1" width="100%" height="760" style="border: none;" title="${toolLabel}"></iframe>`
+  const hashPath = path ?? `${route}?tool=${toolKey}`
+  const baseUrl = `${window.location.origin}${window.location.pathname}#/${hashPath}`
+  const embedUrl = `${baseUrl}${hashPath.includes('?') ? '&' : '?'}embed=1`
+  const embedCode = `<iframe src="${embedUrl}" width="100%" height="760" style="border: none;" title="${toolLabel}"></iframe>`
 
   const copy = (kind: 'embed' | 'link', text: string) => {
     void navigator.clipboard?.writeText(text)
@@ -54,7 +59,7 @@ export default function InstructorBar({
           {copied === 'link' ? 'Link copied ✓' : 'Copy a direct link'}
         </button>
         <a
-          href={`${baseUrl}&embed=1`}
+          href={embedUrl}
           target="_blank"
           rel="noreferrer"
           className="border border-stone-300 text-stone-700 text-xs font-semibold px-3 py-2 rounded-lg hover:bg-stone-100 transition-colors"
