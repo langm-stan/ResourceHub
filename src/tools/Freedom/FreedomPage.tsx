@@ -37,7 +37,8 @@ const TABS: TabItem<Surface>[] = [
 const GREEN = 'var(--c-series-1)'
 const CARDINAL = 'var(--c-accent)'
 
-export function FreedomPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function FreedomPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('curve')
   const [age, setAge] = useState(24)
   const [income, setIncome] = useState(60_000)
@@ -64,15 +65,17 @@ export function FreedomPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Financial freedom</p>
-        <h1 className={styles.h1}>When can you stop working?</h1>
-        <p className={styles.lead}>
-          Forget the word retirement. There is a day when the income from your savings covers your
-          spending, and from that day on, work is a choice. When that day arrives depends almost
-          entirely on one number you control: the share of your income you keep.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Financial freedom</p>
+          <h1 className={styles.h1}>When can you stop working?</h1>
+          <p className={styles.lead}>
+            Forget the word retirement. There is a day when the income from your savings covers your
+            spending, and from that day on, work is a choice. When that day arrives depends almost
+            entirely on one number you control: the share of your income you keep.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader title="Your situation" hint="Pick a life, or type your own numbers." />

@@ -18,9 +18,33 @@ export interface TrainingSession {
   date: string
   period: 'Morning' | 'Afternoon'
   lecture: string
+  /** Two-or-three word session title for the compressed sidebar. */
+  short: string
   speaker: string
   tools: TrainingTool[]
 }
+
+/**
+ * Reference material used throughout the week rather than in one session:
+ * shown across the top of the landing page and pinned atop the sidebar.
+ */
+export const FOUNDATION_TOOLS: TrainingTool[] = [
+  {
+    slug: 'big-three',
+    label: 'The Big Three',
+    description: 'The three questions that anchor the week: take the quiz, read the explanations, and see the stories.',
+  },
+  {
+    slug: 'literacy-data',
+    label: 'Financial Literacy Data',
+    description: 'How U.S. adults score across eight functional areas, drilled down by gender and generation.',
+  },
+  {
+    slug: 'checklist',
+    label: 'Financial Checklist',
+    description: 'The Seven Elements of Good Financial Health as a seven-question self-assessment.',
+  },
+]
 
 export const TRAINING_SESSIONS: TrainingSession[] = [
   {
@@ -29,23 +53,9 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 13',
     period: 'Morning',
     lecture: 'Building a Financial Literacy Foundation',
+    short: 'Financial Literacy Foundations',
     speaker: 'Prof. Lusardi',
     tools: [
-      {
-        slug: 'big-three',
-        label: 'The Big Three',
-        description: 'The three questions that anchor the morning: take the quiz, read the explanations, and see the stories.',
-      },
-      {
-        slug: 'literacy-data',
-        label: 'Financial Literacy Data',
-        description: 'How U.S. adults score across eight functional areas, drilled down by gender and generation.',
-      },
-      {
-        slug: 'checklist',
-        label: 'Financial Checklist',
-        description: 'The Seven Elements of Good Financial Health as a seven-question self-assessment.',
-      },
       {
         slug: 'compound-interest',
         label: 'Compound Interest Scenario',
@@ -64,6 +74,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 13',
     period: 'Afternoon',
     lecture: 'Household Accounting & Budgeting',
+    short: 'Household Budgeting',
     speaker: 'Prof. Lusardi',
     tools: [
       {
@@ -79,6 +90,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 14',
     period: 'Morning',
     lecture: 'Moving from Static to Dynamic Money Management: Lifecycle Model of Savings and Borrowing Responsibly',
+    short: 'Life Cycle',
     speaker: 'Prof. Lang',
     tools: [
       {
@@ -94,8 +106,15 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 14',
     period: 'Afternoon',
     lecture: 'Debt Management & FICO Scores',
+    short: 'Debt & FICO Scores',
     speaker: 'Prof. Lusardi',
-    tools: [],
+    tools: [
+      {
+        slug: 'credit-score',
+        label: 'Your FICO Score',
+        description: 'What goes into the score, and what the same car loan costs at every score band.',
+      },
+    ],
   },
   {
     id: 'wednesday-am',
@@ -103,6 +122,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 15',
     period: 'Morning',
     lecture: 'Investing Basics, Risk Management, Basics of Stocks and Bonds',
+    short: 'Investing Basics',
     speaker: 'Prof. Boskin',
     tools: [],
   },
@@ -112,6 +132,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 15',
     period: 'Afternoon',
     lecture: 'Index & Mutual Funds and Gambling vs. Investing',
+    short: 'Gambling vs. Investing',
     speaker: 'Prof. Lang',
     tools: [
       {
@@ -127,6 +148,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 16',
     period: 'Morning',
     lecture: 'Tax Efficiency, Employer Benefits, and Planning for Retirement',
+    short: 'Taxes & Retirement',
     speaker: 'Prof. Lang',
     tools: [
       {
@@ -152,6 +174,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 16',
     period: 'Afternoon',
     lecture: 'Housing, Cars, and Durable Goods',
+    short: 'Housing & Cars',
     speaker: 'Prof. Lang',
     tools: [
       {
@@ -177,6 +200,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     date: 'July 17',
     period: 'Morning',
     lecture: 'Connecting Ideas',
+    short: 'Connecting Ideas',
     speaker: 'Prof. Lusardi and Prof. Lang',
     tools: [],
   },
@@ -193,4 +217,20 @@ export const TRAINING_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 export function sessionForSlug(slug: string): TrainingSession | undefined {
   const root = slug.split('/')[0]!
   return TRAINING_SESSIONS.find((s) => s.tools.some((t) => t.slug === root))
+}
+
+/** Whether a section page is one of the week-long foundation resources. */
+export function isFoundationSlug(slug: string): boolean {
+  const root = slug.split('/')[0]!
+  return FOUNDATION_TOOLS.some((t) => t.slug === root)
+}
+
+/** The schedule's one-line tool description, reused as the section page's intro. */
+export function toolDescription(slug: string): string | undefined {
+  const root = slug.split('/')[0]!
+  for (const session of TRAINING_SESSIONS) {
+    const tool = session.tools.find((t) => t.slug === root)
+    if (tool) return tool.description
+  }
+  return FOUNDATION_TOOLS.find((t) => t.slug === root)?.description
 }

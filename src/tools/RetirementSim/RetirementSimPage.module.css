@@ -75,6 +75,12 @@
   align-items: start;
 }
 
+.controlStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .sectionLede {
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -260,6 +266,59 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* ------------------------- account rules table --------------------- */
+
+.rulesTitle {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+}
+.rulesScroll {
+  overflow-x: auto;
+}
+.rulesTable {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.rulesTable th,
+.rulesTable td {
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--hairline) solid var(--border-hairline);
+  text-align: left;
+  vertical-align: top;
+}
+.rulesTable thead th {
+  border-top: none;
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding-top: 0;
+}
+.rulesTable tbody th {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.rulesTable td {
+  color: var(--text-muted);
+}
+.rulesTable th:first-child,
+.rulesTable td:first-child {
+  padding-left: 0;
+}
+.rulesTable th:last-child,
+.rulesTable td:last-child {
+  padding-right: 0;
 }
 
 .footnote {

@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Button, Callout, Card, Slider, Stat } from '../../design-system'
+import { Button, Callout, Card, NumberField, SelectField, Slider, Stat, Toggle } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
+// The vetted Taxes tool provides the state schedules; Part 1 reuses them.
+import { computeStateTax } from '../Taxes/compute'
+import { STATE_OPTIONS } from '../Taxes/stateData2026'
 import {
+  ACCOUNT_RULES,
   CONTRIBUTION_LIMITS,
   FORMULAS,
   R_RETIRED,
@@ -45,23 +49,53 @@ function TakeHomePay() {
   const [salary, setSalary] = useState(60000)
   const [raiseOn, setRaiseOn] = useState(false)
   const [hover, setHover] = useState<number | null>(null)
+  // Optional pieces, all off by default: the base lesson is federal brackets.
+  const [withState, setWithState] = useState(false)
+  const [stateCode, setStateCode] = useState('CA')
+  const [withPayroll, setWithPayroll] = useState(false)
+  const [with401k, setWith401k] = useState(false)
+  const [k401, setK401] = useState(5000)
+
   const gross = raiseOn ? salary + 2000 : salary
 
-  const cur = useMemo(() => federalTax(gross), [gross])
-  const base = useMemo(() => federalTax(salary), [salary])
-  const ficaCur = fica(gross)
-  const takeHome = gross - cur.tax - ficaCur
-  const takeHomeBase = salary - base.tax - fica(salary)
-  const raiseDelta = takeHome - takeHomeBase
+  const taxesAt = useMemo(() => {
+    return (g: number) => {
+      const k = with401k ? Math.min(Math.max(0, k401), g) : 0
+      const fed = federalTax(Math.max(0, g - k))
+      const state = withState ? computeStateTax(g, k, 'single', stateCode) : null
+      const payroll = withPayroll ? fica(g) : 0
+      const total = fed.tax + (state?.tax ?? 0) + payroll
+      return { k, fed, state, payroll, total, takeHome: g - k - total }
+    }
+  }, [with401k, k401, withState, stateCode, withPayroll])
+
+  const cur = useMemo(() => taxesAt(gross), [taxesAt, gross])
+  const raiseDelta = cur.takeHome - taxesAt(salary).takeHome
+  const marginalAllIn = (taxesAt(gross + 100).total - cur.total) / 100
 
   const segments = useMemo(() => {
     const raw = [
-      { name: 'standard deduction', total: Math.min(gross, STD_DEDUCTION), taken: 0, rate: 0 },
-      ...cur.slices.map((s) => ({ name: `${pct(s.rate)} bracket`, total: s.amount, taken: s.tax, rate: s.rate })),
+      ...(cur.k > 0
+        ? [{ name: '401(k) contribution', total: cur.k, taken: 0, rate: 0, invested: true }]
+        : []),
+      {
+        name: 'standard deduction',
+        total: Math.min(Math.max(0, gross - cur.k), STD_DEDUCTION),
+        taken: 0,
+        rate: 0,
+        invested: false,
+      },
+      ...cur.fed.slices.map((s) => ({
+        name: `${pct(s.rate)} bracket`,
+        total: s.amount,
+        taken: s.tax,
+        rate: s.rate,
+        invested: false,
+      })),
     ]
     let acc = 0
     return raw.map((g) => {
-      const w = (g.total / gross) * 100
+      const w = gross > 0 ? (g.total / gross) * 100 : 0
       const seg = { ...g, w, center: acc + w / 2 }
       acc += w
       return seg
@@ -72,41 +106,86 @@ function TakeHomePay() {
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        Move the salary and watch each dollar go through the brackets in order. The first{' '}
+        Move the salary slider or type an exact number, and watch each dollar go through the
+        federal brackets in order. The first{' '}
         {formatUSDWhole(STD_DEDUCTION)} passes untaxed (the standard deduction), and each bracket
-        taxes only the dollars inside it.
+        taxes only the dollars inside it. The toggles add the other pieces of a real paycheck when
+        you want them.
       </p>
       <div className={styles.controlsRow}>
-        <Slider
-          label="Gross salary"
-          value={salary}
-          onChange={setSalary}
-          min={20000}
-          max={250000}
-          step={1000}
-          readout={formatUSDWhole(salary)}
-        />
-        <div>
-          <Button onClick={() => setRaiseOn(!raiseOn)}>
-            {raiseOn ? 'Remove the $2,000 raise' : 'Give a $2,000 raise'}
-          </Button>
-          {raiseOn && (
-            <p className={styles.raiseResult}>
-              Take-home change: +{formatUSDWhole(raiseDelta)}. A raise never lowers take-home pay.
-            </p>
+        <div className={styles.controlStack}>
+          <div>
+            <Slider
+              label="Salary (wages, $/yr)"
+              value={salary}
+              onChange={setSalary}
+              min={20000}
+              max={250000}
+              step={1000}
+            />
+            <NumberField value={salary} onChange={setSalary} min={0} max={2_000_000} prefix="$" precision={0} />
+          </div>
+          <div>
+            <Button onClick={() => setRaiseOn(!raiseOn)}>
+              {raiseOn ? 'Remove the $2,000 raise' : 'Give a $2,000 raise'}
+            </Button>
+            {raiseOn && (
+              <p className={styles.raiseResult}>
+                Take-home change: +{formatUSDWhole(raiseDelta)}. A raise never lowers take-home pay.
+              </p>
+            )}
+          </div>
+        </div>
+        <div className={styles.controlStack}>
+          <span className={styles.radioTitle}>Optional pieces</span>
+          <Toggle
+            label="Payroll taxes (Social Security &amp; Medicare)"
+            checked={withPayroll}
+            onChange={setWithPayroll}
+          />
+          <Toggle label="State income tax" checked={withState} onChange={setWithState} />
+          {withState && (
+            <SelectField label="State" value={stateCode} onChange={setStateCode} options={STATE_OPTIONS} />
+          )}
+          <Toggle label="401(k) contribution (pre-tax)" checked={with401k} onChange={setWith401k} />
+          {with401k && (
+            <NumberField
+              label="401(k) contribution ($/yr)"
+              value={k401}
+              onChange={setK401}
+              min={0}
+              max={CONTRIBUTION_LIMITS.k401}
+              prefix="$"
+              precision={0}
+            />
           )}
         </div>
       </div>
       <div className={styles.stats}>
-        <Stat label="Take-home" value={takeHome} format={formatUSDWhole} emphasis animate={false} />
-        <Stat label="Marginal rate" value={cur.marginal} format={(v) => pct(v)} accentColor={RED} animate={false} />
-        <Stat label="Effective rate" value={cur.tax / gross} format={(v) => pct(v, 1)} animate={false} />
+        <Stat label="Take-home" value={cur.takeHome} format={formatUSDWhole} emphasis animate={false} />
+        {cur.k > 0 && (
+          <Stat label="Into the 401(k), still yours" value={cur.k} format={formatUSDWhole} accentColor={GREEN} animate={false} />
+        )}
+        <Stat
+          label="Marginal rate (next dollar)"
+          value={marginalAllIn}
+          format={(v) => pct(v, 1)}
+          accentColor={RED}
+          animate={false}
+        />
+        <Stat
+          label="Effective rate (taxes ÷ gross)"
+          value={gross > 0 ? cur.total / gross : 0}
+          format={(v) => pct(v, 1)}
+          animate={false}
+        />
       </div>
 
       <div>
         <div className={styles.legend}>
           <span style={{ color: GOLD }}>&#9632; kept</span>
           <span style={{ color: RED }}>&#9632; federal income tax</span>
+          {cur.k > 0 && <span style={{ color: GREEN }}>&#9632; 401(k), still yours</span>}
         </div>
         <div className={styles.bracketWrap}>
           <div className={styles.bracketBar} onMouseLeave={() => setHover(null)}>
@@ -116,11 +195,11 @@ function TakeHomePay() {
                 <div
                   key={i}
                   className={styles.bracketSeg}
-                  style={{ width: `${g.w}%` }}
+                  style={{ width: `${g.w}%`, ...(g.invested ? { background: GREEN } : {}) }}
                   onMouseEnter={() => setHover(i)}
                 >
                   <div className={styles.bracketTax} style={{ height: `${takenShare * 100}%` }} />
-                  {g.w > 7 && <div className={styles.bracketRate}>{pct(g.rate)}</div>}
+                  {g.w > 7 && !g.invested && <div className={styles.bracketRate}>{pct(g.rate)}</div>}
                 </div>
               )
             })}
@@ -137,29 +216,53 @@ function TakeHomePay() {
                 <strong className="tnum">{formatUSDWhole(tip.taken)}</strong>
               </div>
               <div className={styles.barTipRow}>
-                <span>Kept</span>
+                <span>{tip.invested ? 'Invested, still yours' : 'Kept'}</span>
                 <strong className="tnum">{formatUSDWhole(tip.total - tip.taken)}</strong>
               </div>
             </div>
           )}
         </div>
         <ul className={styles.sliceList}>
-          <li>First {formatUSDWhole(Math.min(gross, STD_DEDUCTION))}: standard deduction, no tax</li>
-          {cur.slices.map((s, i) => (
+          {cur.k > 0 && (
+            <li>
+              First {formatUSDWhole(cur.k)}: 401(k) contribution, invested before income tax and
+              still your money
+            </li>
+          )}
+          <li>
+            {cur.k > 0 ? 'Next' : 'First'}{' '}
+            {formatUSDWhole(Math.min(Math.max(0, gross - cur.k), STD_DEDUCTION))}: standard
+            deduction, no tax
+          </li>
+          {cur.fed.slices.map((s, i) => (
             <li key={i}>
               {pct(s.rate)} on {formatUSDWhole(s.amount)} &rarr; <strong>{formatUSDWhole(s.tax)}</strong>
             </li>
           ))}
+          {cur.state && (
+            <li>
+              {cur.state.name} income tax, on its own schedule &rarr;{' '}
+              <strong>{formatUSDWhole(cur.state.tax)}</strong>
+            </li>
+          )}
+          {withPayroll && (
+            <li>
+              Social Security + Medicare, on (nearly) every dollar of wages &rarr;{' '}
+              <strong>{formatUSDWhole(cur.payroll)}</strong>
+            </li>
+          )}
           <li className={styles.sliceTotal}>
-            Federal income tax {formatUSDWhole(cur.tax)}, plus FICA {formatUSDWhole(ficaCur)} charged
-            separately on (nearly) every dollar
+            {withState || withPayroll
+              ? `All taxes together: ${formatUSDWhole(cur.total)}`
+              : `Federal income tax ${formatUSDWhole(cur.total)}; payroll and state taxes can be added above`}
           </li>
         </ul>
       </div>
       <Callout tone="mark" label="A raise cannot lower take-home pay">
-        The $2,000 sits on top of the existing income, so it is taxed at the marginal rate plus
-        payroll tax and nothing more. The dollars below the threshold keep their old rates either
-        way. Crossing into a higher bracket changes the tax on the new dollars only.
+        The $2,000 sits on top of the existing income, so it is taxed at the marginal rate and
+        nothing more. The dollars below the threshold keep their old rates either way. Crossing
+        into a higher bracket changes the tax on the new dollars only, and that stays true with
+        every optional piece switched on.
       </Callout>
     </div>
   )
@@ -204,12 +307,6 @@ function AccountTaxation() {
         <Slider label="Tax rate today" value={taxNow} onChange={setTaxNow} min={0} max={50} step={1} readout={`${taxNow}%`} />
         <Slider label="Tax rate in retirement" value={taxLater} onChange={setTaxLater} min={0} max={50} step={1} readout={`${taxLater}%`} />
       </div>
-      <p className={styles.note}>
-        Contributions are capped by law. For {TAX_YEAR}, the IRA limit (traditional and Roth
-        combined) is {formatUSDWhole(CONTRIBUTION_LIMITS.ira)} and the 401(k) employee limit is{' '}
-        {formatUSDWhole(CONTRIBUTION_LIMITS.k401)}; both allow additional catch-up contributions
-        from age 50.
-      </p>
       <div className={styles.stats}>
         <Stat label="Taxable (taxed twice)" value={last.taxable} format={formatUSDWhole} accentColor={SLATE} animate={false} />
         <Stat label="Traditional (taxed on exit)" value={last.traditional} format={formatUSDWhole} accentColor={GOLD} animate={false} />
@@ -250,6 +347,83 @@ function AccountTaxation() {
         higher. The taxable account ends below both because its returns are taxed every year,
         which lowers the rate at which the balance compounds.
       </Callout>
+
+      <div>
+        <p className={styles.rulesTitle}>
+          The rules that come with each account ({TAX_YEAR}, single filer)
+        </p>
+        <div className={styles.rulesScroll}>
+          <table className={styles.rulesTable}>
+            <thead>
+              <tr>
+                <th scope="col">Account</th>
+                <th scope="col">How much can go in per year</th>
+                <th scope="col">Income restrictions</th>
+                <th scope="col">Getting money out</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Traditional 401(k)</th>
+                <td>
+                  {formatUSDWhole(CONTRIBUTION_LIMITS.k401)} of wages, plus{' '}
+                  {formatUSDWhole(ACCOUNT_RULES.k401CatchUp50)} from age 50
+                </td>
+                <td>None; any income level, but only through an employer that offers a plan</td>
+                <td>
+                  Withdrawals are taxed as income; 10% penalty before age{' '}
+                  {ACCOUNT_RULES.earlyWithdrawalAge}; withdrawals required from age{' '}
+                  {ACCOUNT_RULES.rmdAge}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Traditional IRA</th>
+                <td>
+                  {formatUSDWhole(CONTRIBUTION_LIMITS.ira)} across all IRAs combined, plus{' '}
+                  {formatUSDWhole(ACCOUNT_RULES.iraCatchUp50)} from age 50; never more than the
+                  year&rsquo;s earned income
+                </td>
+                <td>
+                  Anyone with earned income can contribute, but the tax deduction phases out
+                  between {formatUSDWhole(ACCOUNT_RULES.tradIraDeductionPhaseOut.single.from)} and{' '}
+                  {formatUSDWhole(ACCOUNT_RULES.tradIraDeductionPhaseOut.single.to)} of income for
+                  workers covered by a plan at work
+                </td>
+                <td>
+                  Withdrawals are taxed as income; 10% penalty before age{' '}
+                  {ACCOUNT_RULES.earlyWithdrawalAge}; withdrawals required from age{' '}
+                  {ACCOUNT_RULES.rmdAge}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Roth IRA</th>
+                <td>Shares the same {formatUSDWhole(CONTRIBUTION_LIMITS.ira)} IRA limit</td>
+                <td>
+                  Contributions phase out between{' '}
+                  {formatUSDWhole(ACCOUNT_RULES.rothIraPhaseOut.single.from)} and{' '}
+                  {formatUSDWhole(ACCOUNT_RULES.rothIraPhaseOut.single.to)} of income; above that,
+                  direct contributions are not allowed
+                </td>
+                <td>
+                  Contributions come back out anytime, tax-free; earnings taken before age{' '}
+                  {ACCOUNT_RULES.earlyWithdrawalAge} owe tax plus the 10% penalty; no required
+                  withdrawals
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Taxable account</th>
+                <td>No limit</td>
+                <td>None</td>
+                <td>Money out anytime; the trade-off is the yearly tax on returns shown above</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className={styles.note}>
+          Limits are for {TAX_YEAR} (IRS Notice 2025-67) and rise most years with inflation.
+          Married-couple phase-out ranges are higher.
+        </p>
+      </div>
     </div>
   )
 }
@@ -432,16 +606,19 @@ const SECTIONS = [
   { id: 4, name: 'Retirement Timing', C: RetirementTiming },
 ]
 
-export function RetirementSimPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function RetirementSimPage({ intro = true }: { intro?: boolean } = {}) {
   const [active, setActive] = useState(1)
   const S = SECTIONS.find((s) => s.id === active)!
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Tax efficiency, employer benefits &amp; retirement</p>
-        <h1 className={styles.h1}>Retirement Planning Simulator</h1>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Tax efficiency, employer benefits &amp; retirement</p>
+          <h1 className={styles.h1}>Retirement Planning Simulator</h1>
+        </header>
+      )}
 
       <div className={styles.tabs} role="tablist" aria-label="Simulator sections">
         {SECTIONS.map((s) => (
@@ -466,8 +643,9 @@ export function RetirementSimPage() {
       <p className={styles.footnote}>
         Tax math: {TAX_YEAR} federal brackets and the {formatUSDWhole(STD_DEDUCTION)} standard
         deduction, single filer (IRS Rev. Proc. 2025-32); FICA with the{' '}
-        {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base. All four parts use simplified
-        annual compounding for teaching; they are illustrations, not financial advice.
+        {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base; optional state income tax from
+        the Tax Foundation&rsquo;s {TAX_YEAR} state tables. All four parts use simplified annual
+        compounding for teaching; they are illustrations, not financial advice.
       </p>
     </div>
   )

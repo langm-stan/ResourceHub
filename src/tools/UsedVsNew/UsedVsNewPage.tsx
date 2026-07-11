@@ -20,7 +20,8 @@ const pct = (v: number) => `${(v * 100).toFixed(1)}%`
 
 type Pick = 'new' | 'used'
 
-export function UsedVsNewPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
   const [price, setPrice] = useState(40000)
   const [age, setAge] = useState(3)
   const [months, setMonths] = useState(60)
@@ -42,15 +43,17 @@ export function UsedVsNewPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Cars and big-ticket items</p>
-        <h1 className={styles.h1}>Used vs. New</h1>
-        <p className={styles.lead}>
-          The same model, bought new or bought a few years old, each financed at its market&rsquo;s
-          average rate. The used loan carries the worse rate; the question is whether the better
-          price beats it.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Cars and big-ticket items</p>
+          <h1 className={styles.h1}>Used vs. New</h1>
+          <p className={styles.lead}>
+            The same model, bought new or bought a few years old, each financed at its market&rsquo;s
+            average rate. The used loan carries the worse rate; the question is whether the better
+            price beats it.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised">
         <div className={styles.grid}>

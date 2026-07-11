@@ -42,7 +42,8 @@ const AMBER = 'var(--c-series-2)'
 const SLATE = 'var(--c-series-3)'
 const CARDINAL = 'var(--c-accent)'
 
-export function HousingPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('payment')
   const [price, setPrice] = useState(420_000)
   const [downPctInput, setDownPctInput] = useState(20)
@@ -64,15 +65,17 @@ export function HousingPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Buying a home</p>
-        <h1 className={styles.h1}>What a house really costs</h1>
-        <p className={styles.lead}>
-          A home is the largest purchase most households ever make, and almost all of it is
-          borrowed. Set a price, a down payment, and a credit score to see the monthly payment, the
-          most home a lender says you can afford, and what the loan means for your taxes.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Buying a home</p>
+          <h1 className={styles.h1}>What a house really costs</h1>
+          <p className={styles.lead}>
+            A home is the largest purchase most households ever make, and almost all of it is
+            borrowed. Set a price, a down payment, and a credit score to see the monthly payment, the
+            most home a lender says you can afford, and what the loan means for your taxes.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader title="Your situation" />

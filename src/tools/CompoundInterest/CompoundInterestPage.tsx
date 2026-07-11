@@ -35,7 +35,8 @@ const PV_TABS: TabItem<Surface>[] = [
   { value: 'math', label: 'The math' },
 ]
 
-export function CompoundInterestPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {}) {
   const [params, setParams] = useSearchParams()
   const [surface, setSurface] = useState<Surface>('overview')
   const [copied, setCopied] = useState(false)
@@ -81,15 +82,17 @@ export function CompoundInterestPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Compound interest</p>
-        <h1 className={styles.h1}>See how money grows over time</h1>
-        <p className={styles.lead}>
-          Money that earns interest doesn&rsquo;t grow in a straight line. It speeds up, because
-          the interest starts earning interest of its own. Start from an example or set your own
-          numbers, then use the tabs to explore.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Compound interest</p>
+          <h1 className={styles.h1}>See how money grows over time</h1>
+          <p className={styles.lead}>
+            Money that earns interest doesn&rsquo;t grow in a straight line. It speeds up, because
+            the interest starts earning interest of its own. Start from an example or set your own
+            numbers, then use the tabs to explore.
+          </p>
+        </header>
+      )}
 
       <div className={styles.examples}>
         <span className={styles.examplesLabel}>Examples</span>

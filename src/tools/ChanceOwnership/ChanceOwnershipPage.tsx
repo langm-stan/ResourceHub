@@ -499,20 +499,23 @@ function IndexFund() {
 
 /* ------------------------------ page ------------------------------ */
 
-export function ChanceOwnershipPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function ChanceOwnershipPage({ intro = true }: { intro?: boolean } = {}) {
   const [active, setActive] = useState<StationKey>('book')
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
-        <h1 className={styles.h1}>Chance &amp; Ownership</h1>
-        <p className={styles.lead}>
-          Four stations trace the path from a sports bet to an index fund. Each one asks the same two
-          questions: what happens to a thousand people who keep playing, and does what you bought own
-          anything?
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
+          <h1 className={styles.h1}>Chance &amp; Ownership</h1>
+          <p className={styles.lead}>
+            Four stations trace the path from a sports bet to an index fund. Each one asks the same two
+            questions: what happens to a thousand people who keep playing, and does what you bought own
+            anything?
+          </p>
+        </header>
+      )}
 
       <Rail active={active} onChange={setActive} />
 

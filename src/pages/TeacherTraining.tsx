@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Sun, Sunset } from 'lucide-react'
-import { TRAINING_DAYS, type TrainingSession } from '../data/teacherTraining'
+import { FOUNDATION_TOOLS, TRAINING_DAYS, type TrainingSession } from '../data/teacherTraining'
 
 /*
  * The Personal Finance Teacher Training Institute landing page: the daily
@@ -86,6 +86,33 @@ export default function TeacherTraining() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-12">
+        <section>
+          <div className="flex items-baseline gap-3 mb-5">
+            <h2 className="font-serif text-2xl font-semibold text-stone-900">Foundations</h2>
+            <p className="text-sm font-semibold uppercase tracking-widest text-stone-400">
+              used throughout the week
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {FOUNDATION_TOOLS.map((t) => (
+              <Link
+                key={t.slug}
+                to={`/teacher-training/${t.slug}`}
+                className="group flex flex-col gap-1.5 rounded-2xl border border-stone-200 bg-white shadow-card p-5 hover:border-stone-300 hover:bg-stone-50 transition-all"
+              >
+                <p className="font-serif text-lg font-semibold text-stone-900 leading-snug flex items-center gap-2">
+                  {t.label}
+                  <ArrowRight
+                    size={16}
+                    className="shrink-0 text-cardinal transition-transform group-hover:translate-x-1"
+                  />
+                </p>
+                <p className="text-sm text-stone-600 leading-relaxed">{t.description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {TRAINING_DAYS.map(({ day, date, sessions }) => (
           <section key={day}>
             <div className="flex items-baseline gap-3 mb-5">

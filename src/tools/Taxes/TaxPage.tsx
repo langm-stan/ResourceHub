@@ -49,7 +49,8 @@ const SLATE = 'var(--c-series-3)'
 const CARDINAL = 'var(--c-accent)'
 const VIOLET = 'var(--c-series-5)'
 
-export function TaxPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('brackets')
   const [gross, setGross] = useState(80_000)
   const [status, setStatus] = useState<FilingStatus>('single')
@@ -63,16 +64,18 @@ export function TaxPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Understanding taxes</p>
-        <h1 className={styles.h1}>How your taxes work</h1>
-        <p className={styles.lead}>
-          Taxes are the biggest bill most households pay, and the system is simpler than it looks.
-          Enter a salary and a state to see how the {TAX_YEAR} brackets fill, what the year&rsquo;s
-          total comes to, and what your tax rates mean for decisions like a 401(k) or Roth
-          contribution.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Understanding taxes</p>
+          <h1 className={styles.h1}>How your taxes work</h1>
+          <p className={styles.lead}>
+            Taxes are the biggest bill most households pay, and the system is simpler than it looks.
+            Enter a salary and a state to see how the {TAX_YEAR} brackets fill, what the year&rsquo;s
+            total comes to, and what your tax rates mean for decisions like a 401(k) or Roth
+            contribution.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader title="Your situation" />
@@ -449,9 +452,14 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
         stateCode={p.state.code}
         stateName={p.state.name}
         exportStats={[
-          { label: 'Effective tax rate', value: formatPercent(p.totalTaxRate, 1), color: GREEN },
-          { label: 'Marginal rate (next dollar)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
-          { label: 'Total taxes this year', value: formatUSDWhole(p.totalTax) },
+          { label: 'Gross income (wages)', value: formatUSDWhole(p.gross) },
+          {
+            label: p.contribution401k > 0 ? 'Taxable income (after 401(k) + deduction)' : 'Taxable income (after deduction)',
+            value: formatUSDWhole(p.taxable),
+          },
+          { label: 'Total taxes (federal + state + payroll)', value: formatUSDWhole(p.totalTax) },
+          { label: 'Effective rate (taxes ÷ gross)', value: formatPercent(p.totalTaxRate, 1), color: GREEN },
+          { label: 'Marginal rate (next dollar of wages)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
         ]}
         caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Both lines start at 7.65% because Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, while the income tax starts only above the standard deduction. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
       />

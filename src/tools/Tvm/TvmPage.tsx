@@ -12,7 +12,8 @@ import styles from './TvmPage.module.css'
 
 type Surface = 'overview' | 'schedule' | 'math'
 
-export function TvmPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function TvmPage({ intro = true }: { intro?: boolean } = {}) {
   const [params, setParams] = useSearchParams()
   const [surface, setSurface] = useState<Surface>('overview')
   const [copied, setCopied] = useState(false)
@@ -42,15 +43,17 @@ export function TvmPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Time value of money</p>
-        <h1 className={styles.h1}>What does it cost, and what does it take?</h1>
-        <p className={styles.lead}>
-          A dollar today isn&rsquo;t the same as a dollar later. Work out the monthly payment on a
-          loan, or how much to set aside each month to reach a savings goal. To solve for any value
-          directly, use the five-key TVM Calculator in the sidebar.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Time value of money</p>
+          <h1 className={styles.h1}>What does it cost, and what does it take?</h1>
+          <p className={styles.lead}>
+            A dollar today isn&rsquo;t the same as a dollar later. Work out the monthly payment on a
+            loan, or how much to set aside each month to reach a savings goal. To solve for any value
+            directly, use the five-key TVM Calculator in the sidebar.
+          </p>
+        </header>
+      )}
 
       <div className={styles.examples}>
         <span className={styles.examplesLabel}>Examples</span>

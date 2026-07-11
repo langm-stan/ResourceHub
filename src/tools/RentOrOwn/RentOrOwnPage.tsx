@@ -27,7 +27,8 @@ const GOLD = 'var(--c-series-2)'
 
 const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`
 
-export function RentOrOwnPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
   const [price, setPrice] = useState(420000)
   const [rent, setRent] = useState(2600)
   const [downPct, setDownPct] = useState(20)
@@ -43,14 +44,16 @@ export function RentOrOwnPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Housing</p>
-        <h1 className={styles.h1}>Rent or Own</h1>
-        <p className={styles.lead}>
-          Two households live in the same house. One owns it, one rents it and invests what the owner
-          tied up. The chart shows who is wealthier if the owner sold in any given year.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Housing</p>
+          <h1 className={styles.h1}>Rent or Own</h1>
+          <p className={styles.lead}>
+            Two households live in the same house. One owns it, one rents it and invests what the owner
+            tied up. The chart shows who is wealthier if the owner sold in any given year.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised">
         <div className={styles.grid}>

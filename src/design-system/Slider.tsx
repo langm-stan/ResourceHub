@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import styles from './Slider.module.css'
 
 interface SliderProps {
@@ -10,9 +10,14 @@ interface SliderProps {
   step?: number
   readout?: string
   note?: string
+  /** Replace the text readout with a typed input, committed on blur or Enter and clamped to [min, max]. */
+  editable?: boolean
+  /** Shown inside the editable input, e.g. "$" or "months". */
+  prefix?: string
+  suffix?: string
 }
 
-/** A labeled range control with a tabular-mono readout. */
+/** A labeled range control with a tabular-mono readout (optionally a typed input). */
 export function Slider({
   label,
   value,
@@ -22,9 +27,22 @@ export function Slider({
   step = 1,
   readout,
   note,
+  editable = false,
+  prefix,
+  suffix,
 }: SliderProps) {
   const id = useId()
   const pct = max === min ? 0 : ((value - min) / (max - min)) * 100
+  // While the user types, the field shows their raw draft; otherwise the
+  // committed value, grouped for readability.
+  const [draft, setDraft] = useState<string | null>(null)
+
+  function commit(raw: string) {
+    setDraft(null)
+    const n = Number(raw.replace(/[^0-9.\-]/g, ''))
+    if (!Number.isFinite(n) || raw.trim() === '') return
+    onChange(Math.min(max, Math.max(min, Math.round(n))))
+  }
 
   return (
     <div className={styles.field}>
@@ -32,7 +50,32 @@ export function Slider({
         <label htmlFor={id} className={styles.label}>
           {label}
         </label>
-        {readout != null && <span className={`${styles.readout} tnum`}>{readout}</span>}
+        {editable ? (
+          <span className={styles.inputWrap}>
+            {prefix && <span className={styles.affix}>{prefix}</span>}
+            <input
+              className={`${styles.readInput} tnum`}
+              inputMode="decimal"
+              value={draft ?? value.toLocaleString('en-US')}
+              aria-label={label}
+              onFocus={(e) => {
+                setDraft(String(value))
+                e.target.select()
+              }}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={(e) => commit(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  commit((e.target as HTMLInputElement).value)
+                  ;(e.target as HTMLInputElement).blur()
+                }
+              }}
+            />
+            {suffix && <span className={styles.affix}>{suffix}</span>}
+          </span>
+        ) : (
+          readout != null && <span className={`${styles.readout} tnum`}>{readout}</span>
+        )}
       </div>
       <input
         id={id}

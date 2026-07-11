@@ -73,6 +73,27 @@ export const CONTRIBUTION_LIMITS = {
   ira: 7_500,
 }
 
+/** Account restrictions beyond the base limits (IRS Notice 2025-67). */
+export const ACCOUNT_RULES = {
+  /** Additional IRA contribution allowed from age 50, 2026. */
+  iraCatchUp50: 1_100,
+  /** Additional 401(k) employee deferral allowed from age 50, 2026. */
+  k401CatchUp50: 8_000,
+  /** Roth IRA contribution MAGI phase-out range, 2026. */
+  rothIraPhaseOut: {
+    single: { from: 153_000, to: 168_000 },
+    mfj: { from: 242_000, to: 252_000 },
+  } as Record<FilingStatus, { from: number; to: number }>,
+  /** Traditional IRA deduction phase-out when covered by a workplace plan, 2026. */
+  tradIraDeductionPhaseOut: {
+    single: { from: 81_000, to: 91_000 },
+    mfj: { from: 129_000, to: 149_000 },
+  } as Record<FilingStatus, { from: number; to: number }>,
+  /** Statutory ages (IRC §72(t), §401(a)(9)) — not inflation-indexed. */
+  earlyWithdrawalAge: '59½',
+  rmdAge: 73,
+}
+
 export const FILING_LABELS: Record<FilingStatus, string> = {
   single: 'Single',
   mfj: 'Married filing jointly',

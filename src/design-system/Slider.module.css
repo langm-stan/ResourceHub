@@ -31,6 +31,34 @@
   color: var(--text-muted);
 }
 
+.inputWrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 3px var(--space-2);
+}
+.inputWrap:focus-within {
+  border-color: var(--accent);
+}
+.affix {
+  color: var(--text-faint);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+.readInput {
+  width: 7ch;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: right;
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-medium);
+  color: var(--text-primary);
+}
+
 .range {
   -webkit-appearance: none;
   appearance: none;

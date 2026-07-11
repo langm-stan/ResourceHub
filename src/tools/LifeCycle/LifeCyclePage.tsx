@@ -65,7 +65,8 @@ const DEFAULTS: LifeCycleState = {
   noBorrowing: false,
 }
 
-export function LifeCyclePage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('overview')
   const [state, setState] = useState<LifeCycleState>(DEFAULTS)
   const update = (patch: Partial<LifeCycleState>) => setState((s) => ({ ...s, ...patch }))
@@ -74,16 +75,18 @@ export function LifeCyclePage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · The life-cycle model</p>
-        <h1 className={styles.h1}>Smooth your spending, not your income</h1>
-        <p className={styles.lead}>
-          Income rises, peaks, and falls over a working life. Your standard of living does not have
-          to follow it. The life-cycle model, the framework behind modern retirement planning, shows
-          how borrowing, saving, and spending down let a household keep steady consumption from a
-          changing income.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · The life-cycle model</p>
+          <h1 className={styles.h1}>Smooth your spending, not your income</h1>
+          <p className={styles.lead}>
+            Income rises, peaks, and falls over a working life. Your standard of living does not have
+            to follow it. The life-cycle model, the framework behind modern retirement planning, shows
+            how borrowing, saving, and spending down let a household keep steady consumption from a
+            changing income.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.controls}>
         <div className={styles.controlsHeader}>

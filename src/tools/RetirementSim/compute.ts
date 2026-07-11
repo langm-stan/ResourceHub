@@ -6,7 +6,7 @@
  */
 import { BRACKETS, FICA, STANDARD_DEDUCTION } from '../Taxes/data2026'
 
-export { CONTRIBUTION_LIMITS, TAX_YEAR } from '../Taxes/data2026'
+export { ACCOUNT_RULES, CONTRIBUTION_LIMITS, TAX_YEAR } from '../Taxes/data2026'
 export const STD_DEDUCTION = STANDARD_DEDUCTION.single
 export const SS_WAGE_BASE = FICA.ssWageBase
 

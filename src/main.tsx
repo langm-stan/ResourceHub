@@ -38,6 +38,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'compound-interest',
   'borrow-save',
   'lifecycle',
+  'credit-score',
   'gambling-investing',
   'taxes',
   'retirement-simulator',
