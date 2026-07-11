@@ -79,13 +79,9 @@ export default function TeacherTraining() {
           <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-3">
             July 13-17, 2026 · Stanford University
           </p>
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white mb-5 max-w-3xl">
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl">
             Personal Finance Teacher Training Institute
           </h1>
-          <p className="text-white/80 max-w-2xl text-lg leading-relaxed">
-            The interactive tools behind each day's lectures, in one place. Open a session to find
-            the materials, project them in class, or explore them on your own device.
-          </p>
         </div>
       </div>
 
