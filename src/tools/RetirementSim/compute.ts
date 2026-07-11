@@ -87,37 +87,56 @@ export function jarSeries(earn: number, years: number, ret: number, taxNow: numb
 
 /* --------------------- part 3: employer match --------------------- */
 
-export interface MatchFormula {
-  id: string
-  label: string
-  matchRate: number
-  cap: number
+/** The match lands on contributions up to this share of salary. */
+export const MATCH_CAP = 0.06
+export const MATCH_RETURN = 0.06
+export const MATCH_TAX = 0.3
+
+export interface MatchScenarioRow {
+  year: number
+  taxable: number
+  noMatch: number
+  halfMatch: number
+  fullMatch: number
 }
 
-export const FORMULAS: MatchFormula[] = [
-  { id: '50on6', label: '50 cents per $1 on the first 6% (most common)', matchRate: 0.5, cap: 0.06 },
-  { id: '100on3', label: '$1 per $1 on the first 3%', matchRate: 1.0, cap: 0.03 },
-  { id: '100on6', label: '$1 per $1 on the first 6% (generous)', matchRate: 1.0, cap: 0.06 },
-]
-
-/** Future value of a level end-of-year payment. */
-export function fvAnnuity(pmt: number, r: number, n: number): number {
-  return pmt * ((Math.pow(1 + r, n) - 1) / r)
-}
-
-export function matchOutcome(salary: number, contribShare: number, f: MatchFormula, years: number, r = 0.07) {
+/**
+ * Four ways to save the same share of salary. The taxable account is funded
+ * after tax and its returns are taxed every year. The three tax-deferred
+ * scenarios grow untaxed and are taxed once at withdrawal (rows show
+ * after-tax value); the match adds 50 or 100 cents per contributed dollar,
+ * on contributions up to MATCH_CAP of salary.
+ */
+export function matchScenarios(
+  salary: number,
+  contribShare: number,
+  years: number,
+  r = MATCH_RETURN,
+  tax = MATCH_TAX
+): MatchScenarioRow[] {
   const contrib = contribShare * salary
-  const matched = Math.min(contribShare, f.cap) * salary * f.matchRate
-  const maxMatch = f.cap * salary * f.matchRate
-  const forgone = maxMatch - matched
-  return {
-    contrib,
-    matched,
-    maxMatch,
-    forgone,
-    careerMatch: fvAnnuity(matched, r, years),
-    careerForgone: fvAnnuity(forgone, r, years),
+  const matched = Math.min(contribShare, MATCH_CAP) * salary
+  const rows: MatchScenarioRow[] = []
+  let taxable = 0
+  let no = 0
+  let half = 0
+  let full = 0
+  for (let y = 0; y <= years; y++) {
+    if (y > 0) {
+      taxable = taxable * (1 + r * (1 - tax)) + contrib * (1 - tax)
+      no = no * (1 + r) + contrib
+      half = half * (1 + r) + contrib + 0.5 * matched
+      full = full * (1 + r) + contrib + matched
+    }
+    rows.push({
+      year: y,
+      taxable,
+      noMatch: no * (1 - tax),
+      halfMatch: half * (1 - tax),
+      fullMatch: full * (1 - tax),
+    })
   }
+  return rows
 }
 
 /* -------------------- part 4: retirement timing ------------------- */

@@ -23,6 +23,7 @@ export interface ParsedStatement {
   liabilities?: AccountGroup[]
   income?: LineItem[]
   expenses?: LineItem[]
+  saving?: LineItem[]
 }
 
 const asLabel = (v: unknown): string => (typeof v === 'string' ? v.trim() : '')
@@ -122,6 +123,10 @@ export function parseStatementXlsx(data: ArrayBuffer): ParsedStatement | null {
     } else if (title === 'monthly budget') {
       result.income = parseSection(rows, 'money in', 'total income')
       result.expenses = parseSection(rows, 'money out', 'total expenses', true)
+      // Files from before the Saving section simply have none here; the
+      // importer's caller pulls saving rows out of the expenses instead.
+      const saving = parseSection(rows, 'saving', 'total saving')
+      if (saving.length) result.saving = saving
     }
   }
 

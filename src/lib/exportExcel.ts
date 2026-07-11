@@ -75,12 +75,14 @@ export function exportBalanceSheetXlsx(assets: AccountGroup[], liabilities: Acco
   XLSX.writeFile(wb, `ifdm-balance-sheet-${new Date().toISOString().slice(0, 10)}.xlsx`)
 }
 
-export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[]) {
+export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], saving: LineItem[]) {
   const totalIncome = sumItems(income)
   const totalExpenses = sumItems(expenses)
   const totalActual = sumActuals(expenses)
   const anyActuals = hasActuals(expenses)
-  const surplus = totalIncome - totalExpenses
+  const totalSaving = sumItems(saving)
+  const leftover = totalIncome - totalExpenses - totalSaving
+  const investable = Math.max(0, totalIncome - totalExpenses)
 
   const rows: (string | number)[][] = [
     ['Monthly Budget'],
@@ -98,8 +100,13 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[]) {
     ]),
     ['Total expenses', totalExpenses, anyActuals ? totalActual : ''],
     [],
-    ['Left over each month', surplus],
-    ['Savings rate', totalIncome > 0 ? surplus / totalIncome : 0],
+    ['Saving', 'Amount'],
+    ...saving.map((i) => [i.label, i.value]),
+    ['Total saving', totalSaving],
+    [],
+    ['Left over each month', leftover],
+    ['Investable each month', investable],
+    ['Savings rate', totalIncome > 0 ? investable / totalIncome : 0],
   ]
 
   const ws = XLSX.utils.aoa_to_sheet(rows)

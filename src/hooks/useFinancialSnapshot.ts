@@ -4,10 +4,13 @@ import {
   LIABILITY_GROUPS,
   INCOME_ITEMS,
   EXPENSE_ITEMS,
+  SAVING_ITEMS,
   STARTER_ASSET_GROUPS,
   STARTER_LIABILITY_GROUPS,
   STARTER_INCOME,
   STARTER_EXPENSES,
+  STARTER_SAVING,
+  splitSavingRows,
   sumItems,
   type AccountGroup,
   type LineItem,
@@ -24,6 +27,8 @@ export type Snapshot = {
   liabilities: AccountGroup[]
   income: LineItem[]
   expenses: LineItem[]
+  /** Pay-yourself-first rows: money kept, not spent; feeds "investable each month". */
+  saving: LineItem[]
 }
 
 export type HistoryPoint = { date: string; netWorth: number }
@@ -33,6 +38,7 @@ const EXAMPLE_SNAPSHOT: Snapshot = {
   liabilities: LIABILITY_GROUPS,
   income: INCOME_ITEMS,
   expenses: EXPENSE_ITEMS,
+  saving: SAVING_ITEMS,
 }
 
 // Clearing does not empty the sheet: it restores the Stanford template's line
@@ -42,6 +48,7 @@ const BLANK_SNAPSHOT: Snapshot = {
   liabilities: STARTER_LIABILITY_GROUPS,
   income: STARTER_INCOME,
   expenses: STARTER_EXPENSES,
+  saving: STARTER_SAVING,
 }
 
 /*
@@ -58,9 +65,27 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
   const assets = p.assets as AccountGroup[]
   const liabilities = p.liabilities as AccountGroup[]
 
-  // Current shape: income and expenses are line-item arrays.
+  // Current shape: income and expenses are line-item arrays. Snapshots from
+  // before the saving list existed carry saving rows inside expenses; pull
+  // them out so nothing is lost.
   if (Array.isArray(p.income) && Array.isArray(p.expenses)) {
-    return { assets, liabilities, income: p.income as LineItem[], expenses: p.expenses as LineItem[] }
+    if (Array.isArray(p.saving)) {
+      return {
+        assets,
+        liabilities,
+        income: p.income as LineItem[],
+        expenses: p.expenses as LineItem[],
+        saving: p.saving as LineItem[],
+      }
+    }
+    const split = splitSavingRows(p.expenses as LineItem[])
+    return {
+      assets,
+      liabilities,
+      income: p.income as LineItem[],
+      expenses: split.expenses,
+      saving: split.saving.length ? split.saving : STARTER_SAVING,
+    }
   }
 
   // Legacy shape: budget categories (budgeted/spent) + a single income number.
@@ -72,13 +97,20 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
       typeof p.income === 'number' && p.income !== 0
         ? [{ key: 'income', label: 'Monthly income', value: p.income }]
         : []
-    const expenses: LineItem[] = (p.budget as LegacyCategory[]).map((c) => ({
+    const mapped: LineItem[] = (p.budget as LegacyCategory[]).map((c) => ({
       key: c.key,
       label: c.label,
       value: c.budgeted,
       ...(typeof c.spent === 'number' && Number.isFinite(c.spent) && c.spent !== 0 ? { actual: c.spent } : null),
     }))
-    return { assets, liabilities, income, expenses }
+    const split = splitSavingRows(mapped)
+    return {
+      assets,
+      liabilities,
+      income,
+      expenses: split.expenses,
+      saving: split.saving.length ? split.saving : STARTER_SAVING,
+    }
   }
 
   return null
@@ -139,6 +171,7 @@ export function useFinancialSnapshot() {
   const netWorth = totalAssets - totalLiabilities
   const totalIncome = sumItems(snapshot.income)
   const totalExpenses = sumItems(snapshot.expenses)
+  const totalSaving = sumItems(snapshot.saving)
 
   const setGroupItems = useCallback(
     (kind: 'assets' | 'liabilities', groupKey: string, items: LineItem[]) => {
@@ -162,6 +195,12 @@ export function useFinancialSnapshot() {
     suppressPersist.current = false
     setIsExampleData(false)
     setSnapshot((prev) => ({ ...prev, expenses }))
+  }, [])
+
+  const setSavingItems = useCallback((saving: LineItem[]) => {
+    suppressPersist.current = false
+    setIsExampleData(false)
+    setSnapshot((prev) => ({ ...prev, saving }))
   }, [])
 
   // The net worth trend records itself: whenever the user's numbers change, the
@@ -214,12 +253,22 @@ export function useFinancialSnapshot() {
         suppressPersist.current = false
         setIsExampleData(false)
         setSnapshot((prev) => {
+          // Files from before the Saving section carry saving rows inside
+          // Money Out; pull them out rather than losing the distinction.
+          let expenses = parsed.expenses
+          let saving = parsed.saving
+          if (expenses && !saving) {
+            const split = splitSavingRows(expenses)
+            expenses = split.expenses
+            saving = split.saving.length ? split.saving : STARTER_SAVING
+          }
           const next = {
             ...prev,
             ...(parsed.assets ? { assets: parsed.assets } : null),
             ...(parsed.liabilities ? { liabilities: parsed.liabilities } : null),
             ...(parsed.income ? { income: parsed.income } : null),
-            ...(parsed.expenses ? { expenses: parsed.expenses } : null),
+            ...(expenses ? { expenses } : null),
+            ...(saving ? { saving } : null),
           }
           // An upload overrides what's on screen. If the file carries only one
           // statement and the other side still shows the example numbers,
@@ -233,6 +282,7 @@ export function useFinancialSnapshot() {
             if (!parsed.income) {
               next.income = STARTER_INCOME
               next.expenses = STARTER_EXPENSES
+              next.saving = STARTER_SAVING
             }
           }
           return next
@@ -270,10 +320,12 @@ export function useFinancialSnapshot() {
     netWorth,
     totalIncome,
     totalExpenses,
+    totalSaving,
     isExampleData,
     setGroupItems,
     setIncomeItems,
     setExpenseItems,
+    setSavingItems,
     importFile,
     loadExampleData,
     clearAll,

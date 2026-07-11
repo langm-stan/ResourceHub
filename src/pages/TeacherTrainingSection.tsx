@@ -55,7 +55,7 @@ const SECTIONS: Record<string, SectionConfig> = {
   budget: {
     title: 'Financial Budget',
     intro:
-      'An interactive balance sheet, budget, and savings goal. These are the same tools as our downloadable templates, in live form, with your numbers saved in your browser.',
+      'An interactive balance sheet and budget: pay yourself first, compare the plan to what actually happened, and see where each dollar of take-home income goes. Your numbers save in your browser and download as Excel.',
     content: <FinancialStatements standalone={false} />,
   },
   'compound-interest': {

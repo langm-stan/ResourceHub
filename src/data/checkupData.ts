@@ -7,7 +7,10 @@
  * — but the rows *inside* each group are free-form: users add, rename, and
  * remove their own line items instead of filling in a wall of preset $0 fields.
  *
- * The budget is fully free-form: "money in" and "money out" line items.
+ * The budget is fully free-form: "money in", "money out", and "saving" line
+ * items. Saving is its own list, not an expense: it is money kept, so it
+ * counts toward what is investable each month (pay yourself first) and flows
+ * into the Your Goal tab instead of disappearing into spending.
  */
 
 /* `actual` only exists on budget expense rows: what was really spent, next to
@@ -29,6 +32,19 @@ export function sumActuals(items: LineItem[]): number {
 
 export function hasActuals(items: LineItem[]): boolean {
   return items.some((i) => typeof i.actual === 'number' && Number.isFinite(i.actual))
+}
+
+/**
+ * Pull saving rows out of an expense list (older snapshots and files kept
+ * "Saving short-term" / "Saving long-term" inside money out). Matches the
+ * template keys and any row whose label starts with "saving".
+ */
+export function splitSavingRows(items: LineItem[]): { expenses: LineItem[]; saving: LineItem[] } {
+  const isSaving = (i: LineItem) => i.key.startsWith('saving') || /^saving/i.test(i.label.trim())
+  return {
+    expenses: items.filter((i) => !isSaving(i)),
+    saving: items.filter(isSaving),
+  }
 }
 
 /* Plain-language "what belongs here" per balance-sheet group, keyed by group
@@ -63,7 +79,7 @@ export const ASSET_GROUPS: AccountGroup[] = [
   {
     key: 'real-estate',
     label: 'Real Estate Assets',
-    items: [],
+    items: [{ key: 'home', label: 'Home', value: 280000 }],
   },
   {
     key: 'other',
@@ -87,6 +103,9 @@ export const LIABILITY_GROUPS: AccountGroup[] = [
     items: [
       { key: 'auto', label: 'Auto Loans', value: 6200 },
       { key: 'student', label: 'Student Loans', value: 21000 },
+      // Sized so the budget's $1,500 housing line matches this loan's
+      // principal-and-interest payment (30 years at 6.4% on $240,000).
+      { key: 'mortgage', label: 'Mortgage', value: 240000 },
     ],
   },
 ]
@@ -177,16 +196,27 @@ export const STARTER_EXPENSES: LineItem[] = [
   { key: 'other-expense', label: 'Other', value: 0 },
 ]
 
+// "Saving", not "savings": these rows are the monthly flow, not the balance.
+export const STARTER_SAVING: LineItem[] = [
+  { key: 'saving-short', label: 'Saving short-term', value: 0 },
+  { key: 'saving-long', label: 'Saving long-term', value: 0 },
+]
+
 export const INCOME_ITEMS: LineItem[] = [
   { key: 'take-home', label: 'Take-home pay', value: 4000 },
   { key: 'side', label: 'Side income', value: 300 },
 ]
 
 export const EXPENSE_ITEMS: LineItem[] = [
-  { key: 'rent', label: 'Rent', value: 1500, actual: 1500 },
+  { key: 'rent', label: 'Mortgage payment', value: 1500, actual: 1500 },
   { key: 'groceries', label: 'Groceries', value: 500, actual: 640 },
   { key: 'transportation', label: 'Transportation', value: 300, actual: 280 },
   { key: 'utilities', label: 'Utilities & phone', value: 250, actual: 250 },
   { key: 'debt', label: 'Debt payments', value: 400, actual: 400 },
   { key: 'everything-else', label: 'Everything else', value: 600, actual: 810 },
+]
+
+export const SAVING_ITEMS: LineItem[] = [
+  { key: 'saving-short', label: 'Saving short-term', value: 200, actual: 200 },
+  { key: 'saving-long', label: 'Saving long-term', value: 300, actual: 250 },
 ]

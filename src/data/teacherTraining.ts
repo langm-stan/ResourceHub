@@ -80,7 +80,8 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
       {
         slug: 'budget',
         label: 'Financial Budget',
-        description: 'An interactive balance sheet, budget, and savings goal, with your numbers downloadable as Excel.',
+        description:
+          'Balance sheet and budget with pay-yourself-first saving, a plan-versus-actual check, and where each dollar of income goes.',
       },
     ],
   },

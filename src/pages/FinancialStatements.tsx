@@ -3,6 +3,7 @@ import SnapshotControls from '../components/checkup/SnapshotControls'
 import StorageNotice from '../components/checkup/StorageNotice'
 import { LineItemsEditor } from '../components/checkup/LineItemsEditor'
 import { PlanVsActual } from '../components/checkup/PlanVsActual'
+import { IncomePie } from '../components/checkup/IncomePie'
 import { GoalChart } from '../components/checkup/GoalChart'
 import { useFinancialSnapshot } from '../hooks/useFinancialSnapshot'
 import { GROUP_HINTS, sumItems } from '../data/checkupData'
@@ -52,18 +53,24 @@ export default function FinancialStatements({ standalone = true }: { standalone?
     netWorth,
     totalIncome,
     totalExpenses,
+    totalSaving,
     isExampleData,
     setGroupItems,
     setIncomeItems,
     setExpenseItems,
+    setSavingItems,
     importFile,
     loadExampleData,
     clearAll,
   } = useFinancialSnapshot()
 
-  const surplus = totalIncome - totalExpenses
-  const savingsRate = totalIncome > 0 ? surplus / totalIncome : 0
-  const monthly = Math.max(0, surplus)
+  // Saving is money kept, not spent: whatever income does not go to expenses
+  // is investable each month, with the budgeted saving as its deliberate part
+  // and the leftover on top.
+  const investable = totalIncome - totalExpenses
+  const leftover = investable - totalSaving
+  const monthly = Math.max(0, investable)
+  const savingsRate = totalIncome > 0 ? monthly / totalIncome : 0
 
   const goalSeries = useMemo(
     () =>
@@ -125,10 +132,10 @@ export default function FinancialStatements({ standalone = true }: { standalone?
           <Stat label="Total assets" value={totalAssets} format={formatUSDWhole} />
           <Stat label="Total liabilities" value={totalLiabilities} format={formatUSDWhole} />
           <Stat
-            label="Left over each month"
-            value={surplus}
+            label="Investable each month"
+            value={investable}
             format={formatUSDWhole}
-            accentColor={surplus >= 0 ? GREEN : CARDINAL}
+            accentColor={investable >= 0 ? GREEN : CARDINAL}
           />
         </div>
       </Card>
@@ -210,7 +217,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
           <Card tone="raised">
             <StepHeader
               title="Your monthly budget"
-              hint="List what comes in and what goes out. The totals update as you type."
+              hint="List what comes in, what you pay yourself first, and what goes out. The totals update as you type."
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               <LineItemsEditor
@@ -220,39 +227,64 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 accent={GREEN}
                 addLabel="Add income"
               />
-              <LineItemsEditor
-                title="Money out"
-                hint="The percent by each row is that expense's share of your total planned spending."
-                items={snapshot.expenses}
-                onChange={setExpenseItems}
-                accent={CARDINAL}
-                addLabel="Add expense"
-                showShare
-              />
+              <div className="flex flex-col gap-8">
+                <LineItemsEditor
+                  title="Money out"
+                  hint="The percent by each row is that expense's share of your total planned spending."
+                  items={snapshot.expenses}
+                  onChange={setExpenseItems}
+                  accent={CARDINAL}
+                  addLabel="Add expense"
+                  showShare
+                />
+                <LineItemsEditor
+                  title="Saving"
+                  hint="Money out too, but out to yourself: it is kept, not spent, so it counts toward what you can invest each month."
+                  items={snapshot.saving}
+                  onChange={setSavingItems}
+                  accent={GREEN}
+                  addLabel="Add saving"
+                />
+              </div>
             </div>
             <div className="flex flex-wrap gap-x-12 gap-y-4 items-baseline border-t border-stone-200 mt-8 pt-6 mb-4">
               <Stat label="Income" value={totalIncome} format={formatUSDWhole} />
               <Stat label="Expenses" value={totalExpenses} format={formatUSDWhole} />
+              <Stat label="Saving" value={totalSaving} format={formatUSDWhole} accentColor={GREEN} />
               <Stat
-                label="Left over each month"
-                value={surplus}
+                label="Left over"
+                value={leftover}
+                format={formatUSDWhole}
+                accentColor={leftover >= 0 ? GREEN : CARDINAL}
+              />
+              <Stat
+                label="Investable each month"
+                value={investable}
                 format={formatUSDWhole}
                 emphasis
-                accentColor={surplus >= 0 ? GREEN : CARDINAL}
+                accentColor={investable >= 0 ? GREEN : CARDINAL}
               />
-              <Stat label="Savings rate" value={savingsRate} format={(v) => formatPercent(v, 0)} animate={false} />
             </div>
-            <Callout tone={surplus >= 0 ? 'note' : 'mark'} label="What this means">
-              {surplus >= 0 ? (
+            <Callout tone={leftover >= 0 && investable > 0 ? 'note' : 'mark'} label="What this means">
+              {investable <= 0 ? (
                 <>
-                  You keep <strong>{formatUSDWhole(surplus)}</strong> a month,{' '}
-                  {formatPercent(savingsRate, 0)} of what you earn. The <em>Your Goal</em> tab shows
-                  what that becomes if you invest it.
+                  You&rsquo;re spending <strong>{formatUSDWhole(-investable)}</strong> more than you
+                  earn each month, before any saving. Trim an expense or add income until this turns
+                  positive.
+                </>
+              ) : leftover < 0 ? (
+                <>
+                  After expenses there is <strong>{formatUSDWhole(investable)}</strong> a month left,
+                  short of the <strong>{formatUSDWhole(totalSaving)}</strong> you planned to pay
+                  yourself first. Trim an expense or lower a saving row until the budget fits.
                 </>
               ) : (
                 <>
-                  You&rsquo;re spending <strong>{formatUSDWhole(-surplus)}</strong> more than you earn
-                  each month. Trim an expense or add income until this turns positive.
+                  You keep <strong>{formatUSDWhole(investable)}</strong> a month,{' '}
+                  {formatPercent(savingsRate, 0)} of what you earn: the{' '}
+                  {formatUSDWhole(totalSaving)} you pay yourself first plus{' '}
+                  {formatUSDWhole(leftover)} left over. The <em>Your Goal</em> tab shows what that
+                  becomes if you invest it.
                 </>
               )}
             </Callout>
@@ -260,16 +292,37 @@ export default function FinancialStatements({ standalone = true }: { standalone?
 
           <Card tone="raised">
             <StepHeader
-              title="Plan versus actual"
-              hint="Fill in what you actually spent last month next to each planned amount. The table shows the gap in each category and each expense's share of real spending."
+              title="Where your income goes"
+              hint="Each planned expense as a share of take-home income, with saving and leftover completing the dollar. Quoted guidelines (like 28% of income on housing) usually mean gross income; a budget divides what actually lands in your account."
             />
             <div className="mt-6">
-              <PlanVsActual items={snapshot.expenses} onChange={setExpenseItems} />
+              <IncomePie
+                income={totalIncome}
+                expenses={snapshot.expenses}
+                totalSaving={totalSaving}
+                leftover={leftover}
+              />
+            </div>
+          </Card>
+
+          <Card tone="raised">
+            <StepHeader
+              title="Plan versus actual"
+              hint="Fill in what you actually spent, and what you actually set aside, next to each planned amount. The table shows the gap in each category, plus each row's share of actual spending and of take-home income."
+            />
+            <div className="mt-6">
+              <PlanVsActual
+                income={totalIncome}
+                expenses={snapshot.expenses}
+                saving={snapshot.saving}
+                onExpensesChange={setExpenseItems}
+                onSavingChange={setSavingItems}
+              />
             </div>
           </Card>
 
           <SnapshotControls
-            onExportExcel={() => exportBudgetXlsx(snapshot.income, snapshot.expenses)}
+            onExportExcel={() => exportBudgetXlsx(snapshot.income, snapshot.expenses, snapshot.saving)}
             onImportFile={importFile}
           />
         </div>
@@ -278,18 +331,26 @@ export default function FinancialStatements({ standalone = true }: { standalone?
       {tab === 'goal' && (
         <Card tone="raised" className="flex flex-col gap-6">
           <StepHeader
-            title="Turn your surplus into wealth"
-            hint="Your leftover money from the Budget tab, invested every month."
+            title="Turn your saving into wealth"
+            hint="Everything you keep each month from the Budget tab: your budgeted saving plus whatever is left over, invested every month."
           />
           {monthly <= 0 ? (
-            <Callout tone="mark" label="No surplus yet">
-              Right now there&rsquo;s nothing left over to invest. Head back to the <em>Budget</em>{' '}
-              tab and get your &ldquo;left over&rdquo; above zero first.
+            <Callout tone="mark" label="Nothing to invest yet">
+              Right now nothing is left after expenses. Head back to the <em>Budget</em> tab and get
+              your saving and leftover above zero first.
             </Callout>
           ) : (
             <>
               <p className="text-lg text-stone-900">
-                Investing your <strong>{formatUSDWhole(monthly)}/month</strong> surplus at
+                Investing the <strong>{formatUSDWhole(monthly)}/month</strong> you keep
+                {totalSaving > 0 && leftover >= 0 ? (
+                  <span className="text-stone-600">
+                    {' '}
+                    ({formatUSDWhole(totalSaving)} budgeted saving + {formatUSDWhole(leftover)} left
+                    over)
+                  </span>
+                ) : null}{' '}
+                at
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl">
                 <NumberField

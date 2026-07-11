@@ -9,7 +9,9 @@ import { STATE_OPTIONS } from '../Taxes/stateData2026'
 import {
   ACCOUNT_RULES,
   CONTRIBUTION_LIMITS,
-  FORMULAS,
+  MATCH_CAP,
+  MATCH_RETURN,
+  MATCH_TAX,
   R_RETIRED,
   R_SAVE,
   RETIREMENT_YEARS,
@@ -20,7 +22,7 @@ import {
   federalTax,
   fica,
   jarSeries,
-  matchOutcome,
+  matchScenarios,
   retirementCurve,
   yearsToFree,
 } from './compute'
@@ -431,20 +433,27 @@ function AccountTaxation() {
 /* ================= Part 3: Employer Matching ================= */
 
 function EmployerMatching() {
-  const [salary, setSalary] = useState(50000)
-  const [contribPct, setContribPct] = useState(3)
-  const [formulaId, setFormulaId] = useState('50on6')
+  const [salary, setSalary] = useState(60000)
+  const [contribPct, setContribPct] = useState(6)
   const [years, setYears] = useState(40)
-  const f = FORMULAS.find((x) => x.id === formulaId)!
 
-  const m = useMemo(() => matchOutcome(salary, contribPct / 100, f, years), [salary, contribPct, f, years])
-  const maxBar = Math.max(m.matched + m.forgone, 1)
+  const rows = useMemo(() => matchScenarios(salary, contribPct / 100, years), [salary, contribPct, years])
+  const last = rows[rows.length - 1]!
+  const x = rows.map((r) => r.year)
+  const yMax = last.fullMatch * 1.1
+
+  const contrib = (contribPct / 100) * salary
+  const matched = Math.min(contribPct / 100, MATCH_CAP) * salary
+  const capped = contribPct / 100 > MATCH_CAP
 
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        Pick a match formula and a contribution rate. The employer&rsquo;s money arrives only on
-        the dollars you contribute inside the formula&rsquo;s cap.
+        Contribute {pct(contribPct / 100)} of a {formatUSDWhole(salary)} salary and{' '}
+        {formatUSDWhole(contrib)} goes into the 401(k). Under the most common formula the employer
+        adds 50 cents for each of those dollars, another {formatUSDWhole(0.5 * matched)}, so the
+        year starts with {formatUSDWhole(contrib + 0.5 * matched)} invested. The chart compares
+        that against saving the same earnings with no match, and outside the 401(k) entirely.
       </p>
       <div className={styles.controlsRow}>
         <Slider label="Salary" value={salary} onChange={setSalary} min={25000} max={150000} step={1000} readout={formatUSDWhole(salary)} />
@@ -452,62 +461,65 @@ function EmployerMatching() {
           label="Your contribution"
           value={contribPct}
           onChange={setContribPct}
-          min={0}
+          min={1}
           max={15}
           step={0.5}
-          readout={`${contribPct}% (${formatUSDWhole(m.contrib)}/yr)`}
+          readout={`${contribPct}% (${formatUSDWhole(contrib)}/yr)`}
         />
-        <Slider label="Career length" value={years} onChange={setYears} min={10} max={45} step={1} readout={`${years} yrs`} />
-        <div className={styles.radioGroup} role="radiogroup" aria-label="Employer formula">
-          <span className={styles.radioTitle}>Employer formula</span>
-          {FORMULAS.map((x) => (
-            <label key={x.id} className={styles.radioLabel}>
-              <input type="radio" name="formula" checked={formulaId === x.id} onChange={() => setFormulaId(x.id)} />
-              {x.label}
-            </label>
-          ))}
-        </div>
+        <Slider label="Years invested" value={years} onChange={setYears} min={10} max={45} step={1} readout={`${years} yrs`} />
       </div>
-      <div className={styles.matchBars}>
-        {[
-          { label: 'Match claimed', v: m.matched, color: GOLD },
-          { label: 'Match missed', v: m.forgone, color: RED },
-        ].map((b) => (
-          <div key={b.label} className={styles.matchBarRow}>
-            <span className={styles.matchBarLabel}>{b.label}</span>
-            <div className={styles.matchBarTrack}>
-              <div className={styles.matchBarFill} style={{ width: `${(b.v / maxBar) * 100}%`, background: b.color }} />
-            </div>
-            <span className={`${styles.matchBarValue} tnum`} style={{ color: b.color }}>
-              {formatUSDWhole(b.v)}/yr
-            </span>
-          </div>
-        ))}
-      </div>
+      {capped && (
+        <p className={styles.note}>
+          The match applies to the first {pct(MATCH_CAP)} of salary only, so the employer adds
+          money on {formatUSDWhole(matched)} of your {formatUSDWhole(contrib)}. The dollars above
+          the cap still get the tax shelter, just no bonus.
+        </p>
+      )}
       <div className={styles.stats}>
-        <Stat
-          label="Match received per year"
-          value={m.matched}
-          format={formatUSDWhole}
-          accentColor={m.forgone > 0 ? undefined : GREEN}
-          animate={false}
-        />
-        <Stat label={`Employer money after ${years} yrs at 7%`} value={m.careerMatch} format={formatUSDWhole} emphasis animate={false} />
-        {m.forgone > 0 && (
-          <Stat label="Career cost of the missed match" value={m.careerForgone} format={formatUSDWhole} accentColor={RED} animate={false} />
-        )}
+        <Stat label={`Taxable account, after ${years} yrs`} value={last.taxable} format={formatUSDWhole} accentColor={SLATE} animate={false} />
+        <Stat label="401(k), no match" value={last.noMatch} format={formatUSDWhole} accentColor={GOLD} animate={false} />
+        <Stat label="401(k) + 50% match" value={last.halfMatch} format={formatUSDWhole} accentColor={RED} animate={false} />
+        <Stat label="401(k) + 100% match" value={last.fullMatch} format={formatUSDWhole} accentColor={GREEN} emphasis animate={false} />
       </div>
-      <p className={styles.note}>
-        {m.forgone > 0
-          ? `You are collecting ${formatUSDWhole(m.matched)} of the ${formatUSDWhole(m.maxMatch)} available each year. About 1 in 4 employees with a match stops short of the full amount (Financial Engines, 2015).`
-          : 'Full match captured.'}
-      </p>
-      <Callout tone="mark" label="The formula sets the break-even contribution">
-        Each formula has a contribution rate at which the full match is captured: 6% under the
-        common formula, 3% under the dollar-for-dollar version. Contributing below that rate leaves
-        part of the offered compensation unclaimed, and the career-cost figure shows what those
-        unclaimed dollars would have compounded to at 7%. Contributions above the cap still get the
-        tax shelter, just no bonus.
+      <div>
+        <div className={styles.legend}>
+          <span style={{ color: GREEN }}>&#9632; 401(k) + 100% match</span>
+          <span style={{ color: RED }}>&#9632; 401(k) + 50% match</span>
+          <span style={{ color: GOLD }}>&#9632; 401(k), no match</span>
+          <span style={{ color: SLATE }}>&#9632; taxable account</span>
+        </div>
+        <StationChart
+          x={x}
+          yMax={yMax}
+          ratio={CHART_RATIO}
+          maxHeight={CHART_MAX_HEIGHT}
+          lines={[
+            { ys: rows.map((r) => r.taxable), color: SLATE, width: 2, label: 'Taxable account' },
+            { ys: rows.map((r) => r.noMatch), color: GOLD, width: 3, label: '401(k), no match' },
+            { ys: rows.map((r) => r.halfMatch), color: RED, width: 3, label: '401(k) + 50% match' },
+            { ys: rows.map((r) => r.fullMatch), color: GREEN, width: 3, label: '401(k) + 100% match' },
+          ]}
+          xTickFormat={(v) => `${Math.round(v)} yr`}
+          xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          figure="Figure 2."
+          caption={`After-tax value of saving ${pct(contribPct / 100)} of a ${formatUSDWhole(salary)} salary each year at a ${pct(MATCH_RETURN)} return, with a ${pct(MATCH_TAX)} tax rate today and at withdrawal. The taxable account's returns are taxed every year; the 401(k) scenarios are taxed once, at withdrawal.`}
+          ariaLabel="After-tax value of a taxable account and a 401(k) with no match, a 50% match, and a 100% match over time"
+          exportStats={[
+            { label: 'Taxable', value: formatUSDWhole(last.taxable), color: SLATE },
+            { label: 'No match', value: formatUSDWhole(last.noMatch), color: GOLD },
+            { label: '50% match', value: formatUSDWhole(last.halfMatch), color: RED },
+            { label: '100% match', value: formatUSDWhole(last.fullMatch), color: GREEN },
+          ]}
+        />
+      </div>
+      <Callout tone="mark" label="The match multiplies the whole pile">
+        Every matched dollar rides the same compounding as your own.{' '}
+        {capped
+          ? `Here the match covers the first ${pct(MATCH_CAP)} of salary, turning ${formatUSDWhole(last.noMatch)} into ${formatUSDWhole(last.halfMatch)} at 50 cents per dollar and ${formatUSDWhole(last.fullMatch)} at dollar for dollar.`
+          : `With the whole contribution matched, 50 cents per dollar lifts the ending balance by exactly half, from ${formatUSDWhole(last.noMatch)} to ${formatUSDWhole(last.halfMatch)}, and dollar for dollar doubles it to ${formatUSDWhole(last.fullMatch)}.`}{' '}
+        A match is the only guaranteed instant return in investing, which is why the standard
+        advice is to contribute at least up to the match cap before saving anywhere else. Roughly
+        1 in 4 employees with a match stops short of the full amount (Financial Engines, 2015).
       </Callout>
     </div>
   )
@@ -579,7 +591,7 @@ function RetirementTiming() {
           yTickFormat={(v) => `${Math.round(v)}`}
           xHoverLabel={(v) => `${Math.round(v)}% savings rate`}
           hoverValueFormat={(v) => `age ${Math.round(v)}`}
-          figure="Figure 2."
+          figure="Figure 3."
           caption={`Savings grow at ${pct(R_SAVE)} while working and ${pct(R_RETIRED, 1)} in retirement; the target funds ${RETIREMENT_YEARS} years of current spending. The curve bends: early points of savings rate buy the most years.`}
           ariaLabel="Retirement age as a function of savings rate"
           exportStats={[

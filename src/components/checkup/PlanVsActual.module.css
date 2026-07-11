@@ -14,10 +14,10 @@
  * of a column gap so the header and totals rules run unbroken. */
 .table {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content max-content max-content max-content;
+  grid-template-columns: minmax(0, 1fr) repeat(5, max-content);
   row-gap: var(--space-2);
   align-items: center;
-  min-width: 420px;
+  min-width: 520px;
 }
 
 /* Each logical row spans the grid via display: contents so the column
@@ -100,10 +100,26 @@
   color: var(--text-muted);
 }
 
+/* Stretch so every cell's box (and so its top border) starts on the same
+ * line; an empty share cell would otherwise center at a different height. */
 .totals > * {
+  align-self: stretch;
   padding-top: var(--space-3);
   border-top: var(--hairline) solid var(--border-strong);
   font-weight: var(--fw-semibold);
+}
+
+/* Partition label between the expense and saving sections of the table. */
+.partition {
+  grid-column: 1 / -1;
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: var(--fw-semibold);
+  color: var(--text-faint);
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--hairline) solid var(--border-strong);
 }
 
 .right {
