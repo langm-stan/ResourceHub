@@ -1,0 +1,271 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.intro {
+  margin-bottom: var(--space-5);
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+
+/* ------------------------------ tabs ------------------------------- */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  margin-bottom: var(--space-5);
+}
+.tab {
+  flex: 1 1 150px;
+  padding: var(--space-3) var(--space-2);
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+.tab:hover {
+  background: var(--surface-sunken);
+}
+.tabActive,
+.tabActive:hover {
+  border-bottom-color: var(--c-series-2);
+  background: var(--surface-raised);
+}
+.tabKicker {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.06em;
+  color: var(--c-cardinal);
+}
+.tabName {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+
+/* ----------------------------- sections ---------------------------- */
+
+/* Controls sit in a row on top; the figure takes the full width below. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.controlsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4) var(--space-6);
+  align-items: start;
+}
+
+.sectionLede {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  margin: 0;
+  max-width: 80ch;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  align-items: baseline;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.note {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.raiseResult {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-series-1);
+  margin-top: var(--space-2);
+}
+
+/* ----------------------- bracket machine bar ----------------------- */
+
+.bracketWrap {
+  position: relative;
+}
+.bracketBar {
+  display: flex;
+  width: 100%;
+  height: 96px;
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.bracketSeg {
+  position: relative;
+  background: var(--c-series-2);
+}
+.bracketSeg + .bracketSeg {
+  border-left: 2px solid var(--surface);
+}
+.bracketSeg:hover {
+  filter: brightness(1.06);
+}
+.bracketTax {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--c-accent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.bracketRate {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+/* Floating readout for the hovered segment, styled like the chart HoverTip. */
+.barTip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--surface-raised);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-2) var(--space-3);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+.barTipTitle {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+.barTipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.barTipRow strong {
+  color: var(--text-primary);
+}
+
+.sliceList {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.sliceList li {
+  margin-bottom: 2px;
+}
+.sliceTotal {
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  margin-top: var(--space-2);
+}
+
+/* ------------------------- match bars ------------------------------ */
+
+.matchBars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.matchBarRow {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 90px;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+}
+.matchBarLabel {
+  color: var(--text-muted);
+  text-align: right;
+}
+.matchBarTrack {
+  height: 28px;
+  background: var(--surface-sunken);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.matchBarFill {
+  height: 100%;
+  border-radius: 3px;
+}
+.matchBarValue {
+  font-weight: var(--fw-semibold);
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.radioLabel {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.radioLabel input {
+  accent-color: var(--c-cardinal);
+}
+.radioTitle {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  margin-top: var(--space-5);
+  max-width: 80ch;
+}

@@ -142,7 +142,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
 
           <StepHeader
             title="What you own and owe"
-            hint="Assets are what you have; liabilities are what you owe. Add, rename, or remove rows until it matches your situation. The groups mirror the downloadable Stanford template."
+            hint="Assets are what you have; liabilities are what you owe. Add, rename, or remove rows until it matches your situation."
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">

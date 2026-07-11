@@ -134,6 +134,16 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         label: 'Understanding Taxes',
         description: 'Brackets, marginal vs. effective rates, the paycheck, and the accounts that shelter savings.',
       },
+      {
+        slug: 'retirement-simulator',
+        label: 'Retirement Planning Simulator',
+        description: 'Four stations: take-home pay, account taxation, employer matching, and retirement timing, each with an exit ticket.',
+      },
+      {
+        slug: 'freedom',
+        label: 'When Can You Stop Working?',
+        description: 'The savings rate sets the date work becomes optional. Four lives to try, and a match toggle measured in years.',
+      },
     ],
   },
   {
@@ -145,9 +155,19 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     speaker: 'Prof. Lang',
     tools: [
       {
+        slug: 'used-vs-new',
+        label: 'Used vs. New',
+        description: 'The same car bought new or a few years old: payments, interest, and the underwater months, side by side.',
+      },
+      {
         slug: 'housing',
         label: 'Buying a Home',
         description: 'PITI, affordability, rate and credit score, and the itemize test.',
+      },
+      {
+        slug: 'rent-or-own',
+        label: 'Rent or Own',
+        description: 'The year-one cost test, then the fifteen-year wealth race between an owner and a renter of the same home.',
       },
     ],
   },

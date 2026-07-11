@@ -40,7 +40,11 @@ const TEACHER_TRAINING_SECTIONS = [
   'lifecycle',
   'gambling-investing',
   'taxes',
+  'retirement-simulator',
+  'freedom',
   'housing',
+  'used-vs-new',
+  'rent-or-own',
 ] as const
 
 createRoot(document.getElementById('root')!).render(

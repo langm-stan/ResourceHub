@@ -252,7 +252,9 @@ function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: 
         />
       </div>
 
-      <p className={styles.bracketGroupTitle}>Federal brackets · {FILING_LABELS[status]}</p>
+      <p className={styles.bracketGroupTitle}>
+        Federal brackets · {FILING_LABELS[status]} · applied to taxable income, not gross wages
+      </p>
       <p className={styles.derivation}>
         Taxable income = {formatUSDWhole(paycheck.gross)} wages − {formatUSDWhole(paycheck.contribution401k)}{' '}
         401(k) − {formatUSDWhole(paycheck.standardDeduction)} standard deduction ={' '}
@@ -260,7 +262,9 @@ function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: 
       </p>
       <BracketContainers segments={incomeTax.segments} />
 
-      <p className={styles.bracketGroupTitle}>{state.name} brackets</p>
+      <p className={styles.bracketGroupTitle}>
+        {state.name} brackets{state.hasTax ? ' · applied to state taxable income' : ''}
+      </p>
       {state.hasTax ? (
         <>
           <p className={styles.derivation}>
@@ -449,14 +453,15 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
           { label: 'Marginal rate (next dollar)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
           { label: 'Total taxes this year', value: formatUSDWhole(p.totalTax) },
         ]}
-        caption={`Both rates across incomes for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
+        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Both lines start at 7.65% because Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, while the income tax starts only above the standard deduction. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
       />
 
       <Callout tone="note" label="Why the effective rate is always the lower one">
-        Your income fills the cheap brackets first. The standard deduction is taxed at zero, the
-        next dollars at 10%, and so on up the schedule. The effective rate averages those early,
-        lightly taxed dollars in with the later ones, so it always ends up below the rate on your
-        last dollar. This is also why a raise cannot lower your take-home pay: new dollars are
+        Your income fills the cheap brackets first. The first{' '}
+        {formatUSDWhole(p.standardDeduction)} of gross wages is covered by the standard deduction
+        and taxed at zero, the next dollars at 10%, and so on up the schedule. The effective rate
+        averages those early, lightly taxed dollars in with the later ones, so it always ends up
+        below the rate on your last dollar. This is also why a raise cannot lower your take-home pay: new dollars are
         taxed at the margin and never change the tax on the dollars below them.
       </Callout>
       <Callout tone="mark" label="The dip in the red line">
@@ -504,8 +509,8 @@ function TaxMathView({ paycheck: p, status }: { paycheck: PaycheckResult; status
         muted
       />
       <FormulaBlock
-        tex={`\\text{average rate} = \\frac{${texUSD(t.tax)}}{${texUSD(t.taxable)}} = ${formatPercent(t.effectiveRateOnTaxable, 1).replace('%', '\\%')} \\qquad \\text{marginal rate} = ${formatPercent(t.marginalRate, 0).replace('%', '\\%')}`}
-        caption="Step 3. The average rate describes the total tax bill. The marginal rate is what the next dollar pays, and it is the rate to use when weighing extra income or a deduction."
+        tex={`\\text{average rate on taxable income} = \\frac{${texUSD(t.tax)}}{${texUSD(t.taxable)}} = ${formatPercent(t.effectiveRateOnTaxable, 1).replace('%', '\\%')} \\qquad \\text{marginal rate} = ${formatPercent(t.marginalRate, 0).replace('%', '\\%')}`}
+        caption="Step 3. This average divides the federal income tax by taxable income; the effective rate in Step 9 divides the whole bill by gross wages instead, so the two are not the same number. The marginal rate is what the next dollar pays, and it is the rate to use when weighing extra income or a deduction."
         muted
       />
       <FormulaBlock

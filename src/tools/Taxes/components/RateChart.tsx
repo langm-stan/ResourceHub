@@ -59,7 +59,9 @@ export function RateChart({
       const g = i * step
       pts.push({
         gross: g,
-        effective: g > 0 ? taxes[i] / g : 0,
+        // At $0 the ratio is 0/0; its limit is the payroll rate on the first
+        // dollar, so the line starts at 7.65% instead of jumping from zero.
+        effective: g > 0 ? taxes[i] / g : (taxes[1] - taxes[0]) / step,
         marginal: (taxes[i + 1] - taxes[i]) / step,
       })
     }
@@ -112,6 +114,7 @@ function Inner({
   // Where the Social Security cap bites: mark the marginal rate just past it.
   const cap = FICA.ssWageBase
   const pastCap = (totalTaxAt(cap + 1_100, status, contribution401k, stateCode) - totalTaxAt(cap + 1_000, status, contribution401k, stateCode)) / 100
+  const preCap = (totalTaxAt(cap - 1_000, status, contribution401k, stateCode) - totalTaxAt(cap - 1_100, status, contribution401k, stateCode)) / 100
   const showCap = cap < xMax * 0.92 && Math.abs(x(cap) - x(gross)) > innerWidth * 0.12
 
   return (
@@ -145,7 +148,8 @@ function Inner({
           x={x(cap)}
           y={y(pastCap)}
           dx={0}
-          dy={-34}
+          // Clear the pre-cap plateau, which sits above the anchor point.
+          dy={y(Math.max(preCap, pastCap)) - y(pastCap) - 18}
           label="Social Security tax caps out"
           align="middle"
           tone="ink"
@@ -154,19 +158,22 @@ function Inner({
 
       <VMarker x={gross} xScale={x} label={`you · ${formatUSDCompact(gross)}`} />
       {(() => {
-        // Keep the two point labels from colliding when the rates sit close
+        // Text drops below each dot so it clears the line running through it;
+        // then keep the two labels from colliding when the rates sit close
         // together (very low incomes, where both are near the payroll rate).
-        let yMarginal = y(ownMarginal)
-        let yEffective = y(ownEffective)
-        if (Math.abs(yMarginal - yEffective) < 16) {
-          const mid = (yMarginal + yEffective) / 2
-          yMarginal = mid - 8
-          yEffective = mid + 8
+        const yMarginal = y(ownMarginal)
+        const yEffective = y(ownEffective)
+        let tMarginal = yMarginal + 16
+        let tEffective = yEffective + 16
+        if (Math.abs(tMarginal - tEffective) < 16) {
+          const mid = (tMarginal + tEffective) / 2
+          tMarginal = mid - 8
+          tEffective = mid + 8
         }
         return (
           <>
-            <EndLabel x={x(gross)} y={yMarginal} text={`${formatPercent(ownMarginal, 1)} marginal`} color="var(--c-accent)" />
-            <EndLabel x={x(gross)} y={yEffective} text={`${formatPercent(ownEffective, 1)} effective`} color="var(--c-series-1)" />
+            <EndLabel x={x(gross)} y={yMarginal} textDy={tMarginal - yMarginal} text={`${formatPercent(ownMarginal, 1)} marginal`} color="var(--c-accent)" />
+            <EndLabel x={x(gross)} y={yEffective} textDy={tEffective - yEffective} text={`${formatPercent(ownEffective, 1)} effective`} color="var(--c-series-1)" />
           </>
         )
       })()}
@@ -176,7 +183,7 @@ function Inner({
         x={(d: RatePoint) => d.gross}
         xScale={x}
         yScale={y}
-        xLabel={(v) => `${formatUSDCompact(v)} of income`}
+        xLabel={(v) => `${formatUSDCompact(v)} gross income`}
         series={[
           { label: 'Marginal rate', color: 'var(--c-accent)', y: (d: RatePoint) => d.marginal, format: (v) => formatPercent(v, 1) },
           { label: 'Effective rate', color: 'var(--c-series-1)', y: (d: RatePoint) => d.effective, format: (v) => formatPercent(v, 1) },

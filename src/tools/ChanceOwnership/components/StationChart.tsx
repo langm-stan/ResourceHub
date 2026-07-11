@@ -33,6 +33,11 @@ interface StationChartProps {
   x: number[]
   lines: ChartLine[]
   yMax: number
+  /** Y-axis floor; defaults to 0 (e.g. an age axis wants a higher floor). */
+  yMin?: number
+  /** Vertical dashed marker (e.g. "you" on a rate axis). */
+  xRef?: number
+  xRefLabel?: string
   /** Percentile band drawn behind the lines. */
   band?: { upper: number[]; lower: number[]; color: string }
   /** Names for the band's edges in the hover readout; omit to keep the band out of it. */
@@ -51,6 +56,9 @@ interface StationChartProps {
   caption: string
   ariaLabel: string
   exportStats?: ExportStat[]
+  /** Frame shape overrides; defaults keep the original station canvas. */
+  ratio?: number
+  maxHeight?: number
 }
 
 /**
@@ -58,11 +66,19 @@ interface StationChartProps {
  * paths, and headline series, on the toolkit's exportable chart frame.
  * Hovering shows a crosshair with every labeled series' value at that point.
  */
-export function StationChart({ figure, caption, ariaLabel, exportStats, ...inner }: StationChartProps) {
+export function StationChart({
+  figure,
+  caption,
+  ariaLabel,
+  exportStats,
+  ratio = 0.46,
+  maxHeight = 380,
+  ...inner
+}: StationChartProps) {
   return (
     <ChartFrame
-      ratio={0.46}
-      maxHeight={380}
+      ratio={ratio}
+      maxHeight={maxHeight}
       figure={figure}
       caption={caption}
       ariaLabel={ariaLabel}
@@ -77,6 +93,9 @@ function Inner({
   x,
   lines,
   yMax,
+  yMin = 0,
+  xRef,
+  xRefLabel,
   band,
   bandLabels,
   yRef,
@@ -91,7 +110,7 @@ function Inner({
   const xMax = x[x.length - 1] || 1
 
   const xs = useMemo(() => scaleLinear().domain([x[0] ?? 0, xMax]).range([0, innerWidth]), [x, xMax, innerWidth])
-  const ys = useMemo(() => scaleLinear().domain([0, yMax]).range([innerHeight, 0]), [yMax, innerHeight])
+  const ys = useMemo(() => scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]), [yMin, yMax, innerHeight])
 
   const toPath = (arr: number[]) =>
     arr.map((v, i) => `${i ? 'L' : 'M'}${xs(x[i]!).toFixed(1)},${ys(Math.min(v, yMax)).toFixed(1)}`).join(' ')
@@ -148,6 +167,26 @@ function Inner({
           {refLabel && (
             <text x={6} y={ys(yRef) - 6} fontSize={11} fill="var(--text-faint)">
               {refLabel}
+            </text>
+          )}
+        </>
+      )}
+
+      {xRef != null && (
+        <>
+          <line
+            x1={xs(xRef)}
+            x2={xs(xRef)}
+            y1={0}
+            y2={innerHeight}
+            stroke="var(--c-accent)"
+            strokeWidth={1}
+            strokeDasharray="4 4"
+            opacity={0.7}
+          />
+          {xRefLabel && (
+            <text x={xs(xRef) + 5} y={12} fontSize={11} fill="var(--c-accent)">
+              {xRefLabel}
             </text>
           )}
         </>

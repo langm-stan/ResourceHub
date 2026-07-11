@@ -342,16 +342,19 @@ export function EndLabel({
   y,
   text,
   color,
+  textDy = 0,
 }: {
   x: number
   y: number
   text: string
   color: string
+  /** Vertical offset for the text only; the dot stays on the series. */
+  textDy?: number
 }) {
   return (
     <g>
       <circle cx={x} cy={y} r={3.5} fill={color} />
-      <text x={x + 8} y={y} dy="0.32em" className={styles.endLabel} fill={color}>
+      <text x={x + 8} y={y + textDy} dy="0.32em" className={styles.endLabel} fill={color}>
         {text}
       </text>
     </g>

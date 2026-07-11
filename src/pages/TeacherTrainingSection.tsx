@@ -16,6 +16,10 @@ import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
 import { ChanceOwnershipPage } from '../tools/ChanceOwnership/ChanceOwnershipPage'
+import { RetirementSimPage } from '../tools/RetirementSim/RetirementSimPage'
+import { FreedomPage } from '../tools/Freedom/FreedomPage'
+import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
+import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
 
 const BASE = '/teacher-training'
 
@@ -72,6 +76,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     instructor: { label: 'Chance & Ownership', path: 'teacher-training/gambling-investing' },
     content: <ChanceOwnershipPage />,
   },
+  'retirement-simulator': {
+    title: 'Retirement Planning Simulator',
+    toolkit: true,
+    instructor: { label: 'Retirement Planning Simulator', path: 'teacher-training/retirement-simulator' },
+    content: <RetirementSimPage />,
+  },
+  freedom: {
+    title: 'When Can You Stop Working?',
+    toolkit: true,
+    instructor: { label: 'When Can You Stop Working?', route: 'lessons', toolKey: 'freedom' },
+    content: <FreedomPage />,
+  },
   taxes: {
     title: 'Understanding Taxes',
     toolkit: true,
@@ -83,6 +99,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Buying a Home', route: 'lessons', toolKey: 'housing' },
     content: <HousingPage />,
+  },
+  'used-vs-new': {
+    title: 'Used vs. New',
+    toolkit: true,
+    instructor: { label: 'Used vs. New', path: 'teacher-training/used-vs-new' },
+    content: <UsedVsNewPage />,
+  },
+  'rent-or-own': {
+    title: 'Rent or Own',
+    toolkit: true,
+    instructor: { label: 'Rent or Own', path: 'teacher-training/rent-or-own' },
+    content: <RentOrOwnPage />,
   },
 }
 
