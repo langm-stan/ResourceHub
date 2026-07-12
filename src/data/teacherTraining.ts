@@ -174,11 +174,6 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         label: 'Retirement Planning Simulator',
         description: 'Four stations: take-home pay, account taxation, employer matching, and retirement timing, each with an exit ticket.',
       },
-      {
-        slug: 'freedom',
-        label: 'When Can You Stop Working?',
-        description: 'The savings rate sets the date work becomes optional. Four lives to try, and a match toggle measured in years.',
-      },
     ],
   },
   {

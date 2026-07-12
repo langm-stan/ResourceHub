@@ -38,7 +38,6 @@ const SECTIONS: { to: string; label: string; children?: SubItem[] }[] = [
       { to: '/lessons?tool=lifecycle', label: 'The Life-Cycle Model' },
       { to: '/lessons?tool=taxes', label: 'Understanding Taxes' },
       { to: '/lessons?tool=housing', label: 'Buying a Home' },
-      { to: '/lessons?tool=freedom', label: 'When Can You Stop Working?' },
     ],
   },
   {

@@ -821,8 +821,7 @@ function RetirementTiming() {
       </div>
       <Callout tone="mark" label="Why the curve bends">
         A higher savings rate adds more each year and shrinks the spending the account must
-        replace, so the first ten points of savings rate move the age more than the last ten. The
-        When Can You Stop Working? lesson runs this model live.
+        replace, so the first ten points of savings rate move the age more than the last ten.
       </Callout>
 
       <div>

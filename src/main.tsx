@@ -44,7 +44,6 @@ const TEACHER_TRAINING_SECTIONS = [
   'gambling-investing',
   'taxes',
   'retirement-simulator',
-  'freedom',
   'housing',
   'used-vs-new',
   'rent-or-own',

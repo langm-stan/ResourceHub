@@ -4,13 +4,11 @@ import InstructorBar from '../components/InstructorBar'
 import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
-import { FreedomPage } from '../tools/Freedom/FreedomPage'
 
 const LESSON_TOOLS = [
   { key: 'lifecycle', label: 'The Life-Cycle Model', Component: LifeCyclePage },
   { key: 'taxes', label: 'Understanding Taxes', Component: TaxPage },
   { key: 'housing', label: 'Buying a Home', Component: HousingPage },
-  { key: 'freedom', label: 'When Can You Stop Working?', Component: FreedomPage },
 ] as const
 
 type ToolKey = (typeof LESSON_TOOLS)[number]['key']

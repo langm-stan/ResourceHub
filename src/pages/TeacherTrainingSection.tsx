@@ -20,7 +20,6 @@ import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
 import { ChanceOwnershipPage } from '../tools/ChanceOwnership/ChanceOwnershipPage'
 import { RetirementSimPage } from '../tools/RetirementSim/RetirementSimPage'
-import { FreedomPage } from '../tools/Freedom/FreedomPage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
 
@@ -107,12 +106,6 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Retirement Planning Simulator', path: 'teacher-training/retirement-simulator' },
     content: <RetirementSimPage intro={false} />,
-  },
-  freedom: {
-    title: 'When Can You Stop Working?',
-    toolkit: true,
-    instructor: { label: 'When Can You Stop Working?', route: 'lessons', toolKey: 'freedom' },
-    content: <FreedomPage intro={false} />,
   },
   taxes: {
     title: 'Understanding Taxes',
