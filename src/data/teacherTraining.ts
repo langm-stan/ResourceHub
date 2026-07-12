@@ -193,17 +193,17 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
       {
         slug: 'used-vs-new',
         label: 'Used vs. New',
-        description: 'The same car bought new or a few years old: payments, interest, and the underwater months, side by side. Type a real listing price straight in.',
+        description: 'The same car bought new or a few years old: the payment, the total interest, and how long the loan exceeds the car’s value. Takes real listing prices and rates.',
       },
       {
         slug: 'housing',
         label: 'Buying a Home',
-        description: 'PITI, affordability, rate and credit score, and the itemize test.',
+        description: 'PITI, affordability, rate and credit score, the length of the loan, and the itemize test.',
       },
       {
         slug: 'rent-or-own',
         label: 'Rent or Own',
-        description: 'The year-one cost test, then the fifteen-year wealth race between an owner and a renter of the same home.',
+        description: 'The first-year cost of owning versus renting the same home, then the wealth of each household over fifteen years.',
       },
     ],
   },

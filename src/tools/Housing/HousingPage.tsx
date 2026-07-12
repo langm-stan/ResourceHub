@@ -3,7 +3,6 @@ import {
   Callout,
   Card,
   FormulaBlock,
-  NumberField,
   SegmentedControl,
   Slider,
   Stat,
@@ -11,6 +10,7 @@ import {
   Tabs,
   type TabItem,
 } from '../../design-system'
+import { paymentFromPV } from '../../lib/finance'
 import { formatPercent, formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { FILING_LABELS, type FilingStatus } from '../Taxes/data2026'
 import { COSTS, CREDIT_TIERS, HOUSING_YEAR, SALT, type CreditTier } from './data2026'
@@ -25,14 +25,16 @@ import {
 } from './compute'
 import { AmortizationChart } from './components/AmortizationChart'
 import { RateSensitivityChart } from './components/RateSensitivityChart'
+import { TermInterestChart, TermLengthChart } from './components/TermLengthChart'
 import styles from './HousingPage.module.css'
 
-type Surface = 'payment' | 'afford' | 'rate' | 'taxes' | 'math'
+type Surface = 'payment' | 'afford' | 'rate' | 'term' | 'taxes' | 'math'
 
 const TABS: TabItem<Surface>[] = [
   { value: 'payment', label: 'The monthly payment' },
+  { value: 'rate', label: 'Rate and credit' },
+  { value: 'term', label: 'The length of the loan' },
   { value: 'afford', label: 'What can you afford?' },
-  { value: 'rate', label: 'Rate, credit, and term' },
   { value: 'taxes', label: 'Taxes and your home' },
   { value: 'math', label: 'The math' },
 ]
@@ -49,17 +51,29 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
   const [downPctInput, setDownPctInput] = useState(20)
   const [tier, setTier] = useState<CreditTier>('excellent')
   const [termKey, setTermKey] = useState<'30' | '15'>('30')
+  // null = follow the credit tier and term; a number = a rate typed in (percent).
+  const [ratePct, setRatePct] = useState<number | null>(null)
+  const [taxPct, setTaxPct] = useState(Math.round(COSTS.propertyTaxRate * 10000) / 100)
+  // null = proportional to the home's value; a number = a quote in dollars per year.
+  const [insYr, setInsYr] = useState<number | null>(null)
   const [income, setIncome] = useState(100_000)
   const [debts, setDebts] = useState(500)
 
   const term: TermYears = termKey === '15' ? 15 : 30
   const downPct = downPctInput / 100
-  const rate = rateFor(tier, term)
+  const rate = ratePct != null ? ratePct / 100 : rateFor(tier, term)
+  const costs = useMemo(
+    () => ({ propertyTaxRate: taxPct / 100, insuranceYr: insYr ?? undefined }),
+    [taxPct, insYr]
+  )
 
-  const m = useMemo(() => computeMortgage(price, downPct, rate, term), [price, downPct, rate, term])
+  const m = useMemo(
+    () => computeMortgage(price, downPct, rate, term, costs),
+    [price, downPct, rate, term, costs]
+  )
   const afford = useMemo(
-    () => computeAffordability(income, debts, rate, term, downPct),
-    [income, debts, rate, term, downPct]
+    () => computeAffordability(income, debts, rate, term, downPct, costs),
+    [income, debts, rate, term, downPct, costs]
   )
   const fits = m.piti <= afford.maxMonthly
 
@@ -70,9 +84,8 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Buying a home</p>
           <h1 className={styles.h1}>What a house really costs</h1>
           <p className={styles.lead}>
-            A home is the largest purchase most households ever make, and almost all of it is
-            borrowed. Set a price, a down payment, and a credit score to see the monthly payment, the
-            most home a lender says you can afford, and what the loan means for your taxes.
+            Set a price, a down payment, and a credit score to see the monthly payment, what a
+            lender would approve, and what the loan means for your taxes.
           </p>
         </header>
       )}
@@ -80,7 +93,16 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
       <Card tone="raised" className={styles.controls}>
         <StepHeader title="Your situation" />
         <div className={styles.controlsGrid}>
-          <NumberField label="Home price" value={price} onChange={setPrice} min={50_000} max={3_000_000} prefix="$" precision={0} />
+          <Slider
+            label="Home price"
+            value={price}
+            onChange={setPrice}
+            min={50_000}
+            max={3_000_000}
+            step={10_000}
+            editable
+            prefix="$"
+          />
           <Slider
             label="Down payment"
             value={downPctInput}
@@ -88,14 +110,19 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
             min={3}
             max={50}
             step={1}
-            readout={`${downPctInput}% · ${formatUSDWhole(m.downPayment)}`}
-            note={m.hasPmi ? 'Below 20% down, lenders add mortgage insurance (PMI).' : undefined}
+            editable
+            suffix="%"
+            precision={1}
+            note={`${formatUSDWhole(m.downPayment)} down.${m.hasPmi ? ' Below 20%, lenders add mortgage insurance (PMI).' : ''}`}
           />
           <SegmentedControl
             label="Credit score"
             options={CREDIT_TIERS.map((t) => ({ value: t.key, label: t.label }))}
             value={tier}
-            onChange={setTier}
+            onChange={(t) => {
+              setTier(t)
+              setRatePct(null)
+            }}
           />
           <SegmentedControl
             label="Loan term"
@@ -104,27 +131,72 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
               { value: '15', label: '15-year' },
             ]}
             value={termKey}
-            onChange={setTermKey}
+            onChange={(k) => {
+              setTermKey(k)
+              setRatePct(null)
+            }}
           />
-          <NumberField label="Household income ($/yr)" value={income} onChange={setIncome} min={0} max={2_000_000} prefix="$" precision={0} />
-          <NumberField
+          <Slider
+            label="Interest rate (APR)"
+            value={Math.round(rate * 10000) / 100}
+            onChange={setRatePct}
+            min={1}
+            max={12}
+            step={0.05}
+            editable
+            suffix="%"
+            precision={2}
+            note={ratePct == null ? 'Follows the credit score and term until you set it.' : undefined}
+          />
+          <Slider
+            label="Property tax (% of value/yr)"
+            value={taxPct}
+            onChange={setTaxPct}
+            min={0}
+            max={3}
+            step={0.05}
+            editable
+            suffix="%"
+            precision={2}
+          />
+          <Slider
+            label="Home insurance ($/yr)"
+            value={Math.round(insYr ?? price * COSTS.insuranceRate)}
+            onChange={setInsYr}
+            min={0}
+            max={15_000}
+            step={100}
+            editable
+            prefix="$"
+            note={insYr == null ? `0.5% of the home's value until you set a quote.` : undefined}
+          />
+          <Slider
+            label="Household income ($/yr)"
+            value={income}
+            onChange={setIncome}
+            min={0}
+            max={2_000_000}
+            step={5_000}
+            editable
+            prefix="$"
+          />
+          <Slider
             label="Other debt payments ($/mo)"
             value={debts}
             onChange={setDebts}
             min={0}
             max={20_000}
+            step={100}
+            editable
             prefix="$"
-            precision={0}
           />
         </div>
         <p className={styles.footnote}>
-          Your rate: <strong>{formatPercent(rate, 1)} APR</strong>. Rates are fixed at {HOUSING_YEAR}{' '}
-          averages: 6.4% on a 30-year loan with excellent credit (Freddie Mac survey, July{' '}
-          {HOUSING_YEAR}), about 0.3 points more for good credit and 1.1 points more for fair credit
-          (myFICO rate tables), and 0.6 points less on a 15-year term. Ownership costs are fixed at
-          national ballparks: property tax {formatPercent(COSTS.propertyTaxRate, 1)} and insurance{' '}
-          {formatPercent(COSTS.insuranceRate, 1)} of the home&rsquo;s value per year, plus PMI of{' '}
-          {formatPercent(COSTS.pmiRate, 1)} of the loan when the down payment is under 20%.
+          Defaults are {HOUSING_YEAR} averages: 6.4% APR on a 30-year loan with excellent credit
+          (Freddie Mac; good credit adds about 0.3 points, fair 1.1, a 15-year term subtracts
+          0.6), property tax {formatPercent(COSTS.propertyTaxRate, 1)} and insurance{' '}
+          {formatPercent(COSTS.insuranceRate, 1)} of value per year. All three can be set
+          directly. PMI {formatPercent(COSTS.pmiRate, 1)} of the loan below 20% down.
         </p>
       </Card>
 
@@ -173,15 +245,15 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
         <Card tone="raised" className={styles.panel}>
           {surface === 'payment' && <PaymentView m={m} />}
           {surface === 'afford' && <AffordView m={m} afford={afford} income={income} debts={debts} />}
-          {surface === 'rate' && <RateView m={m} tier={tier} />}
+          {surface === 'rate' && <RateView m={m} />}
+          {surface === 'term' && <TermView m={m} />}
           {surface === 'taxes' && <HomeTaxView m={m} income={income} />}
           {surface === 'math' && <HousingMathView m={m} afford={afford} income={income} debts={debts} />}
         </Card>
         <Callout tone="plain" label="Educational model, not lending advice">
-          This simplification fixes rates, property tax, insurance, and PMI at {HOUSING_YEAR}{' '}
-          averages, and it skips closing costs, points, HOA dues, maintenance, rate locks, and local
-          variation in taxes and insurance. Real quotes depend on the full application. It shows the
-          structure of the decision, not a preapproval.
+          Rates and ownership costs are fixed at {HOUSING_YEAR} averages; closing costs, HOA dues,
+          maintenance, and local variation are skipped. It shows the structure of the decision, not
+          a preapproval.
         </Callout>
       </div>
     </div>
@@ -205,7 +277,7 @@ function PaymentView({ m }: { m: MortgageResult }) {
     <>
       <StepHeader
         title="One price, four monthly bills"
-        hint="The sticker price becomes a monthly cost. The loan payment is the biggest piece, but taxes and insurance ride along with it, and lenders count all of it."
+        hint="The loan payment, plus the taxes and insurance that ride along with it."
       />
       <div className={styles.stats}>
         <Stat label="All-in monthly cost" value={m.piti} format={formatUSDWhole} emphasis accentColor={CARDINAL} />
@@ -241,10 +313,8 @@ function PaymentView({ m }: { m: MortgageResult }) {
         years={m.years}
         termYears={m.termYears}
         crossoverYear={m.crossoverYear}
-        caption={`Each year's payments on the ${formatUSDWhole(m.loan)} loan, split between interest (red) and principal (green). The total is the same every year; what changes is who it goes to. ${
-          m.crossoverYear
-            ? `Not until year ${m.crossoverYear} does more of the payment build your equity than pay the bank.`
-            : ''
+        caption={`Each year's payments split between interest (red) and principal (green).${
+          m.crossoverYear ? ` Principal overtakes interest in year ${m.crossoverYear}.` : ''
         }`}
         exportStats={[
           { label: 'Monthly P&I', value: formatUSDWhole(m.pi), color: SLATE },
@@ -255,16 +325,16 @@ function PaymentView({ m }: { m: MortgageResult }) {
 
       {m.hasPmi && (
         <Callout tone="mark" label="The cost of a small down payment">
-          With {formatPercent(m.downPct, 0)} down, the lender requires private mortgage insurance:{' '}
-          <strong>{formatUSDWhole(m.pmiMonthly)}</strong> per month that buys you nothing. It
-          protects the lender, not you, and it stays until your equity reaches 20%.
+          With {formatPercent(m.downPct, 0)} down, the lender adds private mortgage insurance:{' '}
+          <strong>{formatUSDWhole(m.pmiMonthly)}</strong> a month. It protects the lender and lasts
+          until equity reaches 20%.
         </Callout>
       )}
       <Callout tone="note" label="Why the first years feel slow">
-        Interest is charged on the balance you still owe, and at the start you owe the most. Of the
-        first {formatUSDWhole(m.pi)} payment, <strong>{formatUSDWhole(m.firstMonthInterest)}</strong>{' '}
-        is interest and only <strong>{formatUSDWhole(m.firstMonthPrincipal)}</strong> pays down the
-        loan. Every payment tilts the split a little further toward you.
+        Interest is charged on the remaining balance. Of the first {formatUSDWhole(m.pi)} payment,{' '}
+        <strong>{formatUSDWhole(m.firstMonthInterest)}</strong> is interest and{' '}
+        <strong>{formatUSDWhole(m.firstMonthPrincipal)}</strong> pays down the loan; the split
+        shifts toward principal each month.
       </Callout>
     </>
   )
@@ -289,7 +359,7 @@ function AffordView({
     <>
       <StepHeader
         title="The 28/36 rule, run on your numbers"
-        hint="Lenders apply two ceilings. Housing costs alone should stay under 28% of gross monthly income, and housing plus every other debt payment should stay under 36%. The lower ceiling wins."
+        hint="Two ceilings: housing under 28% of gross monthly income, housing plus all other debt under 36%. The lower one wins."
       />
       <div className={styles.stats}>
         <Stat
@@ -301,9 +371,15 @@ function AffordView({
         />
         <Stat
           label="Total-debt ceiling (36%)"
+          value={afford.totalCeilingMonthly}
+          format={formatUSDWhole}
+          note="housing plus every other debt payment; fixed by income"
+        />
+        <Stat
+          label="Left for housing under 36%"
           value={afford.maxTotalMonthly}
           format={formatUSDWhole}
-          note={`36% of income minus ${formatUSDWhole(debts)} in other debt payments`}
+          note={`the ${formatUSDWhole(afford.totalCeilingMonthly)} ceiling minus ${formatUSDWhole(debts)} of other debts`}
           accentColor={afford.binding === 'debts' ? CARDINAL : undefined}
         />
         <Stat
@@ -317,35 +393,35 @@ function AffordView({
       </div>
 
       <p className={styles.derivation}>
-        The binding ceiling is the <strong>{afford.binding === 'housing' ? '28% housing ratio' : '36% total-debt ratio'}</strong>
-        {afford.binding === 'debts'
-          ? ': your other debt payments eat into the room the lender allows for housing.'
-          : ': your other debts are light enough that housing costs set the limit.'}{' '}
-        At {formatPercent(m.rate, 1)} with {formatPercent(m.downPct, 0)} down, each $100,000 of
-        home price costs about {formatUSDWhole(afford.costPerDollar * 100_000)} per month, so the{' '}
-        {formatUSDWhole(afford.maxMonthly)} budget supports a {formatUSDWhole(afford.maxPrice)} home.
+        The binding limit is{' '}
+        <strong>
+          {afford.binding === 'housing'
+            ? 'the 28% housing ceiling'
+            : 'what the 36% ceiling leaves after other debts'}
+        </strong>
+        . Each $100,000 of home price costs about {formatUSDWhole(afford.costPerDollar * 100_000)}{' '}
+        per month at these terms, so the {formatUSDWhole(afford.maxMonthly)} budget supports a{' '}
+        {formatUSDWhole(afford.maxPrice)} home.
       </p>
 
       <Callout tone={fits ? 'note' : 'mark'} label={fits ? 'This home fits the guideline' : 'This home breaks the guideline'}>
         {fits ? (
           <>
-            The {formatUSDWhole(m.price)} home costs <strong>{formatUSDWhole(m.piti)}</strong> per
-            month, under the <strong>{formatUSDWhole(afford.maxMonthly)}</strong> ceiling. A lender
-            following the 28/36 rule would consider this affordable at your income.
+            At <strong>{formatUSDWhole(m.piti)}</strong> per month, this home is under the{' '}
+            <strong>{formatUSDWhole(afford.maxMonthly)}</strong> ceiling: affordable by the 28/36
+            rule.
           </>
         ) : (
           <>
-            The {formatUSDWhole(m.price)} home costs <strong>{formatUSDWhole(m.piti)}</strong> per
-            month, over the <strong>{formatUSDWhole(afford.maxMonthly)}</strong> ceiling. A lender
-            following the 28/36 rule would push back, and a budget probably should too.
+            At <strong>{formatUSDWhole(m.piti)}</strong> per month, this home is over the{' '}
+            <strong>{formatUSDWhole(afford.maxMonthly)}</strong> ceiling: a lender would push back.
           </>
         )}
       </Callout>
       <Callout tone="note" label="Other debts shrink the house">
-        The 36% ceiling counts car loans, student loans, and credit card minimums against the same
-        budget as the mortgage. Paying down a $350 car payment does not just free up $350 a month;
-        it can raise the price a lender approves by tens of thousands of dollars. Debt you carry
-        into house-hunting decides the house.
+        The 36% ceiling counts car loans, student loans, and card minimums against the same budget
+        as the mortgage. Clearing a $350 car payment can raise the approved price by tens of
+        thousands of dollars.
       </Callout>
     </>
   )
@@ -353,14 +429,7 @@ function AffordView({
 
 /* ------------------------------------------------------------------ */
 
-function RateView({ m, tier }: { m: MortgageResult; tier: CreditTier }) {
-  const other: TermYears = m.termYears === 30 ? 15 : 30
-  const otherM = useMemo(
-    () => computeMortgage(m.price, m.downPct, rateFor(tier, other), other),
-    [m.price, m.downPct, tier, other]
-  )
-  const m30 = m.termYears === 30 ? m : otherM
-  const m15 = m.termYears === 15 ? m : otherM
+function RateView({ m }: { m: MortgageResult }) {
   const fair = computeMortgage(m.price, m.downPct, rateFor('fair', m.termYears), m.termYears)
   const excellent = computeMortgage(m.price, m.downPct, rateFor('excellent', m.termYears), m.termYears)
 
@@ -368,7 +437,7 @@ function RateView({ m, tier }: { m: MortgageResult; tier: CreditTier }) {
     <>
       <StepHeader
         title="The same house, priced by your credit score"
-        hint="The seller gets the same amount either way. What changes with the rate is how much the bank collects from you over the years, and the rate follows the credit score."
+        hint="The rate follows the credit score, and the rate sets what the bank collects over the years."
       />
       <div className={styles.stats}>
         <Stat
@@ -397,7 +466,7 @@ function RateView({ m, tier }: { m: MortgageResult; tier: CreditTier }) {
       <RateSensitivityChart
         loan={m.loan}
         termYears={m.termYears}
-        caption={`Monthly principal and interest on the ${formatUSDWhole(m.loan)} loan across rates, with the three credit tiers marked. The curve is why buyers watch the Fed: a one-point move changes this payment by roughly ${formatUSDWhole(Math.abs(computeMortgage(m.price, m.downPct, m.rate + 0.01, m.termYears).pi - m.pi))} a month.`}
+        caption={`Principal and interest across rates, with the three credit tiers marked. One point changes the payment by about ${formatUSDWhole(Math.abs(computeMortgage(m.price, m.downPct, m.rate + 0.01, m.termYears).pi - m.pi))} a month.`}
         exportStats={[
           { label: 'Excellent (760+)', value: `${formatUSDWhole(excellent.pi)}/mo`, color: GREEN },
           { label: 'Fair (~640)', value: `${formatUSDWhole(fair.pi)}/mo`, color: CARDINAL },
@@ -405,26 +474,101 @@ function RateView({ m, tier }: { m: MortgageResult; tier: CreditTier }) {
         ]}
       />
 
-      <p className={styles.bracketGroupTitle}>30-year vs. 15-year, at your credit tier</p>
+    </>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+function TermView({ m }: { m: MortgageResult }) {
+  const [termYears, setTermYears] = useState(30)
+  const loanRate = m.rate
+  const i = loanRate / 12
+  const pay = (years: number) => (m.loan > 0 ? paymentFromPV(m.loan, i, years * 12) : 0)
+  const interestFor = (years: number) => pay(years) * years * 12 - m.loan
+  const ioMonthly = m.loan * i
+
+  return (
+    <>
+      <StepHeader
+        title="How long you borrow"
+        hint="A longer term lowers the payment and raises the total interest. Both effects have a limit."
+      />
+      <Slider
+        label="Loan term"
+        value={termYears}
+        onChange={setTermYears}
+        min={10}
+        max={100}
+        step={1}
+        editable
+        suffix="years"
+      />
       <div className={styles.stats}>
-        <Stat label="30-year payment" value={m30.pi} format={formatUSDWhole} note={`${formatPercent(m30.rate, 1)} APR`} />
-        <Stat label="15-year payment" value={m15.pi} format={formatUSDWhole} note={`${formatPercent(m15.rate, 1)} APR, lower rate but higher payment`} />
-        <Stat label="30-year total interest" value={m30.totalInterest} format={formatUSDWhole} accentColor={CARDINAL} />
         <Stat
-          label="15-year total interest"
-          value={m15.totalInterest}
+          label={`Payment, ${termYears}-year loan`}
+          value={pay(termYears)}
           format={formatUSDWhole}
-          accentColor={GREEN}
-          note={`saves ${formatUSDWhole(m30.totalInterest - m15.totalInterest)} in interest`}
+          emphasis
+          note={`${formatUSDWhole(pay(termYears) - ioMonthly)} above the interest-only floor`}
+        />
+        <Stat
+          label={`Total interest, ${termYears}-year loan`}
+          value={interestFor(termYears)}
+          format={formatUSDWhole}
+          accentColor={CARDINAL}
+          note={
+            interestFor(termYears) > m.loan
+              ? `${(interestFor(termYears) / m.loan).toFixed(1)}× the amount borrowed`
+              : `on the ${formatUSDWhole(m.loan)} loan`
+          }
+        />
+        <Stat
+          label="30-year payment"
+          value={pay(30)}
+          format={formatUSDWhole}
+          accentColor={SLATE}
+          note={`${formatUSDWhole(interestFor(30))} total interest`}
+        />
+        <Stat
+          label="Interest-only payment"
+          value={ioMonthly}
+          format={formatUSDWhole}
+          accentColor={CARDINAL}
+          note="the balance never falls, so the interest never ends"
         />
       </div>
 
-      <Callout tone="note" label="The trade behind the terms">
-        The 15-year loan carries a lower rate and builds equity twice as fast, but the payment is{' '}
-        <strong>{formatUSDWhole(m15.pi - m30.pi)}</strong> a month higher. Buyers who need the
-        smaller payment to fit the 28% guideline take the 30-year; buyers with room in the budget
-        buy back <strong>{formatUSDWhole(m30.totalInterest - m15.totalInterest)}</strong> of
-        interest by choosing 15.
+      <TermLengthChart
+        loan={m.loan}
+        rate={loanRate}
+        highlightYears={termYears}
+        caption={`Monthly payment by loan length at ${formatPercent(loanRate, 1)} APR (real rates vary a little by term). Past 30 years the curve hugs the interest-only floor: more length buys almost nothing.`}
+        exportStats={[
+          { label: `${termYears}-year`, value: `${formatUSDWhole(pay(termYears))}/mo`, color: SLATE },
+          { label: '30-year', value: `${formatUSDWhole(pay(30))}/mo`, color: SLATE },
+          { label: 'Interest-only', value: `${formatUSDWhole(ioMonthly)}/mo`, color: CARDINAL },
+        ]}
+      />
+
+      <TermInterestChart
+        loan={m.loan}
+        rate={loanRate}
+        highlightYears={termYears}
+        caption={`Total interest never levels off: ${formatUSDWhole(interestFor(50))} by year 50, ${formatUSDWhole(interestFor(100))} by year 100. The interest-only loan is off this chart entirely: no end to the loan, no end to the interest.`}
+        exportStats={[
+          { label: `${termYears}-year`, value: formatUSDWhole(interestFor(termYears)), color: CARDINAL },
+          { label: '30-year', value: formatUSDWhole(interestFor(30)), color: SLATE },
+          { label: 'The loan itself', value: formatUSDWhole(m.loan) },
+        ]}
+      />
+
+      <Callout tone="mark" label="The 50-year mortgage, priced">
+        A 50-year mortgage, floated as an affordability fix, cuts the payment{' '}
+        <strong>{formatUSDWhole(pay(30) - pay(50))}</strong> below the 30-year and adds{' '}
+        <strong>{formatUSDWhole(interestFor(50) - interestFor(30))}</strong> of interest. The limit
+        of the idea is the interest-only loan: {formatUSDWhole(ioMonthly)} a month, forever,
+        retiring nothing.
       </Callout>
     </>
   )
@@ -440,7 +584,7 @@ function HomeTaxView({ m, income }: { m: MortgageResult; income: number }) {
     <>
       <StepHeader
         title="Does buying change your taxes?"
-        hint="Mortgage interest and property taxes are deductible, but only if you itemize, and itemizing only pays when those deductions beat the standard deduction everyone gets for free."
+        hint="Interest and property tax are deductible only if you itemize, and itemizing only pays past the standard deduction."
       />
       <div className={styles.localControls}>
         <SegmentedControl
@@ -495,26 +639,22 @@ function HomeTaxView({ m, income }: { m: MortgageResult; income: number }) {
           </>
         ) : (
           <>
-            fall short of the {formatUSDWhole(ht.standard)} standard deduction, so this buyer keeps
-            the standard deduction and the home changes nothing on the return.
+            fall short of the {formatUSDWhole(ht.standard)} standard deduction: the home changes
+            nothing on the return.
           </>
         )}
       </p>
 
       <Callout tone="note" label="The folk wisdom is out of date">
-        &ldquo;Buy a house for the tax break&rdquo; made sense when the standard deduction was
-        small. Today a married couple starts with {formatUSDWhole(ht.standard)} for free, so a
-        typical loan&rsquo;s interest often does not clear the bar, and the first{' '}
-        {formatUSDWhole(ht.standard)} of a homeowner&rsquo;s deductions replaces something they
-        already had. Run the comparison before counting the tax break in the budget. State income
-        taxes share the same {formatUSDWhole(ht.saltCap)} cap and can tip the answer; this page
-        counts only property tax.
+        &ldquo;Buy a house for the tax break&rdquo; dates from a smaller standard deduction. A
+        married couple now starts with {formatUSDWhole(ht.standard)} for free, so a typical
+        loan&rsquo;s interest often does not clear the bar. State income taxes share the same{' '}
+        {formatUSDWhole(ht.saltCap)} cap; this page counts only property tax.
       </Callout>
       <Callout tone="note" label="The tax breaks that matter more">
-        Two housing tax rules dwarf the deduction for most owners. Living in the home is untaxed
-        income (renting the same house would be paid with after-tax dollars), and up to{' '}
-        {formatUSDWhole(status === 'mfj' ? 500_000 : 250_000)} of gain when you sell a primary
-        residence is tax-free. Both arrive without itemizing anything.
+        Living in the home is untaxed income, and up to{' '}
+        {formatUSDWhole(status === 'mfj' ? 500_000 : 250_000)} of gain on a primary residence is
+        tax-free. Neither requires itemizing.
       </Callout>
     </>
   )
@@ -539,7 +679,7 @@ function HousingMathView({
     <>
       <StepHeader
         title="Every number on this page, derived"
-        hint="The same calculations the tool runs, written out with your inputs substituted in. Change the panel and the derivations update."
+        hint="The tool&rsquo;s calculations, written out with your inputs substituted in."
       />
       <FormulaBlock
         tex={`${texUSD(m.price)} - \\underbrace{${texUSD(m.downPayment)}}_{${formatPercent(m.downPct, 0).replace('%', '\\%')}\\text{ down}} = ${texUSD(m.loan)}\\text{ borrowed}`}

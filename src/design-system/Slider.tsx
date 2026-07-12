@@ -15,6 +15,8 @@ interface SliderProps {
   /** Shown inside the editable input, e.g. "$" or "months". */
   prefix?: string
   suffix?: string
+  /** Decimal places kept when committing a typed value (default 0). */
+  precision?: number
 }
 
 /** A labeled range control with a tabular-mono readout (optionally a typed input). */
@@ -30,6 +32,7 @@ export function Slider({
   editable = false,
   prefix,
   suffix,
+  precision = 0,
 }: SliderProps) {
   const id = useId()
   const pct = max === min ? 0 : ((value - min) / (max - min)) * 100
@@ -41,7 +44,8 @@ export function Slider({
     setDraft(null)
     const n = Number(raw.replace(/[^0-9.\-]/g, ''))
     if (!Number.isFinite(n) || raw.trim() === '') return
-    onChange(Math.min(max, Math.max(min, Math.round(n))))
+    const factor = 10 ** precision
+    onChange(Math.min(max, Math.max(min, Math.round(n * factor) / factor)))
   }
 
   return (

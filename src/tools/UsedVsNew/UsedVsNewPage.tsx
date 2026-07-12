@@ -3,7 +3,7 @@ import { Callout, Card, SegmentedControl, Slider, Stat } from '../../design-syst
 import { formatUSDWhole } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
-import { NEW_APR, USED_APR, dealPath, fastPayoffMonths } from './compute'
+import { NEW_APR, USED_APR, carValue, dealPath, fastPayoffMonths } from './compute'
 import styles from './UsedVsNewPage.module.css'
 
 /*
@@ -16,28 +16,36 @@ const RED = 'var(--c-accent)'
 const GREEN = 'var(--c-series-1)'
 const GOLD = 'var(--c-series-2)'
 
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`
-
 type Pick = 'new' | 'used'
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
   const [price, setPrice] = useState(40000)
   const [age, setAge] = useState(3)
+  // null = follow the depreciation curve; a number = a real listing price typed in.
+  const [listing, setListing] = useState<number | null>(null)
+  // Rates in percent, defaulting to the Experian market averages.
+  const [newRate, setNewRate] = useState(Math.round(NEW_APR * 10000) / 100)
+  const [usedRate, setUsedRate] = useState(Math.round(USED_APR * 10000) / 100)
   const [months, setMonths] = useState(60)
   const [pick, setPick] = useState<Pick>('new')
 
+  const curveUsed = carValue(price, age)
+  const usedPaid = listing != null ? Math.min(listing, price) : curveUsed
+  const aprNew = newRate / 100
+  const aprUsed = usedRate / 100
+
   const deals = useMemo(
     () => ({
-      new: dealPath(price, 0, NEW_APR, months),
-      used: dealPath(price, age, USED_APR, months),
+      new: dealPath(price, 0, aprNew, months),
+      used: dealPath(price, age, aprUsed, months, usedPaid),
     }),
-    [price, age, months]
+    [price, age, aprNew, aprUsed, months, usedPaid]
   )
   const d = deals[pick]
   const fastMonths = useMemo(
-    () => fastPayoffMonths(deals.used.pricePaid, USED_APR, deals.new.payment),
-    [deals]
+    () => fastPayoffMonths(deals.used.pricePaid, aprUsed, deals.new.payment),
+    [deals, aprUsed]
   )
   const yMax = Math.max(...d.value, ...d.balance) * 1.1
 
@@ -48,9 +56,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Cars and big-ticket items</p>
           <h1 className={styles.h1}>Used vs. New</h1>
           <p className={styles.lead}>
-            The same model, bought new or bought a few years old, each financed at its market&rsquo;s
-            average rate. The used loan carries the worse rate; the question is whether the better
-            price beats it.
+            The same model financed new or a few years old: the payment, the interest, and the
+            months the loan exceeds the car&rsquo;s value.
           </p>
         </header>
       )}
@@ -59,8 +66,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
         <div className={styles.grid}>
           <div className={styles.controlsCol}>
             <p className={styles.lede}>
-              Pick the car and the loan. Both deals put nothing down, so the underwater stretch
-              shows at its worst.
+              Use the defaults or numbers from real listings. Nothing down on either loan.
             </p>
             <Slider
               label="Price new"
@@ -69,16 +75,55 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               min={20000}
               max={80000}
               step={1000}
-              readout={formatUSDWhole(price)}
+              editable
+              prefix="$"
             />
             <Slider
               label="Age of the used one"
               value={age}
               onChange={setAge}
               min={1}
-              max={5}
+              max={8}
               step={1}
-              readout={`${age} yr${age > 1 ? 's' : ''} (${formatUSDWhole(deals.used.pricePaid)})`}
+              editable
+              suffix={age > 1 ? 'yrs' : 'yr'}
+            />
+            <Slider
+              label="Price used"
+              value={Math.round(usedPaid)}
+              onChange={setListing}
+              min={5000}
+              max={price}
+              step={500}
+              editable
+              prefix="$"
+              note={
+                listing == null
+                  ? 'The curve’s estimate. Type a real listing price to replace it.'
+                  : `The curve’s estimate for a ${age}-year-old: ${formatUSDWhole(curveUsed)}.`
+              }
+            />
+            <Slider
+              label="Rate on the new loan"
+              value={newRate}
+              onChange={setNewRate}
+              min={0}
+              max={20}
+              step={0.05}
+              editable
+              suffix="%"
+              precision={2}
+            />
+            <Slider
+              label="Rate on the used loan"
+              value={usedRate}
+              onChange={setUsedRate}
+              min={0}
+              max={20}
+              step={0.05}
+              editable
+              suffix="%"
+              precision={2}
             />
             <Slider
               label="Loan term"
@@ -87,18 +132,19 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               min={36}
               max={84}
               step={12}
-              readout={`${months} months`}
+              editable
+              suffix="months"
             />
             <div className={styles.stats}>
               <Stat
-                label={`New at ${pct(NEW_APR)}`}
+                label={`New at ${newRate.toFixed(2)}%`}
                 value={deals.new.payment}
                 format={(v) => `${formatUSDWhole(v)}/mo`}
                 accentColor={GOLD}
                 animate={false}
               />
               <Stat
-                label={`Used at ${pct(USED_APR)}`}
+                label={`Used at ${usedRate.toFixed(2)}%`}
                 value={deals.used.payment}
                 format={(v) => `${formatUSDWhole(v)}/mo`}
                 accentColor={GREEN}
@@ -113,8 +159,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               />
             </div>
             <p className={styles.note}>
-              Keep paying the new car&rsquo;s {formatUSDWhole(deals.new.payment)} against the used
-              loan anyway and it is gone in {fastMonths} months instead of {months}.
+              At the new car&rsquo;s {formatUSDWhole(deals.new.payment)} payment, the used loan
+              ends in {fastMonths} months instead of {months}.
             </p>
           </div>
 
@@ -144,8 +190,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               figure="Figure 1."
               caption={
                 pick === 'new'
-                  ? `Bought new: the value falls fastest exactly when the balance is highest. Underwater for ${deals.new.underwaterMonths} months on these settings.`
-                  : `Bought at ${age} year${age > 1 ? 's' : ''} old: the steep depreciation already happened to someone else. Underwater for ${deals.used.underwaterMonths} months on these settings.`
+                  ? `Bought new: the loan exceeds the car's value for ${deals.new.underwaterMonths} months at these settings.`
+                  : `Bought at ${age} year${age > 1 ? 's' : ''} old: the loan exceeds the car's value for ${deals.used.underwaterMonths} months at these settings.`
               }
               ariaLabel="Loan balance versus car value over the life of the loan"
               exportStats={[
@@ -154,22 +200,19 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
                 { label: 'Months underwater', value: `${d.underwaterMonths}`, color: d.underwaterMonths > 0 ? RED : GREEN },
               ]}
             />
-            <Callout tone="mark" label="The bigger loan cancels the better rate">
-              On the default settings the five-year interest is nearly identical on both deals: the
-              new car borrows more at a low rate, the used car borrows less at a high one. What
-              separates them is the price paid and the depreciation still to come, both of which
-              favor the buyer who lets the first owner take the steep part of the curve. The trade
-              is repair risk and a shorter warranty; certified pre-owned splits the difference.
+            <Callout tone="mark" label="Why the interest totals come out close">
+              At the defaults, the totals are nearly equal: more borrowed at a lower rate, less at
+              a higher one. The real difference is the price paid, traded against repair risk and
+              a shorter warranty.
             </Callout>
           </div>
         </div>
       </Card>
 
       <p className={styles.footnote}>
-        Simplified for classroom discussion, not financial advice. Depreciation about 20% in year
-        one and 15% a year after (Kelley Blue Book ballpark; varies by model). Average APRs from
-        Experian, State of the Automotive Finance Market (Q4 2025): {pct(NEW_APR)} new,{' '}
-        {pct(USED_APR)} used; your rate depends on your credit score. Nothing down on either loan.
+        Simplified for classroom discussion, not financial advice. Depreciation: about 20% in year
+        one, 15% a year after (Kelley Blue Book; varies by model). Default rates: Experian Q4 2025
+        averages. Nothing down.
       </p>
     </div>
   )

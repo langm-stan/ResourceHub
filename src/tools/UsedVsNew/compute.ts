@@ -40,9 +40,20 @@ export interface DealPath {
 /**
  * Finance the car with nothing down over `months`. `startAge` is the car's
  * age at purchase (0 = new). Paths are sampled quarterly for the chart.
+ * `pricePaidOverride` replaces the curve's price with a real listing; the
+ * car's future value scales with it, treating the listing as the car's true
+ * market value at that age.
  */
-export function dealPath(newPrice: number, startAge: number, apr: number, months: number): DealPath {
-  const pricePaid = carValue(newPrice, startAge)
+export function dealPath(
+  newPrice: number,
+  startAge: number,
+  apr: number,
+  months: number,
+  pricePaidOverride?: number
+): DealPath {
+  const curveAtStart = carValue(newPrice, startAge)
+  const pricePaid = pricePaidOverride ?? curveAtStart
+  const valueAt = (age: number) => carValue(newPrice, age) * (pricePaid / curveAtStart)
   const pmt = monthlyPayment(pricePaid, apr, months)
   const i = apr / 12
   let bal = pricePaid
@@ -54,10 +65,10 @@ export function dealPath(newPrice: number, startAge: number, apr: number, months
     bal = bal * (1 + i) - pmt
     if (m === months) bal = 0
     const age = startAge + m / 12
-    if (bal > carValue(newPrice, age) + 1) underwater++
+    if (bal > valueAt(age) + 1) underwater++
     if (m % 3 === 0 || m === months) {
       x.push(age)
-      value.push(Math.round(carValue(newPrice, age)))
+      value.push(Math.round(valueAt(age)))
       balance.push(Math.round(Math.max(0, bal)))
     }
   }
@@ -68,7 +79,7 @@ export function dealPath(newPrice: number, startAge: number, apr: number, months
     payment: pmt,
     totalInterest: pmt * months - pricePaid,
     underwaterMonths: underwater,
-    valueAtPayoff: carValue(newPrice, startAge + months / 12),
+    valueAtPayoff: valueAt(startAge + months / 12),
     pricePaid,
   }
 }

@@ -36,7 +36,10 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
 
   const race = useMemo(() => wealthRace(price, rent, downPct / 100, growth), [price, rent, downPct, growth])
   const x = [0, ...race.rows.map((r) => r.year)]
-  const owner = [0, ...race.rows.map((r) => r.owner)]
+  // Year 0: selling on day one recovers the equity minus the 6% selling costs;
+  // the renter still holds the down payment and closing costs as cash.
+  const owner0 = Math.round(price * (1 - SELL_COSTS) - price * (1 - downPct / 100))
+  const owner = [owner0, ...race.rows.map((r) => r.owner)]
   const renter = [Math.round(price * (downPct / 100 + BUY_CLOSING)), ...race.rows.map((r) => r.renter)]
   const yMax = Math.max(...owner, ...renter) * 1.08
   const yMin = Math.min(0, ...owner) * 1.15
@@ -49,8 +52,8 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Housing</p>
           <h1 className={styles.h1}>Rent or Own</h1>
           <p className={styles.lead}>
-            Two households live in the same house. One owns it, one rents it and invests what the owner
-            tied up. The chart shows who is wealthier if the owner sold in any given year.
+            One household owns the house; the other rents it and invests the difference. The chart
+            shows who is wealthier in any year.
           </p>
         </header>
       )}
@@ -59,35 +62,39 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
         <div className={styles.grid}>
           <div className={styles.controlsCol}>
             <p className={styles.lede}>
-              Set the price, what the same home rents for, and how long you might stay. The rent is
-              the number worth arguing about: look it up for your town.
+              Set the price, the rent for the same home, and the down payment, from real listings
+              when you can.
             </p>
             <Slider
               label="Home price"
               value={price}
               onChange={setPrice}
-              min={250000}
-              max={800000}
+              min={100000}
+              max={2000000}
               step={10000}
-              readout={formatUSDWhole(price)}
+              editable
+              prefix="$"
             />
             <Slider
               label="Monthly rent for the same home"
               value={rent}
               onChange={setRent}
-              min={1000}
-              max={5000}
+              min={500}
+              max={10000}
               step={50}
-              readout={formatUSDWhole(rent)}
+              editable
+              prefix="$"
             />
             <Slider
               label="Down payment"
               value={downPct}
               onChange={setDownPct}
-              min={5}
-              max={30}
-              step={5}
-              readout={`${downPct}%`}
+              min={0}
+              max={50}
+              step={1}
+              editable
+              suffix="%"
+              precision={1}
             />
             <SegmentedControl
               label="Home price growth"
@@ -123,9 +130,9 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
               />
             </div>
             <p className={styles.note}>
-              The year-one net cost counts interest, taxes, insurance, upkeep, and the return the
-              down payment stopped earning, minus the principal you keep. Rent below that number and
-              renting won the first year.
+              Year-one net cost: interest, property tax, insurance, upkeep, and the down
+              payment&rsquo;s lost return, minus principal paid. Rent below that number and renting
+              cost less.
             </p>
           </div>
 
@@ -145,7 +152,7 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
               xTickFormat={(v) => `${Math.round(v)} yr`}
               xHoverLabel={(v) => `Year ${Math.round(v)}`}
               figure="Figure 1."
-              caption={`Both start with the same cash. The owner's line begins under water because selling costs and closing costs hit before equity builds; time amortizes them away.`}
+              caption={`The owner starts behind the renter: closing and selling costs come out before equity builds.`}
               ariaLabel="Owner versus renter wealth over fifteen years"
               exportStats={[
                 { label: 'Owner, year 15', value: formatUSDWhole(last.owner), color: GOLD },
@@ -156,23 +163,20 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
                 },
               ]}
             />
-            <Callout tone="mark" label="Time is the variable that decides it">
-              Three forces work for the owner as years pass: the principal share of the fixed payment
-              grows, rents rise while the payment does not, and the one-time transaction costs spread
-              across more years. Short stays hand all three advantages to the renter, which is why
-              the break-even year, not the monthly payment, is the honest comparison.
+            <Callout tone="mark" label="How the comparison shifts with time">
+              As years pass, the principal share grows, rents rise against a flat payment, and the
+              one-time costs spread out. All three favor the owner: the break-even year is the
+              number to watch.
             </Callout>
           </div>
         </div>
       </Card>
 
       <p className={styles.footnote}>
-        Simplified for classroom discussion, not financial advice. Assumes a 30-year fixed at{' '}
-        {pct(APR, 1)} (Freddie Mac, 2026), property tax 1.1% and insurance 0.5% of value, upkeep at
-        the 1% rule of thumb, rents growing {pct(RENT_GROWTH)} a year, {pct(ALT_RETURN)} on invested
-        cash, {pct(BUY_CLOSING)} closing costs to buy and {pct(SELL_COSTS)} to sell. Taxes on the
-        renter&rsquo;s investment gains and the owner&rsquo;s capital-gain exclusion are both
-        ignored; they lean in opposite directions.
+        Simplified for classroom discussion, not financial advice. 30-year fixed at {pct(APR, 1)}{' '}
+        (Freddie Mac, 2026); property tax 1.1%, insurance 0.5%, upkeep 1% of value; rents grow{' '}
+        {pct(RENT_GROWTH)} a year; invested cash earns {pct(ALT_RETURN)}; closing costs{' '}
+        {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes on both sides are ignored.
       </p>
     </div>
   )

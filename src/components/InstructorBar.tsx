@@ -38,9 +38,8 @@ export default function InstructorBar({
         For instructors
       </p>
       <p className="text-sm text-stone-600 mb-4 max-w-2xl">
-        Use {toolLabel} in class three ways: enlarge the interface for projection, embed the live tool
-        in slides or a course page, or hover any chart and use its download control to save a PNG
-        figure for a deck.
+        Enlarge {toolLabel} for projection, embed it in slides or a course page, or hover any chart
+        to download it as a PNG.
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <div className="toolkitScope">

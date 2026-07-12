@@ -63,16 +63,26 @@ export interface MortgageResult {
   crossoverYear: number | null
 }
 
+/** User overrides for the fixed ownership costs; omitted fields use COSTS. */
+export interface CostOverrides {
+  /** Property tax as a share of the home's value per year. */
+  propertyTaxRate?: number
+  /** Homeowners insurance in dollars per year (default: proportional to value). */
+  insuranceYr?: number
+}
+
 export function computeMortgage(
   price: number,
   downPct: number,
   rate: number,
-  termYears: TermYears
+  termYears: TermYears,
+  costs?: CostOverrides
 ): MortgageResult {
   const downPayment = price * downPct
   const loan = Math.max(0, price - downPayment)
-  const propertyTaxMonthly = (price * COSTS.propertyTaxRate) / 12
-  const insuranceMonthly = (price * COSTS.insuranceRate) / 12
+  const propertyTaxMonthly = (price * (costs?.propertyTaxRate ?? COSTS.propertyTaxRate)) / 12
+  const insuranceMonthly =
+    costs?.insuranceYr != null ? costs.insuranceYr / 12 : (price * COSTS.insuranceRate) / 12
   const hasPmi = loan > 0 && downPct < COSTS.pmiThreshold
   const pmiMonthly = hasPmi ? (loan * COSTS.pmiRate) / 12 : 0
 
@@ -128,7 +138,9 @@ export function computeMortgage(
 export interface AffordabilityResult {
   /** 28% of monthly income: the ceiling on housing costs alone. */
   maxHousingMonthly: number
-  /** 36% of monthly income minus existing debt payments. */
+  /** 36% of monthly income: the fixed ceiling on housing plus all other debt. */
+  totalCeilingMonthly: number
+  /** What the 36% ceiling leaves for housing after existing debt payments. */
   maxTotalMonthly: number
   /** Which of the two ceilings binds. */
   binding: 'housing' | 'debts'
@@ -149,29 +161,38 @@ export function computeAffordability(
   monthlyDebts: number,
   rate: number,
   termYears: TermYears,
-  downPct: number
+  downPct: number,
+  costs?: CostOverrides
 ): AffordabilityResult {
   const monthlyIncome = incomeYr / 12
   const maxHousingMonthly = AFFORDABILITY.housingRatio * monthlyIncome
-  const maxTotalMonthly = Math.max(0, AFFORDABILITY.totalRatio * monthlyIncome - monthlyDebts)
+  const totalCeilingMonthly = AFFORDABILITY.totalRatio * monthlyIncome
+  const maxTotalMonthly = Math.max(0, totalCeilingMonthly - monthlyDebts)
   const binding = maxTotalMonthly < maxHousingMonthly ? 'debts' : 'housing'
   const maxMonthly = Math.min(maxHousingMonthly, maxTotalMonthly)
 
   const loanShare = 1 - downPct
   const n = termYears * 12
   const i = rate / 12
+  // A fixed-dollar insurance quote does not scale with price, so it comes off
+  // the budget instead of joining the per-dollar cost.
+  const insuranceMonthly = costs?.insuranceYr != null ? costs.insuranceYr / 12 : null
   const costPerDollar =
     (loanShare > 0 ? paymentFromPV(loanShare, i, n) : 0) +
-    (COSTS.propertyTaxRate + COSTS.insuranceRate) / 12 +
+    ((costs?.propertyTaxRate ?? COSTS.propertyTaxRate) +
+      (insuranceMonthly == null ? COSTS.insuranceRate : 0)) /
+      12 +
     (loanShare > 0 && downPct < COSTS.pmiThreshold ? (COSTS.pmiRate * loanShare) / 12 : 0)
+  const budget = Math.max(0, maxMonthly - (insuranceMonthly ?? 0))
 
   return {
     maxHousingMonthly,
+    totalCeilingMonthly,
     maxTotalMonthly,
     binding,
     maxMonthly,
     costPerDollar,
-    maxPrice: costPerDollar > 0 ? maxMonthly / costPerDollar : 0,
+    maxPrice: costPerDollar > 0 ? budget / costPerDollar : 0,
   }
 }
 
@@ -204,7 +225,7 @@ export function computeHomeTaxes(
     m.loan > MORTGAGE_INTEREST_CAP
       ? m.interestYear1 * (MORTGAGE_INTEREST_CAP / m.loan)
       : m.interestYear1
-  const propertyTaxYear = m.price * COSTS.propertyTaxRate
+  const propertyTaxYear = m.propertyTaxMonthly * 12
   const saltCap = Math.max(
     SALT.floor,
     SALT.cap - SALT.phaseOutRate * Math.max(0, incomeYr - SALT.phaseOutStart)
