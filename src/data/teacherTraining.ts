@@ -203,7 +203,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
       {
         slug: 'rent-or-own',
         label: 'Rent or Own',
-        description: 'The first-year cost of owning versus renting the same home, then the wealth of each household over fifteen years.',
+        description: 'The first-year cost of owning versus renting the same home, then the wealth of each household over the loan’s thirty years.',
       },
     ],
   },

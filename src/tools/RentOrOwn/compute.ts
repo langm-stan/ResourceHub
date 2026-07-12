@@ -22,7 +22,7 @@ export const ALT_RETURN = 0.07
 export const RENT_GROWTH = 0.03
 export const BUY_CLOSING = 0.03
 export const SELL_COSTS = 0.06
-export const HORIZON = 15
+export const HORIZON = 30
 
 export type Growth = 'flat' | 'typical' | 'hot'
 export const GROWTH_RATES: Record<Growth, number> = { flat: 0, typical: 0.03, hot: 0.05 }

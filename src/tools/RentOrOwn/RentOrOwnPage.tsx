@@ -176,10 +176,10 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
               xHoverLabel={(v) => `Year ${Math.round(v)}`}
               figure="Figure 1."
               caption={`The owner starts behind the renter: closing and selling costs come out before equity builds.`}
-              ariaLabel="Owner versus renter wealth over fifteen years"
+              ariaLabel="Owner versus renter wealth over the life of the loan"
               exportStats={[
-                { label: 'Owner, year 15', value: formatUSDWhole(last.owner), color: GOLD },
-                { label: 'Renter, year 15', value: formatUSDWhole(last.renter), color: GREEN },
+                { label: `Owner, year ${HORIZON}`, value: formatUSDWhole(last.owner), color: GOLD },
+                { label: `Renter, year ${HORIZON}`, value: formatUSDWhole(last.renter), color: GREEN },
                 {
                   label: 'Break-even',
                   value: race.breakEvenYear ? `year ${race.breakEvenYear}` : `beyond ${HORIZON} yrs`,
@@ -188,8 +188,7 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
             />
             <Callout tone="mark" label="How the comparison shifts with time">
               As years pass, the principal share grows, rents rise against a flat payment, and the
-              one-time costs spread out. All three favor the owner: the break-even year is the
-              number to watch.
+              one-time costs spread out. The break-even year is the number to watch.
             </Callout>
           </div>
         </div>
