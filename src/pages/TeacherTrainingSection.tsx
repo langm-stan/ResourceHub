@@ -11,6 +11,7 @@ import { LITERACY_DATA_INTRO, LiteracyDataContent } from './LiteracyData'
 import { CHECKLIST_INTRO, ChecklistContent } from './Checklist'
 import FinancialStatements from './FinancialStatements'
 import { CompoundInterestPage } from '../tools/CompoundInterest/CompoundInterestPage'
+import { InflationPage } from '../tools/Inflation/InflationPage'
 import { TvmPage } from '../tools/Tvm/TvmPage'
 import { TvmCalculatorPage } from '../tools/Tvm/TvmCalculatorPage'
 import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
@@ -70,6 +71,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Compound Interest', route: 'calculators', toolKey: 'compound' },
     content: <CompoundInterestPage intro={false} />,
+  },
+  inflation: {
+    title: 'The Effect of Inflation',
+    toolkit: true,
+    instructor: { label: 'The Effect of Inflation', path: 'teacher-training/inflation' },
+    content: <InflationPage intro={false} />,
   },
   'borrow-save': {
     title: 'Borrow & Save',

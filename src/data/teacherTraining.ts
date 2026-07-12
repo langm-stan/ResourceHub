@@ -68,6 +68,12 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         description: 'Watch interest earn interest, with the math shown and charts ready for a deck.',
       },
       {
+        slug: 'inflation',
+        label: 'The Effect of Inflation',
+        description:
+          'Prices compound too: what the same purchase costs over time at different inflation rates, and what a fixed amount of money still buys.',
+      },
+      {
         slug: 'borrow-save',
         label: 'Borrow & Save',
         description: 'Guided borrow-and-save scenarios on the time-value-of-money engine.',

@@ -37,6 +37,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'tvm-calculator',
   'budget',
   'compound-interest',
+  'inflation',
   'borrow-save',
   'lifecycle',
   'credit-score',
