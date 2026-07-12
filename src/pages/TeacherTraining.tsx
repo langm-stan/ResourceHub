@@ -82,6 +82,22 @@ export default function TeacherTraining() {
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl">
             Personal Finance Teacher Training Institute
           </h1>
+          <div className="mt-4 max-w-3xl text-white/85 leading-relaxed space-y-1">
+            <p>
+              The tools we had already designed are posted on the{' '}
+              <a
+                href="https://ifdm.stanford.edu/resourcehub"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-white underline decoration-white/50 underline-offset-2 hover:decoration-white"
+              >
+                IFDM Resource Hub
+              </a>
+              .
+            </p>
+            <p>This page was built just for the Personal Finance Teacher Training Institute.</p>
+            <p>Eventually the two will be merged, but for now, please use both.</p>
+          </div>
         </div>
       </div>
 
