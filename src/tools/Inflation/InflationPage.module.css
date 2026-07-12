@@ -71,6 +71,10 @@
   min-width: 0;
 }
 
+.vehicleRow {
+  margin-top: var(--space-4);
+}
+
 .stats {
   display: flex;
   flex-wrap: wrap;

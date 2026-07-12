@@ -71,7 +71,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         slug: 'inflation',
         label: 'The Effect of Inflation',
         description:
-          'Prices compound too: what the same purchase costs over time at different inflation rates, and what a fixed amount of money still buys.',
+          'Rising prices, shrinking purchasing power, and whether cash, savings, bonds, or stocks keep pace.',
       },
       {
         slug: 'borrow-save',
@@ -193,7 +193,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
       {
         slug: 'used-vs-new',
         label: 'Used vs. New',
-        description: 'The same car bought new or a few years old: payments, interest, and the underwater months, side by side.',
+        description: 'The same car bought new or a few years old: payments, interest, and the underwater months, side by side. Type a real listing price straight in.',
       },
       {
         slug: 'housing',
