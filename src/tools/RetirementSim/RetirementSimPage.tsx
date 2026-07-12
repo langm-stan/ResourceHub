@@ -114,11 +114,8 @@ function TakeHomePay() {
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        Move the salary slider or type an exact number, and watch each dollar go through the
-        federal brackets in order. The first{' '}
-        {formatUSDWhole(STD_DEDUCTION)} passes untaxed (the standard deduction), and each bracket
-        taxes only the dollars inside it. The toggles add the other pieces of a real paycheck when
-        you want them.
+        Set a salary and watch each dollar go through the federal brackets in order. The toggles
+        add the other pieces of a real paycheck.
       </p>
       <div className={styles.controlsRow}>
         <div className={styles.controlStack}>
@@ -267,10 +264,8 @@ function TakeHomePay() {
         </ul>
       </div>
       <Callout tone="mark" label="A raise cannot lower take-home pay">
-        The $2,000 sits on top of the existing income, so it is taxed at the marginal rate and
-        nothing more. The dollars below the threshold keep their old rates either way. Crossing
-        into a higher bracket changes the tax on the new dollars only, and that stays true with
-        every optional piece switched on.
+        The $2,000 sits on top of the existing income, so only the new dollars are taxed at the
+        marginal rate; the dollars below keep their old rates.
       </Callout>
     </div>
   )
@@ -296,9 +291,9 @@ function AccountTaxation() {
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        The same {formatUSDWhole(earn)} of earnings goes into three accounts every year. The
-        taxable account is taxed going in and on every year&rsquo;s returns. The traditional 401(k)
-        is taxed once, at withdrawal. The Roth is taxed once, going in.
+        The same {formatUSDWhole(earn)} of earnings goes into three accounts every year: the
+        taxable account is taxed going in and on every year&rsquo;s returns, the traditional
+        401(k) once at withdrawal, the Roth once going in.
       </p>
       <div className={styles.controlsRow}>
         <Slider
@@ -349,11 +344,9 @@ function AccountTaxation() {
         />
       </div>
       <Callout tone="mark" label="Comparing the three accounts">
-        With equal tax rates today and in retirement, the traditional and Roth accounts end at the
-        same after-tax value. When the tax rate today is lower than the rate in retirement, the
-        Roth ends higher; when the rate in retirement is lower, the traditional account ends
-        higher. The taxable account ends below both because its returns are taxed every year,
-        which lowers the rate at which the balance compounds.
+        With equal tax rates today and in retirement, traditional and Roth tie; whichever period
+        has the lower rate favors that account. The taxable account trails both because yearly
+        taxes slow its compounding.
       </Callout>
 
       <div>
@@ -455,11 +448,9 @@ function EmployerMatching() {
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        Contribute {pct(contribPct / 100)} of a {formatUSDWhole(salary)} salary and{' '}
-        {formatUSDWhole(contrib)} goes into the 401(k). Under the most common formula the employer
-        adds 50 cents for each of those dollars, another {formatUSDWhole(0.5 * matched)}, so the
-        year starts with {formatUSDWhole(contrib + 0.5 * matched)} invested. The chart compares
-        that against saving the same earnings with no match, and outside the 401(k) entirely.
+        The employer adds 50 cents (or a dollar) for each dollar you contribute, on the first{' '}
+        {pct(MATCH_CAP)} of salary. The chart compares the same earnings saved with a match,
+        without one, and outside the 401(k) entirely.
       </p>
       <div className={styles.controlsRow}>
         <Slider label="Salary" value={salary} onChange={setSalary} min={25000} max={150000} step={1000} readout={formatUSDWhole(salary)} />
@@ -476,9 +467,8 @@ function EmployerMatching() {
       </div>
       {capped && (
         <p className={styles.note}>
-          The match applies to the first {pct(MATCH_CAP)} of salary only, so the employer adds
-          money on {formatUSDWhole(matched)} of your {formatUSDWhole(contrib)}. The dollars above
-          the cap still get the tax shelter, just no bonus.
+          The match stops at {pct(MATCH_CAP)} of salary, so the employer adds money on{' '}
+          {formatUSDWhole(matched)} of your {formatUSDWhole(contrib)}.
         </p>
       )}
       <div className={styles.stats}>
@@ -519,13 +509,9 @@ function EmployerMatching() {
         />
       </div>
       <Callout tone="mark" label="The match multiplies the whole pile">
-        Every matched dollar rides the same compounding as your own.{' '}
-        {capped
-          ? `Here the match covers the first ${pct(MATCH_CAP)} of salary, turning ${formatUSDWhole(last.noMatch)} into ${formatUSDWhole(last.halfMatch)} at 50 cents per dollar and ${formatUSDWhole(last.fullMatch)} at dollar for dollar.`
-          : `With the whole contribution matched, 50 cents per dollar lifts the ending balance by exactly half, from ${formatUSDWhole(last.noMatch)} to ${formatUSDWhole(last.halfMatch)}, and dollar for dollar doubles it to ${formatUSDWhole(last.fullMatch)}.`}{' '}
-        A match is the only guaranteed instant return in investing, which is why the standard
-        advice is to contribute at least up to the match cap before saving anywhere else. Roughly
-        1 in 4 employees with a match stops short of the full amount (Financial Engines, 2015).
+        Every matched dollar rides the same compounding as your own, which is why the standard
+        advice is to contribute at least up to the cap before saving anywhere else. Roughly 1 in 4
+        employees with a match stops short of the full amount (Financial Engines, 2015).
       </Callout>
     </div>
   )
@@ -567,12 +553,10 @@ function RetirementTiming() {
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
-        The two-step method turns retirement into two time-value calculations. A couple wants{' '}
-        {formatUSDWhole(income)} a year for {RETIREMENT_YEARS} years of retirement. Step 1: at the{' '}
-        {pct(R_RETIRED, 1)} return of a safer withdrawal portfolio, the pile that funds it is{' '}
-        {formatUSDWhole(pile)} by {RETIRE_AGE}. Step 2: starting at {PLAN_START_AGE}, reaching that
-        pile takes {planYears} years of saving at {pct(R_SAVE)}, which is{' '}
-        {formatUSDWhole(plan.saving)} a year. The three figures below stress-test the plan.
+        A couple wants {formatUSDWhole(income)} a year for {RETIREMENT_YEARS} years of retirement.
+        Step 1 prices the pile that funds it by {RETIRE_AGE} (at {pct(R_RETIRED, 1)}); step 2
+        prices the saving that reaches the pile in {planYears} years (at {pct(R_SAVE)}). The
+        figures below stress-test the plan.
       </p>
       <div className={styles.controlsRow}>
         <Slider
@@ -600,8 +584,7 @@ function RetirementTiming() {
         <p className={styles.rulesTitle}>The price of waiting</p>
         <p className={styles.sectionLede}>
           Same target by {RETIRE_AGE}, same {pct(R_SAVE)} return; the only thing that moves is the
-          starting age. The default target rounds the couple&rsquo;s pile up to $1.4 million,
-          a buffer rather than a bullseye.
+          starting age.
         </p>
       </div>
       <div className={styles.controlsRow}>
@@ -641,9 +624,8 @@ function RetirementTiming() {
       <div>
         <p className={styles.rulesTitle}>If returns disappoint</p>
         <p className={styles.sectionLede}>
-          The couple&rsquo;s plan assumes {pct(R_SAVE)} a year. Markets do not sign contracts. Move
-          the actual return and watch the same {formatUSDWhole(plan.saving)} of yearly saving land
-          somewhere else.
+          The plan assumes {pct(R_SAVE)} a year. Move the actual return and watch where the same{' '}
+          {formatUSDWhole(plan.saving)} of yearly saving lands.
         </p>
       </div>
       <div className={styles.controlsRow}>
@@ -671,10 +653,10 @@ function RetirementTiming() {
       </div>
       <p className={styles.note}>
         {actualPct < 7
-          ? `Two percentage points of planning optimism cost real money: the pile falls short, and the income it sustains falls to ${formatUSDWhole(plan.actualIncome)} instead of ${formatUSDWhole(income)}.`
+          ? `The pile falls short, and the income it funds falls to ${formatUSDWhole(plan.actualIncome)} instead of ${formatUSDWhole(income)}.`
           : actualPct === 7
             ? 'Returns came in as planned, and the pile funds the goal.'
-            : `Returns beat the plan. Enjoy it carefully: after a streak of great returns, markets reverse.`}
+            : 'Returns beat the plan.'}
       </p>
       <div>
         <div className={styles.legend}>
@@ -705,18 +687,15 @@ function RetirementTiming() {
         />
       </div>
       <Callout tone="mark" label="A retirement plan is adjusted over time">
-        Save more than the minimum so the plan carries a buffer. Recheck the balance every few
-        years and adjust the contribution, and be careful after a streak of great returns, because
-        markets reverse. The plan is a dial you keep turning, not a decision you make once.
+        Save more than the minimum so the plan carries a buffer, recheck the balance every few
+        years, and adjust the contribution.
       </Callout>
 
       <div>
         <p className={styles.rulesTitle}>Retirement is a savings rate, not an age</p>
         <p className={styles.sectionLede}>
-          Flip the method around: fix the savings rate and solve for the date. The model finds the
-          age when savings can fund {RETIREMENT_YEARS} years of your current spending, starting
-          work at {START_AGE}. There is a day when investment income covers your spending; after
-          that, work is a choice.
+          Flip the method around: fix the savings rate and solve for the age when savings can fund{' '}
+          {RETIREMENT_YEARS} years of current spending.
         </p>
       </div>
       <div className={styles.controlsRow}>
@@ -775,11 +754,9 @@ function RetirementTiming() {
         />
       </div>
       <Callout tone="mark" label="Why the curve bends">
-        A higher savings rate works on both sides of the calculation: more goes into the account
-        each year, and the spending the account must eventually replace gets smaller. That is why
-        the first ten points of savings rate move the retirement age by more than the last ten.
-        When the room has seen the curve, hand it over: the When Can You Stop Working? lesson runs
-        this model live, with four lives to try and a match toggle measured in years.
+        A higher savings rate adds more each year and shrinks the spending the account must
+        replace, so the first ten points of savings rate move the age more than the last ten. The
+        When Can You Stop Working? lesson runs this model live.
       </Callout>
     </div>
   )
