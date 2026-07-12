@@ -93,7 +93,7 @@ export default function TeacherTraining() {
               used throughout the week
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {FOUNDATION_TOOLS.map((t) => (
               <Link
                 key={t.slug}
