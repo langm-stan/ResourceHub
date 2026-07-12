@@ -149,17 +149,14 @@ export const RETIRE_AGE = 65
 /** The worked example's couple starts saving at 30, so 35 years to 65. */
 export const PLAN_START_AGE = 30
 
-/** Present value of RETIREMENT_YEARS of $1-a-year withdrawals at rate r. */
-function annuityFactor(r: number): number {
-  return (1 - Math.pow(1 + r, -RETIREMENT_YEARS)) / r
+/** Present value of `years` of $1-a-year withdrawals at rate r. */
+function annuityFactor(r: number, years = RETIREMENT_YEARS): number {
+  return (1 - Math.pow(1 + r, -years)) / r
 }
 
-/** Pile that funds 30 years of a given annual spend at the retired rate. */
-const ANNUITY_FACTOR = annuityFactor(R_RETIRED)
-
-/** Step 1 of the two-step method: the pile that funds a retirement income. */
-export function retirementPile(income: number): number {
-  return income * ANNUITY_FACTOR
+/** Step 1 of the two-step method: the savings that fund a retirement income. */
+export function retirementTarget(income: number, years = RETIREMENT_YEARS, r = R_RETIRED): number {
+  return income * annuityFactor(r, years)
 }
 
 /** Step 2: the level end-of-year saving that grows to `target` in `years`. */
@@ -168,10 +165,10 @@ export function savingFor(target: number, years: number, r = R_SAVE): number {
 }
 
 /** Annual saving that reaches `target` by RETIRE_AGE, for each starting age. */
-export function waitingCurve(target: number): { age: number; saving: number }[] {
+export function waitingCurve(target: number, r = R_SAVE): { age: number; saving: number }[] {
   const rows: { age: number; saving: number }[] = []
   for (let age = START_AGE; age <= 45; age++) {
-    rows.push({ age, saving: savingFor(target, RETIRE_AGE - age) })
+    rows.push({ age, saving: savingFor(target, RETIRE_AGE - age, r) })
   }
   return rows
 }
@@ -188,49 +185,68 @@ export interface PlanRow {
  * planned while saving, the safer withdrawal portfolio is assumed to earn
  * less by the same margin.
  */
-export function planOutcome(income: number, actualR: number) {
-  const target = retirementPile(income)
-  const years = RETIRE_AGE - PLAN_START_AGE
-  const saving = Math.round(savingFor(target, years))
+export function planOutcome(
+  income: number,
+  actualR: number,
+  retiredYears = RETIREMENT_YEARS,
+  plannedRetiredR = R_RETIRED,
+  plannedR = R_SAVE,
+  startAge = PLAN_START_AGE
+) {
+  const target = retirementTarget(income, retiredYears, plannedRetiredR)
+  const years = RETIRE_AGE - startAge
+  const saving = Math.round(savingFor(target, years, plannedR))
   const rows: PlanRow[] = []
   let plan = 0
   let actual = 0
   for (let y = 0; y <= years; y++) {
     if (y > 0) {
-      plan = plan * (1 + R_SAVE) + saving
+      plan = plan * (1 + plannedR) + saving
       actual = actual * (1 + actualR) + saving
     }
-    rows.push({ age: PLAN_START_AGE + y, plan, actual })
+    rows.push({ age: startAge + y, plan, actual })
   }
-  const retiredR = Math.max(0.005, R_RETIRED - (R_SAVE - actualR))
-  const actualIncome = actual / annuityFactor(retiredR)
-  return { target, saving, rows, actualPile: actual, retiredR, actualIncome }
+  const retiredR = Math.max(0.005, plannedRetiredR - (plannedR - actualR))
+  const actualIncome = actual / annuityFactor(retiredR, retiredYears)
+  return { target, saving, rows, actualBalance: actual, retiredR, actualIncome }
 }
 
 /**
- * Working years until savings can fund 30 years of current spending.
+ * Working years until savings can fund `retiredYears` of current spending,
+ * under the same returns as the plan above.
  * Returns null when the savings rate never gets there within 75 years.
  */
-export function yearsToFree(income: number, savingsRate: number): number | null {
+export function yearsToFree(
+  income: number,
+  savingsRate: number,
+  saveR = R_SAVE,
+  retiredR = R_RETIRED,
+  retiredYears = RETIREMENT_YEARS
+): number | null {
   const save = income * savingsRate
   const spend = income - save
   if (save <= 0) return null
-  const target = spend * ANNUITY_FACTOR
+  const target = spend * annuityFactor(retiredR, retiredYears)
   let bal = 0
   let y = 0
   while (bal < target && y < 75) {
-    bal = bal * (1 + R_SAVE) + save
+    bal = bal * (1 + saveR) + save
     y++
   }
   return y >= 75 ? null : y
 }
 
-/** Retirement age for each savings rate from 5% to 70%. */
-export function retirementCurve(income: number): { rate: number; age: number }[] {
-  const rows: { rate: number; age: number }[] = []
+/** Working years until free, for each savings rate from 5% to 70%. */
+export function retirementCurve(
+  income: number,
+  saveR = R_SAVE,
+  retiredR = R_RETIRED,
+  retiredYears = RETIREMENT_YEARS
+): { rate: number; years: number }[] {
+  const rows: { rate: number; years: number }[] = []
   for (let s = 5; s <= 70; s++) {
-    const y = yearsToFree(income, s / 100)
-    if (y !== null) rows.push({ rate: s, age: START_AGE + y })
+    const y = yearsToFree(income, s / 100, saveR, retiredR, retiredYears)
+    if (y !== null) rows.push({ rate: s, years: y })
   }
   return rows
 }
