@@ -15,11 +15,11 @@ function SessionCard({ session }: { session: TrainingSession }) {
   const PeriodIcon = session.period === 'Morning' ? Sun : Sunset
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white shadow-card overflow-hidden">
+    <div className="h-full flex flex-col rounded-2xl border border-stone-200 bg-white shadow-card overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="w-full flex items-center gap-4 p-5 text-left hover:bg-stone-50 transition-colors"
+        className="w-full flex-1 flex items-center gap-4 p-5 text-left hover:bg-stone-50 transition-colors"
       >
         <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 bg-cardinal/10 text-cardinal">
           <PeriodIcon size={22} strokeWidth={2} />
@@ -119,7 +119,7 @@ export default function TeacherTraining() {
               <h2 className="font-serif text-2xl font-semibold text-stone-900">{day}</h2>
               <p className="text-sm font-semibold uppercase tracking-widest text-stone-400">{date}</p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
               {sessions.map((s) => (
                 <SessionCard key={s.id} session={s} />
               ))}
