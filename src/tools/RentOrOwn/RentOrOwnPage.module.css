@@ -87,3 +87,32 @@
   margin-top: var(--space-5);
   max-width: 80ch;
 }
+
+/* The year-one ledger: what each month of owning costs, line by line. */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-3) 0;
+}
+.ledgerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  font-size: var(--fs-ui);
+}
+.ledgerRow:last-child {
+  border-bottom: none;
+}
+.ledgerTotal {
+  font-weight: 600;
+}
+.ledgerCredit {
+  color: var(--c-series-1);
+}
+.ledgerAmount {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

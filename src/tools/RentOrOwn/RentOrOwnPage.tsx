@@ -108,12 +108,6 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
             />
             <div className={styles.stats}>
               <Stat
-                label="Owning costs, year one"
-                value={race.ownerMonthlyYear1}
-                format={(v) => `${formatUSDWhole(v)}/mo`}
-                animate={false}
-              />
-              <Stat
                 label="Net cost of owning, year one"
                 value={race.netOwnCostYear1}
                 format={(v) => `${formatUSDWhole(v)}/mo`}
@@ -129,10 +123,39 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
                 animate={false}
               />
             </div>
+            <div className={styles.ledger}>
+              <div className={styles.ledgerRow}>
+                <span>Interest, first year</span>
+                <span className={styles.ledgerAmount}>{formatUSDWhole(race.interestMoYear1)}/mo</span>
+              </div>
+              <div className={styles.ledgerRow}>
+                <span>Property tax, insurance, upkeep</span>
+                <span className={styles.ledgerAmount}>{formatUSDWhole(race.escrowUpkeepMoYear1)}/mo</span>
+              </div>
+              <div className={styles.ledgerRow}>
+                <span>Return the {formatUSDWhole(price * (downPct / 100))} down payment gives up</span>
+                <span className={styles.ledgerAmount}>{formatUSDWhole(race.forgoneReturnMo)}/mo</span>
+              </div>
+              <div className={`${styles.ledgerRow} ${styles.ledgerCredit}`}>
+                <span>Principal, kept as equity</span>
+                <span className={styles.ledgerAmount}>
+                  &minus;{formatUSDWhole(race.principalMoYear1)}/mo
+                </span>
+              </div>
+              <div className={`${styles.ledgerRow} ${styles.ledgerTotal}`}>
+                <span>Net cost of owning</span>
+                <span className={styles.ledgerAmount}>{formatUSDWhole(race.netOwnCostYear1)}/mo</span>
+              </div>
+              <div className={styles.ledgerRow}>
+                <span>Rent for the same home</span>
+                <span className={styles.ledgerAmount}>{formatUSDWhole(rent)}/mo</span>
+              </div>
+            </div>
             <p className={styles.note}>
-              Year-one net cost: interest, property tax, insurance, upkeep, and the down
-              payment&rsquo;s lost return, minus principal paid. Rent below that number and renting
-              cost less.
+              Only the principal line becomes wealth: {formatUSDWhole(race.principalMoYear1)} of
+              the {formatUSDWhole(race.ownerMonthlyYear1)} the owner pays each month, a share that
+              grows every year as interest falls. If the whole payment built equity, owning would
+              win immediately.
             </p>
           </div>
 

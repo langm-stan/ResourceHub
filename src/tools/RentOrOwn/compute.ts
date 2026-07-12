@@ -48,6 +48,13 @@ export interface RaceResult {
   pAndI: number
   /** Net year-one cost of owning per month: pure costs + forgone return on cash in, less principal. */
   netOwnCostYear1: number
+  /** The pieces of the year-one net cost, per month. */
+  interestMoYear1: number
+  escrowUpkeepMoYear1: number
+  /** What the down payment would have earned at the planning return. */
+  forgoneReturnMo: number
+  /** Principal paid: spending that becomes equity rather than cost. */
+  principalMoYear1: number
 }
 
 /**
@@ -113,5 +120,9 @@ export function wealthRace(price: number, rent0: number, downShare: number, grow
     ownerMonthlyYear1: pAndI + (value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12,
     pAndI,
     netOwnCostYear1,
+    interestMoYear1: interestY1 / 12,
+    escrowUpkeepMoYear1: (value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12,
+    forgoneReturnMo: (down * ALT_RETURN) / 12,
+    principalMoYear1: principalY1 / 12,
   }
 }
