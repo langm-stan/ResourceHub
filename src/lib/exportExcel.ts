@@ -104,7 +104,7 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], savin
     ...saving.map((i) => [i.label, i.value]),
     ['Total saving', totalSaving],
     [],
-    ['Left over each month', leftover],
+    ['Extra saving each month', leftover],
     ['Investable each month', investable],
     ['Savings rate', totalIncome > 0 ? investable / totalIncome : 0],
   ]

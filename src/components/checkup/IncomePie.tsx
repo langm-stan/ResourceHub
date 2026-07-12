@@ -60,7 +60,7 @@ export function IncomePie({ income, expenses, totalSaving, leftover }: IncomePie
     slices.push({ key: 'saving', label: 'Saving', value: totalSaving, fill: GREEN })
   }
   if (!overBudget && leftover > 0) {
-    slices.push({ key: 'leftover', label: 'Left over', value: leftover, fill: SLATE })
+    slices.push({ key: 'leftover', label: 'Extra saving', value: leftover, fill: SLATE })
   }
   const denom = overBudget ? slices.reduce((s, x) => s + x.value, 0) : income
 
@@ -74,7 +74,7 @@ export function IncomePie({ income, expenses, totalSaving, leftover }: IncomePie
           caption={
             overBudget
               ? 'The plan adds up to more than take-home income, so these are shares of the planned outflows instead. Trim until the budget fits back inside the pie.'
-              : 'Your planned budget as shares of take-home income. Warm colors are spent, green is kept on purpose, gray is left over.'
+              : 'Your planned budget as shares of take-home income. Warm colors are spent, green is kept on purpose, gray is the extra saving on top.'
           }
           ariaLabel="Where your take-home income goes"
           expandable={false}
@@ -82,7 +82,7 @@ export function IncomePie({ income, expenses, totalSaving, leftover }: IncomePie
             { label: 'Take-home income', value: formatUSDWhole(income) },
             { label: 'Spending', value: formatUSDWhole(spendRows.reduce((s, e) => s + e.value, 0)), color: CARDINAL },
             { label: 'Saving', value: formatUSDWhole(totalSaving), color: GREEN },
-            { label: 'Left over', value: formatUSDWhole(leftover), color: leftover >= 0 ? GREEN : CARDINAL },
+            { label: 'Extra saving', value: formatUSDWhole(leftover), color: leftover >= 0 ? GREEN : CARDINAL },
           ]}
         >
           <PieSlices slices={slices} denom={denom} centerLabel={overBudget ? 'planned out' : 'take-home'} centerValue={denom} />

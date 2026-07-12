@@ -141,7 +141,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
       </Card>
 
       <div className="mb-6">
-        <Tabs items={TABS} value={tab} onChange={setTab} />
+        <Tabs items={TABS} value={tab} onChange={setTab} size="lg" />
       </div>
 
       {tab === 'balance-sheet' && (
@@ -184,12 +184,33 @@ export default function FinancialStatements({ standalone = true }: { standalone?
             </Card>
           </div>
 
-          <Callout tone={netWorth >= 0 ? 'note' : 'mark'} label="What this means">
-            Your net worth is <strong>{formatUSDWhole(netWorth)}</strong>
-            {netWorth < 0
-              ? '. You owe more than you own right now, which is common early in a career. Paying down debt and saving both move this number up.'
-              : ': the amount left if you sold everything and paid off every debt.'}
-          </Callout>
+          <Card
+            tone="raised"
+            className="border-l-4"
+            style={{ borderLeftColor: netWorth >= 0 ? GREEN : CARDINAL }}
+          >
+            <div className="flex flex-wrap items-center gap-x-12 gap-y-6">
+              <Stat
+                label="Net worth"
+                value={netWorth}
+                format={formatUSDWhole}
+                emphasis
+                accentColor={netWorth >= 0 ? GREEN : CARDINAL}
+              />
+              <div className="flex items-baseline gap-x-6 text-stone-500">
+                <Stat label="Total assets" value={totalAssets} format={formatUSDWhole} />
+                <span className="text-2xl" aria-hidden="true">
+                  &minus;
+                </span>
+                <Stat label="Total liabilities" value={totalLiabilities} format={formatUSDWhole} />
+              </div>
+              <p className="text-stone-600 max-w-md basis-72 grow">
+                {netWorth < 0
+                  ? 'This is the number to watch. You owe more than you own right now, which is common early in a career. Paying down debt and saving both move it up.'
+                  : 'This is the number to watch: what you would keep if you sold everything and paid off every debt. Saving and paying down debt both move it up.'}
+              </p>
+            </div>
+          </Card>
 
           <StepHeader
             title="How healthy is this balance sheet?"
@@ -252,7 +273,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
               <Stat label="Expenses" value={totalExpenses} format={formatUSDWhole} />
               <Stat label="Saving" value={totalSaving} format={formatUSDWhole} accentColor={GREEN} />
               <Stat
-                label="Left over"
+                label="Extra saving"
                 value={leftover}
                 format={formatUSDWhole}
                 accentColor={leftover >= 0 ? GREEN : CARDINAL}
@@ -283,8 +304,8 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                   You keep <strong>{formatUSDWhole(investable)}</strong> a month,{' '}
                   {formatPercent(savingsRate, 0)} of what you earn: the{' '}
                   {formatUSDWhole(totalSaving)} you pay yourself first plus{' '}
-                  {formatUSDWhole(leftover)} left over. The <em>Your Goal</em> tab shows what that
-                  becomes if you invest it.
+                  {formatUSDWhole(leftover)} of extra saving. The <em>Your Goal</em> tab shows what
+                  that becomes if you invest it.
                 </>
               )}
             </Callout>
@@ -293,7 +314,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
           <Card tone="raised">
             <StepHeader
               title="Where your income goes"
-              hint="Each planned expense as a share of take-home income, with saving and leftover completing the dollar. Quoted guidelines (like 28% of income on housing) usually mean gross income; a budget divides what actually lands in your account."
+              hint="Each planned expense as a share of take-home income, with saving and extra saving completing the dollar. Quoted guidelines (like 28% of income on housing) usually mean gross income; a budget divides what actually lands in your account."
             />
             <div className="mt-6">
               <IncomePie
@@ -332,12 +353,12 @@ export default function FinancialStatements({ standalone = true }: { standalone?
         <Card tone="raised" className="flex flex-col gap-6">
           <StepHeader
             title="Turn your saving into wealth"
-            hint="Everything you keep each month from the Budget tab: your budgeted saving plus whatever is left over, invested every month."
+            hint="Everything you keep each month from the Budget tab: your budgeted saving plus the extra saving on top, invested every month."
           />
           {monthly <= 0 ? (
             <Callout tone="mark" label="Nothing to invest yet">
               Right now nothing is left after expenses. Head back to the <em>Budget</em> tab and get
-              your saving and leftover above zero first.
+              your saving above zero first.
             </Callout>
           ) : (
             <>
@@ -346,8 +367,8 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 {totalSaving > 0 && leftover >= 0 ? (
                   <span className="text-stone-600">
                     {' '}
-                    ({formatUSDWhole(totalSaving)} budgeted saving + {formatUSDWhole(leftover)} left
-                    over)
+                    ({formatUSDWhole(totalSaving)} budgeted saving + {formatUSDWhole(leftover)}{' '}
+                    extra saving)
                   </span>
                 ) : null}{' '}
                 at
