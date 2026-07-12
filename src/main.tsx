@@ -34,6 +34,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'big-three/stories',
   'literacy-data',
   'checklist',
+  'tvm-calculator',
   'budget',
   'compound-interest',
   'borrow-save',

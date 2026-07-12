@@ -145,9 +145,67 @@ export const START_AGE = 25
 export const R_SAVE = 0.07
 export const R_RETIRED = 0.035
 export const RETIREMENT_YEARS = 30
+export const RETIRE_AGE = 65
+/** The worked example's couple starts saving at 30, so 35 years to 65. */
+export const PLAN_START_AGE = 30
+
+/** Present value of RETIREMENT_YEARS of $1-a-year withdrawals at rate r. */
+function annuityFactor(r: number): number {
+  return (1 - Math.pow(1 + r, -RETIREMENT_YEARS)) / r
+}
 
 /** Pile that funds 30 years of a given annual spend at the retired rate. */
-const ANNUITY_FACTOR = (1 - Math.pow(1 + R_RETIRED, -RETIREMENT_YEARS)) / R_RETIRED
+const ANNUITY_FACTOR = annuityFactor(R_RETIRED)
+
+/** Step 1 of the two-step method: the pile that funds a retirement income. */
+export function retirementPile(income: number): number {
+  return income * ANNUITY_FACTOR
+}
+
+/** Step 2: the level end-of-year saving that grows to `target` in `years`. */
+export function savingFor(target: number, years: number, r = R_SAVE): number {
+  return (target * r) / (Math.pow(1 + r, years) - 1)
+}
+
+/** Annual saving that reaches `target` by RETIRE_AGE, for each starting age. */
+export function waitingCurve(target: number): { age: number; saving: number }[] {
+  const rows: { age: number; saving: number }[] = []
+  for (let age = START_AGE; age <= 45; age++) {
+    rows.push({ age, saving: savingFor(target, RETIRE_AGE - age) })
+  }
+  return rows
+}
+
+export interface PlanRow {
+  age: number
+  plan: number
+  actual: number
+}
+
+/**
+ * The couple's plan under the planned 7% and under an actual return. The
+ * saving is a whole-dollar amount, and when markets return less than
+ * planned while saving, the safer withdrawal portfolio is assumed to earn
+ * less by the same margin.
+ */
+export function planOutcome(income: number, actualR: number) {
+  const target = retirementPile(income)
+  const years = RETIRE_AGE - PLAN_START_AGE
+  const saving = Math.round(savingFor(target, years))
+  const rows: PlanRow[] = []
+  let plan = 0
+  let actual = 0
+  for (let y = 0; y <= years; y++) {
+    if (y > 0) {
+      plan = plan * (1 + R_SAVE) + saving
+      actual = actual * (1 + actualR) + saving
+    }
+    rows.push({ age: PLAN_START_AGE + y, plan, actual })
+  }
+  const retiredR = Math.max(0.005, R_RETIRED - (R_SAVE - actualR))
+  const actualIncome = actual / annuityFactor(retiredR)
+  return { target, saving, rows, actualPile: actual, retiredR, actualIncome }
+}
 
 /**
  * Working years until savings can fund 30 years of current spending.

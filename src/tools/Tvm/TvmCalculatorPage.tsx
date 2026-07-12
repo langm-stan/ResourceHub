@@ -5,19 +5,22 @@ import styles from './TvmPage.module.css'
 /**
  * The five-key financial calculator as its own tool, separate from the
  * guided borrow/save scenarios in TvmPage.
+ * `intro` hides the page's own header when a surrounding shell already provides the title.
  */
-export function TvmCalculatorPage() {
+export function TvmCalculatorPage({ intro = true }: { intro?: boolean } = {}) {
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Calculator · Time value of money</p>
-        <h1 className={styles.h1}>The five-key calculator</h1>
-        <p className={styles.lead}>
-          The same model a financial calculator uses: N, I/Y, PV, PMT, and FV. Enter any four and
-          solve for the fifth. Remember the sign rule: money you receive is positive, money you pay
-          out is negative.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Calculator · Time value of money</p>
+          <h1 className={styles.h1}>The five-key calculator</h1>
+          <p className={styles.lead}>
+            The same model a financial calculator uses: N, I/Y, PV, PMT, and FV. Enter any four and
+            solve for the fifth. Remember the sign rule: money you receive is positive, money you pay
+            out is negative.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.panel}>
         <StepHeader

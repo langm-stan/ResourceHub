@@ -12,6 +12,7 @@ import { CHECKLIST_INTRO, ChecklistContent } from './Checklist'
 import FinancialStatements from './FinancialStatements'
 import { CompoundInterestPage } from '../tools/CompoundInterest/CompoundInterestPage'
 import { TvmPage } from '../tools/Tvm/TvmPage'
+import { TvmCalculatorPage } from '../tools/Tvm/TvmCalculatorPage'
 import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
 import { CreditScorePage } from '../tools/CreditScore/CreditScorePage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
@@ -57,6 +58,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     intro:
       'An interactive balance sheet and budget: pay yourself first, compare the plan to what actually happened, and see where each dollar of take-home income goes. Your numbers save in your browser and download as Excel.',
     content: <FinancialStatements standalone={false} />,
+  },
+  'tvm-calculator': {
+    title: 'TVM Calculator',
+    toolkit: true,
+    instructor: { label: 'TVM Calculator', route: 'calculators', toolKey: 'tvm-calc' },
+    content: <TvmCalculatorPage intro={false} />,
   },
   'compound-interest': {
     title: 'Compound Interest Scenario',

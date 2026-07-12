@@ -35,6 +35,12 @@ export const FOUNDATION_TOOLS: TrainingTool[] = [
     description: 'The three questions that anchor the week: take the quiz, read the explanations, and see the stories.',
   },
   {
+    slug: 'tvm-calculator',
+    label: 'TVM Calculator',
+    description:
+      'The five-key financial calculator behind every money question this week: N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
+  },
+  {
     slug: 'literacy-data',
     label: 'Financial Literacy Data',
     description: 'How U.S. adults score across eight functional areas, drilled down by gender and generation.',
