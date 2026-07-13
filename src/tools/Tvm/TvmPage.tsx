@@ -1,9 +1,18 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button, Callout, Card, Stat, StepHeader, Tabs, type TabItem } from '../../design-system'
 import { formatPercent, formatUSDWhole, formatYears } from '../../lib/format'
 import { computeTvm, type TvmResults } from './compute'
-import { parseTvm, toSearchParams, tvmEqual, TVM_PRESETS, type TvmState } from './state'
+import {
+  hasTvmParams,
+  loadSavedTvm,
+  parseTvm,
+  saveTvm,
+  toSearchParams,
+  tvmEqual,
+  TVM_PRESETS,
+  type TvmState,
+} from './state'
 import { TvmParameters } from './components/TvmParameters'
 import { TvmChart } from './components/TvmChart'
 import { ScheduleTable } from './components/ScheduleTable'
@@ -22,6 +31,7 @@ export function TvmPage({ intro = true }: { intro?: boolean } = {}) {
 
   const setState = useCallback(
     (next: TvmState) => {
+      saveTvm(next)
       const p = toSearchParams(next)
       if (params.get('embed') === '1') p.set('embed', '1')
       const tool = params.get('tool')
@@ -34,6 +44,16 @@ export function TvmPage({ intro = true }: { intro?: boolean } = {}) {
     (patch: Partial<TvmState>) => setState({ ...state, ...patch }),
     [state, setState],
   )
+
+  // Arriving without scenario parameters (navigating back from another tool):
+  // restore the visitor's last scenario. A shared or embedded link, which
+  // carries its own parameters, is never overridden.
+  useEffect(() => {
+    if (hasTvmParams(params)) return
+    const saved = loadSavedTvm()
+    if (saved) setState(saved)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const share = useCallback(() => {
     void navigator.clipboard?.writeText(window.location.href)

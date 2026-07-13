@@ -37,6 +37,32 @@ function num(params: URLSearchParams, key: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback
 }
 
+const STORAGE_KEY = 'ifdm-tvm-scenario-v1'
+
+/** Remember the scenario so leaving the tool and coming back restores it. */
+export function saveTvm(s: TvmState): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, toSearchParams(s).toString())
+  } catch {
+    /* storage unavailable: the URL still carries the scenario */
+  }
+}
+
+/** The saved scenario, or null when none is stored or storage is unavailable. */
+export function loadSavedTvm(): TvmState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? parseTvm(new URLSearchParams(raw)) : null
+  } catch {
+    return null
+  }
+}
+
+/** True when the URL carries any scenario parameter (a shared or embedded link). */
+export function hasTvmParams(params: URLSearchParams): boolean {
+  return ['mode', 'a', 'r', 't'].some((k) => params.has(k))
+}
+
 export function parseTvm(params: URLSearchParams): TvmState {
   // 'calc' was a mode here before the five-key calculator became its own
   // tool; the Calculators page redirects those links to tool=tvm-calc.

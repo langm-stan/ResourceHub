@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Callout,
   FormulaBlock,
@@ -15,6 +15,7 @@ import {
   type TvmVar,
 } from '../../../lib/finance'
 import { formatPercent, formatUSD } from '../../../lib/format'
+import { usePersistentState } from '../../../hooks/usePersistentState'
 import styles from './TvmCalculator.module.css'
 
 const KEYS: { var: TvmVar; label: string; help: string }[] = [
@@ -44,18 +45,21 @@ const FREQUENCY_VALUES = FREQUENCY_OPTIONS.map((o) => o.value)
 
 /** The traditional five-key calculator: enter four, solve for the fifth. */
 export function TvmCalculator() {
-  // Default: $1 invested at 8% for 237 years grows to about $83 million.
-  // PV is −1 because the dollar is paid out today (sign convention).
-  const [n, setN] = useState(237)
-  const [iy, setIy] = useState(8)
-  const [pv, setPv] = useState(-1)
-  const [pmt, setPmt] = useState(0)
-  const [fv, setFv] = useState(0)
-  const [py, setPy] = useState(1)
+  // Default: $100 a month at 8% for 30 years grows to about $149,000.
+  // PMT is −100 because the deposits are paid out (sign convention).
+  // Values persist in localStorage so navigating away and back keeps them.
+  const [n, setN] = usePersistentState('ifdm-tvm-calc-n', 360)
+  const [iy, setIy] = usePersistentState('ifdm-tvm-calc-iy', 8)
+  const [pv, setPv] = usePersistentState('ifdm-tvm-calc-pv', 0)
+  const [pmt, setPmt] = usePersistentState('ifdm-tvm-calc-pmt', -100)
+  const [fv, setFv] = usePersistentState('ifdm-tvm-calc-fv', 0)
+  const [py, setPy] = usePersistentState('ifdm-tvm-calc-py', 12)
   // 'Custom…' keeps P/Y freely adjustable; the presets cover daily → annually.
-  const [customPy, setCustomPy] = useState(false)
-  const [due, setDue] = useState(false)
-  const [solveFor, setSolveFor] = useState<TvmVar>('fv')
+  const [customPy, setCustomPy] = usePersistentState('ifdm-tvm-calc-custom-py', false)
+  const [due, setDue] = usePersistentState('ifdm-tvm-calc-due', false)
+  const [solveFor, setSolveFor] = usePersistentState<TvmVar>('ifdm-tvm-calc-solve', 'fv', (v) =>
+    KEYS.some((k) => k.var === v),
+  )
 
   const frequencyValue = customPy || !FREQUENCY_VALUES.includes(String(py)) ? 'custom' : String(py)
   const pickFrequency = (v: string) => {

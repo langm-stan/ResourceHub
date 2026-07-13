@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Button,
@@ -11,7 +11,15 @@ import {
 } from '../../design-system'
 import { formatPercent, formatUSDWhole, formatYears } from '../../lib/format'
 import { computeResults, type Results } from './compute'
-import { parseScenario, scenariosEqual, toSearchParams, type Scenario } from './state'
+import {
+  hasScenarioParams,
+  loadSavedScenario,
+  parseScenario,
+  saveScenario,
+  scenariosEqual,
+  toSearchParams,
+  type Scenario,
+} from './state'
 import { PRESETS } from './presets'
 import { ParameterPanel } from './components/ParameterPanel'
 import { GrowthChart } from './components/GrowthChart'
@@ -47,6 +55,7 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
   const update = useCallback(
     (patch: Partial<Scenario>) => {
       const next = { ...scenario, ...patch }
+      saveScenario(next)
       const nextParams = toSearchParams(next)
       if (params.get('embed') === '1') nextParams.set('embed', '1')
       // Keep the Calculators page on this tool; without it the page falls
@@ -60,6 +69,7 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
 
   const loadPreset = useCallback(
     (s: Scenario) => {
+      saveScenario(s)
       const nextParams = toSearchParams(s)
       if (params.get('embed') === '1') nextParams.set('embed', '1')
       const tool = params.get('tool')
@@ -69,6 +79,16 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
     },
     [params, setParams],
   )
+
+  // Arriving without scenario parameters (navigating back from another tool):
+  // restore the visitor's last scenario. A shared or embedded link, which
+  // carries its own parameters, is never overridden.
+  useEffect(() => {
+    if (hasScenarioParams(params)) return
+    const saved = loadSavedScenario()
+    if (saved) update(saved)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const share = useCallback(() => {
     void navigator.clipboard?.writeText(window.location.href)

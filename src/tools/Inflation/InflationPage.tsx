@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { scaleLinear } from 'd3-scale'
 import {
   Callout,
@@ -22,6 +22,7 @@ import {
   useChart,
 } from '../../design-system/chart'
 import { formatUSDCompact, formatUSDWhole, formatYears, texNumber, texUSD } from '../../lib/format'
+import { usePersistentState } from '../../hooks/usePersistentState'
 import styles from './InflationPage.module.css'
 
 /*
@@ -81,10 +82,15 @@ function priceSeries(price: number, ratePct: number, years: number): Point[] {
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
-  const [price, setPrice] = useState(100)
-  const [rate, setRate] = useState(2)
-  const [years, setYears] = useState(30)
-  const [vehicleKey, setVehicleKey] = useState<VehicleKey>('savings')
+  // Values persist in localStorage so navigating away and back keeps them.
+  const [price, setPrice] = usePersistentState('ifdm-inflation-price', 100)
+  const [rate, setRate] = usePersistentState('ifdm-inflation-rate', 2)
+  const [years, setYears] = usePersistentState('ifdm-inflation-years', 30)
+  const [vehicleKey, setVehicleKey] = usePersistentState<VehicleKey>(
+    'ifdm-inflation-vehicle',
+    'savings',
+    (v) => VEHICLES.some((x) => x.key === v),
+  )
 
   const prices = useMemo(() => priceSeries(price, rate, years), [price, rate, years])
   const buying = useMemo(() => {

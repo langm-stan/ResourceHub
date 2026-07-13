@@ -78,6 +78,32 @@ function num(params: URLSearchParams, key: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback
 }
 
+const STORAGE_KEY = 'ifdm-compound-scenario-v1'
+
+/** Remember the scenario so leaving the tool and coming back restores it. */
+export function saveScenario(s: Scenario): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, toSearchParams(s).toString())
+  } catch {
+    /* storage unavailable: the URL still carries the scenario */
+  }
+}
+
+/** The saved scenario, or null when none is stored or storage is unavailable. */
+export function loadSavedScenario(): Scenario | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? parseScenario(new URLSearchParams(raw)) : null
+  } catch {
+    return null
+  }
+}
+
+/** True when the URL carries any scenario parameter (a shared or embedded link). */
+export function hasScenarioParams(params: URLSearchParams): boolean {
+  return ['p', 'r', 't', 'f', 'mode', 'c'].some((k) => params.has(k))
+}
+
 export function parseScenario(params: URLSearchParams): Scenario {
   const freqCode = params.get('f')
   const frequency: FrequencyName =
