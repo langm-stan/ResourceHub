@@ -44,16 +44,18 @@ const FREQUENCY_VALUES = FREQUENCY_OPTIONS.map((o) => o.value)
 
 /** The traditional five-key calculator: enter four, solve for the fifth. */
 export function TvmCalculator() {
-  const [n, setN] = useState(360)
-  const [iy, setIy] = useState(6)
-  const [pv, setPv] = useState(200_000)
+  // Default: $1 invested at 8% for 237 years grows to about $83 million.
+  // PV is −1 because the dollar is paid out today (sign convention).
+  const [n, setN] = useState(237)
+  const [iy, setIy] = useState(8)
+  const [pv, setPv] = useState(-1)
   const [pmt, setPmt] = useState(0)
   const [fv, setFv] = useState(0)
-  const [py, setPy] = useState(12)
+  const [py, setPy] = useState(1)
   // 'Custom…' keeps P/Y freely adjustable; the presets cover daily → annually.
   const [customPy, setCustomPy] = useState(false)
   const [due, setDue] = useState(false)
-  const [solveFor, setSolveFor] = useState<TvmVar>('pmt')
+  const [solveFor, setSolveFor] = useState<TvmVar>('fv')
 
   const frequencyValue = customPy || !FREQUENCY_VALUES.includes(String(py)) ? 'custom' : String(py)
   const pickFrequency = (v: string) => {

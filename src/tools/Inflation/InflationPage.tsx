@@ -82,7 +82,7 @@ function priceSeries(price: number, ratePct: number, years: number): Point[] {
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
   const [price, setPrice] = useState(100)
-  const [rate, setRate] = useState(3)
+  const [rate, setRate] = useState(2)
   const [years, setYears] = useState(30)
   const [vehicleKey, setVehicleKey] = useState<VehicleKey>('savings')
 
