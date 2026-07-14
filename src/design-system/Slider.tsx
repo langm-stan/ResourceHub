@@ -17,6 +17,8 @@ interface SliderProps {
   suffix?: string
   /** Decimal places kept when committing a typed value (default 0). */
   precision?: number
+  /** Ceiling for typed values when it exceeds the track's max; the slider still ends at max. */
+  inputMax?: number
 }
 
 /** A labeled range control with a tabular-mono readout (optionally a typed input). */
@@ -33,9 +35,10 @@ export function Slider({
   prefix,
   suffix,
   precision = 0,
+  inputMax,
 }: SliderProps) {
   const id = useId()
-  const pct = max === min ? 0 : ((value - min) / (max - min)) * 100
+  const pct = max === min ? 0 : Math.min(100, ((value - min) / (max - min)) * 100)
   // While the user types, the field shows their raw draft; otherwise the
   // committed value, grouped for readability.
   const [draft, setDraft] = useState<string | null>(null)
@@ -45,7 +48,7 @@ export function Slider({
     const n = Number(raw.replace(/[^0-9.\-]/g, ''))
     if (!Number.isFinite(n) || raw.trim() === '') return
     const factor = 10 ** precision
-    onChange(Math.min(max, Math.max(min, Math.round(n * factor) / factor)))
+    onChange(Math.min(inputMax ?? max, Math.max(min, Math.round(n * factor) / factor)))
   }
 
   return (
