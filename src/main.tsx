@@ -40,6 +40,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'inflation',
   'borrow-save',
   'lifecycle',
+  'paying-off-debt',
   'credit-score',
   'gambling-investing',
   'taxes',

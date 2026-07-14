@@ -123,6 +123,12 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     speaker: 'Prof. Lusardi',
     tools: [
       {
+        slug: 'paying-off-debt',
+        label: 'Paying off Debt',
+        description:
+          'Installment loans: how long a budgeted payment takes to clear a debt, what a term costs per month, and where each payment goes.',
+      },
+      {
         slug: 'credit-score',
         label: 'Your FICO Score',
         description: 'What goes into the score, and what the same car loan costs at every score band.',

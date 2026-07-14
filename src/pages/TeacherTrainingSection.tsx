@@ -16,6 +16,7 @@ import { TvmPage } from '../tools/Tvm/TvmPage'
 import { TvmCalculatorPage } from '../tools/Tvm/TvmCalculatorPage'
 import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
 import { CreditScorePage } from '../tools/CreditScore/CreditScorePage'
+import { PayingOffDebtPage } from '../tools/PayingOffDebt/PayingOffDebtPage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
 import { ChanceOwnershipPage } from '../tools/ChanceOwnership/ChanceOwnershipPage'
@@ -88,6 +89,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'The Life-Cycle Model', route: 'lessons', toolKey: 'lifecycle' },
     content: <LifeCyclePage intro={false} />,
+  },
+  'paying-off-debt': {
+    title: 'Paying off Debt',
+    toolkit: true,
+    instructor: { label: 'Paying off Debt', path: 'teacher-training/paying-off-debt' },
+    content: <PayingOffDebtPage intro={false} />,
   },
   'credit-score': {
     title: 'Your FICO Score',
