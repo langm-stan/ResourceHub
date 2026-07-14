@@ -18,6 +18,7 @@ export interface BettorSimParams {
   n: number
   bets: number
   stake: number
+  start: number
   winProb: number
   winMult: number
   feeOnWin: number
@@ -39,9 +40,8 @@ export interface BettorSim {
 }
 
 /** Monte Carlo: n players betting repeatedly. Returns sampled series. */
-export function simulateBettors({ n, bets, stake, winProb, winMult, feeOnWin, seed }: BettorSimParams): BettorSim {
+export function simulateBettors({ n, bets, stake, start, winProb, winMult, feeOnWin, seed }: BettorSimParams): BettorSim {
   const rng = makeRng(seed)
-  const start = 1000
   const step = Math.max(1, Math.floor(bets / 60))
   const samplesX: number[] = []
   for (let b = 0; b <= bets; b += step) samplesX.push(b)

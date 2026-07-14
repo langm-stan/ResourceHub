@@ -151,7 +151,7 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
       {
         slug: 'gambling-investing',
         label: 'Chance & Ownership',
-        description: 'Four stations from pure chance to ownership: the house, the prediction market, the stock picker, and the index fund.',
+        description: 'Three stations from pure chance to ownership: the house, the stock picker, and the index fund.',
       },
     ],
   },

@@ -6,11 +6,11 @@ import { StationChart } from './components/StationChart'
 import styles from './ChanceOwnershipPage.module.css'
 
 /*
- * Chance & Ownership: a four-station classroom simulator built for the
- * teacher training institute. Sportsbook, prediction market, stock picker,
- * index fund. Every station asks the same two questions: what happens to a
- * thousand people who keep playing, and does the thing you bought own
- * anything?
+ * Chance & Ownership: a three-station classroom simulator built for the
+ * teacher training institute. The house (casino games, sports bets, and
+ * prediction markets), stock picker, index fund. Every station asks the
+ * same two questions: what happens to a thousand people who keep playing,
+ * and does the thing you bought own anything?
  */
 
 const RED = 'var(--c-accent)'
@@ -22,13 +22,12 @@ const fmtSignedPct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.a
 
 /* --------------------------- spectrum rail ------------------------ */
 
-type StationKey = 'book' | 'pm' | 'pick' | 'index'
+type StationKey = 'book' | 'pick' | 'index'
 
 const STATIONS: { id: StationKey; n: string; title: string; ev: string; negative: boolean; pos: number }[] = [
   { id: 'book', n: 'I', title: 'The House', ev: '−$1 to −$25 per $100, depending on the game', negative: true, pos: 6 },
-  { id: 'pm', n: 'II', title: 'The Prediction Market', ev: 'about −$1.50 per $100 traded', negative: true, pos: 34 },
-  { id: 'pick', n: 'III', title: 'The Stock Picker', ev: 'positive, with a wide spread', negative: false, pos: 66 },
-  { id: 'index', n: 'IV', title: 'The Index Fund', ev: 'about +$7 per $100, per year held', negative: false, pos: 94 },
+  { id: 'pick', n: 'II', title: 'The Stock Picker', ev: 'positive, with a wide spread', negative: false, pos: 66 },
+  { id: 'index', n: 'III', title: 'The Index Fund', ev: 'about +$7 per $100, per year held', negative: false, pos: 94 },
 ]
 
 function Rail({ active, onChange }: { active: StationKey; onChange: (s: StationKey) => void }) {
@@ -68,9 +67,9 @@ function Rail({ active, onChange }: { active: StationKey; onChange: (s: StationK
   )
 }
 
-/* ------------------------ stations I and II ----------------------- */
+/* ----------------------------- station I -------------------------- */
 
-type BetType = 'blackjack' | 'straight' | 'parlay'
+type BetType = 'blackjack' | 'straight' | 'parlay' | 'pm'
 
 const BET_PARAMS: Record<BetType, { winProb: number; winMult: number; feeOnWin: number; label: string }> = {
   blackjack: {
@@ -81,40 +80,40 @@ const BET_PARAMS: Record<BetType, { winProb: number; winMult: number; feeOnWin: 
   },
   straight: { winProb: 0.5, winMult: 100 / 110, feeOnWin: 0, label: 'Straight bet at −110 · about a 4.5% house edge' },
   parlay: { winProb: 0.125, winMult: 5, feeOnWin: 0, label: 'Same-game parlay · about a 25% effective house edge' },
+  pm: {
+    winProb: 0.5,
+    winMult: 1,
+    feeOnWin: 0.03,
+    label: 'Prediction market on 50/50 games · about a 1.5% cost per trade in exchange fees',
+  },
 }
 
-const PM_PARAMS = {
-  winProb: 0.5,
-  winMult: 1,
-  feeOnWin: 0.03,
-  label: 'Prediction market on 50/50 games · about a 1.5% cost per trade in exchange fees',
-}
-
-function BettingStation({ mode }: { mode: 'book' | 'pm' }) {
-  const isPM = mode === 'pm'
+function BettingStation() {
   const [betType, setBetType] = useState<BetType>('straight')
+  const isPM = betType === 'pm'
+  const [start, setStart] = useState(1000)
   const [stake, setStake] = useState(25)
   const [bets, setBets] = useState(200)
   const [seed, setSeed] = useState(1)
 
-  const params = isPM ? PM_PARAMS : BET_PARAMS[betType]
+  const params = BET_PARAMS[betType]
 
   const sim = useMemo(
-    () => simulateBettors({ n: 1000, bets, stake, seed: seed * 13 + bets, ...params }),
-    [bets, stake, seed, params]
+    () => simulateBettors({ n: 1000, bets, stake, start, seed: seed * 13 + bets, ...params }),
+    [bets, stake, start, seed, params]
   )
 
   // Comparison line for the prediction market: a sportsbook straight bet on the same settings.
   const compare = useMemo(
     () =>
       isPM
-        ? simulateBettors({ n: 1000, bets, stake, seed: seed * 13 + bets, winProb: 0.5, winMult: 100 / 110, feeOnWin: 0 })
+        ? simulateBettors({ n: 1000, bets, stake, start, seed: seed * 13 + bets, winProb: 0.5, winMult: 100 / 110, feeOnWin: 0 })
         : null,
-    [isPM, bets, stake, seed]
+    [isPM, bets, stake, start, seed]
   )
 
-  const yMax = Math.max(1600, sim.p90[sim.p90.length - 1]! * 1.1, sim.start * 1.6)
-  const lineColor = isPM ? GREEN : RED
+  const yMax = Math.max(sim.p90[sim.p90.length - 1]! * 1.1, sim.start * 1.6)
+  const lineColor = RED
 
   const insight = isPM ? (
     <Callout tone="mark" label="Zero-sum, minus fees">
@@ -144,76 +143,80 @@ function BettingStation({ mode }: { mode: 'book' | 'pm' }) {
   )
 
   return (
-    <div className={styles.stationGrid}>
-      <div className={styles.controlsCol}>
-        <p className={styles.stationLede}>
-          {isPM
-            ? '1,000 simulated traders each start with $1,000 and trade event contracts on 50/50 games against each other.'
-            : '1,000 simulated players each start with $1,000 and bet repeatedly against the house. Choose the game to change the house edge.'}
-        </p>
-        {!isPM && (
-          <SegmentedControl
-            label="The game"
-            options={[
-              { value: 'blackjack', label: 'Blackjack' },
-              { value: 'straight', label: 'Straight (−110)' },
-              { value: 'parlay', label: 'Parlay' },
-            ]}
-            value={betType}
-            onChange={setBetType}
-          />
-        )}
-        <Slider label="Bet size" value={stake} onChange={setStake} min={10} max={100} step={5} readout={formatUSDWhole(stake)} />
-        <Slider label="Number of bets" value={bets} onChange={setBets} min={50} max={500} step={10} readout={`${bets}`} />
+    <div className={styles.stationStack}>
+      <p className={styles.stationLede}>
+        {isPM
+          ? `1,000 simulated traders each start with ${formatUSDWhole(start)} and trade event contracts on 50/50 games against each other. Choose the game to change the house edge.`
+          : `1,000 simulated players each start with ${formatUSDWhole(start)} and bet repeatedly against the house. Choose the game to change the house edge.`}
+      </p>
+      <div className={styles.gameRow}>
+        <SegmentedControl
+          label="The game"
+          options={[
+            { value: 'blackjack', label: 'Blackjack' },
+            { value: 'straight', label: 'Straight (−110)' },
+            { value: 'parlay', label: 'Parlay' },
+            { value: 'pm', label: 'Prediction market' },
+          ]}
+          value={betType}
+          onChange={setBetType}
+        />
         <Button onClick={() => setSeed((s) => s + 1)}>Re-run 1,000 players</Button>
-        <div className={styles.stats}>
-          <Stat
-            label="Still ahead"
-            value={sim.ahead}
-            format={(v) => formatPercent(v, 0)}
-            accentColor={sim.ahead < 0.4 ? RED : undefined}
-            animate={false}
-          />
-          <Stat
-            label="Typical player has"
-            value={sim.medFinal}
-            format={formatUSDWhole}
-            accentColor={sim.medFinal < sim.start ? RED : GREEN}
-            animate={false}
-          />
-          <Stat
-            label="Lost the full $1,000"
-            value={sim.busted}
-            format={(v) => formatPercent(v, 0)}
-            accentColor={sim.busted > 0.05 ? RED : undefined}
-            animate={false}
-          />
-        </div>
+      </div>
+      <div className={styles.slidersRow}>
+        <Slider label="Starting amount" value={start} onChange={setStart} min={100} max={10000} step={100} editable prefix="$" />
+        <Slider label="Bet size" value={stake} onChange={setStake} min={1} max={500} step={1} editable prefix="$" />
+        <Slider label="Number of bets" value={bets} onChange={setBets} min={10} max={1000} step={10} editable />
+      </div>
+      <div className={styles.stats}>
+        <Stat
+          label="Still ahead"
+          value={sim.ahead}
+          format={(v) => formatPercent(v, 0)}
+          accentColor={sim.ahead < 0.4 ? RED : undefined}
+          animate={false}
+        />
+        <Stat
+          label="Typical player has"
+          value={sim.medFinal}
+          format={formatUSDWhole}
+          accentColor={sim.medFinal < sim.start ? RED : GREEN}
+          animate={false}
+        />
+        <Stat
+          label={`Lost the full ${formatUSDWhole(start)}`}
+          value={sim.busted}
+          format={(v) => formatPercent(v, 0)}
+          accentColor={sim.busted > 0.05 ? RED : undefined}
+          animate={false}
+        />
       </div>
 
       <div className={styles.chartCol}>
         <div className={styles.legend}>
           <span style={{ color: lineColor }}>&#9632; typical player</span>
           <span style={{ color: 'var(--text-muted)' }}>&#9617; middle 80% of players</span>
-          {isPM && <span style={{ color: RED }}>&#9476; typical sportsbook bettor, same bets</span>}
-          <span style={{ color: 'var(--text-muted)' }}>&#9476; starting $1,000</span>
+          {isPM && <span style={{ color: SLATE }}>&#9476; typical sportsbook bettor, same bets</span>}
+          <span style={{ color: 'var(--text-muted)' }}>&#9476; starting {formatUSDWhole(start)}</span>
         </div>
         <StationChart
           x={sim.x}
           yMax={yMax}
           yRef={sim.start}
-          refLabel="starting $1,000"
+          refLabel={`starting ${formatUSDWhole(start)}`}
           band={{ upper: sim.p90, lower: sim.p10, color: lineColor }}
           bandLabels={{ upper: '90th percentile player', lower: '10th percentile player' }}
           lines={[
             ...(compare
-              ? [{ ys: compare.median, color: RED, width: 2, dashed: true, label: 'Sportsbook median, same bets' }]
+              ? [{ ys: compare.median, color: SLATE, width: 2, dashed: true, label: 'Sportsbook median, same bets' }]
               : []),
             { ys: sim.median, color: lineColor, width: 3, label: 'Typical player (median)' },
           ]}
           xTickFormat={(v) => `${Math.round(v)} bets`}
           xHoverLabel={(v) => (isPM ? `After ${Math.round(v)} trades` : `After ${Math.round(v)} bets`)}
-          figure={isPM ? 'Figure 2.' : 'Figure 1.'}
+          ratio={0.42}
+          maxHeight={520}
+          figure="Figure 1."
           caption={`${params.label}. The shaded band holds the middle 80% of 1,000 simulated players; the bold line is the median player.`}
           ariaLabel={
             isPM
@@ -223,7 +226,7 @@ function BettingStation({ mode }: { mode: 'book' | 'pm' }) {
           exportStats={[
             { label: 'Still ahead', value: formatPercent(sim.ahead, 0), color: sim.ahead < 0.4 ? RED : undefined },
             { label: 'Typical player has', value: formatUSDWhole(sim.medFinal), color: sim.medFinal < sim.start ? RED : GREEN },
-            { label: 'Lost the full $1,000', value: formatPercent(sim.busted, 0) },
+            { label: `Lost the full ${formatUSDWhole(start)}`, value: formatPercent(sim.busted, 0) },
           ]}
         />
         {insight}
@@ -232,7 +235,7 @@ function BettingStation({ mode }: { mode: 'book' | 'pm' }) {
   )
 }
 
-/* --------------------------- station III -------------------------- */
+/* --------------------------- station II --------------------------- */
 
 function ReturnBars({ ticket, sp }: { ticket: { r1: number; r5: number; r10: number }; sp: { r1: number; r5: number; r10: number } }) {
   const rows = [
@@ -401,7 +404,7 @@ function StockPicker() {
   )
 }
 
-/* --------------------------- station IV --------------------------- */
+/* --------------------------- station III -------------------------- */
 
 function IndexFund() {
   const [monthly, setMonthly] = useState(100)
@@ -478,7 +481,7 @@ function IndexFund() {
           extraHover={[{ label: 'Contributed so far', ys: series.x.map((t) => monthly * 12 * t) }]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
-          figure="Figure 3."
+          figure="Figure 2."
           caption={`The same ${formatUSDWhole(monthly)} a month at a 7% average yearly return, held steady for illustration. Real markets swing; the average only shows up if you stay in.`}
           ariaLabel="Growth of a monthly index fund habit at two expense ratios"
           exportStats={[
@@ -510,7 +513,7 @@ export function ChanceOwnershipPage({ intro = true }: { intro?: boolean } = {}) 
           <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
           <h1 className={styles.h1}>Chance &amp; Ownership</h1>
           <p className={styles.lead}>
-            Four stations trace the path from a sports bet to an index fund. Each one asks the same two
+            Three stations trace the path from a sports bet to an index fund. Each one asks the same two
             questions: what happens to a thousand people who keep playing, and does what you bought own
             anything?
           </p>
@@ -520,8 +523,7 @@ export function ChanceOwnershipPage({ intro = true }: { intro?: boolean } = {}) 
       <Rail active={active} onChange={setActive} />
 
       <Card tone="raised" className={styles.panel}>
-        {active === 'book' && <BettingStation mode="book" />}
-        {active === 'pm' && <BettingStation mode="pm" />}
+        {active === 'book' && <BettingStation />}
         {active === 'pick' && <StockPicker />}
         {active === 'index' && <IndexFund />}
       </Card>
