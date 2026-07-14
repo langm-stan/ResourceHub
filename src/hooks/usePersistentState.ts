@@ -8,7 +8,10 @@ import { useCallback, useState } from 'react'
  * numbers, is finite), so stale or corrupted entries fall back to the default.
  * Pass `isValid` to tighten that check for union-typed values.
  */
-export function usePersistentState<T extends string | number | boolean>(
+// T is deliberately unconstrained: a `string | number | boolean` constraint
+// would make literal defaults infer literal types (360, not number) and the
+// setters would then reject other values. Only JSON-safe primitives belong here.
+export function usePersistentState<T>(
   key: string,
   initial: T,
   isValid?: (v: T) => boolean,
@@ -35,7 +38,7 @@ export function usePersistentState<T extends string | number | boolean>(
   const set = useCallback(
     (next: T | ((prev: T) => T)) => {
       setValue((prev) => {
-        const v = typeof next === 'function' ? next(prev) : next
+        const v = typeof next === 'function' ? (next as (prev: T) => T)(prev) : next
         try {
           localStorage.setItem(key, JSON.stringify(v))
         } catch {
