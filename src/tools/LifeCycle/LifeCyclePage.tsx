@@ -41,13 +41,13 @@ const CARDINAL = 'var(--c-accent)'
  * history): start ≈ average bachelor's starting salary (NACE 2025, ~$68.7k);
  * retire at 67 = Social Security full retirement age for anyone born 1960+;
  * plan to 90 (SSA longevity tables — Lusardi's "longevity literacy" point);
- * retirement income ≈ the ~40% of earnings Social Security replaces for a
- * middle earner. The earnings hump — rising to a peak around age 50, drifting
- * down after — matches BLS/Census age–earnings profiles; a $120k peak is in
- * line with median earnings for bachelor's holders at those ages.
+ * retirement income ≈ the average annual Social Security retirement benefit
+ * (~$23k/yr). The earnings hump — rising to a peak around age 50, drifting
+ * down after — matches BLS/Census age–earnings profiles; a $150k peak suits
+ * the teacher-training audience's professional households.
  *
- * realRatePct is the return on savings above inflation, default 2%/yr ≈ the
- * SSA Trustees' long-run real-interest assumption. It was briefly removed as
+ * realRatePct is the return on savings above inflation, default 3%/yr, a
+ * modest balanced-portfolio real return. It was briefly removed as
  * a control ("real interest rate" read as jargon), then reinstated in plain
  * language ("Savings grow at") when the user asked what the wealth path
  * earns. Keep the label jargon-free. All amounts stay in today's dollars.
@@ -57,11 +57,11 @@ const DEFAULTS: LifeCycleState = {
   retireAge: 67,
   endAge: 90,
   startIncome: 68_000,
-  peakIncome: 120_000,
+  peakIncome: 150_000,
   peakAge: 50,
-  retirementIncome: 38_000,
+  retirementIncome: 23_000,
   ssStartAge: 67,
-  realRatePct: 2,
+  realRatePct: 3,
   noBorrowing: false,
 }
 
