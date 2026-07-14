@@ -83,8 +83,10 @@ const BET_PARAMS: Record<BetType, { winProb: number; winMult: number; feeOnWin: 
   pm: {
     winProb: 0.5,
     winMult: 1,
-    feeOnWin: 0.03,
-    label: 'Prediction market on 50/50 games · about a 1.5% cost per trade in exchange fees',
+    // Kalshi taker fee: 7¢ × price × (1 − price) per contract. At 50¢ that is
+    // 1.75¢ on a 50¢ stake, ~3.5% of money wagered per trade.
+    feeOnWin: 0.07,
+    label: 'Prediction market on 50/50 games · about a 3.5% cost per trade at mid prices',
   },
 }
 
@@ -118,9 +120,10 @@ function BettingStation() {
   const insight = isPM ? (
     <Callout tone="mark" label="Zero-sum, minus fees">
       An event contract has no house on the other side: one trader's gain is another trader's loss,
-      less the exchange's fee. The cost per trade is well below a sportsbook's margin, so the median
-      bankroll declines more slowly, but the market remains negative-sum for participants in
-      aggregate.
+      less the exchange's fee. That fee looks tiny (at most 1.75¢ per $1 contract), but measured
+      against the money wagered, a market order near 50¢ gives up about 3.5% per trade, not far
+      below the sportsbook's 4.5%. The exchange collects it on every trade, and the product is
+      built to produce many trades.
     </Callout>
   ) : betType === 'blackjack' ? (
     <Callout tone="mark" label="Skill changes the rate, not the direction">
