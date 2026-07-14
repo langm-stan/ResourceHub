@@ -1,6 +1,6 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import '@fontsource-variable/inter'
 import 'katex/dist/katex.min.css'
 import './styles/tokens.css'
@@ -50,9 +50,25 @@ const TEACHER_TRAINING_SECTIONS = [
   'rent-or-own',
 ] as const
 
+/*
+ * Reset scroll when the visitor opens another page. Keyed on the pathname
+ * and the ?tool= selector (the /lessons and /calculators shells switch pages
+ * through it); the other search params carry in-page scenario state and must
+ * not move the scroll.
+ */
+function ScrollToTop() {
+  const { pathname, search } = useLocation()
+  const tool = new URLSearchParams(search).get('tool')
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname, tool])
+  return null
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<App />}>
           <Route index element={<Hub />} />
