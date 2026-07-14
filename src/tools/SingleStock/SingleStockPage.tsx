@@ -119,6 +119,18 @@ function Classes() {
         caption={`The class of ${cohort.year}: $1,000 in each of the most famous stocks of the moment, January ${cohort.year} through mid-2026, dividends reinvested and corporate actions included. Figures are approximate. Red bars ended below the money put in.`}
       />
 
+      <Callout tone="plain" label="The fund at one, five, and ten years">
+        {formatUSDWhole(STAKE)} in the fund from January {cohort.year} was{' '}
+        {formatUSDWhole(cohort.fundAt.y1 * STAKE)} after one year
+        {cohort.fundAt.y10 !== null
+          ? `, ${formatUSDWhole(cohort.fundAt.y5 * STAKE)} after five, and ${formatUSDWhole(cohort.fundAt.y10 * STAKE)} after ten`
+          : ` and ${formatUSDWhole(cohort.fundAt.y5 * STAKE)} after five (the ten-year mark arrives in 2031)`}
+        ; by mid-2026 it was {formatUSDWhole(fundValue)}.{' '}
+        {cohort.year === 2000
+          ? 'From this start even the fund was still underwater at year ten. It recovered because a fund cannot go to zero; several stocks below could not make the same promise.'
+          : 'A pick has to beat these checkpoints at the horizon you would actually hold, not just at the finish line.'}
+      </Callout>
+
       <Callout tone="mark" label={`What the class of ${cohort.year} teaches`}>{cohort.note}</Callout>
     </>
   )

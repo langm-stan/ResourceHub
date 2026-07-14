@@ -127,6 +127,7 @@ function RevealBoard({
   onYear: (y: number) => void
 }) {
   const fundValue = cohort.indexMultiple * STAKE
+  const fundAt = cohort.fundAt
   const pick = cohort.stocks.find((s) => s.ticker === picked)
   const yourValue = pick ? pick.multiple * STAKE : fundValue
   const beatFund = cohort.stocks.filter((s) => s.multiple > cohort.indexMultiple).length
@@ -169,6 +170,18 @@ function RevealBoard({
           animate={false}
         />
       </div>
+
+      <Callout tone="plain" label="The fund at one, five, and ten years">
+        {formatUSDWhole(STAKE)} in the fund from January {cohort.year} was{' '}
+        {formatUSDWhole(fundAt.y1 * STAKE)} after one year
+        {fundAt.y10 !== null
+          ? `, ${formatUSDWhole(fundAt.y5 * STAKE)} after five, and ${formatUSDWhole(fundAt.y10 * STAKE)} after ten`
+          : ` and ${formatUSDWhole(fundAt.y5 * STAKE)} after five (the ten-year mark arrives in 2031)`}
+        ; by mid-2026 it was {formatUSDWhole(fundValue)}.{' '}
+        {cohort.year === 2000
+          ? 'From this start even the fund was still underwater at year ten. It recovered because a fund cannot go to zero; several picks below could not make the same promise.'
+          : 'A pick has to beat these checkpoints at the horizon you would actually hold, not just at the finish line.'}
+      </Callout>
 
       <ClassChart
         cohort={cohort}

@@ -316,6 +316,22 @@ function StockPicker() {
         index.
       </p>
 
+      <div className={styles.indexStrip}>
+        <span className={styles.indexStripLabel}>The index (S&amp;P 500) from January {year}:</span>
+        {[
+          { h: '1 year', v: data.sp.r1 },
+          { h: '5 years', v: data.sp.r5 },
+          { h: '10 years', v: data.sp.r10 },
+        ].map((r) => (
+          <span key={r.h} className={styles.indexStripItem}>
+            {r.h}{' '}
+            <strong className="tnum" style={{ color: r.v >= 0 ? GREEN : RED }}>
+              {fmtSignedPct(r.v)}
+            </strong>
+          </span>
+        ))}
+      </div>
+
       <div className={styles.stationGrid}>
         <div className={styles.boardCol}>
           <div className={styles.board}>

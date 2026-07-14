@@ -42,6 +42,14 @@ export interface Cohort {
   year: number
   intro: string
   indexMultiple: number
+  /**
+   * $1 in the fund after 1, 5, and 10 years (dividends reinvested), so the
+   * reveal can report the market's return over each horizon, not just the
+   * endpoint. Computed from the Timing lesson's Shiller monthly series
+   * (spxData.ts), January start, July 2026; null = horizon not reached yet.
+   * Annual update alongside indexMultiple.
+   */
+  fundAt: { y1: number; y5: number; y10: number | null }
   /** The honest one-paragraph reading of this class, shown at reveal. */
   note: string
   stocks: CohortStock[]
@@ -53,6 +61,7 @@ export const COHORTS: Cohort[] = [
     intro:
       'It is January 2000. The Nasdaq has doubled in fifteen months, your neighbor just quit his job to day-trade, and everyone agrees the internet changes everything. You have $1,000.',
     indexMultiple: 8.36,
+    fundAt: { y1: 0.948, y5: 0.893, y10: 0.943 },
     note:
       'The most valuable company on Earth (Cisco), the most admired (GE), and the most innovative (Enron) all trailed a fund anyone could buy with no research at all. The picks that came closest were the two boring ones, Walmart and Exxon. One stock in ten beat the fund, and you had to hold it through sixteen underwater years to collect.',
     stocks: [
@@ -133,6 +142,7 @@ export const COHORTS: Cohort[] = [
     intro:
       'It is January 2010. The market is limping out of the worst crash since 1929, smartphones are the new obsession, and nobody trusts banks. You have $1,000.',
     indexMultiple: 8.97,
+    fundAt: { y1: 1.164, y5: 1.994, y10: 3.558 },
     note:
       'Half this class beat the fund, the best a cohort of famous names ever did, and the reason these ten are remembered at all. The catch: in 2010 the sure thing was BlackBerry, the biggest company in America was Exxon, and Netflix was a DVD mailer trading for pocket change. The winners are only obvious now, and the fund held every one of them the whole time.',
     stocks: [
@@ -213,6 +223,7 @@ export const COHORTS: Cohort[] = [
     intro:
       'It is January 2021. Everyone is stuck at home, stimulus checks are landing, commissions are zero, and your group chat has never been louder about stocks. You have $1,000.',
     indexMultiple: 2.19,
+    fundAt: { y1: 1.222, y5: 1.959, y10: null },
     note:
       'Seven of the ten favorites lost money while the boring fund more than doubled. The two that won, GameStop bought before the squeeze and Palantir, won huge, which is exactly what keeps the game going: everyone remembers the two, nobody posts about the seven. Buying GameStop at the January peak instead of the start of the month lost 95%.',
     stocks: [

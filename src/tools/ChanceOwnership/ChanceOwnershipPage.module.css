@@ -235,6 +235,25 @@
   margin: 0 0 var(--space-1);
 }
 
+.indexStrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-5);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  font-size: var(--fs-ui);
+}
+.indexStripLabel {
+  color: var(--text-muted);
+}
+.indexStripItem {
+  color: var(--text-primary);
+}
+
 .boardCol {
   min-width: 0;
 }
