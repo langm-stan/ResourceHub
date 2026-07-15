@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button, Callout, Card, SegmentedControl, Slider, Stat } from '../../design-system'
 import { formatPercent, formatUSDWhole } from '../../lib/format'
-import { CHEAP_FEE, DEFAULT_RETURN_PCT, PICK_YEARS, buildFeeSeries, generateTickets, simulateBettors } from './compute'
+import { CHEAP_FEE, DEFAULT_RETURN_PCT, buildFeeSeries, simulateBettors } from './compute'
+import { REAL_BOARDS } from './realBoards'
 import { StationChart } from './components/StationChart'
 import styles from './ChanceOwnershipPage.module.css'
 
@@ -288,40 +289,43 @@ function ReturnBars({ ticket, sp }: { ticket: { r1: number; r5: number; r10: num
 function StockPicker() {
   const [year, setYear] = useState(2000)
   const [pick, setPick] = useState<number | null>(null)
-  const [draw, setDraw] = useState(1)
-  const data = PICK_YEARS[year]!
-  const tickets = useMemo(() => generateTickets(year, draw), [year, draw])
+  const [revealed, setRevealed] = useState(false)
+  const board = REAL_BOARDS[year]!
+  const stocks = board.stocks
+  const sp = board.sp
   const committed = pick !== null
-  const beat = tickets.filter((t) => t.r10 > data.sp.r10).length
-  const medianR10 = [...tickets].map((t) => t.r10).sort((a, b) => a - b)[50]!
-  const best = Math.max(...tickets.map((t) => t.r10))
+  const beat = stocks.filter((s) => (s.r10 ?? -100) > sp.r10).length
+  const sortedR10 = stocks.map((s) => s.r10 ?? -100).sort((a, b) => a - b)
+  const medianR10 = sortedR10[Math.floor(sortedR10.length / 2)]!
+  const best = Math.max(...sortedR10)
 
-  useEffect(() => setPick(null), [year, draw])
+  useEffect(() => setPick(null), [year])
+  useEffect(() => setRevealed(false), [year, pick])
 
   return (
     <div>
       <div className={styles.pickerHeader}>
         <SegmentedControl
           label="It is January of"
-          options={Object.keys(PICK_YEARS).map((y) => ({ value: y, label: y }))}
+          options={Object.keys(REAL_BOARDS).map((y) => ({ value: y, label: y }))}
           value={String(year)}
           onChange={(y) => setYear(Number(y))}
         />
-        <p className={styles.pickerNote}>{data.note}</p>
+        <p className={styles.pickerNote}>{board.note}</p>
       </div>
 
       <p className={styles.stationLede}>
-        The board holds <strong>100 stocks, ranked by market cap</strong>, with no names or tickers
-        shown. Choose one ticket and commit $1,000 to it, then compare its next decade against the
-        index.
+        The board holds the <strong>100 largest US companies of that January, ranked by market
+        cap</strong>, with no names shown. Choose one ticket and commit $1,000 to it, then compare
+        its next decade against the index. These are real companies and their real returns.
       </p>
 
       <div className={styles.indexStrip}>
         <span className={styles.indexStripLabel}>The index (S&amp;P 500) from January {year}:</span>
         {[
-          { h: '1 year', v: data.sp.r1 },
-          { h: '5 years', v: data.sp.r5 },
-          { h: '10 years', v: data.sp.r10 },
+          { h: '1 year', v: sp.r1 },
+          { h: '5 years', v: sp.r5 },
+          { h: '10 years', v: sp.r10 },
         ].map((r) => (
           <span key={r.h} className={styles.indexStripItem}>
             {r.h}{' '}
@@ -335,7 +339,7 @@ function StockPicker() {
       <div className={styles.stationGrid}>
         <div className={styles.boardCol}>
           <div className={styles.board}>
-            {tickets.map((t, i) => {
+            {stocks.map((s, i) => {
               const selected = pick === i
               return (
                 <button
@@ -344,7 +348,7 @@ function StockPicker() {
                   onClick={() => {
                     if (!committed) setPick(i)
                   }}
-                  title={committed ? undefined : `#${i + 1} · ${t.cap}`}
+                  title={committed ? undefined : `#${i + 1} · $${s.cap}B`}
                   className={[
                     styles.ticket,
                     selected ? styles.ticketSelected : '',
@@ -359,8 +363,8 @@ function StockPicker() {
             })}
           </div>
           <div className={styles.boardScale}>
-            <span>#1 · largest ({tickets[0]!.cap})</span>
-            <span>#100 · smallest ({tickets[99]!.cap})</span>
+            <span>#1 · largest (${stocks[0]!.cap}B)</span>
+            <span>#{stocks.length} · smallest (${stocks[stocks.length - 1]!.cap}B)</span>
           </div>
         </div>
 
@@ -373,12 +377,15 @@ function StockPicker() {
           ) : (
             <Card tone="raised" className={styles.pickResult}>
               <p className={styles.pickResultTitle}>
-                Ticket <span className={styles.pickResultNumber}>#{pick! + 1}</span> ({tickets[pick!]!.cap}),
-                bought January {year}
+                Ticket <span className={styles.pickResultNumber}>#{pick! + 1}</span> ($
+                {stocks[pick!]!.cap}B), bought January {year}
               </p>
-              <ReturnBars ticket={tickets[pick!]!} sp={data.sp} />
-              <Button variant="quiet" size="sm" onClick={() => setDraw((d) => d + 1)}>
-                New board, draw again
+              <ReturnBars
+                ticket={{ r1: stocks[pick!]!.r1 ?? -100, r5: stocks[pick!]!.r5 ?? -100, r10: stocks[pick!]!.r10 ?? -100 }}
+                sp={sp}
+              />
+              <Button variant="quiet" size="sm" onClick={() => setPick(null)}>
+                Pick a different ticket
               </Button>
             </Card>
           )}
@@ -391,15 +398,15 @@ function StockPicker() {
             <Stat
               label="Tickets that beat the index (10 yr)"
               value={beat}
-              format={(v) => `${Math.round(v)} of 100`}
-              accentColor={beat < 50 ? RED : GREEN}
+              format={(v) => `${Math.round(v)} of ${stocks.length}`}
+              accentColor={beat < stocks.length / 2 ? RED : GREEN}
               animate={false}
             />
             <Stat
               label="Typical ticket (10 yr)"
               value={medianR10}
               format={fmtSignedPct}
-              accentColor={medianR10 < data.sp.r10 ? RED : GREEN}
+              accentColor={medianR10 < sp.r10 ? RED : GREEN}
               animate={false}
             />
             <Stat label="Best ticket on the board (10 yr)" value={best} format={fmtSignedPct} accentColor={GREEN} animate={false} />
@@ -410,14 +417,26 @@ function StockPicker() {
             whole gains. A single pick usually misses the winners; holding the index guarantees owning
             them, whichever stocks they turn out to be.
           </Callout>
+          {!revealed ? (
+            <Button variant="quiet" size="sm" onClick={() => setRevealed(true)}>
+              So which company was it?
+            </Button>
+          ) : (
+            <Callout tone="note" label={`Ticket #${pick! + 1} was ${stocks[pick!]!.name}`}>
+              {stocks[pick!]!.fate ??
+                `${stocks[pick!]!.name} stayed listed through the whole window; the bars above are its actual price returns, dividends excluded.`}
+            </Callout>
+          )}
         </>
       )}
 
       <p className={styles.footnote}>
-        Index returns are actual approximate S&amp;P 500 price returns from January of each year.
-        Individual tickets are simulated from the real statistical distribution of single-stock
-        outcomes: most stocks lag the index, and a small minority create most of the excess wealth.
-        For classroom illustration only.
+        Real data: the 100 largest US-listed companies by market capitalization in January of each
+        year (list sources: Vanguard 500 Index holdings 12/31/1994 via SEC EDGAR; period market-cap
+        tables; FT Global 500; ranks below the top 30 are approximate). Returns are actual price
+        returns, splits adjusted, dividends excluded on both the stocks and the index. Bankrupt
+        companies go to zero; cash buyouts freeze at the deal price; stock mergers track the
+        acquirer; major spinoffs are counted. Figures are approximate (within about 10%).
       </p>
     </div>
   )
