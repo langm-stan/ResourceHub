@@ -163,12 +163,17 @@ export interface FeeSeries {
   costly: number[]
 }
 
-const ANNUAL_RETURN = 0.07
+export const DEFAULT_RETURN_PCT = 7
 export const CHEAP_FEE = 0.05
 
-export function buildFeeSeries(monthly: number, years: number, feePct: number): FeeSeries {
+export function buildFeeSeries(
+  monthly: number,
+  years: number,
+  feePct: number,
+  returnPct: number = DEFAULT_RETURN_PCT
+): FeeSeries {
   const build = (f: number) => {
-    const net = (ANNUAL_RETURN - f / 100) / 12
+    const net = (returnPct - f) / 100 / 12
     const ys = [0]
     let v = 0
     for (let m = 1; m <= years * 12; m++) {

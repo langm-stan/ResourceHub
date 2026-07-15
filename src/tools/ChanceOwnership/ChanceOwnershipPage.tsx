@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button, Callout, Card, SegmentedControl, Slider, Stat } from '../../design-system'
 import { formatPercent, formatUSDWhole } from '../../lib/format'
-import { CHEAP_FEE, PICK_YEARS, buildFeeSeries, generateTickets, simulateBettors } from './compute'
+import { CHEAP_FEE, DEFAULT_RETURN_PCT, PICK_YEARS, buildFeeSeries, generateTickets, simulateBettors } from './compute'
 import { StationChart } from './components/StationChart'
 import styles from './ChanceOwnershipPage.module.css'
 
@@ -429,8 +429,9 @@ function IndexFund() {
   const [monthly, setMonthly] = useState(100)
   const [years, setYears] = useState(30)
   const [fee, setFee] = useState(1.0)
+  const [ret, setRet] = useState(DEFAULT_RETURN_PCT)
 
-  const series = useMemo(() => buildFeeSeries(monthly, years, fee), [monthly, years, fee])
+  const series = useMemo(() => buildFeeSeries(monthly, years, fee, ret), [monthly, years, fee, ret])
 
   const contributed = monthly * 12 * years
   const cheapFinal = series.cheap[series.cheap.length - 1]!
@@ -454,6 +455,15 @@ function IndexFund() {
           readout={formatUSDWhole(monthly)}
         />
         <Slider label="Years" value={years} onChange={setYears} min={10} max={45} step={1} readout={`${years}`} />
+        <Slider
+          label="Average yearly return"
+          value={ret}
+          onChange={setRet}
+          min={3}
+          max={12}
+          step={0.5}
+          readout={`${ret.toFixed(1)}%`}
+        />
         <Slider
           label="Fund expense ratio"
           value={fee}
@@ -501,7 +511,7 @@ function IndexFund() {
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
           figure="Figure 2."
-          caption={`The same ${formatUSDWhole(monthly)} a month at a 7% average yearly return, held steady for illustration. Real markets swing; the average only shows up if you stay in.`}
+          caption={`The same ${formatUSDWhole(monthly)} a month at a ${ret.toFixed(1)}% average yearly return, held steady for illustration. Real markets swing; the average only shows up if you stay in.`}
           ariaLabel="Growth of a monthly index fund habit at two expense ratios"
           exportStats={[
             { label: `At ${CHEAP_FEE.toFixed(2)}%`, value: formatUSDWhole(cheapFinal), color: GREEN },
