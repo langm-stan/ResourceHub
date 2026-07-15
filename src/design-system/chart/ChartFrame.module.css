@@ -100,10 +100,19 @@
 }
 
 .canvas {
+  position: relative;
   width: 100%;
   background: color-mix(in srgb, var(--surface) 60%, var(--surface-raised));
   border: var(--hairline) solid var(--border-hairline);
   border-radius: var(--radius);
+}
+
+/* HTML layer above the SVG that hover readouts portal into. */
+.hoverLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .svg {

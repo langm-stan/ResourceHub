@@ -19,6 +19,11 @@ export interface ChartGeometry {
   margin: ChartMargin
   innerWidth: number
   innerHeight: number
+  /**
+   * HTML layer above the SVG for hover readouts. SVG foreignObject repaints
+   * unreliably in WebKit (ghost tooltips trail the cursor), so tips portal here.
+   */
+  overlayEl: HTMLDivElement | null
 }
 
 const ChartContext = createContext<ChartGeometry | null>(null)
@@ -64,13 +69,14 @@ function MeasuredCanvas({
   children,
 }: Pick<ChartFrameProps, 'ratio' | 'height' | 'maxHeight' | 'margin' | 'ariaLabel' | 'children'>) {
   const [ref, size] = useResizeObserver<HTMLDivElement>()
+  const [overlayEl, setOverlayEl] = useState<HTMLDivElement | null>(null)
   const margin = { ...DEFAULT_MARGIN, ...marginOverride }
 
   const width = size.width || 720
   const h = height ?? Math.min(Math.round(width * ratio), maxHeight ?? Number.POSITIVE_INFINITY)
   const innerWidth = Math.max(0, width - margin.left - margin.right)
   const innerHeight = Math.max(0, h - margin.top - margin.bottom)
-  const geometry: ChartGeometry = { width, height: h, margin, innerWidth, innerHeight }
+  const geometry: ChartGeometry = { width, height: h, margin, innerWidth, innerHeight, overlayEl }
 
   return (
     <div ref={ref} className={styles.canvas}>
@@ -88,6 +94,7 @@ function MeasuredCanvas({
           </g>
         </svg>
       )}
+      <div ref={setOverlayEl} className={styles.hoverLayer} aria-hidden="true" />
     </div>
   )
 }

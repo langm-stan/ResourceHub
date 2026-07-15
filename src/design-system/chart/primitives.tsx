@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { area as d3area, line as d3line, curveMonotoneX } from 'd3-shape'
 import type { ScaleLinear } from 'd3-scale'
 import { useChart } from './ChartFrame'
@@ -210,33 +211,29 @@ export interface HoverTipRow {
 /**
  * The floating readout box shown while hovering a chart. Positioned by the
  * x pixel of the hovered point; flips to the left near the right edge.
+ * Rendered as HTML portaled above the SVG — foreignObject repaints
+ * unreliably in WebKit, leaving ghost copies that trail the cursor.
  */
 export function HoverTip({ px, title, rows }: { px: number; title: string; rows: HoverTipRow[] }) {
-  const { innerWidth } = useChart()
+  const { innerWidth, margin, overlayEl } = useChart()
+  if (!overlayEl) return null
   const W = 224
-  const H = 40 + rows.length * 22
   const flip = px > innerWidth - W - 20
-  const tx = flip ? px - W - 14 : px + 14
-  return (
-    <foreignObject
-      x={tx}
-      y={6}
-      width={W}
-      height={H}
-      pointerEvents="none"
-      style={{ overflow: 'visible' }}
-    >
-      <div className={styles.tip}>
-        <div className={styles.tipTitle}>{title}</div>
-        {rows.map((r) => (
-          <div key={r.label} className={styles.tipRow}>
-            {r.color && <span className={styles.tipSwatch} style={{ background: r.color }} />}
-            <span className={styles.tipLabel}>{r.label}</span>
-            <span className={`${styles.tipValue} tnum`}>{r.value}</span>
-          </div>
-        ))}
-      </div>
-    </foreignObject>
+  const style = flip
+    ? { left: margin.left + px - 14, transform: 'translateX(-100%)' }
+    : { left: margin.left + px + 14 }
+  return createPortal(
+    <div className={styles.tip} style={{ position: 'absolute', top: margin.top + 6, ...style }}>
+      <div className={styles.tipTitle}>{title}</div>
+      {rows.map((r) => (
+        <div key={r.label} className={styles.tipRow}>
+          {r.color && <span className={styles.tipSwatch} style={{ background: r.color }} />}
+          <span className={styles.tipLabel}>{r.label}</span>
+          <span className={`${styles.tipValue} tnum`}>{r.value}</span>
+        </div>
+      ))}
+    </div>,
+    overlayEl,
   )
 }
 
