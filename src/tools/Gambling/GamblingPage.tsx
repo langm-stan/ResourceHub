@@ -25,13 +25,15 @@ import {
 import { AheadChart } from './components/AheadChart'
 import { MoneyPathChart } from './components/MoneyPathChart'
 import { OddsChart } from './components/OddsChart'
+import { StocksBondsContent } from './StocksBondsPage'
 import styles from './GamblingPage.module.css'
 
-type Surface = 'overview' | 'odds' | 'research' | 'math'
+type Surface = 'overview' | 'odds' | 'history' | 'research' | 'math'
 
 const TABS: TabItem<Surface>[] = [
   { value: 'overview', label: 'Overview' },
   { value: 'odds', label: 'Know the odds' },
+  { value: 'history', label: 'Stocks vs. bonds' },
   { value: 'research', label: 'What the research says' },
   { value: 'math', label: 'The math' },
 ]
@@ -122,6 +124,7 @@ export function GamblingPage() {
         <Card tone="raised" className={styles.panel}>
           {surface === 'overview' && <Overview weekly={weekly} startYear={startYear} game={game} />}
           {surface === 'odds' && <KnowTheOdds />}
+          {surface === 'history' && <StocksBondsContent figure="Figure 4." />}
           {surface === 'research' && <ResearchView />}
           {surface === 'math' && <MathView />}
         </Card>

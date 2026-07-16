@@ -65,6 +65,21 @@
   margin-bottom: var(--space-5);
 }
 
+/* The rolling-returns tool's control band: start year, windows, comparison. */
+.rollingControls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-7);
+  align-items: start;
+  max-width: 880px;
+  margin-bottom: var(--space-5);
+}
+@media (max-width: 640px) {
+  .rollingControls {
+    grid-template-columns: 1fr;
+  }
+}
+
 .footnote {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);

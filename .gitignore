@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Raw historical price data (1.9GB of Stooq daily files); never commit or deploy.
+/data
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

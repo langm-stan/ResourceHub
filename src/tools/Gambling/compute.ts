@@ -25,6 +25,7 @@
  */
 
 import { SPX } from '../Timing/spxData'
+import { HISTORY } from './historyData'
 
 export type GameKey = 'lottery' | 'sports' | 'slots'
 
@@ -151,6 +152,85 @@ export interface OddsRow {
   /** Expected dollars returned per $1 staked (per year, for the fund). */
   payback: number
   kind: 'gamble' | 'invest'
+}
+
+/*
+ * Rolling holding-period returns, 1928-2025 (Damodaran annual data,
+ * see ./historyData.ts). A "window" is every consecutive stretch of
+ * `period` calendar years starting no earlier than `startYear`; its
+ * return is annualized (the geometric mean), so a 20-year window's
+ * figure answers "what did each year average over those 20 years."
+ */
+
+export type AssetKey = 'sp' | 'bond' | 'bill' | 'baa'
+
+export const HISTORY_FIRST_YEAR = HISTORY[0]!.y
+export const HISTORY_LAST_YEAR = HISTORY[HISTORY.length - 1]!.y
+
+export interface RollingSeriesPoint {
+  /** Calendar year the window ends in. */
+  end: number
+  /** Annualized return over the window. */
+  v: number
+}
+
+export function rollingSeries(key: AssetKey, period: number, startYear: number): RollingSeriesPoint[] {
+  const points: RollingSeriesPoint[] = []
+  for (let i = period - 1; i < HISTORY.length; i++) {
+    if (HISTORY[i - period + 1]!.y < startYear) continue
+    let growth = 1
+    for (let j = i - period + 1; j <= i; j++) growth *= 1 + HISTORY[j]![key]
+    points.push({ end: HISTORY[i]!.y, v: Math.pow(growth, 1 / period) - 1 })
+  }
+  return points
+}
+
+export interface WindowStats {
+  worst: number
+  worstEnd: number
+  best: number
+  bestEnd: number
+  /** Count of windows with a negative annualized return. */
+  losing: number
+  n: number
+}
+
+export function seriesStats(points: RollingSeriesPoint[]): WindowStats {
+  let worst = Infinity
+  let best = -Infinity
+  let worstEnd = 0
+  let bestEnd = 0
+  let losing = 0
+  for (const p of points) {
+    if (p.v < worst) {
+      worst = p.v
+      worstEnd = p.end
+    }
+    if (p.v > best) {
+      best = p.v
+      bestEnd = p.end
+    }
+    if (p.v < 0) losing++
+  }
+  return { worst, worstEnd, best, bestEnd, losing, n: points.length }
+}
+
+/**
+ * Share of window end-years, common to both series, where the first
+ * finished ahead. Each series keeps its own window length, so this
+ * compares "the stretch ending in 1999" across the two assets.
+ */
+export function aheadShareOf(a: RollingSeriesPoint[], b: RollingSeriesPoint[]): number {
+  const bByEnd = new Map(b.map((p) => [p.end, p.v]))
+  let common = 0
+  let ahead = 0
+  for (const p of a) {
+    const other = bByEnd.get(p.end)
+    if (other === undefined) continue
+    common++
+    if (p.v > other) ahead++
+  }
+  return common === 0 ? 0 : ahead / common
 }
 
 export const ODDS: OddsRow[] = [

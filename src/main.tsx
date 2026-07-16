@@ -43,6 +43,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'paying-off-debt',
   'credit-score',
   'gambling-investing',
+  'stocks-bonds',
   'taxes',
   'retirement-simulator',
   'housing',

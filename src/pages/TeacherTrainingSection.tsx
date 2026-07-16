@@ -20,6 +20,7 @@ import { PayingOffDebtPage } from '../tools/PayingOffDebt/PayingOffDebtPage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
 import { ChanceOwnershipPage } from '../tools/ChanceOwnership/ChanceOwnershipPage'
+import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
 import { RetirementSimPage } from '../tools/RetirementSim/RetirementSimPage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
@@ -107,6 +108,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Chance & Ownership', path: 'teacher-training/gambling-investing' },
     content: <ChanceOwnershipPage intro={false} />,
+  },
+  'stocks-bonds': {
+    title: 'Stocks vs. Bonds',
+    toolkit: true,
+    instructor: { label: 'Stocks vs. Bonds', path: 'teacher-training/stocks-bonds' },
+    content: <StocksBondsPage intro={false} />,
   },
   'retirement-simulator': {
     title: 'Retirement Planning Simulator',

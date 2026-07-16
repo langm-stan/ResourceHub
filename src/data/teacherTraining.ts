@@ -166,10 +166,15 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     day: 'Thursday',
     date: 'July 16',
     period: 'Morning',
-    lecture: 'Tax Efficiency, Employer Benefits, and Planning for Retirement',
-    short: 'Taxes & Retirement',
+    lecture: 'Investing, Taxes, and Tax Efficiency',
+    short: 'Investing & Taxes',
     speaker: 'Prof. Lang',
     tools: [
+      {
+        slug: 'stocks-bonds',
+        label: 'Stocks vs. Bonds',
+        description: 'Rolling returns since 1928: pick the start year and window for stocks, then compare against bonds, bills, or the same stocks at another window.',
+      },
       {
         slug: 'taxes',
         label: 'Understanding Taxes',
