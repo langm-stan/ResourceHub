@@ -101,9 +101,9 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
   const cmpPeriod = Number(cmpPeriodKey)
   const asset = compareKey === 'none' ? null : ASSETS[compareKey]
 
-  /* Every drawn series needs at least one full window before 2025. */
-  const maxStart =
-    HISTORY_LAST_YEAR - Math.max(spPeriod, asset ? cmpPeriod : spPeriod) + 1
+  /* Start year clips the chart's left edge (the window end year), not the
+     lookback; keep a handful of end-years visible up to 2025. */
+  const maxStart = HISTORY_LAST_YEAR - 5
   const start = Math.min(startYear, maxStart)
 
   const spSeries: ChartSeries = useMemo(
@@ -124,7 +124,9 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
             points: rollingSeries(compareKey, cmpPeriod, start),
             period: cmpPeriod,
             label: ASSETS[compareKey].label,
-            short: ASSETS[compareKey].short,
+            // The same-index comparison shares the green line's name, so tag it
+            // with its window to tell the two apart at the right edge.
+            short: compareKey === 'sp' ? `Stocks ${cmpPeriod}yr` : ASSETS[compareKey].short,
             color: ASSETS[compareKey].color,
           },
     [compareKey, cmpPeriod, start]
@@ -146,16 +148,19 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
 
   const stretchWord = spPeriod === 1 ? 'calendar year' : `${spPeriod}-year stretch`
   const cmpStretchWord = cmpPeriod === 1 ? 'calendar year' : `${cmpPeriod}-year stretch`
+  // The leftmost end year actually drawn (a long window near the start year may
+  // begin later than `start` if it would reach before 1928).
+  const firstEnd = spSeries.points[0]?.end ?? start
 
   const caption = asset
-    ? `Annualized return of every ${stretchWord} of the S&P 500 with dividends (green) and every ${cmpStretchWord} of ${asset.plural} (${asset.colorWord}), starting no earlier than ${start}. The green series ranged from ${formatPercent(sp.worst, 1)} a year (window ending ${sp.worstEnd}) to ${formatPercent(sp.best, 1)} (ending ${sp.bestEnd}); the ${asset.colorWord} one from ${formatPercent(cmp!.worst, 1)} to ${formatPercent(cmp!.best, 1)}.`
-    : `Annualized return of every ${stretchWord} of the S&P 500 with dividends since ${start}. The worst window returned ${formatPercent(sp.worst, 1)} a year (ending ${sp.worstEnd}) and the best ${formatPercent(sp.best, 1)} a year (ending ${sp.bestEnd}). Use the comparison control to lay a second series alongside it, another asset or the same stocks at a longer window.`
+    ? `Annualized return of the S&P 500 with dividends over every ${stretchWord} (green) and ${asset.plural} over every ${cmpStretchWord} (${asset.colorWord}), each plotted at the year its window ends, from ${firstEnd} to ${HISTORY_LAST_YEAR}. Every window looks back its full length, into data as old as ${HISTORY_FIRST_YEAR}. The green series ranged from ${formatPercent(sp.worst, 1)} a year (window ending ${sp.worstEnd}) to ${formatPercent(sp.best, 1)} (ending ${sp.bestEnd}); the ${asset.colorWord} one from ${formatPercent(cmp!.worst, 1)} to ${formatPercent(cmp!.best, 1)}.`
+    : `Annualized return of the S&P 500 with dividends over every ${stretchWord}, plotted at the year its window ends, from ${firstEnd} to ${HISTORY_LAST_YEAR}. The worst window returned ${formatPercent(sp.worst, 1)} a year (ending ${sp.worstEnd}) and the best ${formatPercent(sp.best, 1)} a year (ending ${sp.bestEnd}). Use the comparison control to lay a second series alongside it, another asset or the same stocks at a longer window.`
 
   return (
     <>
       <StepHeader
         title="Stocks and bonds by holding period"
-        hint={`Every rolling stretch of market history from your chosen start year to ${HISTORY_LAST_YEAR}, and what each investment returned per year over it. Lengthen the window and watch the stock line calm down.`}
+        hint={`Every rolling window of market history, drawn at the year it ends. The start year sets the chart's left edge; each window still looks back its full length. Lengthen the window and watch the stock line calm down.`}
       />
       <div className={styles.rollingControls}>
         <Slider
@@ -166,7 +171,7 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
           max={maxStart}
           step={1}
           readout={String(start)}
-          note={`Windows that begin ${start} or later, through ${HISTORY_LAST_YEAR}.`}
+          note={`The chart runs from ${start} to ${HISTORY_LAST_YEAR}; each window looks back over its own length.`}
         />
         <SegmentedControl
           label="Stocks rolling window"
@@ -209,7 +214,7 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
           value={sp.losing / Math.max(1, sp.n)}
           format={(v) => formatPercent(v, 0)}
           accentColor={sp.losing === 0 ? GREEN : CARDINAL}
-          note={`${sp.losing} of ${sp.n} windows since ${start}`}
+          note={`${sp.losing} of ${sp.n} windows ending ${firstEnd}–${HISTORY_LAST_YEAR}`}
         />
         {compareKey === 'sp' && cmp ? (
           <Stat

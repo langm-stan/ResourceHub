@@ -157,9 +157,16 @@ export interface OddsRow {
 /*
  * Rolling holding-period returns, 1928-2025 (Damodaran annual data,
  * see ./historyData.ts). A "window" is every consecutive stretch of
- * `period` calendar years starting no earlier than `startYear`; its
- * return is annualized (the geometric mean), so a 20-year window's
- * figure answers "what did each year average over those 20 years."
+ * `period` calendar years; its return is annualized (the geometric
+ * mean), so a 20-year window's figure answers "what did each year
+ * average over those 20 years."
+ *
+ * `startYear` clips the x-axis, not the lookback: a window is kept when
+ * it ENDS in `startYear` or later. Each window still reaches back its
+ * full length into the data, so a 20-year window plotted at 1983 spans
+ * 1964-1983 even though the chart starts at 1983. The window can only
+ * reach as far back as 1928, so end years before 1928+period-1 have no
+ * window and simply don't appear.
  */
 
 export type AssetKey = 'sp' | 'bond' | 'bill' | 'baa'
@@ -177,7 +184,7 @@ export interface RollingSeriesPoint {
 export function rollingSeries(key: AssetKey, period: number, startYear: number): RollingSeriesPoint[] {
   const points: RollingSeriesPoint[] = []
   for (let i = period - 1; i < HISTORY.length; i++) {
-    if (HISTORY[i - period + 1]!.y < startYear) continue
+    if (HISTORY[i]!.y < startYear) continue
     let growth = 1
     for (let j = i - period + 1; j <= i; j++) growth *= 1 + HISTORY[j]![key]
     points.push({ end: HISTORY[i]!.y, v: Math.pow(growth, 1 / period) - 1 })

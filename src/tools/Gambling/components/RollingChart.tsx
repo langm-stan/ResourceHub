@@ -44,8 +44,9 @@ export function RollingChart({
 }) {
   return (
     <ChartFrame
-      ratio={0.42}
-      maxHeight={380}
+      ratio={0.52}
+      maxHeight={480}
+      margin={{ right: 92 }}
       figure={figure}
       caption={caption}
       exportStats={exportStats}
@@ -168,7 +169,7 @@ function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries
           x={x(s.points[s.points.length - 1]!.end)}
           y={y(s.points[s.points.length - 1]!.v)}
           textDy={textDy}
-          text={`${s.short} · ${s.period}yr`}
+          text={s.short}
           color={s.color}
         />
       ))}
