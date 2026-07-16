@@ -65,9 +65,14 @@ export interface JarRow {
 
 /**
  * The same pre-tax earnings go into three jars each year. The taxable jar is
- * taxed on the way in and on each year's returns; the traditional jar is
- * taxed once at withdrawal (rows show its after-tax value); the Roth jar is
- * taxed once on the way in.
+ * taxed on the way in (at today's rate, since the wages are earned now) and
+ * on each year's returns; the traditional jar is taxed once at withdrawal
+ * (rows show its after-tax value); the Roth jar is taxed once on the way in.
+ *
+ * The taxable jar's yearly return tax uses the retirement rate, not today's:
+ * its gains accrue over a whole career toward the same rate environment the
+ * traditional jar retires into, so charging the low current rate would let
+ * "taxed twice" beat "taxed once at a higher rate" whenever rates rise.
  */
 export function jarSeries(earn: number, years: number, ret: number, taxNow: number, taxLater: number): JarRow[] {
   const rows: JarRow[] = []
@@ -76,7 +81,7 @@ export function jarSeries(earn: number, years: number, ret: number, taxNow: numb
   let roth = 0
   for (let y = 0; y <= years; y++) {
     if (y > 0) {
-      taxable = taxable * (1 + ret * (1 - taxNow)) + earn * (1 - taxNow)
+      taxable = taxable * (1 + ret * (1 - taxLater)) + earn * (1 - taxNow)
       trad = trad * (1 + ret) + earn
       roth = roth * (1 + ret) + earn * (1 - taxNow)
     }

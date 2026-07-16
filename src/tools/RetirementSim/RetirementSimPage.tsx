@@ -337,7 +337,7 @@ function AccountTaxation() {
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
           figure="Figure 1."
-          caption={`After-tax value of ${formatUSDWhole(earn)} of earnings saved each year in each account. The taxable account's returns are taxed every year at the full rate, a simplification.`}
+          caption={`After-tax value of ${formatUSDWhole(earn)} of earnings saved each year in each account. The taxable account's returns are taxed every year at the retirement rate, a simplification: real brokerage accounts pay lower capital-gains rates and defer tax on gains until sale.`}
           ariaLabel="After-tax value of taxable, traditional, and Roth accounts over time"
           exportStats={[
             { label: 'Taxable', value: formatUSDWhole(last.taxable), color: SLATE },
