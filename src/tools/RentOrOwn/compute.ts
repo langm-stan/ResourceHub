@@ -63,13 +63,19 @@ export interface RaceResult {
  * the same up-front cash, and each month whoever pays less invests the
  * difference. Wealth is compared if the owner sold in year t.
  */
-export function wealthRace(price: number, rent0: number, downShare: number, growth: Growth): RaceResult {
+export function wealthRace(
+  price: number,
+  rent0: number,
+  downShare: number,
+  growth: Growth,
+  apr = APR
+): RaceResult {
   const g = GROWTH_RATES[growth]
   const down = price * downShare
   const closing = price * BUY_CLOSING
   const loan = price - down
-  const pAndI = monthlyPayment(loan)
-  const iMo = APR / 12
+  const pAndI = monthlyPayment(loan, apr)
+  const iMo = apr / 12
   const rMo = ALT_RETURN / 12
 
   let balance = loan

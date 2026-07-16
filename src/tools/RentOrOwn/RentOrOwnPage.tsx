@@ -32,9 +32,13 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
   const [price, setPrice] = useState(420000)
   const [rent, setRent] = useState(2600)
   const [downPct, setDownPct] = useState(20)
+  const [ratePct, setRatePct] = useState(Math.round(APR * 1000) / 10)
   const [growth, setGrowth] = useState<Growth>('typical')
 
-  const race = useMemo(() => wealthRace(price, rent, downPct / 100, growth), [price, rent, downPct, growth])
+  const race = useMemo(
+    () => wealthRace(price, rent, downPct / 100, growth, ratePct / 100),
+    [price, rent, downPct, growth, ratePct]
+  )
   const x = [0, ...race.rows.map((r) => r.year)]
   // Year 0: selling on day one recovers the equity minus the 6% selling costs;
   // the renter still holds the down payment and closing costs as cash.
@@ -62,8 +66,8 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
         <div className={styles.grid}>
           <div className={styles.controlsCol}>
             <p className={styles.lede}>
-              Set the price, the rent for the same home, and the down payment, from real listings
-              when you can.
+              Set the price, the rent for the same home, the down payment, and the mortgage rate,
+              from real listings and rate quotes when you can.
             </p>
             <Slider
               label="Home price"
@@ -92,6 +96,17 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
               min={0}
               max={50}
               step={1}
+              editable
+              suffix="%"
+              precision={1}
+            />
+            <Slider
+              label="Mortgage rate (30-year fixed)"
+              value={ratePct}
+              onChange={setRatePct}
+              min={2}
+              max={12}
+              step={0.1}
               editable
               suffix="%"
               precision={1}
@@ -195,10 +210,11 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
       </Card>
 
       <p className={styles.footnote}>
-        Simplified for classroom discussion, not financial advice. 30-year fixed at {pct(APR, 1)}{' '}
-        (Freddie Mac, 2026); property tax 1.1%, insurance 0.5%, upkeep 1% of value; rents grow{' '}
-        {pct(RENT_GROWTH)} a year; invested cash earns {pct(ALT_RETURN)}; closing costs{' '}
-        {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes on both sides are ignored.
+        Simplified for classroom discussion, not financial advice. 30-year fixed; the rate starts
+        at {pct(APR, 1)} (Freddie Mac, 2026) and is adjustable above. Property tax 1.1%, insurance
+        0.5%, upkeep 1% of value; rents grow {pct(RENT_GROWTH)} a year; invested cash earns{' '}
+        {pct(ALT_RETURN)}; closing costs {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes
+        on both sides are ignored.
       </p>
     </div>
   )
