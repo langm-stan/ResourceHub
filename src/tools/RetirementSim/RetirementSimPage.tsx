@@ -43,6 +43,7 @@ const RED = 'var(--c-accent)'
 const GREEN = 'var(--c-series-1)'
 const GOLD = 'var(--c-series-2)'
 const SLATE = 'var(--c-series-3)'
+const VIOLET = 'var(--c-series-5)'
 
 /* Full-width figures: wider than the two-column original, so also taller. */
 const CHART_RATIO = 0.5
@@ -114,11 +115,24 @@ function TakeHomePay() {
   }, [gross, cur])
   const tip = hover != null ? segments[hover] : null
 
+  /*
+   * State and payroll taxes are drawn as flat bands across the non-401(k)
+   * dollars: each is its own total (from the stats) spread evenly over the
+   * income it applies to, so the bands sum to the figures shown below.
+   * Federal stays genuinely progressive, band by bracket. Payroll (FICA)
+   * has no standard deduction, so it also bites the standard-deduction slice.
+   */
+  const taxableBase = Math.max(0, gross - cur.k)
+  const payrollRate = withPayroll && taxableBase > 0 ? cur.payroll / taxableBase : 0
+  const stateRate = withState && cur.state && taxableBase > 0 ? cur.state.tax / taxableBase : 0
+  const tipState = tip && !tip.invested ? stateRate * tip.total : 0
+  const tipPayroll = tip && !tip.invested ? payrollRate * tip.total : 0
+
   return (
     <div className={styles.section}>
       <p className={styles.sectionLede}>
         Set a salary and watch each dollar go through the federal brackets in order. The toggles
-        add the other pieces of a real paycheck.
+        add the other pieces of a real paycheck, and the bar fills in their bite.
       </p>
       <div className={styles.controlsRow}>
         <div className={styles.controlStack}>
@@ -193,12 +207,21 @@ function TakeHomePay() {
         <div className={styles.legend}>
           <span style={{ color: GOLD }}>&#9632; kept</span>
           <span style={{ color: RED }}>&#9632; federal income tax</span>
+          {withState && <span style={{ color: VIOLET }}>&#9632; state income tax</span>}
+          {withPayroll && <span style={{ color: SLATE }}>&#9632; payroll (SS &amp; Medicare)</span>}
           {cur.k > 0 && <span style={{ color: GREEN }}>&#9632; 401(k), still yours</span>}
         </div>
         <div className={styles.bracketWrap}>
           <div className={styles.bracketBar} onMouseLeave={() => setHover(null)}>
             {segments.map((g, i) => {
-              const takenShare = g.total > 0 ? g.taken / g.total : 0
+              const bands = g.invested
+                ? []
+                : [
+                    { h: g.total > 0 ? g.taken / g.total : 0, c: RED },
+                    { h: stateRate, c: VIOLET },
+                    { h: payrollRate, c: SLATE },
+                  ]
+              let top = 0
               return (
                 <div
                   key={i}
@@ -206,7 +229,12 @@ function TakeHomePay() {
                   style={{ width: `${g.w}%`, ...(g.invested ? { background: GREEN } : {}) }}
                   onMouseEnter={() => setHover(i)}
                 >
-                  <div className={styles.bracketTax} style={{ height: `${takenShare * 100}%` }} />
+                  {bands.map((b, j) => {
+                    if (b.h <= 0) return null
+                    const style = { top: `${top * 100}%`, height: `${b.h * 100}%`, background: b.c }
+                    top += b.h
+                    return <div key={j} className={styles.bracketBand} style={style} />
+                  })}
                   {g.w > 7 && !g.invested && <div className={styles.bracketRate}>{pct(g.rate)}</div>}
                 </div>
               )
@@ -223,9 +251,21 @@ function TakeHomePay() {
                 <span>Federal income tax</span>
                 <strong className="tnum">{formatUSDWhole(tip.taken)}</strong>
               </div>
+              {tipState > 0 && (
+                <div className={styles.barTipRow}>
+                  <span>State income tax</span>
+                  <strong className="tnum">{formatUSDWhole(tipState)}</strong>
+                </div>
+              )}
+              {tipPayroll > 0 && (
+                <div className={styles.barTipRow}>
+                  <span>Payroll (SS &amp; Medicare)</span>
+                  <strong className="tnum">{formatUSDWhole(tipPayroll)}</strong>
+                </div>
+              )}
               <div className={styles.barTipRow}>
                 <span>{tip.invested ? 'Invested, still yours' : 'Kept'}</span>
-                <strong className="tnum">{formatUSDWhole(tip.total - tip.taken)}</strong>
+                <strong className="tnum">{formatUSDWhole(tip.total - tip.taken - tipState - tipPayroll)}</strong>
               </div>
             </div>
           )}
@@ -866,40 +906,46 @@ function RetirementTiming() {
   )
 }
 
-/* ============================== page ============================== */
+/* ============================== pages ============================== */
 
-const SECTIONS = [
-  { id: 1, name: 'Take-Home Pay', C: TakeHomePay },
-  { id: 2, name: 'Account Taxation', C: AccountTaxation },
-  { id: 3, name: 'Employer Matching', C: EmployerMatching },
-  { id: 4, name: 'Retirement Timing', C: RetirementTiming },
+/*
+ * The lesson family split into two tools that share the part components and
+ * helpers above: Tax Advantages (parts 1-3, the tax side) and the Retirement
+ * Planning Simulator (part 4, the timing side). Both are wired into the
+ * Thursday-morning session.
+ */
+
+const TAX_SECTIONS = [
+  { name: 'Take-Home Pay', C: TakeHomePay },
+  { name: 'Account Taxation', C: AccountTaxation },
+  { name: 'Employer Matching', C: EmployerMatching },
 ]
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
-export function RetirementSimPage({ intro = true }: { intro?: boolean } = {}) {
-  const [active, setActive] = useState(1)
-  const S = SECTIONS.find((s) => s.id === active)!
+export function TaxAdvantagesPage({ intro = true }: { intro?: boolean } = {}) {
+  const [active, setActive] = useState(0)
+  const S = TAX_SECTIONS[active]!
 
   return (
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
-          <p className={styles.eyebrow}>Lesson · Tax efficiency, employer benefits &amp; retirement</p>
-          <h1 className={styles.h1}>Retirement Planning Simulator</h1>
+          <p className={styles.eyebrow}>Lesson · Taxes &amp; tax-advantaged saving</p>
+          <h1 className={styles.h1}>Tax Advantages</h1>
         </header>
       )}
 
-      <div className={styles.tabs} role="tablist" aria-label="Simulator sections">
-        {SECTIONS.map((s) => (
+      <div className={styles.tabs} role="tablist" aria-label="Tax advantages sections">
+        {TAX_SECTIONS.map((s, i) => (
           <button
-            key={s.id}
+            key={s.name}
             type="button"
             role="tab"
-            aria-selected={active === s.id}
-            className={active === s.id ? `${styles.tab} ${styles.tabActive}` : styles.tab}
-            onClick={() => setActive(s.id)}
+            aria-selected={active === i}
+            className={active === i ? `${styles.tab} ${styles.tabActive}` : styles.tab}
+            onClick={() => setActive(i)}
           >
-            <div className={styles.tabKicker}>PART {s.id}</div>
+            <div className={styles.tabKicker}>PART {i + 1}</div>
             <div className={styles.tabName}>{s.name}</div>
           </button>
         ))}
@@ -913,8 +959,33 @@ export function RetirementSimPage({ intro = true }: { intro?: boolean } = {}) {
         Tax math: {TAX_YEAR} federal brackets and the {formatUSDWhole(STD_DEDUCTION)} standard
         deduction, single filer (IRS Rev. Proc. 2025-32); FICA with the{' '}
         {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base; optional state income tax from
-        the Tax Foundation&rsquo;s {TAX_YEAR} state tables. All four parts use simplified annual
+        the Tax Foundation&rsquo;s {TAX_YEAR} state tables. These three parts use simplified annual
         compounding for teaching; they are illustrations, not financial advice.
+      </p>
+    </div>
+  )
+}
+
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function RetirementSimPage({ intro = true }: { intro?: boolean } = {}) {
+  return (
+    <div className={styles.page}>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Planning for retirement</p>
+          <h1 className={styles.h1}>Retirement Planning Simulator</h1>
+        </header>
+      )}
+
+      <Card tone="raised">
+        <RetirementTiming />
+      </Card>
+
+      <p className={styles.footnote}>
+        The two-step method: the savings that fund a retirement income, then the level yearly saving
+        that builds it, at {pct(R_SAVE)} while working and {pct(R_RETIRED, 1)} once retired over a{' '}
+        {RETIREMENT_YEARS}-year retirement. Simplified annual compounding for teaching; an
+        illustration, not financial advice.
       </p>
     </div>
   )

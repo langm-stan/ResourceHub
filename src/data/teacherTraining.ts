@@ -155,9 +155,14 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     speaker: 'Prof. Lang',
     tools: [
       {
-        slug: 'gambling-investing',
-        label: 'Chance & Ownership',
-        description: 'Three stations from pure chance to ownership: the house, the stock picker, and the index fund.',
+        slug: 'gambling-sim',
+        label: 'Gambling Simulation',
+        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets, and the law of large numbers grinds the group down.',
+      },
+      {
+        slug: 'stock-picker',
+        label: 'Stock Picker',
+        description: 'Commit $1,000 to one of the 100 largest US companies of a real January and watch its actual decade against the index. Most single picks trail.',
       },
     ],
   },
@@ -171,6 +176,11 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
     speaker: 'Prof. Lang',
     tools: [
       {
+        slug: 'index-fund-fees',
+        label: 'Index Fund Fees',
+        description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
+      },
+      {
         slug: 'stocks-bonds',
         label: 'Stocks vs. Bonds',
         description: 'Rolling returns since 1928: pick the start year and window for stocks, then compare against bonds, bills, or the same stocks at another window.',
@@ -181,9 +191,9 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         description: 'Brackets, marginal vs. effective rates, the paycheck, and the accounts that shelter savings.',
       },
       {
-        slug: 'retirement-simulator',
-        label: 'Retirement Planning Simulator',
-        description: 'Four stations: take-home pay, account taxation, employer matching, and retirement timing, each with an exit ticket.',
+        slug: 'tax-advantages',
+        label: 'Tax Advantages',
+        description: 'Three parts: how a paycheck is taxed, how taxable, traditional, and Roth accounts are taxed, and how an employer match adds free money.',
       },
     ],
   },
@@ -210,6 +220,11 @@ export const TRAINING_SESSIONS: TrainingSession[] = [
         slug: 'rent-or-own',
         label: 'Rent or Own',
         description: 'The first-year cost of owning versus renting the same home, then the wealth of each household over the loan’s thirty years.',
+      },
+      {
+        slug: 'retirement-simulator',
+        label: 'Retirement Planning Simulator',
+        description: 'The two-step method: the savings that fund a retirement income, then the yearly saving that builds it, and how starting age and savings rate move the date.',
       },
     ],
   },

@@ -19,9 +19,11 @@ import { CreditScorePage } from '../tools/CreditScore/CreditScorePage'
 import { PayingOffDebtPage } from '../tools/PayingOffDebt/PayingOffDebtPage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
-import { ChanceOwnershipPage } from '../tools/ChanceOwnership/ChanceOwnershipPage'
+import { GamblingSimPage } from '../tools/ChanceOwnership/GamblingSimPage'
+import { StockPickerPage } from '../tools/ChanceOwnership/StockPickerPage'
+import { IndexFundFeesPage } from '../tools/ChanceOwnership/IndexFundFeesPage'
 import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
-import { RetirementSimPage } from '../tools/RetirementSim/RetirementSimPage'
+import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/RetirementSimPage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
 
@@ -103,17 +105,35 @@ const SECTIONS: Record<string, SectionConfig> = {
     instructor: { label: 'Your FICO Score', path: 'teacher-training/credit-score' },
     content: <CreditScorePage intro={false} />,
   },
-  'gambling-investing': {
-    title: 'Gambling vs. Investing',
+  'gambling-sim': {
+    title: 'Gambling Simulation',
     toolkit: true,
-    instructor: { label: 'Chance & Ownership', path: 'teacher-training/gambling-investing' },
-    content: <ChanceOwnershipPage intro={false} />,
+    instructor: { label: 'Gambling Simulation', path: 'teacher-training/gambling-sim' },
+    content: <GamblingSimPage intro={false} />,
+  },
+  'stock-picker': {
+    title: 'Stock Picker',
+    toolkit: true,
+    instructor: { label: 'Stock Picker', path: 'teacher-training/stock-picker' },
+    content: <StockPickerPage intro={false} />,
+  },
+  'index-fund-fees': {
+    title: 'Index Fund Fees',
+    toolkit: true,
+    instructor: { label: 'Index Fund Fees', path: 'teacher-training/index-fund-fees' },
+    content: <IndexFundFeesPage intro={false} />,
   },
   'stocks-bonds': {
     title: 'Stocks vs. Bonds',
     toolkit: true,
     instructor: { label: 'Stocks vs. Bonds', path: 'teacher-training/stocks-bonds' },
     content: <StocksBondsPage intro={false} />,
+  },
+  'tax-advantages': {
+    title: 'Tax Advantages',
+    toolkit: true,
+    instructor: { label: 'Tax Advantages', path: 'teacher-training/tax-advantages' },
+    content: <TaxAdvantagesPage intro={false} />,
   },
   'retirement-simulator': {
     title: 'Retirement Planning Simulator',

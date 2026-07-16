@@ -16,7 +16,7 @@ export default function InstructorBar({
   route?: string
   toolKey?: string
   toolLabel: string
-  /** Full hash path override for tools that live outside the ?tool= pages, e.g. "teacher-training/gambling-investing". */
+  /** Full hash path override for tools that live outside the ?tool= pages, e.g. "teacher-training/stock-picker". */
   path?: string
 }) {
   const [copied, setCopied] = useState<'embed' | 'link' | null>(null)
