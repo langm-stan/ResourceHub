@@ -144,8 +144,9 @@ export function amortizationSchedule(
   const totalInterest = cumulativeInterest
   const totalPaid = cumulativePrincipal + cumulativeInterest
 
+  // Relative tolerance: an absolute one falsely trips on float error at large principals.
   assert(
-    Math.abs(cumulativePrincipal - principal) < 1e-6,
+    Math.abs(cumulativePrincipal - principal) < 1e-9 * principal + 1e-6,
     'amortization failed to repay the full principal. Check inputs.',
   )
 

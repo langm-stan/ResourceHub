@@ -125,7 +125,11 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
         <div className={styles.contrib}>
           <Toggle
             label="Add regular contributions"
-            note="A fixed amount invested every compounding period."
+            note={
+              scenario.frequency === 'continuous'
+                ? 'A fixed amount invested every month. Under continuous compounding, contributions are still made monthly.'
+                : 'A fixed amount invested every compounding period.'
+            }
             checked={scenario.contribution != null}
             onChange={(on) =>
               onChange({
@@ -136,7 +140,7 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
           {scenario.contribution && (
             <div className={styles.contribFields}>
               <NumberField
-                label="Each period"
+                label={scenario.frequency === 'continuous' ? 'Each month' : 'Each period'}
                 value={scenario.contribution.amount}
                 onChange={(amount) =>
                   onChange({ contribution: { ...scenario.contribution!, amount } })

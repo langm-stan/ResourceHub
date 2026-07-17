@@ -63,7 +63,8 @@ export function formatPercent(rate: number, fractionDigits = 2): string {
 export function formatYears(years: number): string {
   if (years < 1) {
     const months = Math.round(years * 12)
-    return `${months} month${months === 1 ? '' : 's'}`
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'}`
+    return '1 year'
   }
   const rounded = Math.round(years * 10) / 10
   return `${rounded} year${rounded === 1 ? '' : 's'}`

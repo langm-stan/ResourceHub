@@ -255,8 +255,8 @@ export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
               ]}
             />
             <FormulaBlock
-              tex={`P_{t} = P_0 (1+\\pi)^{t} = ${texUSD(price)} \\cdot (1 + ${texNumber(rate / 100, 3)})^{${years}} = \\boxed{${texUSD(finalPrice)}}`}
-              caption="The compound interest formula, with π the inflation rate."
+              tex={`P_{t} = \\frac{P_0}{(1+\\pi)^{t}} = \\frac{${texUSD(price)}}{(1 + ${texNumber(rate / 100, 3)})^{${years}}} = \\boxed{${texUSD(finalBuys)}}`}
+              caption="The compound interest formula in reverse, with π the inflation rate: dividing by the price growth gives purchasing power."
               muted
             />
           </Card>
@@ -318,6 +318,13 @@ export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
                   A {vehicle.rate}% return exceeds {rate}% inflation: the{' '}
                   <strong>{formatUSDWhole(vehicleBalance)}</strong> balance is worth{' '}
                   <strong>{formatUSDWhole(vehicleBuys)}</strong> in today&rsquo;s dollars.
+                </>
+              ) : vehicle.rate === rate ? (
+                <>
+                  A {vehicle.rate}% return keeps pace with {rate}% inflation exactly: the{' '}
+                  <strong>{formatUSDWhole(vehicleBalance)}</strong> balance is worth{' '}
+                  <strong>{formatUSDWhole(vehicleBuys)}</strong> in today&rsquo;s dollars, the same
+                  purchasing power you started with.
                 </>
               ) : (
                 <>

@@ -49,7 +49,7 @@ const CARDS = [
     accent: '#007C92',
     title: 'Interactive Lessons',
     description:
-      'Research-grounded lessons you can explore: the life-cycle model behind retirement planning, and how federal and state taxes shape a paycheck.',
+      'Research-grounded lessons you can explore: the life-cycle model behind retirement planning, how federal and state taxes shape a paycheck, and the true cost of buying a home.',
     cta: 'Start a lesson',
   },
   {

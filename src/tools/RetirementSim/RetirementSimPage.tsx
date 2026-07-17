@@ -116,17 +116,19 @@ function TakeHomePay() {
   const tip = hover != null ? segments[hover] : null
 
   /*
-   * State and payroll taxes are drawn as flat bands across the non-401(k)
-   * dollars: each is its own total (from the stats) spread evenly over the
-   * income it applies to, so the bands sum to the figures shown below.
-   * Federal stays genuinely progressive, band by bracket. Payroll (FICA)
-   * has no standard deduction, so it also bites the standard-deduction slice.
+   * State and payroll taxes are drawn as flat bands: each is its own total
+   * (from the stats) spread evenly over the income it applies to, so the
+   * bands sum to the figures shown below. Federal stays genuinely
+   * progressive, band by bracket. State tax skips the 401(k) slice (the
+   * deferral is excluded from state taxable income here), but payroll (FICA)
+   * is owed on every wage dollar, deferred or not, so its band covers the
+   * 401(k) and standard-deduction slices too.
    */
   const taxableBase = Math.max(0, gross - cur.k)
-  const payrollRate = withPayroll && taxableBase > 0 ? cur.payroll / taxableBase : 0
+  const payrollRate = withPayroll && gross > 0 ? cur.payroll / gross : 0
   const stateRate = withState && cur.state && taxableBase > 0 ? cur.state.tax / taxableBase : 0
   const tipState = tip && !tip.invested ? stateRate * tip.total : 0
-  const tipPayroll = tip && !tip.invested ? payrollRate * tip.total : 0
+  const tipPayroll = tip ? payrollRate * tip.total : 0
 
   return (
     <div className={styles.section}>
@@ -215,7 +217,7 @@ function TakeHomePay() {
           <div className={styles.bracketBar} onMouseLeave={() => setHover(null)}>
             {segments.map((g, i) => {
               const bands = g.invested
-                ? []
+                ? [{ h: payrollRate, c: SLATE }]
                 : [
                     { h: g.total > 0 ? g.taken / g.total : 0, c: RED },
                     { h: stateRate, c: VIOLET },
@@ -264,7 +266,13 @@ function TakeHomePay() {
                 </div>
               )}
               <div className={styles.barTipRow}>
-                <span>{tip.invested ? 'Invested, still yours' : 'Kept'}</span>
+                <span>
+                  {tip.invested
+                    ? tipPayroll > 0
+                      ? 'Invested after payroll tax, still yours'
+                      : 'Invested, still yours'
+                    : 'Kept'}
+                </span>
                 <strong className="tnum">{formatUSDWhole(tip.total - tip.taken - tipState - tipPayroll)}</strong>
               </div>
             </div>
@@ -781,7 +789,7 @@ function RetirementTiming() {
           xTickFormat={(v) => `age ${Math.round(v)}`}
           xHoverLabel={(v) => `Age ${Math.round(v)}`}
           figure="Figure 4."
-          caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${RETIRE_AGE}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to miss by the same margin (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
+          caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${RETIRE_AGE}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
           ariaLabel="Accumulation under the planned return versus the actual return"
           exportStats={[
             { label: `Planned at ${plannedPct}`, value: formatUSDWhole(planEnd.plan), color: GOLD },

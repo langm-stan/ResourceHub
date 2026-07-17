@@ -11,7 +11,7 @@ import {
   useChart,
   type ExportStat,
 } from '../../../design-system/chart'
-import { formatUSDCompact, formatUSDWhole, formatYears } from '../../../lib/format'
+import { formatUSD, formatUSDCompact, formatUSDWhole, formatYears } from '../../../lib/format'
 import type { BalancePoint, TvmResults } from '../compute'
 
 export function TvmChart({
@@ -29,12 +29,12 @@ export function TvmChart({
     : `Your savings building toward the goal over ${years} years. The dashed line is your target.`
   const exportStats: ExportStat[] = isLoan
     ? [
-        { label: 'Monthly payment', value: formatUSDWhole(results.payment), color: 'var(--c-accent)' },
+        { label: 'Monthly payment', value: formatUSD(results.payment), color: 'var(--c-accent)' },
         { label: "Total you'll pay", value: formatUSDWhole(results.totalPaid) },
         { label: 'Of that, interest', value: formatUSDWhole(results.totalInterest), color: 'var(--c-series-2)' },
       ]
     : [
-        { label: 'Save each month', value: formatUSDWhole(results.payment), color: 'var(--c-accent)' },
+        { label: 'Save each month', value: formatUSD(results.payment), color: 'var(--c-accent)' },
         { label: "You'll contribute", value: formatUSDWhole(results.totalPaid) },
         { label: 'Interest adds', value: formatUSDWhole(results.totalInterest), color: 'var(--c-series-1)' },
       ]

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Callout } from '../../design-system'
 import { fmtPct, formatUSDWhole } from '../../lib/format'
 import { hasActuals, sumActuals, sumItems, type LineItem } from '../../data/checkupData'
@@ -38,6 +39,11 @@ function withActual(items: LineItem[], key: string, raw: string): LineItem[] {
  * the actual column, stored on the same snapshot rows.
  */
 export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSavingChange }: PlanVsActualProps) {
+  // The raw text of whichever actual field is being typed in, keyed by row.
+  // Showing the draft (instead of String(actual)) keeps a trailing decimal
+  // point alive between keystrokes, so cents like 12.75 can be entered.
+  const [draft, setDraft] = useState<{ key: string; text: string } | null>(null)
+
   const plannedExp = sumItems(expenses)
   const actualExp = sumActuals(expenses)
   const plannedSav = sumItems(saving)
@@ -72,10 +78,17 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
             <input
               className={`${styles.actual} tnum`}
               inputMode="decimal"
-              value={isTracked ? String(it.actual) : ''}
+              value={draft?.key === it.key ? draft.text : isTracked ? String(it.actual) : ''}
               placeholder="0"
               aria-label={`${flip ? 'Actually set aside for' : 'Actually spent on'} ${it.label || 'untitled row'}`}
-              onChange={(e) => onChange(withActual(items, it.key, e.target.value))}
+              onChange={(e) => {
+                setDraft({ key: it.key, text: e.target.value })
+                onChange(withActual(items, it.key, e.target.value))
+              }}
+              onBlur={() => setDraft(null)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+              }}
             />
           </div>
         </div>

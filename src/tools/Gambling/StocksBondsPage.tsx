@@ -13,7 +13,7 @@ import { RollingChart, type ChartSeries } from './components/RollingChart'
 import styles from './GamblingPage.module.css'
 
 /*
- * Stocks vs. bonds by holding period: 97 years of rolling windows from
+ * Stocks vs. bonds by holding period: 98 years of rolling windows from
  * the Damodaran annual series (see ./historyData.ts). It opens on the
  * plain story, the S&P 500 one year at a time, and every step of
  * flexibility is a control: the start year, the stock window, and an
@@ -80,7 +80,11 @@ const ASSETS: Record<
 const isCompareKey = (v: string): v is CompareKey => v === 'none' || v in ASSETS
 
 export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string } = {}) {
-  const [startYear, setStartYear] = usePersistentState('ifdm-stocks-bonds-start', HISTORY_FIRST_YEAR)
+  const [startYear, setStartYear] = usePersistentState(
+    'ifdm-stocks-bonds-start',
+    HISTORY_FIRST_YEAR,
+    (v) => Number.isInteger(v) && v >= HISTORY_FIRST_YEAR && v <= HISTORY_LAST_YEAR
+  )
   const [spPeriodKey, setSpPeriodKey] = usePersistentState<PeriodKey>(
     'ifdm-stocks-bonds-period',
     '1',
@@ -302,7 +306,7 @@ export function StocksBondsPage({ intro = true }: { intro?: boolean } = {}) {
           <h1 className={styles.h1}>Stocks, bonds, and the holding period</h1>
           <p className={styles.lead}>
             A stock is a share of a business&rsquo;s profits; a bond is a loan with a promised
-            payment. The bond is the steadier year, the stock is the better decade, and 97 years
+            payment. The bond is the steadier year, the stock is the better decade, and 98 years
             of market history show exactly how the holding period settles the contest between
             them.
           </p>

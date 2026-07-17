@@ -13,7 +13,7 @@ const STORIES = [
     body: [
       'Dave and Michelle, two 25-year-olds who just got married, received $5,000 in cash as wedding presents and needed to decide what to do with it. Dave suggested waiting to invest until they had better jobs and made more money.',
       "Michelle told Dave about the Rule of 72, which approximates how many years it takes for an investment to double at a given annual rate of return. With a 7% return, plausible for a diversified stock portfolio held for the long term, their money would double roughly every 10 years.",
-      "At a 7% annual return, their original $5,000 would grow to about $160,000 by the time they turned 75. If they waited until age 55 to invest that same $5,000, it would grow to only about $20,000 by 75, far less than investing right away.",
+      "At a 7% annual return, their original $5,000 would grow to about $147,000 by the time they turned 75. If they waited until age 55 to invest that same $5,000, it would grow to only about $20,000 by 75, far less than investing right away.",
       'Dave and Michelle decided to invest their $5,000 immediately, giving compound interest as much time as possible to work.',
     ],
   },

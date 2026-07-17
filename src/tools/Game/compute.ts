@@ -6,7 +6,7 @@
  * returns include dividends, both disclosed on the page.
  */
 import { SPX } from '../Timing/spxData'
-import { BOTTOMS, monthName } from '../Timing/compute'
+import { monthName } from '../Timing/compute'
 
 export const ROUND_MONTHS = 120
 export const START_BALANCE = 10_000
@@ -45,7 +45,7 @@ const EVENTS: { y: number; m: number; text: string }[] = [
 
 export function revealRound(start: number): Reveal {
   const first = SPX[start]!
-  const last = SPX[start + ROUND_MONTHS - 1]!
+  const last = SPX[start + ROUND_MONTHS]!
   const inWindow = (y: number, m: number) => {
     const a = first.y * 12 + first.m
     const b = last.y * 12 + last.m
@@ -56,11 +56,4 @@ export function revealRound(start: number): Reveal {
     label: `${monthName(first.m)} ${first.y} to ${monthName(last.m)} ${last.y}`,
     events: EVENTS.filter((e) => inWindow(e.y, e.m)).map((e) => e.text),
   }
-}
-
-/** Bear bottoms are marked on the reveal chart, like the Timing lesson. */
-export function bottomsInWindow(start: number): number[] {
-  return BOTTOMS.filter((b) => b.index > start && b.index < start + ROUND_MONTHS).map(
-    (b) => b.index - start
-  )
 }

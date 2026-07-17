@@ -399,11 +399,19 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 <Stat label="Interest adds" value={goalFinal - goalContributed} format={formatUSDWhole} accentColor={GREEN} />
               </div>
               <GoalChart points={goalSeries} years={goalYears} />
-              <FormulaBlock
-                tex={`FV = PMT \\cdot \\frac{(1+i)^{n} - 1}{i} = ${texUSD(monthly)} \\cdot \\frac{(1+${(goalRate / 1200).toFixed(6)})^{${goalYears * 12}} - 1}{${(goalRate / 1200).toFixed(6)}} = \\boxed{${texUSD(goalFinal)}}`}
-                caption={`The future value of an annuity. i is the monthly rate (${goalRate}% ÷ 12); n is the ${goalYears * 12} monthly deposits.`}
-                muted
-              />
+              {goalRate === 0 ? (
+                <FormulaBlock
+                  tex={`FV = PMT \\cdot n = ${texUSD(monthly)} \\cdot ${goalYears * 12} = \\boxed{${texUSD(goalFinal)}}`}
+                  caption={`With a 0% return there is no compounding: the future value is just the ${goalYears * 12} monthly deposits added up.`}
+                  muted
+                />
+              ) : (
+                <FormulaBlock
+                  tex={`FV = PMT \\cdot \\frac{(1+i)^{n} - 1}{i} = ${texUSD(monthly)} \\cdot \\frac{(1+${(goalRate / 1200).toFixed(6)})^{${goalYears * 12}} - 1}{${(goalRate / 1200).toFixed(6)}} = \\boxed{${texUSD(goalFinal)}}`}
+                  caption={`The future value of an annuity. i is the monthly rate (${goalRate}% ÷ 12); n is the ${goalYears * 12} monthly deposits.`}
+                  muted
+                />
+              )}
               <Callout tone="note" label="The payoff">
                 Setting aside <strong>{formatUSDWhole(monthly)}</strong> a month for {goalYears} years
                 could grow to <strong>{formatUSDWhole(goalFinal)}</strong>. You&rsquo;d put in{' '}

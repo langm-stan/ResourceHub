@@ -215,14 +215,20 @@ function BracketContainers({ segments }: { segments: BracketSegment[] }) {
 
 function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
   const { incomeTax, state } = paycheck
-  // The $1,000-raise experiment, run exactly: federal and state together.
+  // The $1,000-raise experiment, run exactly: federal and state together. The
+  // raise lands on gross wages, so it runs through the same pipeline as the
+  // real numbers — any unused standard deduction absorbs it first.
   const raise = useMemo(() => {
-    const fed = computeIncomeTax(incomeTax.taxable + 1_000, status).tax - incomeTax.tax
+    const fedTaxable = Math.max(
+      0,
+      paycheck.gross + 1_000 - paycheck.contribution401k - paycheck.standardDeduction
+    )
+    const fed = computeIncomeTax(fedTaxable, status).tax - incomeTax.tax
     const st =
       computeStateTax(paycheck.gross + 1_000, paycheck.contribution401k, status, state.code).tax -
       state.tax
     return fed + st
-  }, [incomeTax, status, paycheck.gross, paycheck.contribution401k, state])
+  }, [incomeTax, status, paycheck.gross, paycheck.contribution401k, paycheck.standardDeduction, state])
 
   return (
     <>
@@ -461,7 +467,7 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
           { label: 'Effective rate (taxes ÷ gross)', value: formatPercent(p.totalTaxRate, 1), color: GREEN },
           { label: 'Marginal rate (next dollar of wages)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
         ]}
-        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Both lines start at 7.65% because Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, while the income tax starts only above the standard deduction. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
+        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, so neither line starts at zero; the income tax joins in only once income clears any deduction. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
       />
 
       <Callout tone="note" label="Why the effective rate is always the lower one">

@@ -8,6 +8,7 @@ import {
   APR,
   BUY_CLOSING,
   HORIZON,
+  PMI_RATE,
   RENT_GROWTH,
   SELL_COSTS,
   wealthRace,
@@ -147,6 +148,12 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
                 <span>Property tax, insurance, upkeep</span>
                 <span className={styles.ledgerAmount}>{formatUSDWhole(race.escrowUpkeepMoYear1)}/mo</span>
               </div>
+              {race.pmiMo > 0 && (
+                <div className={styles.ledgerRow}>
+                  <span>Mortgage insurance (PMI), below 20% down</span>
+                  <span className={styles.ledgerAmount}>{formatUSDWhole(race.pmiMo)}/mo</span>
+                </div>
+              )}
               <div className={styles.ledgerRow}>
                 <span>Return the {formatUSDWhole(price * (downPct / 100))} down payment gives up</span>
                 <span className={styles.ledgerAmount}>{formatUSDWhole(race.forgoneReturnMo)}/mo</span>
@@ -212,9 +219,10 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
       <p className={styles.footnote}>
         Simplified for classroom discussion, not financial advice. 30-year fixed; the rate starts
         at {pct(APR, 1)} (Freddie Mac, 2026) and is adjustable above. Property tax 1.1%, insurance
-        0.5%, upkeep 1% of value; rents grow {pct(RENT_GROWTH)} a year; invested cash earns{' '}
-        {pct(ALT_RETURN)}; closing costs {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes
-        on both sides are ignored.
+        0.5%, upkeep 1% of value; PMI {pct(PMI_RATE, 1)} of the loan when the down payment is
+        under 20%; rents grow {pct(RENT_GROWTH)} a year; invested cash earns {pct(ALT_RETURN)};
+        closing costs {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes on both sides
+        are ignored.
       </p>
     </div>
   )

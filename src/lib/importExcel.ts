@@ -31,6 +31,16 @@ const asAmount = (v: unknown): number => {
   const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(/[$,\s]/g, ''))
   return Number.isFinite(n) ? n : 0
 }
+/**
+ * True when a cell holds something that reads as a number. The editor allows
+ * an amount with no label, so a value-only row is a real item; a row with
+ * neither label nor amount is just spacing.
+ */
+const hasAmount = (v: unknown): boolean => {
+  if (typeof v === 'number') return Number.isFinite(v)
+  if (typeof v === 'string' && v.trim() !== '') return Number.isFinite(Number(v.replace(/[$,\s]/g, '')))
+  return false
+}
 
 /**
  * Walk one two-column region (labels at `col`, amounts at `col + 1`) and
@@ -46,7 +56,6 @@ function parseGroupColumn(rows: Row[], col: number, template: AccountGroup[]): A
   let items: LineItem[] = []
   for (const row of rows) {
     const label = asLabel(row[col])
-    if (!label) continue
     const lower = label.toLowerCase()
 
     if (byLabel.has(lower) && asLabel(row[col + 1]).toLowerCase() === 'amount') {
@@ -60,6 +69,8 @@ function parseGroupColumn(rows: Row[], col: number, template: AccountGroup[]): A
       current = null
       continue
     }
+    // Keep unlabeled rows that carry an amount; skip rows with neither.
+    if (!label && !hasAmount(row[col + 1])) continue
     items.push({ ...newLineItem(label, asAmount(row[col + 1])) })
   }
 
@@ -82,7 +93,6 @@ function parseSection(rows: Row[], header: string, totalPrefix: string, withActu
   let inSection = false
   for (const row of rows) {
     const label = asLabel(row[0])
-    if (!label) continue
     const lower = label.toLowerCase()
     if (lower === header) {
       inSection = true
@@ -90,6 +100,8 @@ function parseSection(rows: Row[], header: string, totalPrefix: string, withActu
     }
     if (!inSection) continue
     if (lower.startsWith(totalPrefix)) break
+    // Keep unlabeled rows that carry an amount; skip rows with neither.
+    if (!label && !hasAmount(row[1])) continue
     const item = { ...newLineItem(label, asAmount(row[1])) }
     if (withActual) {
       const raw = row[2]

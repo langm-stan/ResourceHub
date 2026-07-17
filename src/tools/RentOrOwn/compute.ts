@@ -7,6 +7,8 @@
  * - 30-year fixed at the Housing tool's excellent-credit rate (6.4%, 2026).
  * - Property tax 1.1% and insurance 0.5% of home value per year; upkeep at
  *   the 1%-of-value rule of thumb.
+ * - PMI matches the Housing tool: 0.6% of the loan per year when the down
+ *   payment is under 20%, charged on the original loan.
  * - The alternative return on money not tied up in the house is 7%, the
  *   course's long-horizon planning rate.
  * - Rents grow 3% per year; buyer pays 3% closing costs going in; seller
@@ -17,6 +19,8 @@ import { COSTS, RATES } from '../Housing/data2026'
 export const APR = RATES.base30
 export const PROPERTY_TAX = COSTS.propertyTaxRate
 export const INSURANCE = COSTS.insuranceRate
+export const PMI_RATE = COSTS.pmiRate
+export const PMI_THRESHOLD = COSTS.pmiThreshold
 export const UPKEEP = 0.01
 export const ALT_RETURN = 0.07
 export const RENT_GROWTH = 0.03
@@ -53,6 +57,8 @@ export interface RaceResult {
   escrowUpkeepMoYear1: number
   /** What the down payment would have earned at the planning return. */
   forgoneReturnMo: number
+  /** Monthly mortgage insurance; zero at 20% down or more. */
+  pmiMo: number
   /** Principal paid: spending that becomes equity rather than cost. */
   principalMoYear1: number
 }
@@ -75,6 +81,8 @@ export function wealthRace(
   const closing = price * BUY_CLOSING
   const loan = price - down
   const pAndI = monthlyPayment(loan, apr)
+  // Same rule as the Housing tool: PMI on the original loan below 20% down.
+  const pmiMo = loan > 0 && downShare < PMI_THRESHOLD ? (loan * PMI_RATE) / 12 : 0
   const iMo = apr / 12
   const rMo = ALT_RETURN / 12
 
@@ -89,7 +97,7 @@ export function wealthRace(
   for (let year = 1; year <= HORIZON; year++) {
     const value = price * (1 + g) ** (year - 1)
     const rent = rent0 * (1 + RENT_GROWTH) ** (year - 1)
-    const ownCostMo = pAndI + (value * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12
+    const ownCostMo = pAndI + pmiMo + (value * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12
     for (let m = 0; m < 12; m++) {
       const interest = balance * iMo
       const principal = pAndI - interest
@@ -115,7 +123,7 @@ export function wealthRace(
   const breakEvenYear = rows.find((r) => r.owner >= r.renter)?.year ?? null
   const value1 = price
   const pureCostY1 =
-    interestY1 + value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)
+    interestY1 + pmiMo * 12 + value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)
   // Matches the lecture's year-one test: down-payment opportunity cost only;
   // closing costs stay in the wealth race, where they belong.
   const netOwnCostYear1 = (pureCostY1 + down * ALT_RETURN - principalY1) / 12
@@ -123,12 +131,13 @@ export function wealthRace(
   return {
     rows,
     breakEvenYear,
-    ownerMonthlyYear1: pAndI + (value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12,
+    ownerMonthlyYear1: pAndI + pmiMo + (value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12,
     pAndI,
     netOwnCostYear1,
     interestMoYear1: interestY1 / 12,
     escrowUpkeepMoYear1: (value1 * (PROPERTY_TAX + INSURANCE + UPKEEP)) / 12,
     forgoneReturnMo: (down * ALT_RETURN) / 12,
+    pmiMo,
     principalMoYear1: principalY1 / 12,
   }
 }

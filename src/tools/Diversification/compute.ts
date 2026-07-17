@@ -146,7 +146,7 @@ function normCdf(z: number): number {
 }
 
 export function simulateSingleStocks(years: number, nStocks = 60): SingleStockSim {
-  // Seed chosen so the shared market path lands within 1% of its true
+  // Seed chosen so the shared market path lands within about 2% of its true
   // 30-year median ($54.2k vs $55.2k per $10k): the drawn index line
   // should show the typical index experience, not a lucky or unlucky one.
   const rand = mulberry32(9)

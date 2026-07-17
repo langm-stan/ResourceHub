@@ -207,7 +207,7 @@ function OverviewPanel({ scenario, results }: { scenario: Scenario; results: Res
         />
         <Stat label="Promised later" value={results.futureAmount} format={formatUSDWhole} />
         <Stat
-          label="Rate"
+          label="Effective annual rate"
           value={results.ear}
           format={(v) => formatPercent(v, 2)}
           animate={false}

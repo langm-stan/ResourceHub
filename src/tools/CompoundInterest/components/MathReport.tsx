@@ -35,6 +35,7 @@ export function MathReport({ scenario, results }: MathReportProps) {
       })
     } else {
       const i = r / (m as number)
+      // PV is the closed form, no simulation, so the exponent is exact.
       const n = (m as number) * t
       const factor = Math.pow(1 + i, n)
       rows.push({
@@ -53,15 +54,60 @@ export function MathReport({ scenario, results }: MathReportProps) {
   }
 
   if (continuous) {
-    rows.push({ tex: `FV = P \\cdot e^{rt}`, caption: 'Future value, continuous compounding' })
+    const lumpFV = P * Math.exp(r * t)
+    rows.push({
+      tex: `FV = P \\cdot e^{rt}`,
+      caption: scenario.contribution
+        ? 'Future value of the lump sum, continuous compounding'
+        : 'Future value, continuous compounding',
+    })
     rows.push({ tex: `FV = ${tex(P, 0)} \\cdot e^{(${scenario.ratePct / 100})(${t})}` })
     rows.push({
-      tex: `FV = ${tex(P, 0)} \\cdot e^{${tex(r * t, 4)}} = \\boxed{${tex(results.final.balance)}}`,
+      tex: `FV = ${tex(P, 0)} \\cdot e^{${tex(r * t, 4)}} = \\boxed{${tex(lumpFV)}}`,
       muted: true,
     })
+
+    if (scenario.contribution) {
+      // The engine deposits monthly under continuous compounding, so each
+      // deposit grows at the monthly equivalent of the continuous rate.
+      const g = Math.exp(r / 12)
+      const iMonthly = g - 1
+      const nMonths = Math.round(12 * t)
+      const pmt = scenario.contribution.amount
+      const due = scenario.contribution.timing === 'due'
+      const annuity =
+        (iMonthly === 0 ? pmt * nMonths : (pmt * (Math.pow(g, nMonths) - 1)) / iMonthly) *
+        (due ? g : 1)
+      if (iMonthly === 0) {
+        rows.push({
+          tex: `+\\;\\; PMT \\cdot n`,
+          caption: 'Plus the monthly contributions. At a 0% rate they simply add up.',
+        })
+        rows.push({
+          tex: `= ${tex(pmt, 0)} \\cdot ${nMonths} = \\boxed{${tex(annuity)}}`,
+          muted: true,
+        })
+      } else {
+        rows.push({
+          tex: `+\\;\\; PMT \\cdot \\dfrac{(1 + i)^{n} - 1}{i}${due ? ' \\cdot (1 + i)' : ''}, \\quad i = e^{r/12} - 1`,
+          caption: due
+            ? 'Plus the future value of the contributions, deposited at the start of each month. They compound at the monthly equivalent of the continuous rate.'
+            : 'Plus the future value of the contributions, deposited monthly. They compound at the monthly equivalent of the continuous rate.',
+        })
+        rows.push({
+          tex: `= ${tex(pmt, 0)} \\cdot \\dfrac{(${tex(g, 5)})^{${nMonths}} - 1}{${tex(iMonthly, 5)}}${due ? ` \\cdot ${tex(g, 5)}` : ''} = \\boxed{${tex(annuity)}}`,
+          muted: true,
+        })
+      }
+      rows.push({
+        tex: `FV = ${tex(lumpFV)} + ${tex(annuity)} = \\boxed{${tex(results.final.balance)}}`,
+        muted: true,
+      })
+    }
   } else {
     const i = r / (m as number)
-    const n = (m as number) * t
+    // The simulation steps whole periods, so the exponent is the rounded count.
+    const n = Math.round((m as number) * t)
     const factor = Math.pow(1 + i, n)
     const lumpFV = P * factor
     rows.push({
@@ -78,13 +124,32 @@ export function MathReport({ scenario, results }: MathReportProps) {
 
     if (scenario.contribution) {
       const pmt = scenario.contribution.amount
-      const annuity = (pmt * (factor - 1)) / i
+      const due = scenario.contribution.timing === 'due'
+      const annuity =
+        (i === 0 ? pmt * n : (pmt * (factor - 1)) / i) * (due ? 1 + i : 1)
+      if (i === 0) {
+        rows.push({
+          tex: `+\\;\\; PMT \\cdot n`,
+          caption: 'Plus the contributions. At a 0% rate they simply add up.',
+        })
+        rows.push({
+          tex: `= ${tex(pmt, 0)} \\cdot ${tex(n, 0)} = \\boxed{${tex(annuity)}}`,
+          muted: true,
+        })
+      } else {
+        rows.push({
+          tex: `+\\;\\; PMT \\cdot \\dfrac{(1 + i)^{n} - 1}{i}${due ? ' \\cdot (1 + i)' : ''}`,
+          caption: due
+            ? 'Plus the future value of the contributions. Deposits at the start of each period earn one extra period of growth, the trailing (1 + i).'
+            : 'Plus the future value of the contributions',
+        })
+        rows.push({
+          tex: `= ${tex(pmt, 0)} \\cdot \\dfrac{(${tex(1 + i, 5)})^{${tex(n, 0)}} - 1}{${tex(i, 5)}}${due ? ` \\cdot ${tex(1 + i, 5)}` : ''} = \\boxed{${tex(annuity)}}`,
+          muted: true,
+        })
+      }
       rows.push({
-        tex: `+\\;\\; PMT \\cdot \\dfrac{(1 + i)^{n} - 1}{i}`,
-        caption: 'Plus the future value of the contributions',
-      })
-      rows.push({
-        tex: `= ${tex(pmt, 0)} \\cdot \\dfrac{(${tex(1 + i, 5)})^{${tex(n, 0)}} - 1}{${tex(i, 5)}} = \\boxed{${tex(annuity)}}`,
+        tex: `FV = ${tex(lumpFV)} + ${tex(annuity)} = \\boxed{${tex(results.final.balance)}}`,
         muted: true,
       })
     }

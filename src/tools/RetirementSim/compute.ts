@@ -186,9 +186,9 @@ export interface PlanRow {
 
 /**
  * The couple's plan under the planned 7% and under an actual return. The
- * saving is a whole-dollar amount, and when markets return less than
- * planned while saving, the safer withdrawal portfolio is assumed to earn
- * less by the same margin.
+ * saving is a whole-dollar amount, and the safer withdrawal portfolio is
+ * assumed to move by the same margin the saving years did, in the same
+ * direction: earning less when markets fell short, more when they beat it.
  */
 export function planOutcome(
   income: number,
@@ -238,7 +238,9 @@ export function yearsToFree(
     bal = bal * (1 + saveR) + save
     y++
   }
-  return y >= 75 ? null : y
+  // The loop also stops at the 75-year cap, so check the target, not the
+  // year count: reaching it in exactly year 75 still counts.
+  return bal >= target ? y : null
 }
 
 /** Working years until free, for each savings rate from 5% to 70%. */

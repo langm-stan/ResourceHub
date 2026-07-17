@@ -37,14 +37,20 @@ export function NumberField({
   }, [value, precision, editing])
 
   function commit(raw: string) {
-    const parsed = Number(raw.replace(/[^0-9.\-]/g, ''))
-    if (Number.isNaN(parsed)) {
+    const cleaned = raw.replace(/[^0-9.\-]/g, '')
+    const parsed = Number(cleaned)
+    // An empty or unparseable entry reverts to the previous value rather than
+    // committing 0 (Number('') is 0).
+    if (cleaned === '' || Number.isNaN(parsed)) {
       setDraft(format(value, precision))
       return
     }
     let next = parsed
     if (min != null) next = Math.max(min, next)
     if (max != null) next = Math.min(max, next)
+    // Round to the field's precision so the stored value matches the display.
+    const factor = 10 ** precision
+    next = Math.round(next * factor) / factor
     onChange(next)
     setDraft(format(next, precision))
   }

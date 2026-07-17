@@ -182,8 +182,14 @@ function Overview({
           <>
             The sniper paid <em>more</em>: while the cash camped out waiting for a crash, the
             market climbed so far that the next bottom cost more than the ordinary months the
-            monthly buyer had been quietly buying. The 2003 bottom was two and a half times the
-            price of an average month in the early 1990s.
+            monthly buyer had been quietly buying.
+            {/* The worked example only fits windows that actually contain the 2003 bottom. */}
+            {startYear <= 2003 && (
+              <>
+                {' '}
+                The 2003 bottom was about twice the price of an average month in the early 1990s.
+              </>
+            )}
           </>
         ) : perfectBehind ? (
           <>
@@ -214,8 +220,10 @@ function Overview({
       </Callout>
       <Callout tone="plain" label="Why one month matters so much">
         Rebounds off bear-market bottoms are violent. The month after the March 2009 bottom, the
-        index jumped about 9%; after March 2020, about 10%. Wait one month to be sure the bottom
-        was real and the discount you camped in cash for years to capture is substantially gone.
+        index jumped about 12%; after March 2020, about 4%. Even the smaller rebound is real
+        money, and the deepest bottom produced the sharpest one. Wait one month to be sure the
+        bottom was real and part of the discount you camped in cash for years to capture is
+        already gone.
         Think you would have caught it live? The Beat the Market game in the sidebar deals you a
         mystery decade of this same data and one sell button. Bring a class and keep score.
       </Callout>

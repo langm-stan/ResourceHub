@@ -71,11 +71,14 @@ export function toSearchParams(s: Scenario): URLSearchParams {
   return p
 }
 
-function num(params: URLSearchParams, key: string, fallback: number): number {
+function num(params: URLSearchParams, key: string, fallback: number, min: number, max: number): number {
   const raw = params.get(key)
   if (raw == null) return fallback
   const n = Number(raw)
-  return Number.isFinite(n) ? n : fallback
+  if (!Number.isFinite(n)) return fallback
+  // Clamp to the same bounds the tool's own inputs enforce, so a hand-edited
+  // link cannot load a negative principal or an absurd magnitude.
+  return Math.min(max, Math.max(min, n))
 }
 
 const STORAGE_KEY = 'ifdm-compound-scenario-v1'
@@ -110,19 +113,21 @@ export function parseScenario(params: URLSearchParams): Scenario {
     freqCode && CODE_FREQ[freqCode] ? CODE_FREQ[freqCode] : DEFAULT_SCENARIO.frequency
   const mode: Mode = params.get('mode') === 'pv' ? 'pv' : 'fv'
 
-  const cAmount = params.get('c')
+  // Contribution amounts get the same clamp as the tool's input (0..10,000);
+  // anything that clamps to zero means no contribution.
+  const cAmount = num(params, 'c', 0, 0, 10_000)
   const contribution =
-    cAmount != null && Number.isFinite(Number(cAmount)) && Number(cAmount) !== 0
+    cAmount > 0
       ? {
-          amount: Number(cAmount),
+          amount: cAmount,
           timing: (params.get('ct') === 'due' ? 'due' : 'ordinary') as Timing,
         }
       : null
 
   return {
-    principal: num(params, 'p', DEFAULT_SCENARIO.principal),
-    ratePct: num(params, 'r', DEFAULT_SCENARIO.ratePct),
-    years: num(params, 't', DEFAULT_SCENARIO.years),
+    principal: num(params, 'p', DEFAULT_SCENARIO.principal, 0, 1_000_000),
+    ratePct: num(params, 'r', DEFAULT_SCENARIO.ratePct, 0, 40),
+    years: num(params, 't', DEFAULT_SCENARIO.years, 1, 100),
     frequency,
     mode,
     contribution,

@@ -159,8 +159,18 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               />
             </div>
             <p className={styles.note}>
-              At the new car&rsquo;s {formatUSDWhole(deals.new.payment)} payment, the used loan
-              ends in {fastMonths} months instead of {months}.
+              {fastMonths != null ? (
+                <>
+                  At the new car&rsquo;s {formatUSDWhole(deals.new.payment)} payment, the used
+                  loan ends in {fastMonths} months instead of {months}.
+                </>
+              ) : (
+                <>
+                  At the new car&rsquo;s {formatUSDWhole(deals.new.payment)} payment, this used
+                  loan would still not be paid off after 30 years; at {usedRate.toFixed(2)}%,
+                  essentially the whole payment goes to interest.
+                </>
+              )}
             </p>
           </div>
 

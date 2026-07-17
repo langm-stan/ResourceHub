@@ -22,7 +22,9 @@ export function TvmParameters({
         label="What are you working out?"
         options={MODE_OPTIONS}
         value={state.mode}
-        onChange={(mode) => onChange({ mode })}
+        onChange={(mode) =>
+          onChange({ mode, years: mode === 'loan' ? Math.min(state.years, 30) : state.years })
+        }
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>

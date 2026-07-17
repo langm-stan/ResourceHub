@@ -50,13 +50,15 @@ export function computeBracketTax(
   const segments: BracketSegment[] = []
   let from = 0
   let tax = 0
-  let marginalRate = brackets[0]?.rate ?? 0
+  // Rate on the NEXT dollar: the bracket that dollar t..t+1 lands in. An
+  // income sitting exactly on a bracket line therefore reports the higher
+  // rate, since the next dollar is the first one taxed at it.
+  const marginalRate = brackets.find((b) => t < b.upTo)?.rate ?? brackets[0]?.rate ?? 0
 
   for (const b of brackets) {
     const amount = Math.max(0, Math.min(t, b.upTo) - from)
     const segTax = amount * b.rate
     tax += segTax
-    if (amount > 0) marginalRate = b.rate
     segments.push({ rate: b.rate, from, to: b.upTo, amount, tax: segTax, isMarginal: false })
     from = b.upTo
   }
@@ -187,28 +189,49 @@ export function computePaycheck(
   stateCode: string
 ): PaycheckResult {
   const g = Math.max(0, gross)
-  const k = Math.min(Math.max(0, contribution401k), g)
-
-  // 401(k) deferrals reduce income tax but NOT payroll (FICA) tax — FICA is
-  // computed on gross wages. Nearly every taxing state follows the federal
-  // pre-tax treatment of deferrals (PA is the exception, noted in its data).
-  const standardDeduction = STANDARD_DEDUCTION[status]
-  const taxable = Math.max(0, g - k - standardDeduction)
-  const incomeTax = computeIncomeTax(taxable, status)
-  const state = computeStateTax(g, k, status, stateCode)
 
   const socialSecurity = FICA.ssRate * Math.min(g, FICA.ssWageBase)
   const medicare = FICA.medicareRate * g
   const additionalMedicare =
     FICA.additionalMedicareRate * Math.max(0, g - FICA.additionalMedicareThreshold[status])
+  const payrollTax = socialSecurity + medicare + additionalMedicare
 
-  const totalTax = incomeTax.tax + state.tax + socialSecurity + medicare + additionalMedicare
-  const takeHomeYear = g - k - totalTax
+  // 401(k) deferrals reduce income tax but NOT payroll (FICA) tax — FICA is
+  // computed on gross wages. Nearly every taxing state follows the federal
+  // pre-tax treatment of deferrals (PA is the exception, noted in its data).
+  const standardDeduction = STANDARD_DEDUCTION[status]
+  const evaluate = (kk: number) => {
+    const taxable = Math.max(0, g - kk - standardDeduction)
+    const incomeTax = computeIncomeTax(taxable, status)
+    const state = computeStateTax(g, kk, status, stateCode)
+    const totalTax = incomeTax.tax + state.tax + payrollTax
+    return { taxable, incomeTax, state, totalTax, takeHomeYear: g - kk - totalTax }
+  }
+
+  // Because payroll tax is owed on gross wages even when every remaining
+  // dollar is deferred, a contribution close to the whole paycheck would push
+  // take-home pay below zero. Shrink the effective contribution until
+  // take-home is at least zero, so the paycheck rows still sum to gross.
+  // Each step is one Newton step on the piecewise-linear take-home function,
+  // so it lands exactly and terminates in a handful of iterations.
+  let k = Math.min(Math.max(0, contribution401k), g)
+  let result = evaluate(k)
+  for (let guard = 0; result.takeHomeYear < -1e-6 && k > 0 && guard < 20; guard++) {
+    // Slope of take-home per dollar of contribution: each side's marginal
+    // rate matters only while that side actually has taxable income —
+    // otherwise the deduction absorbs the shifted dollars tax-free.
+    const m =
+      (result.taxable > 0 ? result.incomeTax.marginalRate : 0) +
+      (result.state.taxable > 0 ? result.state.marginalRate : 0)
+    k = Math.max(0, k + result.takeHomeYear / (1 - m))
+    result = evaluate(k)
+  }
+  const { taxable, incomeTax, state, totalTax, takeHomeYear } = result
 
   // The all-in marginal rate, taken numerically over the next $100 of wages
   // so bracket edges, the SS wage cap, and the Medicare surtax threshold all
   // come out right without special cases.
-  const marginalAllInRate = (totalTaxAt(g + 100, status, contribution401k, stateCode) - totalTax) / 100
+  const marginalAllInRate = (totalTaxAt(g + 100, status, k, stateCode) - totalTax) / 100
 
   return {
     gross: g,

@@ -1,5 +1,4 @@
 import ResourceHubShell from '../components/ResourceHubShell'
-import { AlertCircle } from 'lucide-react'
 
 /*
  * Response shares are U.S. adults in the FINRA Foundation National Financial
@@ -27,7 +26,6 @@ const QUESTIONS = [
     answer: 'More than $102',
     explanation:
       "Interest builds on interest over time. This phenomenon is known as compound interest. In the first year, you earn 2% of $100, or $2 in interest. In the second year, you earn 2% of $102 (your balance after the first year), or $2.04. Because each year's interest is calculated on a growing balance, the account is worth more than $102 after 5 years.",
-    verified: true,
     responses: { correct: 69, incorrect: 14, dontKnow: 16 },
   },
   {
@@ -36,8 +34,8 @@ const QUESTIONS = [
     q: 'Imagine that the interest rate on your savings account was 1% per year and inflation was 2% per year. After 1 year, would you be able to buy more, exactly the same, or less than today with the money in this account?',
     options: ['More', 'Exactly the same', 'Less', "Don't know"],
     answer: 'Less',
-    explanation: null,
-    verified: false,
+    explanation:
+      'Inflation, the general increase in prices in the economy, erodes your ability to buy things. If the interest rate on your savings account is less than the inflation rate, your ability to buy things will decrease.',
     responses: { correct: 58, incorrect: 18, dontKnow: 23 },
   },
   {
@@ -46,8 +44,8 @@ const QUESTIONS = [
     q: '"Buying a single company stock usually provides a safer return than a stock mutual fund." True or false?',
     options: ['True', 'False', "Don't know"],
     answer: 'False',
-    explanation: null,
-    verified: false,
+    explanation:
+      "Buying individual stocks is typically very risky, as prices can fluctuate significantly. Stock mutual funds typically contain many stocks of companies from different industries, which lowers the fluctuation of the fund's price. This is the concept of diversification at work.",
     responses: { correct: 41, incorrect: 11, dontKnow: 47 },
   },
 ]
@@ -105,15 +103,7 @@ export function BigThreeExplainedContent() {
                 </li>
               ))}
             </ul>
-            {item.verified ? (
-              <p className="text-sm text-stone-600 bg-stone-50 rounded-lg p-4 leading-relaxed">{item.explanation}</p>
-            ) : (
-              <div className="flex items-start gap-2 text-xs text-stone-500 bg-sand/20 border border-sand/40 rounded-lg p-3">
-                <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                The full explanation for this question couldn't be pulled from ifdm.stanford.edu (the site blocks
-                automated fetches). Paste the source text here to replace this placeholder.
-              </div>
-            )}
+            <p className="text-sm text-stone-600 bg-stone-50 rounded-lg p-4 leading-relaxed">{item.explanation}</p>
             <ResponseBar responses={item.responses} />
           </div>
         ))}

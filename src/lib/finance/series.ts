@@ -43,7 +43,7 @@ export function growthSeries(input: GrowthSeriesInput): GrowthSeries {
       : 1 + annualRate / sPerYear
   const simpleRatePerStep = annualRate / sPerYear
 
-  const totalSteps = Math.max(1, Math.round(sPerYear * years))
+  const totalSteps = years <= 0 ? 0 : Math.max(1, Math.round(sPerYear * years))
   const maxPoints = input.maxPoints ?? 600
   const stride = Math.max(1, Math.ceil(totalSteps / Math.max(1, maxPoints - 1)))
 
@@ -78,13 +78,15 @@ export function growthSeries(input: GrowthSeriesInput): GrowthSeries {
     const isSampled = step % stride === 0 || step === totalSteps
     if (isSampled) {
       const principalContributed = invested
-      const simpleInterest = cumulativeSimple
+      // Clamp the simple band first, then derive the rest so the identity
+      // balance = principal + simple + interestOnInterest holds at any rate.
+      const simpleInterest = cumulativeSimple < 0 ? 0 : cumulativeSimple
       const interestOnInterest = balance - principalContributed - simpleInterest
       points.push({
         t: step / sPerYear,
         balance,
         principalContributed,
-        simpleInterest: simpleInterest < 0 ? 0 : simpleInterest,
+        simpleInterest,
         interestOnInterest: Math.abs(interestOnInterest) < 1e-9 ? 0 : interestOnInterest,
       })
     }

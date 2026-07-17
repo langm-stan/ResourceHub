@@ -34,9 +34,6 @@ export function exportBalanceSheetXlsx(assets: AccountGroup[], liabilities: Acco
   })
 
   push(['', 'Total Assets', totalAssets])
-  push([])
-  push(['', '', 'Net Worth = Total Assets - Total Liabilities'])
-  push(['', '', 'Net Worth', '', '', '', netWorth])
 
   const ws = XLSX.utils.aoa_to_sheet(rows)
 
@@ -57,6 +54,18 @@ export function exportBalanceSheetXlsx(assets: AccountGroup[], liabilities: Acco
     liabRowIdx++
   })
   XLSX.utils.sheet_add_aoa(ws, [['Total Liabilities', totalLiabilities]], { origin: { r: liabRowIdx, c: 6 } })
+
+  // Net Worth goes one blank row below whichever column runs longer, so a
+  // long liabilities list can never overwrite it.
+  const netWorthRow = Math.max(rows.length, liabRowIdx + 1) + 1
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [
+      ['Net Worth = Total Assets - Total Liabilities'],
+      ['Net Worth', '', '', '', netWorth],
+    ],
+    { origin: { r: netWorthRow, c: 2 } }
+  )
 
   XLSX.utils.sheet_add_aoa(
     ws,
@@ -82,7 +91,9 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], savin
   const anyActuals = hasActuals(expenses)
   const totalSaving = sumItems(saving)
   const leftover = totalIncome - totalExpenses - totalSaving
-  const investable = Math.max(0, totalIncome - totalExpenses)
+  // The honest number, negative when spending exceeds income (as on screen);
+  // the savings rate still treats a shortfall as nothing to invest.
+  const investable = totalIncome - totalExpenses
 
   const rows: (string | number)[][] = [
     ['Monthly Budget'],
@@ -106,7 +117,7 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], savin
     [],
     ['Extra saving each month', leftover],
     ['Investable each month', investable],
-    ['Savings rate', totalIncome > 0 ? investable / totalIncome : 0],
+    ['Savings rate', totalIncome > 0 ? Math.max(0, investable) / totalIncome : 0],
   ]
 
   const ws = XLSX.utils.aoa_to_sheet(rows)

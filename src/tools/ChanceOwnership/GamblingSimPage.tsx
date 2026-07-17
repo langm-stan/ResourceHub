@@ -60,7 +60,9 @@ function BettingStation() {
     [isPM, bets, stake, start, seed]
   )
 
-  const yMax = Math.max(sim.p90[sim.p90.length - 1]! * 1.1, sim.start * 1.6)
+  // Scale to the highest plotted point, not the final one: in losing games the
+  // band ends near zero even though it peaked far above the start.
+  const yMax = Math.max(Math.max(...sim.p90, ...sim.median) * 1.1, sim.start * 1.6)
   const lineColor = RED
 
   const insight = isPM ? (

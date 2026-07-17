@@ -1,5 +1,5 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { fmtUSD } from '../../lib/format'
+import { fmtUSD, formatUSDCompact } from '../../lib/format'
 import type { HistoryPoint } from '../../hooks/useFinancialSnapshot'
 import { TrendingUp } from 'lucide-react'
 
@@ -41,7 +41,7 @@ export default function NetWorthChart({ history }: { history: HistoryPoint[] }) 
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
           <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${Math.round(v / 1000)}k`} />
+          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => formatUSDCompact(Number(v))} />
           <Tooltip formatter={(v) => fmtUSD(Number(v))} />
           <Area type="monotone" dataKey="value" stroke="var(--accent)" fill="url(#netWorthFill)" strokeWidth={2.5} />
         </AreaChart>

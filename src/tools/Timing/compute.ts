@@ -13,9 +13,10 @@
  * Invested balances earn the index total return, computed as
  * r_t = (P_t + D_t/12) / P_{t-1} - 1. Cash earns a flat user-set rate.
  * Verified July 2026: the one-month-late buyer ends behind the monthly
- * buyer for 14 of 16 start years 1985-2015 (cash at 0%), and even the
- * perfect bottom buyer trails for most starts. Starting 1997-2001, at
- * the bubble peak, is the exception, which the page discusses honestly.
+ * buyer for 28 of 31 start years 1985-2015 (cash at 0%); only 1997,
+ * 1998, and 1999 starts win, and even the perfect bottom buyer trails
+ * for most starts. Starting near the dot-com bubble peak is the
+ * exception, which the page discusses honestly.
  */
 import { SPX } from './spxData'
 
@@ -36,7 +37,7 @@ export function findBottoms(): Bottom[] {
   let ddIdx: number | null = null
   SPX.forEach((row, i) => {
     if (row.p > peak) {
-      if (ddIdx !== null && ddMin < -0.19) {
+      if (ddIdx !== null && ddMin <= -0.19) {
         const b = SPX[ddIdx]!
         bottoms.push({ index: ddIdx, y: b.y, m: b.m, price: b.p, drawdown: ddMin })
       }
@@ -51,7 +52,7 @@ export function findBottoms(): Bottom[] {
       }
     }
   })
-  if (ddIdx !== null && ddMin < -0.19) {
+  if (ddIdx !== null && ddMin <= -0.19) {
     const b = SPX[ddIdx]!
     bottoms.push({ index: ddIdx, y: b.y, m: b.m, price: b.p, drawdown: ddMin })
   }

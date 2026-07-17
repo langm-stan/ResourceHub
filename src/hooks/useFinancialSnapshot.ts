@@ -52,6 +52,26 @@ const BLANK_SNAPSHOT: Snapshot = {
 }
 
 /*
+ * Imported and migrated files can carry amounts as strings ("1500"), which
+ * would show in the inputs but add $0 to every total (sumItems skips
+ * non-finite values). Coercing at load time keeps state numerically valid.
+ */
+const asFiniteNumber = (v: unknown): number => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+const coerceItems = (items: LineItem[]): LineItem[] =>
+  items.map((item) => ({
+    ...item,
+    value: asFiniteNumber(item.value),
+    ...(item.actual !== undefined ? { actual: asFiniteNumber(item.actual) } : null),
+  }))
+
+const coerceGroups = (groups: AccountGroup[]): AccountGroup[] =>
+  groups.map((g) => ({ ...g, items: coerceItems(g.items ?? []) }))
+
+/*
  * Accepts either the current snapshot shape or the pre-merge one (fixed budget
  * categories with budgeted/spent amounts plus a single income number) that may
  * still be sitting in localStorage or in an exported .json file. Returns null
@@ -62,8 +82,8 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
   const p = parsed as Record<string, unknown>
   if (!Array.isArray(p.assets) || !Array.isArray(p.liabilities)) return null
 
-  const assets = p.assets as AccountGroup[]
-  const liabilities = p.liabilities as AccountGroup[]
+  const assets = coerceGroups(p.assets as AccountGroup[])
+  const liabilities = coerceGroups(p.liabilities as AccountGroup[])
 
   // Current shape: income and expenses are line-item arrays. Snapshots from
   // before the saving list existed carry saving rows inside expenses; pull
@@ -73,16 +93,16 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
       return {
         assets,
         liabilities,
-        income: p.income as LineItem[],
-        expenses: p.expenses as LineItem[],
-        saving: p.saving as LineItem[],
+        income: coerceItems(p.income as LineItem[]),
+        expenses: coerceItems(p.expenses as LineItem[]),
+        saving: coerceItems(p.saving as LineItem[]),
       }
     }
-    const split = splitSavingRows(p.expenses as LineItem[])
+    const split = splitSavingRows(coerceItems(p.expenses as LineItem[]))
     return {
       assets,
       liabilities,
-      income: p.income as LineItem[],
+      income: coerceItems(p.income as LineItem[]),
       expenses: split.expenses,
       saving: split.saving.length ? split.saving : STARTER_SAVING,
     }
@@ -93,16 +113,18 @@ function coerceSnapshot(parsed: unknown): Snapshot | null {
   // the row's actual); the income number becomes one "money in" row.
   if (Array.isArray(p.budget)) {
     type LegacyCategory = { key: string; label: string; budgeted: number; spent?: number }
+    const legacyIncome = asFiniteNumber(p.income)
     const income: LineItem[] =
-      typeof p.income === 'number' && p.income !== 0
-        ? [{ key: 'income', label: 'Monthly income', value: p.income }]
-        : []
-    const mapped: LineItem[] = (p.budget as LegacyCategory[]).map((c) => ({
-      key: c.key,
-      label: c.label,
-      value: c.budgeted,
-      ...(typeof c.spent === 'number' && Number.isFinite(c.spent) && c.spent !== 0 ? { actual: c.spent } : null),
-    }))
+      legacyIncome !== 0 ? [{ key: 'income', label: 'Monthly income', value: legacyIncome }] : []
+    const mapped: LineItem[] = (p.budget as LegacyCategory[]).map((c) => {
+      const spent = asFiniteNumber(c.spent)
+      return {
+        key: c.key,
+        label: c.label,
+        value: asFiniteNumber(c.budgeted),
+        ...(c.spent !== undefined && spent !== 0 ? { actual: spent } : null),
+      }
+    })
     const split = splitSavingRows(mapped)
     return {
       assets,

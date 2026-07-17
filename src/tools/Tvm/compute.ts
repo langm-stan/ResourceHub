@@ -62,7 +62,27 @@ export function computeTvm(s: TvmState): TvmResults {
     }
   }
 
-  // Loan (default for loan + calc-fallback).
+  // Loan (default for loan + calc-fallback). A zero or negative amount (the
+  // slider's minimum, or a hand-edited URL) means there is nothing to
+  // amortize; return a flat zero payoff instead of asking the schedule
+  // builder for an impossible loan.
+  if (s.amount <= 0) {
+    return {
+      mode: 'loan',
+      payment: 0,
+      periodRate: i,
+      periods: n,
+      totalPaid: 0,
+      totalInterest: 0,
+      amount: 0,
+      balanceSeries: [
+        { t: 0, balance: 0 },
+        { t: s.years, balance: 0 },
+      ],
+      yearly: [],
+    }
+  }
+
   const payment = paymentFromPV(s.amount, i, n)
   const schedule = amortizationSchedule(s.amount, i, n)
   return {

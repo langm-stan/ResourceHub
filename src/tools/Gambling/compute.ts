@@ -21,7 +21,8 @@
  *
  * The investment side is a broad stock index fund with the same
  * long-run figures used in the Diversification lesson and in Lecture
- * 11: an 8% average annual return with a 20% standard deviation.
+ * 11: an 8% average annual return with about a 20% standard deviation
+ * (0.18 log-SD; see INDEX_SD_LOG below).
  */
 
 import { SPX } from '../Timing/spxData'
@@ -36,7 +37,11 @@ export const GAMES: Record<GameKey, { label: string; payback: number; short: str
 }
 
 export const INDEX_RETURN = 0.08
-/** SD of yearly index returns, for the chance-of-being-ahead model. */
+/**
+ * SD of yearly index LOG returns, for the chance-of-being-ahead model.
+ * A 0.18 log-SD corresponds to an arithmetic one-year return SD of about
+ * 19.6%, which is what the on-page "yearly swings of about 20%" refers to.
+ */
 export const INDEX_SD_LOG = 0.18
 
 export interface PathPoint {
@@ -89,7 +94,7 @@ export function computeRealPaths(
       invested: spy,
     })
   }
-  return { points, years: Math.max(1, Math.round((SPX.length - start) / 12)) }
+  return { points, years: Math.max(1, Math.floor((SPX.length - start) / 12)) }
 }
 
 export interface AheadPoint {

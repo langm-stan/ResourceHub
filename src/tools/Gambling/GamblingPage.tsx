@@ -111,9 +111,9 @@ export function GamblingPage() {
         <p className={styles.footnote}>
           Payback rates are typical published figures, not adjustable: scratch lotteries return
           about 65¢ of each dollar as prizes, standard sports bets about 95¢, slot machines about
-          92¢. The investment is SPY, the S&amp;P 500 ETF, at its actual historical returns with
-          dividends reinvested (Shiller data, monthly, through {SPY_END_LABEL}), not a modeled
-          average. The weekly habit is applied as its monthly equivalent.
+          92¢. The investment is the S&amp;P 500 index with dividends reinvested, what an
+          S&amp;P 500 fund like SPY tracks (Shiller data, monthly, through {SPY_END_LABEL}), not
+          a modeled average. The weekly habit is applied as its monthly equivalent.
         </p>
       </Card>
 
@@ -148,6 +148,18 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
   const gameLabel = GAMES[game].label
   const gameShort = GAMES[game].short
 
+  const crashYears = [2008, 2020, 2022].filter((y) => y >= startYear)
+  const crashNote =
+    crashYears.length === 0
+      ? ''
+      : crashYears.length === 1
+        ? `, the ${crashYears[0]} crash included`
+        : `, crashes of ${
+            crashYears.length === 2
+              ? crashYears.join(' and ')
+              : `${crashYears[0]}, ${crashYears[1]}, and ${crashYears[2]}`
+          } included`
+
   return (
     <>
       <StepHeader
@@ -181,7 +193,7 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
           { label: `Expected pocket, ${gameLabel.toLowerCase()}`, value: formatUSDWhole(end.pocket), color: CARDINAL },
           { label: 'SPY balance', value: formatUSDWhole(end.invested), color: GREEN },
         ]}
-        caption={`${formatUSDWhole(weekly)} a week since January ${startYear} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value melts to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually grew to ${formatUSDWhole(end.invested)} (green), crashes of ${startYear <= 2007 ? '2008 and 2020' : '2020 and 2022'} included.`}
+        caption={`${formatUSDWhole(weekly)} a week since January ${startYear} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value melts to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually grew to ${formatUSDWhole(end.invested)} (green)${crashNote}.`}
       />
 
       <StepHeader
@@ -194,7 +206,7 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
           { label: `Bettor ahead after ${years} yr`, value: formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0), color: CARDINAL },
           { label: `Investor ahead after ${years} yr`, value: formatPercent(endAhead.investor, 0), color: GREEN },
         ]}
-        caption={`The chance of being ahead of your money. Red: one standard sports bet every week at typical odds with no special skill, the friendliest odds in this lesson. Green: a diversified index fund bought and held, with an 8% average return and 20% yearly swings. After ${years} years the bettor is ahead ${formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0)} of the time and the investor ${formatPercent(endAhead.investor, 0)} of the time.`}
+        caption={`The chance of being ahead of your money. Red: one standard sports bet every week at typical odds with no special skill, the friendliest odds in this lesson. Green: a diversified index fund bought and held, with an 8% average return and yearly swings of about 20%. After ${years} years the bettor is ahead ${formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0)} of the time and the investor ${formatPercent(endAhead.investor, 0)} of the time.`}
       />
 
       <Callout tone="mark" label="The law of large numbers cuts both ways">
@@ -373,8 +385,8 @@ function MathView() {
       <Callout tone="note" label="Why the investor's odds improve">
         A diversified index fund is a positive expected value bet whose yearly ups and downs partly
         cancel over time, the diversification argument applied across years instead of across
-        stocks. The 8% average and 20% swing behind the chance-of-being-ahead model are the same
-        figures used in the One Stock or the Fund lesson; the U.S. market has finished a calendar
+        stocks. The 8% average and yearly swings of about 20% behind the chance-of-being-ahead model are similar
+        to the assumptions in the One Stock or the Fund lesson; the U.S. market has finished a calendar
         year higher roughly three times out of four.
       </Callout>
     </>

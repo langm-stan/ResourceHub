@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button, Callout, Card, Stat, StepHeader, Tabs, type TabItem } from '../../design-system'
-import { formatPercent, formatUSDWhole, formatYears } from '../../lib/format'
+import { formatPercent, formatUSD, formatUSDWhole, formatYears } from '../../lib/format'
 import { computeTvm, type TvmResults } from './compute'
 import {
   hasTvmParams,
@@ -178,7 +178,7 @@ function Overview({ state, results }: { state: TvmState; results: TvmResults }) 
       <Stat
         label="Monthly payment"
         value={results.payment}
-        format={formatUSDWhole}
+        format={formatUSD}
         emphasis
         accentColor="var(--c-accent)"
       />
@@ -195,7 +195,7 @@ function Overview({ state, results }: { state: TvmState; results: TvmResults }) 
       <Stat
         label="Save each month"
         value={results.payment}
-        format={formatUSDWhole}
+        format={formatUSD}
         emphasis
         accentColor="var(--c-accent)"
       />
@@ -225,7 +225,7 @@ function Overview({ state, results }: { state: TvmState; results: TvmResults }) 
         {isLoan ? (
           <>
             Borrowing <strong>{formatUSDWhole(state.amount)}</strong> at {formatPercent(state.ratePct / 100, 2)}{' '}
-            for {formatYears(state.years)} costs <strong>{formatUSDWhole(results.payment)}</strong> a
+            for {formatYears(state.years)} costs <strong>{formatUSD(results.payment)}</strong> a
             month. You&rsquo;ll repay {formatUSDWhole(results.totalPaid)} in all;{' '}
             {formatUSDWhole(results.totalInterest)} of that is interest.
           </>
@@ -233,7 +233,7 @@ function Overview({ state, results }: { state: TvmState; results: TvmResults }) 
           <>
             To reach <strong>{formatUSDWhole(state.amount)}</strong> in {formatYears(state.years)} at{' '}
             {formatPercent(state.ratePct / 100, 2)}, set aside{' '}
-            <strong>{formatUSDWhole(results.payment)}</strong> a month. You put in{' '}
+            <strong>{formatUSD(results.payment)}</strong> a month. You put in{' '}
             {formatUSDWhole(results.totalPaid)}; interest covers the other{' '}
             {formatUSDWhole(results.totalInterest)}.
           </>

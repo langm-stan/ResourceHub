@@ -71,7 +71,7 @@ export interface LifeCycleResults {
   peakIncomeAge: number
   /** Present value of lifetime income at startAge. */
   lifetimeIncomePV: number
-  /** Ages where the no-borrowing constraint binds (consumption = income). */
+  /** Years where the no-borrowing constraint binds (consumption held below the full-horizon smooth level). */
   constrainedYears: number
   /** Most negative wealth on the unconstrained path (0 if never negative). */
   maxDebt: number
@@ -147,19 +147,35 @@ export function computeFromIncomes(
     const age = startAge + k
     const y = incomes[k]
 
-    // Remaining lifetime resources, valued at the start of this year:
-    // current wealth plus the PV of income still to come.
-    const pvRemaining = incomes
-      .slice(k)
-      .reduce((s, inc, j) => s + inc / Math.pow(1 + r, j + 1), 0)
-    let c = annuitize(wealth + pvRemaining, r, T - k)
-
-    // No-borrowing constraint: with zero wealth and desired consumption above
-    // income, the agent simply consumes their income (they cannot borrow the
-    // difference). Once income catches up, smoothing takes over for good.
-    if (noBorrowing && wealth <= 1e-9 && c > y) {
-      c = y
-      constrainedYears++
+    let c: number
+    if (noBorrowing) {
+      // No-borrowing constraint, solved forward-looking: consumption is the
+      // smallest annuity value of current wealth plus income up to any future
+      // horizon. The binding horizon is where wealth would first hit zero;
+      // consuming any more would mean borrowing somewhere before that date.
+      // Where the constraint never binds, the full-horizon annuity is the
+      // minimum and this reduces to ordinary smoothing. With income rising
+      // early (the usual case) the one-year horizon binds and c equals income
+      // exactly; with income arriving late (a pension after a gap) the agent
+      // rations a level consumption that spends wealth to zero at the binding
+      // date, then re-smooths from there. Wealth never goes negative.
+      let pv = 0
+      let cand = 0
+      c = Infinity
+      for (let j = k; j < T; j++) {
+        pv += incomes[j] / Math.pow(1 + r, j - k + 1)
+        cand = annuitize(wealth + pv, r, j - k + 1)
+        if (cand < c) c = cand
+      }
+      // After the loop, `cand` is the unconstrained full-horizon annuity.
+      if (cand - c > 1e-9) constrainedYears++
+    } else {
+      // Remaining lifetime resources, valued at the start of this year:
+      // current wealth plus the PV of income still to come.
+      const pvRemaining = incomes
+        .slice(k)
+        .reduce((s, inc, j) => s + inc / Math.pow(1 + r, j + 1), 0)
+      c = annuitize(wealth + pvRemaining, r, T - k)
     }
 
     points.push({ age, income: y, consumption: c, wealth, saving: y - c })

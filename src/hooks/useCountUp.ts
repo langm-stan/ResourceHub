@@ -10,17 +10,19 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
 export function useCountUp(target: number, duration = 320): number {
   const reduced = useReducedMotion()
   const [value, setValue] = useState(target)
-  const fromRef = useRef(target)
+  // The value currently on screen, so a retarget mid-animation continues from
+  // wherever the count sits instead of jumping to the superseded target.
+  const valueRef = useRef(target)
   const frameRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
     if (reduced) {
-      fromRef.current = target
+      valueRef.current = target
       setValue(target)
       return
     }
 
-    const from = fromRef.current
+    const from = valueRef.current
     const delta = target - from
     if (delta === 0) return
 
@@ -29,18 +31,17 @@ export function useCountUp(target: number, duration = 320): number {
       if (start === null) start = now
       const elapsed = now - start
       const progress = Math.min(1, elapsed / duration)
-      setValue(from + delta * easeOut(progress))
+      const next = from + delta * easeOut(progress)
+      valueRef.current = next
+      setValue(next)
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(tick)
-      } else {
-        fromRef.current = target
       }
     }
     frameRef.current = requestAnimationFrame(tick)
 
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current)
-      fromRef.current = target
     }
   }, [target, duration, reduced])
 

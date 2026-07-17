@@ -45,8 +45,10 @@ export function Slider({
 
   function commit(raw: string) {
     setDraft(null)
-    const n = Number(raw.replace(/[^0-9.\-]/g, ''))
-    if (!Number.isFinite(n) || raw.trim() === '') return
+    const cleaned = raw.replace(/[^0-9.\-]/g, '')
+    const n = Number(cleaned)
+    // An empty or unparseable entry (Number('') is 0) reverts to the value.
+    if (cleaned === '' || !Number.isFinite(n)) return
     const factor = 10 ** precision
     onChange(Math.min(inputMax ?? max, Math.max(min, Math.round(n * factor) / factor)))
   }

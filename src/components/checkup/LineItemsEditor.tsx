@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { fmtPct, formatUSDWhole } from '../../lib/format'
 import { newLineItem, sumItems, type LineItem } from '../../data/checkupData'
 import styles from './LineItemsEditor.module.css'
@@ -28,6 +29,11 @@ export function LineItemsEditor({
   hint,
   showShare = false,
 }: LineItemsEditorProps) {
+  // The raw text of whichever amount field is being typed in, keyed by row.
+  // Showing the draft (instead of String(value)) keeps a trailing decimal
+  // point alive between keystrokes, so cents like 1250.50 can be entered.
+  const [draft, setDraft] = useState<{ key: string; text: string } | null>(null)
+
   function set(key: string, patch: Partial<LineItem>) {
     onChange(items.map((it) => (it.key === key ? { ...it, ...patch } : it)))
   }
@@ -64,11 +70,17 @@ export function LineItemsEditor({
               <input
                 className={`${styles.amount} tnum`}
                 inputMode="decimal"
-                value={it.value === 0 ? '' : String(it.value)}
+                value={draft?.key === it.key ? draft.text : it.value === 0 ? '' : String(it.value)}
                 placeholder="0"
                 onChange={(e) => {
-                  const n = Number(e.target.value.replace(/[^0-9.\-]/g, ''))
+                  const text = e.target.value
+                  setDraft({ key: it.key, text })
+                  const n = Number(text.replace(/[^0-9.\-]/g, ''))
                   set(it.key, { value: Number.isFinite(n) ? n : 0 })
+                }}
+                onBlur={() => setDraft(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                 }}
               />
             </div>

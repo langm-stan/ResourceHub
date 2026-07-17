@@ -245,7 +245,7 @@ function Overview({
         {borrows ? (
           <Stat label="Peak early-career borrowing" value={-r.maxDebt} format={formatUSDWhole} accentColor={CARDINAL} />
         ) : (
-          <Stat label="Years constrained to income" value={r.constrainedYears} format={(v) => `${Math.round(v)}`} animate={false} />
+          <Stat label="Years below full smoothing" value={r.constrainedYears} format={(v) => `${Math.round(v)}`} animate={false} />
         )}
       </div>
 
@@ -310,9 +310,10 @@ function Overview({
           </>
         ) : state.noBorrowing && r.constrainedYears > 0 ? (
           <>
-            With no access to credit, consumption equals income for the first{' '}
-            <strong>{r.constrainedYears} years</strong>. Smoothing begins once income reaches the
-            sustainable level. Turn the toggle off to compare.
+            With no access to credit, spending in the first{' '}
+            <strong>{r.constrainedYears} years</strong> is held to what income and savings on hand
+            can cover. Full smoothing begins once income catches up. Turn the toggle off to
+            compare.
           </>
         ) : (
           <>

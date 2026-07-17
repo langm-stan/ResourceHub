@@ -12,12 +12,17 @@ export interface LoanSchedule {
   splitX: number[]
   interestPart: number[]
   principalPart: number[]
-  /** Payments made until the balance hits zero; Infinity if it never does. */
+  /** Payments made until the balance hits zero; Infinity when it is not cleared within the charted horizon. */
   months: number
   payment: number
   totalPaid: number
   totalInterest: number
+  /** The balance did not reach zero within the charted horizon. */
   neverEnds: boolean
+  /** The payment is at or below the first month's interest, so the balance truly never falls. */
+  paymentBelowInterest: boolean
+  /** Months actually simulated and plotted (the cap, when the loan outlives the chart). */
+  plottedMonths: number
 }
 
 /** A payment at or below the first month's interest is charted over 20 years. */
@@ -34,7 +39,10 @@ export function buildSchedule(pv: number, aprPct: number, payment: number): Loan
   const interestPart: number[] = []
   const principalPart: number[] = []
 
-  const cap = payment <= pv * i ? NEVER_CAP : HARD_CAP
+  // At or below the first month's interest the balance can never fall; above
+  // it the loan always clears eventually, though maybe not within the chart.
+  const paymentBelowInterest = payment <= pv * i
+  const cap = paymentBelowInterest ? NEVER_CAP : HARD_CAP
   let bal = pv
   let totalPaid = 0
   let totalInterest = 0
@@ -66,6 +74,8 @@ export function buildSchedule(pv: number, aprPct: number, payment: number): Loan
     totalPaid,
     totalInterest,
     neverEnds,
+    paymentBelowInterest: paymentBelowInterest && neverEnds,
+    plottedMonths: m,
   }
 }
 

@@ -30,11 +30,14 @@ export function toSearchParams(s: TvmState): URLSearchParams {
   return p
 }
 
-function num(params: URLSearchParams, key: string, fallback: number): number {
+function num(params: URLSearchParams, key: string, fallback: number, min: number, max: number): number {
   const raw = params.get(key)
   if (raw == null) return fallback
   const n = Number(raw)
-  return Number.isFinite(n) ? n : fallback
+  if (!Number.isFinite(n)) return fallback
+  // Clamp to the same bounds the tool's own inputs enforce, so a hand-edited
+  // link cannot load a negative amount or an absurd magnitude.
+  return Math.min(max, Math.max(min, n))
 }
 
 const STORAGE_KEY = 'ifdm-tvm-scenario-v1'
@@ -70,9 +73,11 @@ export function parseTvm(params: URLSearchParams): TvmState {
   const mode: TvmMode = raw === 'save' ? 'save' : 'loan'
   return {
     mode,
-    amount: num(params, 'a', DEFAULT_TVM.amount),
-    ratePct: num(params, 'r', DEFAULT_TVM.ratePct),
-    years: num(params, 't', DEFAULT_TVM.years),
+    amount: num(params, 'a', DEFAULT_TVM.amount, 0, 2_000_000),
+    ratePct: num(params, 'r', DEFAULT_TVM.ratePct, 0, 40),
+    // Loan terms cap at 30 years (the slider's loan-mode max); extreme
+    // rate-times-term combinations overflow the amortization arithmetic.
+    years: num(params, 't', DEFAULT_TVM.years, 1, mode === 'loan' ? 30 : 40),
   }
 }
 

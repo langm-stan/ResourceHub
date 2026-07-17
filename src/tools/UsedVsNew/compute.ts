@@ -21,6 +21,7 @@ export function carValue(price: number, t: number): number {
 }
 
 export function monthlyPayment(loan: number, apr: number, months: number): number {
+  if (apr === 0) return loan / months
   const i = apr / 12
   return (loan * i) / (1 - (1 + i) ** -months)
 }
@@ -84,8 +85,12 @@ export function dealPath(
   }
 }
 
-/** Months to retire the used loan when paying the new car's payment instead. */
-export function fastPayoffMonths(loan: number, apr: number, bigPayment: number): number {
+/**
+ * Months to retire the used loan when paying the new car's payment instead.
+ * Returns null when the payment does not clear the loan within 30 years
+ * (including when it never covers the interest at all).
+ */
+export function fastPayoffMonths(loan: number, apr: number, bigPayment: number): number | null {
   const i = apr / 12
   let bal = loan
   let m = 0
@@ -93,5 +98,5 @@ export function fastPayoffMonths(loan: number, apr: number, bigPayment: number):
     bal = bal * (1 + i) - bigPayment
     m++
   }
-  return m
+  return bal > 0 ? null : m
 }

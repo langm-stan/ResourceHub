@@ -243,7 +243,7 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
           <Tabs items={TABS} value={surface} onChange={setSurface} />
         </div>
         <Card tone="raised" className={styles.panel}>
-          {surface === 'payment' && <PaymentView m={m} />}
+          {surface === 'payment' && <PaymentView m={m} insYr={insYr} />}
           {surface === 'afford' && <AffordView m={m} afford={afford} income={income} debts={debts} />}
           {surface === 'rate' && <RateView m={m} />}
           {surface === 'term' && <TermView m={m} />}
@@ -251,9 +251,9 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
           {surface === 'math' && <HousingMathView m={m} afford={afford} income={income} debts={debts} />}
         </Card>
         <Callout tone="plain" label="Educational model, not lending advice">
-          Rates and ownership costs are fixed at {HOUSING_YEAR} averages; closing costs, HOA dues,
-          maintenance, and local variation are skipped. It shows the structure of the decision, not
-          a preapproval.
+          Rates and ownership costs start at {HOUSING_YEAR} averages, and the controls above can
+          change them. Closing costs, HOA dues, maintenance, and local variation are skipped. It
+          shows the structure of the decision, not a preapproval.
         </Callout>
       </div>
     </div>
@@ -262,11 +262,19 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
 
 /* ------------------------------------------------------------------ */
 
-function PaymentView({ m }: { m: MortgageResult }) {
+function PaymentView({ m, insYr }: { m: MortgageResult; insYr: number | null }) {
   const rows = [
     { label: 'Principal & interest', note: 'the loan payment itself, fixed for the whole term', value: m.pi, color: SLATE },
-    { label: 'Property tax', note: `${formatPercent(COSTS.propertyTaxRate, 1)} of the home's value per year, held in escrow`, value: m.propertyTaxMonthly, color: AMBER },
-    { label: 'Homeowners insurance', note: `${formatPercent(COSTS.insuranceRate, 1)} of the home's value per year`, value: m.insuranceMonthly, color: GREEN },
+    { label: 'Property tax', note: `${formatPercent((m.propertyTaxMonthly * 12) / m.price, 2)} of the home's value per year, held in escrow`, value: m.propertyTaxMonthly, color: AMBER },
+    {
+      label: 'Homeowners insurance',
+      note:
+        insYr == null
+          ? `${formatPercent(COSTS.insuranceRate, 1)} of the home's value per year`
+          : `your quote of ${formatUSDWhole(insYr)} per year`,
+      value: m.insuranceMonthly,
+      color: GREEN,
+    },
     ...(m.hasPmi
       ? [{ label: 'Mortgage insurance (PMI)', note: 'required until you reach 20% equity', value: m.pmiMonthly, color: CARDINAL }]
       : []),

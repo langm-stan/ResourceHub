@@ -71,14 +71,25 @@ function Inner({
   brokeLabel?: string
 }) {
   const { innerWidth, innerHeight } = useChart()
-  const compareByAge = new Map((compare ?? []).map((p) => [p.age, p]))
-  const ages = points.map((p) => p.age)
+  // Each point carries START-of-year wealth, so the last one (endAge − 1)
+  // still holds a year of spending. The final year's flows run the balance
+  // down to zero, so append that terminal point and the line actually
+  // reaches zero at the planning horizon, as the caption promises.
+  const withTerminal = (src: LifeCyclePoint[]): LifeCyclePoint[] => {
+    const last = src[src.length - 1]
+    if (!last) return src
+    return [...src, { age: last.age + 1, income: 0, consumption: 0, wealth: 0, saving: 0 }]
+  }
+  const series = withTerminal(points)
+  const compareSeries = compare ? withTerminal(compare) : undefined
+  const compareByAge = new Map((compareSeries ?? []).map((p) => [p.age, p]))
+  const ages = series.map((p) => p.age)
   const x0 = ages[0]
-  const x1 = ages[ages.length - 1] + 1
+  const x1 = ages[ages.length - 1]
   const wMin =
-    Math.min(0, ...points.map((p) => p.wealth), ...(compare ?? []).map((p) => p.wealth)) * 1.08
+    Math.min(0, ...series.map((p) => p.wealth), ...(compareSeries ?? []).map((p) => p.wealth)) * 1.08
   const wMax =
-    Math.max(...points.map((p) => p.wealth), ...(compare ?? []).map((p) => p.wealth)) * 1.08
+    Math.max(...series.map((p) => p.wealth), ...(compareSeries ?? []).map((p) => p.wealth)) * 1.08
 
   const x = useMemo(() => scaleLinear().domain([x0, x1]).range([0, innerWidth]), [x0, x1, innerWidth])
   const y = useMemo(
@@ -94,7 +105,7 @@ function Inner({
       <AxisBottom x={x} ticks={7} format={(v) => `${v}`} />
 
       <AreaSeries
-        data={points}
+        data={series}
         x={(d: LifeCyclePoint) => d.age}
         y0={() => 0}
         y1={(d: LifeCyclePoint) => d.wealth}
@@ -103,7 +114,7 @@ function Inner({
         fill="color-mix(in srgb, var(--c-series-2) 26%, var(--surface))"
       />
       <LineSeries
-        data={points}
+        data={series}
         x={(d: LifeCyclePoint) => d.age}
         y={(d: LifeCyclePoint) => d.wealth}
         xScale={x}
@@ -126,9 +137,9 @@ function Inner({
         />
       )}
 
-      {compare && (
+      {compareSeries && (
         <LineSeries
-          data={compare}
+          data={compareSeries}
           x={(d: LifeCyclePoint) => d.age}
           y={(d: LifeCyclePoint) => d.wealth}
           xScale={x}
@@ -177,7 +188,7 @@ function Inner({
       )}
 
       <HoverProbe
-        data={points}
+        data={series}
         x={(d: LifeCyclePoint) => d.age}
         xScale={x}
         yScale={y}

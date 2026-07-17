@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button, Callout, Card, SegmentedControl, Stat } from '../../design-system'
 import { REAL_BOARDS } from './realBoards'
 import styles from './ChanceOwnershipPage.module.css'
@@ -73,8 +73,13 @@ function StockPicker() {
   const medianR10 = sortedR10[Math.floor(sortedR10.length / 2)]!
   const best = Math.max(...sortedR10)
 
-  useEffect(() => setPick(null), [year])
-  useEffect(() => setRevealed(false), [year, pick])
+  /* Reset synchronously with the year switch so a committed ticket never
+   * shows the new board's company for a frame under the old ticket number. */
+  const changeYear = (y: number) => {
+    setYear(y)
+    setPick(null)
+    setRevealed(false)
+  }
 
   return (
     <div>
@@ -83,7 +88,7 @@ function StockPicker() {
           label="It is January of"
           options={Object.keys(REAL_BOARDS).map((y) => ({ value: y, label: y }))}
           value={String(year)}
-          onChange={(y) => setYear(Number(y))}
+          onChange={(y) => changeYear(Number(y))}
         />
         <p className={styles.pickerNote}>{board.note}</p>
       </div>
@@ -120,7 +125,10 @@ function StockPicker() {
                   key={i}
                   type="button"
                   onClick={() => {
-                    if (!committed) setPick(i)
+                    if (!committed) {
+                      setPick(i)
+                      setRevealed(false)
+                    }
                   }}
                   title={committed ? undefined : `#${i + 1} · $${s.cap}B`}
                   className={[
@@ -158,7 +166,14 @@ function StockPicker() {
                 ticket={{ r1: stocks[pick!]!.r1 ?? -100, r5: stocks[pick!]!.r5 ?? -100, r10: stocks[pick!]!.r10 ?? -100 }}
                 sp={sp}
               />
-              <Button variant="quiet" size="sm" onClick={() => setPick(null)}>
+              <Button
+                variant="quiet"
+                size="sm"
+                onClick={() => {
+                  setPick(null)
+                  setRevealed(false)
+                }}
+              >
                 Pick a different ticket
               </Button>
             </Card>

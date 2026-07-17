@@ -81,6 +81,10 @@ export function yearsToReach(
   assertPositive(principal, 'principal')
   assertPositive(target, 'target')
   assertPositive(annualRate, 'annual rate')
+  assert(
+    target >= principal,
+    `target must be at least the principal (received target ${target}, principal ${principal}).`,
+  )
 
   const ratio = Math.log(target / principal)
   if (freq.kind === 'continuous') {

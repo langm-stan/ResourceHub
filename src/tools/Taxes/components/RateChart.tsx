@@ -52,10 +52,12 @@ export function RateChart({
   const points = useMemo(() => {
     const N = 280
     const step = xMax / N
+    // One extra sample past the right edge feeds the forward difference for
+    // the final point, so both lines run all the way to the axis edge.
     const taxes: number[] = []
-    for (let i = 0; i <= N; i++) taxes.push(totalTaxAt(i * step, status, contribution401k, stateCode))
+    for (let i = 0; i <= N + 1; i++) taxes.push(totalTaxAt(i * step, status, contribution401k, stateCode))
     const pts: RatePoint[] = []
-    for (let i = 0; i < N; i++) {
+    for (let i = 0; i <= N; i++) {
       const g = i * step
       pts.push({
         gross: g,

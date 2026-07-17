@@ -92,6 +92,14 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
   )
 
   const monthlyInterest = firstMonthInterest(pv, apr)
+  // How far the chart actually runs: 20 years when the payment loses to the
+  // interest, 100 years when the loan clears but not before the cutoff.
+  const plottedYears = Math.round(main.plottedMonths / 12)
+  const timeToPayOff = main.neverEnds
+    ? main.paymentBelowInterest
+      ? 'Never'
+      : `Over ${plottedYears} years`
+    : fmtMonths(main.months)
   const compColor = mode === 'payment' ? GREEN : GOLD
   const compLabel =
     mode === 'payment'
@@ -101,13 +109,15 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
   const chartX = compare && compare.x.length > main.x.length ? compare.x : main.x
   const yMax = Math.max(...main.balance, ...(compare?.balance ?? [0]), pv) * 1.05
 
-  const compareSentence = !compare
+  const compareSentence = !compare || compare.neverEnds
     ? ''
     : mode === 'payment'
       ? ` Doubling the payment ends it in ${compare.months} months and cuts the interest to ${formatUSDWhole(compare.totalInterest)}.`
       : ` Stretched to ${stretchYears} years, the payment falls to $${compare.payment.toFixed(2)} but the interest grows to ${formatUSDWhole(compare.totalInterest)}.`
   const caption = main.neverEnds
-    ? `${formatUSDWhole(payment)} a month never clears ${formatUSDWhole(pv)} at ${apr}%: interest accrues faster than the payment. Shown over 20 years.${compareSentence}`
+    ? main.paymentBelowInterest
+      ? `${formatUSDWhole(payment)} a month never clears ${formatUSDWhole(pv)} at ${apr}%: interest accrues faster than the payment. Shown over ${plottedYears} years.${compareSentence}`
+      : `${formatUSDWhole(payment)} a month does reduce ${formatUSDWhole(pv)} at ${apr}%, but paying it off would take longer than the ${plottedYears} years shown.${compareSentence}`
     : mode === 'payment'
       ? `${formatUSDWhole(pv)} at ${apr}%, paying ${formatUSDWhole(payment)} a month, takes ${main.months} months to clear and costs ${formatUSDWhole(main.totalInterest)} in interest.${compareSentence}`
       : `Repaying ${formatUSDWhole(pv)} at ${apr}% over ${years} years takes $${main.payment.toFixed(2)} a month and ${formatUSDWhole(main.totalInterest)} of interest.${compareSentence}`
@@ -192,10 +202,16 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             <Stat
               label="Time to pay off"
               value={Number.isFinite(main.months) ? main.months : 0}
-              format={() => fmtMonths(main.months)}
+              format={() => timeToPayOff}
               emphasis
               accentColor={main.neverEnds ? RED : undefined}
-              note={main.neverEnds ? 'the payment does not cover the interest' : fmtYears(main.months)}
+              note={
+                main.neverEnds
+                  ? main.paymentBelowInterest
+                    ? 'the payment does not cover the interest'
+                    : `longer than the ${plottedYears} years shown`
+                  : fmtYears(main.months)
+              }
               animate={false}
             />
           ) : (
@@ -230,7 +246,9 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
               accentColor={GREEN}
               note={
                 main.neverEnds
-                  ? 'instead of never'
+                  ? main.paymentBelowInterest
+                    ? 'instead of never'
+                    : `instead of more than ${plottedYears} years`
                   : `${main.months - compare.months} months sooner, ${formatUSDWhole(main.totalInterest - compare.totalInterest)} less interest`
               }
               animate={false}
@@ -238,10 +256,18 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           )}
         </div>
 
-        {main.neverEnds && (
+        {main.paymentBelowInterest && (
           <Callout tone="mark" label="This payment loses to the interest">
             Interest on {formatUSDWhole(pv)} at {apr}% runs {formatUSDWhole(monthlyInterest)} a
             month. A payment below that never reaches the principal, so the balance grows.
+          </Callout>
+        )}
+        {main.neverEnds && !main.paymentBelowInterest && (
+          <Callout tone="mark" label="This payment barely beats the interest">
+            Interest on {formatUSDWhole(pv)} at {apr}% runs {formatUSDWhole(monthlyInterest)} a
+            month, so only {formatUSDWhole(payment - monthlyInterest)} of the first payment reaches
+            the principal. The loan does shrink, but clearing it would take longer than the{' '}
+            {plottedYears} years shown.
           </Callout>
         )}
 
@@ -287,7 +313,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           ariaLabel="Remaining loan balance by month under the chosen payment"
           exportStats={[
             mode === 'payment'
-              ? { label: 'Time to pay off', value: fmtMonths(main.months), color: main.neverEnds ? RED : undefined }
+              ? { label: 'Time to pay off', value: timeToPayOff, color: main.neverEnds ? RED : undefined }
               : { label: 'Monthly payment', value: `$${main.payment.toFixed(2)}` },
             { label: 'Total paid', value: main.neverEnds ? '—' : formatUSDWhole(main.totalPaid) },
             { label: 'Interest paid', value: main.neverEnds ? '—' : formatUSDWhole(main.totalInterest), color: RED },
@@ -318,7 +344,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           xHoverLabel={(v) => `Payment ${Math.round(v)}`}
           figure="Figure 2."
           caption={
-            main.neverEnds
+            main.paymentBelowInterest
               ? 'Every dollar of the payment goes to interest, and the debt still grows.'
               : 'Interest is charged on the remaining balance, so early payments are interest-heavy and the split shifts toward principal as the debt falls.'
           }
