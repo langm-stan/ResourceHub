@@ -72,10 +72,13 @@ function TakeHomePay() {
 
   const taxesAt = useMemo(() => {
     return (g: number) => {
-      const k = with401k ? Math.min(Math.max(0, k401), g) : 0
+      // Payroll tax is owed on gross wages even when every remaining dollar
+      // is deferred, so cap the contribution at what is left after it; the
+      // take-home figure can then never go negative.
+      const payroll = withPayroll ? fica(g) : 0
+      const k = with401k ? Math.min(Math.max(0, k401), Math.max(0, g - payroll)) : 0
       const fed = federalTax(Math.max(0, g - k))
       const state = withState ? computeStateTax(g, k, 'single', stateCode) : null
-      const payroll = withPayroll ? fica(g) : 0
       const total = fed.tax + (state?.tax ?? 0) + payroll
       return { k, fed, state, payroll, total, takeHome: g - k - total }
     }

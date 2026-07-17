@@ -137,7 +137,9 @@ export function parseStatementXlsx(data: ArrayBuffer): ParsedStatement | null {
       result.expenses = parseSection(rows, 'money out', 'total expenses', true)
       // Files from before the Saving section simply have none here; the
       // importer's caller pulls saving rows out of the expenses instead.
-      const saving = parseSection(rows, 'saving', 'total saving')
+      // Older exports had no Actual column on saving rows; withActual leaves
+      // the field unset when the column is empty, so both vintages import.
+      const saving = parseSection(rows, 'saving', 'total saving', true)
       if (saving.length) result.saving = saving
     }
   }

@@ -178,6 +178,13 @@ export interface PaycheckResult {
   totalTaxRate: number
   /** What the NEXT dollar of wages pays, all taxes in — income tax plus payroll. */
   marginalAllInRate: number
+  /**
+   * Income tax alone (federal + state, after credits) on the NEXT dollar of
+   * wages — payroll excluded. Derived numerically like marginalAllInRate, so
+   * an unused standard deduction or a state exemption credit correctly reads
+   * as 0%, where the bracket-schedule rates would overstate it.
+   */
+  marginalIncomeTaxRate: number
   incomeTax: IncomeTaxResult
   state: StateTaxResult
 }
@@ -233,6 +240,15 @@ export function computePaycheck(
   // come out right without special cases.
   const marginalAllInRate = (totalTaxAt(g + 100, status, k, stateCode) - totalTax) / 100
 
+  // The income-tax-only marginal rate (federal + state, payroll excluded),
+  // also taken numerically. The bracket-schedule rates overstate this at low
+  // incomes, where the next dollar is absorbed by an unused standard
+  // deduction or a state exemption credit before any tax is actually owed.
+  const incomeTaxOnlyAt = (gg: number) =>
+    computeIncomeTax(Math.max(0, gg - k - standardDeduction), status).tax +
+    computeStateTax(gg, k, status, stateCode).tax
+  const marginalIncomeTaxRate = (incomeTaxOnlyAt(g + 100) - (incomeTax.tax + state.tax)) / 100
+
   return {
     gross: g,
     contribution401k: k,
@@ -247,6 +263,7 @@ export function computePaycheck(
     totalTax,
     totalTaxRate: g > 0 ? totalTax / g : 0,
     marginalAllInRate,
+    marginalIncomeTaxRate,
     incomeTax,
     state,
   }

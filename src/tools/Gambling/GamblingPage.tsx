@@ -206,7 +206,7 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
           { label: `Bettor ahead after ${years} yr`, value: formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0), color: CARDINAL },
           { label: `Investor ahead after ${years} yr`, value: formatPercent(endAhead.investor, 0), color: GREEN },
         ]}
-        caption={`The chance of being ahead of your money. Red: one standard sports bet every week at typical odds with no special skill, the friendliest odds in this lesson. Green: a diversified index fund bought and held, with an 8% average return and yearly swings of about 20%. After ${years} years the bettor is ahead ${formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0)} of the time and the investor ${formatPercent(endAhead.investor, 0)} of the time.`}
+        caption={`The chance of being ahead of your money. Red: one standard sports bet every week at typical odds with no special skill, the friendliest odds of the three wagers compared here. Green: a diversified index fund bought and held, with an 8% average return and yearly swings of about 20%. After ${years} years the bettor is ahead ${formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0)} of the time and the investor ${formatPercent(endAhead.investor, 0)} of the time.`}
       />
 
       <Callout tone="mark" label="The law of large numbers cuts both ways">

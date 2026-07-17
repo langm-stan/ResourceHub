@@ -241,7 +241,7 @@ function Overview({
           format={formatUSDWhole}
           note={`${formatPercent(savedShare, 0)} of career earnings; growth adds the rest`}
         />
-        <Stat label={`Wealth at retirement (${r.peakWealthAge})`} value={r.peakWealth} format={formatUSDWhole} accentColor={AMBER} />
+        <Stat label={`Peak wealth (age ${r.peakWealthAge})`} value={r.peakWealth} format={formatUSDWhole} accentColor={AMBER} />
         {borrows ? (
           <Stat label="Peak early-career borrowing" value={-r.maxDebt} format={formatUSDWhole} accentColor={CARDINAL} />
         ) : (
@@ -255,7 +255,7 @@ function Overview({
         exportStats={[
           { label: 'Sustainable annual spending', value: formatUSDWhole(r.smoothedConsumption), color: GREEN },
           { label: 'Saved out of income', value: `${formatUSDWhole(totalSaved)} (${formatPercent(savedShare, 0)})` },
-          { label: `Wealth at retirement (${r.peakWealthAge})`, value: formatUSDWhole(r.peakWealth), color: AMBER },
+          { label: `Peak wealth (age ${r.peakWealthAge})`, value: formatUSDWhole(r.peakWealth), color: AMBER },
           ...(borrows
             ? [{ label: 'Peak early-career borrowing', value: formatUSDWhole(-r.maxDebt), color: CARDINAL }]
             : []),
@@ -524,6 +524,14 @@ function MathView({
   results: ReturnType<typeof computeLifeCycle>
 }) {
   const T = state.endAge - state.startAge
+  // The boxed value comes from the formula itself (the unconstrained annuity
+  // of lifetime income), so the equation is always numerically true. With the
+  // no-borrowing toggle on, the simulated path deviates from this level, and
+  // the captions say so instead of boxing the post-constraint number.
+  const rate = state.realRatePct / 100
+  const annuityC =
+    rate > 0 ? (r.lifetimeIncomePV * rate) / (1 - Math.pow(1 + rate, -T)) : r.lifetimeIncomePV / T
+  const binding = state.noBorrowing && r.constrainedYears > 0
   return (
     <>
       <StepHeader
@@ -535,8 +543,8 @@ function MathView({
         caption="The lifetime budget constraint: the present value of consumption must equal the present value of income, with no bequest."
       />
       <FormulaBlock
-        tex={`c \\;=\\; PV \\cdot \\frac{r}{1-(1+r)^{-T}} \\;=\\; \\boxed{${texUSD(r.smoothedConsumption)}}`}
-        caption={`With these inputs, PV = ${formatUSDWhole(r.lifetimeIncomePV)}, T = ${T} years, and r = ${state.realRatePct}%. This is the annuity formula from the Time Value of Money lesson: lifetime income paid back in equal installments.`}
+        tex={`c \\;=\\; PV \\cdot \\frac{r}{1-(1+r)^{-T}} \\;=\\; \\boxed{${texUSD(annuityC)}}`}
+        caption={`With these inputs, PV = ${formatUSDWhole(r.lifetimeIncomePV)}, T = ${T} years, and r = ${state.realRatePct}%. This is the annuity formula from the Time Value of Money lesson: lifetime income paid back in equal installments.${binding ? ' With no borrowing allowed, the early years are held below this level, and the later years sit slightly above it once the constraint stops binding.' : ''}`}
       />
       <FormulaBlock
         tex={`W_{t+1} = W_t(1+r) + y_t - c`}
@@ -546,6 +554,8 @@ function MathView({
       <Callout tone="note" label="Check it yourself">
         With no growth the formula is just <em>c = lifetime income ÷ years</em>. Set the return on
         savings to zero and the green line lands on that simple average; raise it and c climbs.
+        {binding &&
+          ' With the no-borrowing toggle on, the green line straddles the formula value instead of sitting on it; turn the toggle off to see the match exactly.'}{' '}
         However you move the sliders, wealth ends at zero: the model spends the last dollar on the
         last day, by design.
       </Callout>

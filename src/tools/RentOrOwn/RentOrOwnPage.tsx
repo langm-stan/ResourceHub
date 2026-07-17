@@ -220,7 +220,8 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
         Simplified for classroom discussion, not financial advice. 30-year fixed; the rate starts
         at {pct(APR, 1)} (Freddie Mac, 2026) and is adjustable above. Property tax 1.1%, insurance
         0.5%, upkeep 1% of value; PMI {pct(PMI_RATE, 1)} of the loan when the down payment is
-        under 20%; rents grow {pct(RENT_GROWTH)} a year; invested cash earns {pct(ALT_RETURN)};
+        under 20%, charged for the whole loan here as a simplification (real lenders drop it once
+        equity reaches 20 to 22%); rents grow {pct(RENT_GROWTH)} a year; invested cash earns {pct(ALT_RETURN)};
         closing costs {pct(BUY_CLOSING)} to buy, {pct(SELL_COSTS)} to sell. Taxes on both sides
         are ignored.
       </p>

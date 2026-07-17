@@ -212,7 +212,7 @@ function Overview({
         )}
       </Callout>
       <Callout tone="note" label="An honest exception">
-        Slide the start to 1997 through 2001 and the timer wins: someone who began saving at the
+        Slide the start to 1996 through 2000 and the timer wins: someone who began saving at the
         top of the dot-com bubble was paid, after the fact, for sitting in cash while the market
         halved. That is the exception that teaches the rule. You only know a peak was a peak
         afterward, the same way you only know a bottom afterward, and a plan that works for one

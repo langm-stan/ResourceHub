@@ -162,9 +162,7 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
           {surface === 'paycheck' && <PaycheckView paycheck={paycheck} status={status} />}
           {surface === 'rates' && <RatesView paycheck={paycheck} status={status} />}
           {surface === 'roth' && (
-            <RothView
-              marginalPct={Math.round((paycheck.incomeTax.marginalRate + paycheck.state.marginalRate) * 100)}
-            />
+            <RothView marginalPct={Math.round(paycheck.marginalIncomeTaxRate * 100)} />
           )}
           {surface === 'math' && <TaxMathView paycheck={paycheck} status={status} />}
         </Card>
@@ -254,10 +252,10 @@ function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: 
         />
         <Stat
           label="Marginal income-tax rate"
-          value={incomeTax.marginalRate + state.marginalRate}
+          value={paycheck.marginalIncomeTaxRate}
           format={(v) => formatPercent(v, 1)}
           animate={false}
-          note="federal plus state, on your next taxable dollar"
+          note="federal plus state, on your next dollar of wages"
         />
       </div>
 
@@ -493,6 +491,16 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
 
 function TaxMathView({ paycheck: p, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
   const t = p.incomeTax
+  // The federal share of the derived income-tax marginal, taken numerically
+  // like the combined rate, so the breakdown always sums to the number shown.
+  const fedMarginal =
+    (computeIncomeTax(
+      Math.max(0, p.gross + 100 - p.contribution401k - p.standardDeduction),
+      status
+    ).tax -
+      t.tax) /
+    100
+  const stateMarginal = p.marginalIncomeTaxRate - fedMarginal
   const used = t.segments.filter((s) => s.amount > 0)
   // Two bracket terms per line so the sum never overflows the panel — a high
   // earner touches all seven brackets.
@@ -573,9 +581,9 @@ function TaxMathView({ paycheck: p, status }: { paycheck: PaycheckResult; status
         of wages pays income tax and payroll tax:{' '}
         <strong>{formatPercent(p.marginalAllInRate, 1)}</strong> here. A deduction or a 401(k)
         contribution avoids only income tax:{' '}
-        <strong>{formatPercent(t.marginalRate + p.state.marginalRate, 1)}</strong> here (
-        {formatPercent(t.marginalRate, 0)} federal
-        {p.state.hasTax ? ` plus ${formatPercent(p.state.marginalRate, 1)} state` : ', no state tax'}
+        <strong>{formatPercent(p.marginalIncomeTaxRate, 1)}</strong> here (
+        {formatPercent(fedMarginal, 0)} federal
+        {p.state.hasTax ? ` plus ${formatPercent(stateMarginal, 1)} state` : ', no state tax'}
         ). The Roth tab uses the income-tax rate for that reason: payroll tax is paid either way.
       </Callout>
     </>

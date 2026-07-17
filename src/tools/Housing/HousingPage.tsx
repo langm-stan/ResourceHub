@@ -637,8 +637,11 @@ function HomeTaxView({ m, income }: { m: MortgageResult; income: number }) {
         {ht.deductibleInterest < ht.interestYear1
           ? `, of which ${formatUSDWhole(ht.deductibleInterest)} is deductible (interest counts only on the first ${formatUSDWhole(750_000)} of the loan)`
           : ''}
-        . Property tax is <strong>{formatUSDWhole(ht.propertyTaxYear)}</strong>, within the{' '}
-        {formatUSDWhole(ht.saltCap)} state-and-local-tax cap. Together they{' '}
+        . Property tax is <strong>{formatUSDWhole(ht.propertyTaxYear)}</strong>,{' '}
+        {ht.propertyTaxYear > ht.saltCap
+          ? `capped at the ${formatUSDWhole(ht.saltCap)} state-and-local-tax limit`
+          : `within the ${formatUSDWhole(ht.saltCap)} state-and-local-tax cap`}
+        . Together they{' '}
         {ht.itemizes ? (
           <>
             beat the {formatUSDWhole(ht.standard)} standard deduction, so itemizing cuts federal
@@ -694,7 +697,7 @@ function HousingMathView({
         caption="Step 1. The down payment comes out of savings; the rest is the loan."
       />
       <FormulaBlock
-        tex={`M = L \\cdot \\frac{i}{1-(1+i)^{-n}} = ${texUSD(m.loan)} \\cdot \\frac{${texNumber(i, 5)}}{1-(1+${texNumber(i, 5)})^{-${n}}} = \\boxed{${texUSD(m.pi)}}`}
+        tex={`M = L \\cdot \\frac{i}{1-(1+i)^{-n}} = ${texUSD(m.loan)} \\cdot \\frac{${texNumber(i, 6)}}{1-(1+${texNumber(i, 6)})^{-${n}}} = \\boxed{${texUSD(m.pi)}}`}
         caption={`Step 2. The fixed monthly payment on ${formatUSDWhole(m.loan)} at ${formatPercent(m.rate, 1)} APR (i is the monthly rate, n the ${n} monthly payments). This is the same annuity formula as the TVM calculator.`}
         muted
       />
@@ -714,7 +717,7 @@ function HousingMathView({
         muted
       />
       <FormulaBlock
-        tex={`\\text{max price} = \\frac{${texUSD(afford.maxMonthly)}}{${texNumber(afford.costPerDollar, 5)}\\text{ per \\$1 of price}} = \\boxed{${texUSD(afford.maxPrice)}}`}
+        tex={`\\text{max price} = \\frac{${texUSD(afford.maxMonthly)}}{${texNumber(afford.costPerDollar, 6)}\\text{ per \\$1 of price}} = \\boxed{${texUSD(afford.maxPrice)}}`}
         caption="Step 6. Every monthly cost (payment, taxes, insurance, PMI) scales with the price, so the budget divided by the cost of each price dollar gives the most affordable home."
         muted
       />
@@ -727,9 +730,9 @@ function HousingMathView({
         The taxes tab reuses the Understanding Taxes lesson&rsquo;s bracket engine: it computes
         federal income tax twice, once with the standard deduction and once with the home&rsquo;s
         itemized deductions, and reports the difference. The {HOUSING_YEAR} SALT cap is{' '}
-        {formatUSDWhole(SALT.cap)} (falling to {formatUSDWhole(SALT.floor)} for incomes above{' '}
-        {formatUSDWhole(SALT.phaseOutStart)}), and interest counts on the first{' '}
-        {formatUSDWhole(750_000)} of the loan.
+        {formatUSDWhole(SALT.cap)} (phasing down for incomes above{' '}
+        {formatUSDWhole(SALT.phaseOutStart)} until it reaches a {formatUSDWhole(SALT.floor)} floor),
+        and interest counts on the first {formatUSDWhole(750_000)} of the loan.
       </Callout>
     </>
   )
