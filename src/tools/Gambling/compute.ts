@@ -205,6 +205,10 @@ export interface WindowStats {
   /** Count of windows with a negative annualized return. */
   losing: number
   n: number
+  /** Arithmetic mean of the windows' annualized returns. */
+  mean: number
+  /** Sample standard deviation of the windows' annualized returns. */
+  sd: number
 }
 
 export function seriesStats(points: RollingSeriesPoint[]): WindowStats {
@@ -213,6 +217,7 @@ export function seriesStats(points: RollingSeriesPoint[]): WindowStats {
   let worstEnd = 0
   let bestEnd = 0
   let losing = 0
+  let sum = 0
   for (const p of points) {
     if (p.v < worst) {
       worst = p.v
@@ -223,8 +228,12 @@ export function seriesStats(points: RollingSeriesPoint[]): WindowStats {
       bestEnd = p.end
     }
     if (p.v < 0) losing++
+    sum += p.v
   }
-  return { worst, worstEnd, best, bestEnd, losing, n: points.length }
+  const n = points.length
+  const mean = n ? sum / n : 0
+  const sd = n > 1 ? Math.sqrt(points.reduce((s, p) => s + (p.v - mean) ** 2, 0) / (n - 1)) : 0
+  return { worst, worstEnd, best, bestEnd, losing, n, mean, sd }
 }
 
 /**

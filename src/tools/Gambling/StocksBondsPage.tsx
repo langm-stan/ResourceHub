@@ -205,63 +205,115 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
         )}
       </div>
 
-      <div className={styles.stats}>
-        <Stat
-          label={`Worst ${stretchWord}, stocks`}
-          value={sp.worst}
-          format={(v) => `${formatPercent(v, 1)}/yr`}
-          accentColor={sp.worst < 0 ? CARDINAL : GREEN}
-          note={`the window ending ${sp.worstEnd}`}
-        />
-        <Stat
-          label="Stock windows that lost money"
-          value={sp.losing / Math.max(1, sp.n)}
-          format={(v) => formatPercent(v, 0)}
-          accentColor={sp.losing === 0 ? GREEN : CARDINAL}
-          note={`${sp.losing} of ${sp.n} windows ending ${firstEnd}–${HISTORY_LAST_YEAR}`}
-        />
-        {compareKey === 'sp' && cmp ? (
-          <Stat
-            label="Comparison windows that lost money"
-            value={cmp.losing / Math.max(1, cmp.n)}
-            format={(v) => formatPercent(v, 0)}
-            emphasis
-            accentColor={cmp.losing === 0 ? GREEN : CARDINAL}
-            note={`stocks held ${cmpStretchWord === 'calendar year' ? 'one year' : `${cmpPeriod} years`} at a time: ${cmp.losing} of ${cmp.n} windows`}
-          />
-        ) : asset && ahead !== null ? (
-          <Stat
-            label="Windows where stocks finished ahead"
-            value={ahead}
-            format={(v) => formatPercent(v, 0)}
-            emphasis
-            accentColor={GREEN}
-            note={`vs. ${asset.plural}, windows ending the same year`}
-          />
-        ) : (
-          <Stat
-            label={`Best ${stretchWord}, stocks`}
-            value={sp.best}
-            format={(v) => `${formatPercent(v, 1)}/yr`}
-            emphasis
-            accentColor={GREEN}
-            note={`the window ending ${sp.bestEnd}`}
-          />
+      <div className={styles.assetRows}>
+        <div>
+          <p className={styles.assetHead}>
+            <span className={styles.assetSwatch} style={{ background: GREEN }} aria-hidden="true" />
+            Stocks (S&amp;P 500) · {spPeriod === 1 ? 'one year at a time' : `${spPeriod}-year windows`}
+          </p>
+          <div className={styles.stats}>
+            <Stat
+              label="Average"
+              value={sp.mean}
+              format={(v) => `${formatPercent(v, 1)}/yr`}
+              note={`${sp.n} windows ending ${firstEnd}–${HISTORY_LAST_YEAR}`}
+            />
+            <Stat
+              label="Standard deviation"
+              value={sp.sd}
+              format={(v) => formatPercent(v, 1)}
+              emphasis
+              accentColor={GREEN}
+              note="the typical distance from the average"
+            />
+            <Stat
+              label="Worst window"
+              value={sp.worst}
+              format={(v) => `${formatPercent(v, 1)}/yr`}
+              accentColor={sp.worst < 0 ? CARDINAL : GREEN}
+              note={`ending ${sp.worstEnd}`}
+            />
+            <Stat
+              label="Lost money"
+              value={sp.losing / Math.max(1, sp.n)}
+              format={(v) => formatPercent(v, 0)}
+              accentColor={sp.losing === 0 ? GREEN : CARDINAL}
+              note={`${sp.losing} of ${sp.n} windows`}
+            />
+          </div>
+        </div>
+        {asset && cmp && (
+          <div>
+            <p className={styles.assetHead}>
+              <span className={styles.assetSwatch} style={{ background: asset.color }} aria-hidden="true" />
+              {asset.label} · {cmpPeriod === 1 ? 'one year at a time' : `${cmpPeriod}-year windows`}
+            </p>
+            <div className={styles.stats}>
+              <Stat
+                label="Average"
+                value={cmp.mean}
+                format={(v) => `${formatPercent(v, 1)}/yr`}
+                note={`${cmp.n} windows ending ${cmpSeries!.points[0]?.end ?? firstEnd}–${HISTORY_LAST_YEAR}`}
+              />
+              <Stat
+                label="Standard deviation"
+                value={cmp.sd}
+                format={(v) => formatPercent(v, 1)}
+                emphasis
+                accentColor={asset.color}
+                note={
+                  cmp.sd < sp.sd
+                    ? `${(sp.sd / Math.max(cmp.sd, 0.0001)).toFixed(1)}× steadier than the stock row`
+                    : undefined
+                }
+              />
+              <Stat
+                label="Worst window"
+                value={cmp.worst}
+                format={(v) => `${formatPercent(v, 1)}/yr`}
+                accentColor={cmp.worst < 0 ? CARDINAL : GREEN}
+                note={`ending ${cmp.worstEnd}`}
+              />
+              <Stat
+                label="Lost money"
+                value={cmp.losing / Math.max(1, cmp.n)}
+                format={(v) => formatPercent(v, 0)}
+                accentColor={cmp.losing === 0 ? GREEN : CARDINAL}
+                note={`${cmp.losing} of ${cmp.n} windows`}
+              />
+            </div>
+          </div>
         )}
       </div>
+      {asset && ahead !== null && compareKey !== 'sp' && (
+        <p className={styles.aheadNote}>
+          Stocks finished ahead of {asset.plural} in <strong>{formatPercent(ahead, 0)}</strong> of
+          windows ending the same year.
+        </p>
+      )}
 
       <RollingChart
         stocks={spSeries}
         compare={cmpSeries}
         figure={figure}
         exportStats={[
-          { label: `Worst ${stretchWord}, stocks`, value: `${formatPercent(sp.worst, 1)}/yr`, color: sp.worst < 0 ? CARDINAL : GREEN },
-          { label: 'Stock windows that lost money', value: formatPercent(sp.losing / Math.max(1, sp.n), 0), color: sp.losing === 0 ? GREEN : CARDINAL },
-          ...(compareKey === 'sp' && cmp
-            ? [{ label: `${cmpPeriod}-yr windows that lost money`, value: formatPercent(cmp.losing / Math.max(1, cmp.n), 0), color: cmp.losing === 0 ? GREEN : CARDINAL }]
-            : asset && ahead !== null
-              ? [{ label: `Stocks ahead of ${asset.short}`, value: formatPercent(ahead, 0), color: GREEN }]
-              : [{ label: `Best ${stretchWord}, stocks`, value: `${formatPercent(sp.best, 1)}/yr`, color: GREEN }]),
+          { label: `Average, stocks ${spPeriod}yr`, value: `${formatPercent(sp.mean, 1)}/yr`, color: GREEN },
+          { label: 'Std deviation, stocks', value: formatPercent(sp.sd, 1), color: GREEN },
+          ...(asset && cmp
+            ? [
+                {
+                  label: `Std deviation, ${compareKey === 'sp' ? `stocks ${cmpPeriod}yr` : asset.short}`,
+                  value: formatPercent(cmp.sd, 1),
+                  color: asset.color,
+                },
+              ]
+            : [
+                {
+                  label: `Worst ${stretchWord}`,
+                  value: `${formatPercent(sp.worst, 1)}/yr`,
+                  color: sp.worst < 0 ? CARDINAL : GREEN,
+                },
+              ]),
         ]}
         caption={caption}
       />
