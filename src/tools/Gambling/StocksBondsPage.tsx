@@ -222,7 +222,6 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
               label="Standard deviation"
               value={sp.sd}
               format={(v) => formatPercent(v, 1)}
-              emphasis
               accentColor={GREEN}
               note="the typical distance from the average"
             />
@@ -259,7 +258,6 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
                 label="Standard deviation"
                 value={cmp.sd}
                 format={(v) => formatPercent(v, 1)}
-                emphasis
                 accentColor={asset.color}
                 note={
                   cmp.sd < sp.sd
