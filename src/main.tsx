@@ -46,6 +46,8 @@ const TEACHER_TRAINING_SECTIONS = [
   'stock-picker',
   'index-fund-fees',
   'stocks-bonds',
+  'bond-pricing',
+  'bond-rates',
   'taxes',
   'tax-advantages',
   'retirement-simulator',

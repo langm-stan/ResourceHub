@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
-import { isFoundationSlug, sessionForSlug, toolDescription } from '../data/teacherTraining'
+import { COURSE_UNITS, isFoundationSlug, toolDescription, unitForSlug } from '../data/teacherTraining'
 import { BigThreeContent } from './BigThree'
 import { BigThreeQuizContent } from './BigThreeQuiz'
 import { BigThreeExplainedContent } from './BigThreeExplained'
@@ -23,6 +23,8 @@ import { GamblingSimPage } from '../tools/ChanceOwnership/GamblingSimPage'
 import { StockPickerPage } from '../tools/ChanceOwnership/StockPickerPage'
 import { IndexFundFeesPage } from '../tools/ChanceOwnership/IndexFundFeesPage'
 import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
+import { BondPricingPage } from '../tools/Bonds/BondPricingPage'
+import { BondRatesPage } from '../tools/Bonds/BondRatesPage'
 import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/RetirementSimPage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
@@ -35,7 +37,7 @@ interface SectionConfig {
   /**
    * Toolkit tools need the wide column + type scope. They render with
    * intro={false} so the shell's title is the only one on the page (the
-   * schedule's one-line description becomes the intro), matching the
+   * unit's one-line description becomes the intro), matching the
    * Financial Budget page's format.
    */
   toolkit?: boolean
@@ -47,7 +49,7 @@ interface SectionConfig {
 /*
  * Each section reuses the exact component behind the corresponding Resource
  * Hub page (never a copy), wrapped in the teacher training shell so all
- * navigation leads back to the training schedule. Toolkit tools keep their
+ * navigation leads back to the course overview. Toolkit tools keep their
  * instructor bar pointing at their canonical embeddable route.
  */
 const SECTIONS: Record<string, SectionConfig> = {
@@ -129,6 +131,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     instructor: { label: 'Stocks vs. Bonds', path: 'teacher-training/stocks-bonds' },
     content: <StocksBondsPage intro={false} />,
   },
+  'bond-pricing': {
+    title: 'Pricing a Bond',
+    toolkit: true,
+    instructor: { label: 'Pricing a Bond', path: 'teacher-training/bond-pricing' },
+    content: <BondPricingPage intro={false} />,
+  },
+  'bond-rates': {
+    title: 'Bonds and Interest Rates',
+    toolkit: true,
+    instructor: { label: 'Bonds and Interest Rates', path: 'teacher-training/bond-rates' },
+    content: <BondRatesPage intro={false} />,
+  },
   'tax-advantages': {
     title: 'Tax Advantages',
     toolkit: true,
@@ -171,7 +185,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
   const [params] = useSearchParams()
   const embed = params.get('embed') === '1'
   const section = SECTIONS[slug]!
-  const session = sessionForSlug(slug)
+  const unit = unitForSlug(slug)
 
   // Embedded in a slide or another page: the tool alone, at full width.
   if (embed && section.toolkit) {
@@ -183,11 +197,11 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
       title={section.title}
       intro={section.intro ?? (section.toolkit ? toolDescription(slug) : undefined)}
       eyebrow={
-        session
-          ? `Teacher Training · ${session.day} ${session.period}`
+        unit
+          ? `Teaching Toolkit · Unit ${COURSE_UNITS.indexOf(unit) + 1}: ${unit.short}`
           : isFoundationSlug(slug)
-            ? 'Teacher Training · Foundations'
-            : 'Teacher Training Institute'
+            ? 'Teaching Toolkit · Foundations'
+            : 'Teaching Toolkit'
       }
       wide={section.toolkit}
     >

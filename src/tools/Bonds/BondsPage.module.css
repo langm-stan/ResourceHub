@@ -1,0 +1,157 @@
+/* Shared layout for the two bond pages, following the toolkit page family. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.intro {
+  margin-bottom: var(--space-5);
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.controlsRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-6);
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .controlsRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  align-items: baseline;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  margin-top: var(--space-5);
+  max-width: 80ch;
+}
+
+/* The cash-flow timeline: what you pay today, then each payment the bond owes. */
+.timeline {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  padding: var(--space-2) 0;
+}
+.node {
+  flex: 1;
+  min-width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.amount {
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink);
+  text-align: center;
+  line-height: 1.3;
+}
+.amountToday {
+  composes: amount;
+  color: var(--c-series-1);
+}
+.amountFinal {
+  composes: amount;
+  color: var(--c-accent);
+}
+.amountEllipsis {
+  composes: amount;
+  color: var(--text-faint);
+  font-weight: var(--fw-regular);
+}
+.rail {
+  position: relative;
+  width: 100%;
+  height: 14px;
+}
+.rail::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6px;
+  height: 2px;
+  background: var(--c-rule);
+}
+.rail::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--c-paper);
+  border: 2px solid var(--c-ink-muted);
+}
+.railToday::after {
+  border-color: var(--c-series-1);
+}
+.railFinal::after {
+  border-color: var(--c-accent);
+}
+.railEllipsis::after {
+  display: none;
+}
+.period {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.timelineCaption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-muted);
+  max-width: 80ch;
+}
