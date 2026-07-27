@@ -100,6 +100,8 @@ function StockPicker() {
   const committed = pick !== null
   const beat = stocks.filter((s) => (s.r10 ?? -100) > sp.r10).length
   const r10s = useMemo(() => stocks.map((s) => s.r10 ?? -100), [stocks])
+  /* What a growing basket converges to: the board held in equal amounts. */
+  const boardMean = r10s.reduce((a, b) => a + b, 0) / r10s.length
   const sortedR10 = [...r10s].sort((a, b) => a - b)
   const medianR10 = sortedR10[Math.floor(sortedR10.length / 2)]!
   const best = Math.max(...sortedR10)
@@ -558,6 +560,13 @@ function StockPicker() {
 
                   <span className={styles.compareRule} />
 
+                  <span className={styles.compareLabel}>All 100 tickets, equal amounts</span>
+                  <span className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                    {fmtSignedPct(Math.round(boardMean))}
+                  </span>
+                  <span className={styles.compareValueSm}>one result</span>
+                  <span className={`${styles.compareValueSm} tnum`}>0 pts</span>
+
                   <span className={styles.compareLabel}>The market (S&amp;P 500)</span>
                   <span className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
                     {fmtSignedPct(sp.r10)}
@@ -566,15 +575,17 @@ function StockPicker() {
                   <span className={`${styles.compareValueSm} tnum`}>0 pts</span>
                 </div>
                 <p className={styles.compareNote}>
-                  Every basket size averages close to the board&rsquo;s mean; adding tickets does
-                  not raise the expected return. It narrows the spread around it
+                  Every basket size averages close to the 100-ticket row, and adding tickets does
+                  not raise that average. It narrows the spread around it
                   {statsB && sizeA !== sizeB && Math.min(statsA.span, statsB.span) > 0
                     ? `: the ${statsA.span >= statsB.span ? sizeA : sizeB}-ticket baskets spread ${(
                         Math.max(statsA.span, statsB.span) / Math.min(statsA.span, statsB.span)
                       ).toFixed(1)} times as wide`
                     : ''}
-                  . The market itself has no spread; holding all of it gives the same result every
-                  time.
+                  . The bottom two rows have no spread because each is one fixed portfolio. They
+                  can differ from each other: the S&amp;P 500 weights the largest companies most
+                  heavily and holds 500 of them, so it runs ahead of an equal split when the
+                  giants lead the decade and behind it when they lag.
                 </p>
               </>
             )}
