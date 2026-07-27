@@ -24,6 +24,10 @@ const GREEN = 'var(--c-series-1)'
 const SLATE = 'var(--c-series-3)'
 
 const fmtSignedPct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString()}%`
+const fmtSignedPts = (v: number) => {
+  const r = Math.round(v)
+  return `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)} pts`
+}
 
 function ReturnBars({
   ticket,
@@ -115,6 +119,12 @@ function StockPicker() {
   const strayFrom = (r1: number, r5: number, r10: number) =>
     (Math.abs(r1 - sp.r1) + Math.abs(r5 - sp.r5) + Math.abs(r10 - sp.r10)) / 3
   const basketStray = strayFrom(rawBasketAvg('r1'), rawBasketAvg('r5'), rawBasketAvg('r10'))
+  /* Signed gaps, basket minus market: positive means ahead at that mark. */
+  const gaps = [
+    { h: '1 yr', v: rawBasketAvg('r1') - sp.r1 },
+    { h: '5 yr', v: rawBasketAvg('r5') - sp.r5 },
+    { h: '10 yr', v: rawBasketAvg('r10') - sp.r10 },
+  ]
   const allStrays = stocks
     .map((s) => strayFrom(s.r1 ?? -100, s.r5 ?? -100, s.r10 ?? -100))
     .sort((a, b) => a - b)
@@ -328,7 +338,11 @@ function StockPicker() {
                 { label: 'Tickets held', value: `${basketSize}` },
                 { label: 'Basket 10-yr return', value: fmtSignedPct(basketR10), color: basketR10 >= sp.r10 ? GREEN : RED },
                 { label: 'Market 10-yr return', value: fmtSignedPct(sp.r10) },
-                { label: 'Strays from the market by', value: `${Math.round(basketStray)} pts`, color: GREEN },
+                ...gaps.map((g) => ({
+                  label: `Basket minus market, ${g.h}`,
+                  value: fmtSignedPts(g.v),
+                  color: g.v >= 0 ? GREEN : RED,
+                })),
               ]}
             />
 
@@ -351,13 +365,21 @@ function StockPicker() {
                 animate={false}
                 note="the benchmark the basket is settling onto"
               />
-              <Stat
-                label="Your basket strays from the market by"
-                value={basketStray}
-                format={(v) => `${Math.round(v)} pts`}
-                animate={false}
-                note={`average gap at the 1, 5, and 10-year marks; a single ticket here typically strays ${Math.round(typicalStray)} pts`}
-              />
+              {gaps.map((g, i) => (
+                <Stat
+                  key={g.h}
+                  label={`Basket minus market (${g.h})`}
+                  value={g.v}
+                  format={fmtSignedPts}
+                  accentColor={g.v >= 0 ? GREEN : RED}
+                  animate={false}
+                  note={
+                    i === gaps.length - 1
+                      ? `a single ticket here typically strays ${Math.round(typicalStray)} pts from the market`
+                      : undefined
+                  }
+                />
+              ))}
             </div>
 
             <Callout tone="mark" label="More tickets make the basket move like the market">
