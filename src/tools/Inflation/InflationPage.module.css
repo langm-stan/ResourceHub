@@ -34,19 +34,16 @@
   padding-bottom: 4px;
 }
 
-/* ---- Two-column workbook ----------------------------------------------- */
+/* ---- Parameters on top, full-width output below ------------------------ */
 .layout {
-  display: grid;
-  grid-template-columns: var(--rail-width) 1fr;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-6);
-  align-items: start;
 }
 .rail {
   position: relative;
 }
 .railSticky {
-  position: sticky;
-  top: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -55,6 +52,13 @@
   box-shadow: var(--shadow-card);
   border: var(--hairline) solid var(--border-hairline);
   padding: var(--space-5);
+}
+/* The controls flow horizontally across the band and wrap as needed. */
+.controlsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4) var(--space-6);
+  align-items: start;
 }
 .railNote {
   font-size: var(--fs-caption);
@@ -97,12 +101,6 @@
 }
 
 @media (max-width: 920px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-  .railSticky {
-    position: static;
-  }
   .intro {
     grid-template-columns: 1fr;
     row-gap: var(--space-3);

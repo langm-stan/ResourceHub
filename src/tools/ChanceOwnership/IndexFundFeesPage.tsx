@@ -30,12 +30,12 @@ function IndexFund() {
   const yMax = cheapFinal * 1.1
 
   return (
-    <div className={styles.stationGrid}>
-      <div className={styles.controlsCol}>
-        <p className={styles.stationLede}>
-          The same monthly amount goes into a fund holding all 500 companies and compounds over
-          decades. The remaining variable is the fund's <strong>expense ratio</strong>.
-        </p>
+    <div className={styles.stationStack}>
+      <p className={styles.stationLede}>
+        The same monthly amount goes into a fund holding all 500 companies and compounds over
+        decades. The remaining variable is the fund's <strong>expense ratio</strong>.
+      </p>
+      <div className={styles.slidersRowWide}>
         <Slider
           label="Invested per month"
           value={monthly}
@@ -43,9 +43,11 @@ function IndexFund() {
           min={25}
           max={500}
           step={25}
-          readout={formatUSDWhole(monthly)}
+          editable
+          inputMax={5000}
+          prefix="$"
         />
-        <Slider label="Years" value={years} onChange={setYears} min={10} max={45} step={1} readout={`${years}`} />
+        <Slider label="Years" value={years} onChange={setYears} min={10} max={45} step={1} editable />
         <Slider
           label="Average yearly return"
           value={ret}
@@ -53,7 +55,9 @@ function IndexFund() {
           min={3}
           max={12}
           step={0.5}
-          readout={`${ret.toFixed(1)}%`}
+          editable
+          suffix="%"
+          precision={1}
         />
         <Slider
           label="Fund expense ratio"
@@ -62,26 +66,28 @@ function IndexFund() {
           min={0.1}
           max={2}
           step={0.05}
-          readout={`${fee.toFixed(2)}%`}
+          editable
+          suffix="%"
+          precision={2}
         />
-        <div className={styles.statsColumn}>
-          <Stat
-            label={`Index ETF at ${CHEAP_FEE.toFixed(2)}%, after ${years} years`}
-            value={cheapFinal}
-            format={formatUSDWhole}
-            accentColor={GREEN}
-            emphasis
-            animate={false}
-          />
-          <Stat label={`The same fund at ${fee.toFixed(2)}%`} value={costlyFinal} format={formatUSDWhole} animate={false} />
-          <Stat
-            label="Eaten by the higher fee"
-            value={cheapFinal - costlyFinal}
-            format={formatUSDWhole}
-            accentColor={RED}
-            animate={false}
-          />
-        </div>
+      </div>
+      <div className={styles.stats}>
+        <Stat
+          label={`Index ETF at ${CHEAP_FEE.toFixed(2)}%, after ${years} years`}
+          value={cheapFinal}
+          format={formatUSDWhole}
+          accentColor={GREEN}
+          emphasis
+          animate={false}
+        />
+        <Stat label={`The same fund at ${fee.toFixed(2)}%`} value={costlyFinal} format={formatUSDWhole} animate={false} />
+        <Stat
+          label="Eaten by the higher fee"
+          value={cheapFinal - costlyFinal}
+          format={formatUSDWhole}
+          accentColor={RED}
+          animate={false}
+        />
       </div>
       <div className={styles.chartCol}>
         <div className={styles.legend}>

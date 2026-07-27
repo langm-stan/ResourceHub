@@ -63,83 +63,114 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
         </header>
       )}
 
-      <Card tone="raised">
-        <div className={styles.grid}>
-          <div className={styles.controlsCol}>
-            <p className={styles.lede}>
-              Set the price, the rent for the same home, the down payment, and the mortgage rate,
-              from real listings and rate quotes when you can.
-            </p>
-            <Slider
-              label="Home price"
-              value={price}
-              onChange={setPrice}
-              min={100000}
-              max={2000000}
-              step={10000}
-              editable
-              prefix="$"
-            />
-            <Slider
-              label="Monthly rent for the same home"
-              value={rent}
-              onChange={setRent}
-              min={500}
-              max={10000}
-              step={50}
-              editable
-              prefix="$"
-            />
-            <Slider
-              label="Down payment"
-              value={downPct}
-              onChange={setDownPct}
-              min={0}
-              max={50}
-              step={1}
-              editable
-              suffix="%"
-              precision={1}
-            />
-            <Slider
-              label="Mortgage rate (30-year fixed)"
-              value={ratePct}
-              onChange={setRatePct}
-              min={2}
-              max={12}
-              step={0.1}
-              editable
-              suffix="%"
-              precision={1}
-            />
-            <SegmentedControl
-              label="Home price growth"
-              options={[
-                { value: 'flat', label: 'Flat (0%)' },
-                { value: 'typical', label: 'Typical (3%)' },
-                { value: 'hot', label: 'Hot (5%)' },
-              ]}
-              value={growth}
-              onChange={setGrowth}
-            />
-            <div className={styles.stats}>
-              <Stat
-                label="Net cost of owning, year one"
-                value={race.netOwnCostYear1}
-                format={(v) => `${formatUSDWhole(v)}/mo`}
-                accentColor={race.netOwnCostYear1 > rent ? RED : GREEN}
-                emphasis
-                animate={false}
-              />
-              <Stat
-                label="Owner catches the renter"
-                value={race.breakEvenYear ?? 0}
-                format={(v) => (race.breakEvenYear ? `year ${Math.round(v)}` : `not in ${HORIZON} years`)}
-                accentColor={race.breakEvenYear ? GREEN : RED}
-                animate={false}
-              />
-            </div>
-            <div className={styles.ledger}>
+      <Card tone="raised" className={styles.stack}>
+        <p className={styles.lede}>
+          Set the price, the rent for the same home, the down payment, and the mortgage rate,
+          from real listings and rate quotes when you can.
+        </p>
+        <div className={styles.controlsRow}>
+          <Slider
+            label="Home price"
+            value={price}
+            onChange={setPrice}
+            min={100000}
+            max={2000000}
+            step={10000}
+            editable
+            prefix="$"
+          />
+          <Slider
+            label="Monthly rent for the same home"
+            value={rent}
+            onChange={setRent}
+            min={500}
+            max={10000}
+            step={50}
+            editable
+            prefix="$"
+          />
+          <Slider
+            label="Down payment"
+            value={downPct}
+            onChange={setDownPct}
+            min={0}
+            max={50}
+            step={1}
+            editable
+            suffix="%"
+            precision={1}
+          />
+          <Slider
+            label="Mortgage rate (30-year fixed)"
+            value={ratePct}
+            onChange={setRatePct}
+            min={2}
+            max={12}
+            step={0.1}
+            editable
+            suffix="%"
+            precision={1}
+          />
+        </div>
+        <SegmentedControl
+          label="Home price growth"
+          options={[
+            { value: 'flat', label: 'Flat (0%)' },
+            { value: 'typical', label: 'Typical (3%)' },
+            { value: 'hot', label: 'Hot (5%)' },
+          ]}
+          value={growth}
+          onChange={setGrowth}
+        />
+        <div className={styles.stats}>
+          <Stat
+            label="Net cost of owning, year one"
+            value={race.netOwnCostYear1}
+            format={(v) => `${formatUSDWhole(v)}/mo`}
+            accentColor={race.netOwnCostYear1 > rent ? RED : GREEN}
+            emphasis
+            animate={false}
+          />
+          <Stat
+            label="Owner catches the renter"
+            value={race.breakEvenYear ?? 0}
+            format={(v) => (race.breakEvenYear ? `year ${Math.round(v)}` : `not in ${HORIZON} years`)}
+            accentColor={race.breakEvenYear ? GREEN : RED}
+            animate={false}
+          />
+        </div>
+
+        <div className={styles.legend}>
+          <span style={{ color: GOLD }}>&#9632; owner&rsquo;s wealth if sold that year</span>
+          <span style={{ color: GREEN }}>&#9632; renter&rsquo;s invested wealth</span>
+        </div>
+        <StationChart
+          x={x}
+          yMin={yMin}
+          yMax={yMax}
+          lines={[
+            { ys: renter, color: GREEN, width: 3, label: 'Renter, investing the difference' },
+            { ys: owner, color: GOLD, width: 3, label: 'Owner, if sold that year' },
+          ]}
+          xTickFormat={(v) => `${Math.round(v)} yr`}
+          xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          ratio={0.42}
+          maxHeight={460}
+          figure="Figure 1."
+          caption={`The owner starts behind the renter: closing and selling costs come out before equity builds.`}
+          ariaLabel="Owner versus renter wealth over the life of the loan"
+          exportStats={[
+            { label: `Owner, year ${HORIZON}`, value: formatUSDWhole(last.owner), color: GOLD },
+            { label: `Renter, year ${HORIZON}`, value: formatUSDWhole(last.renter), color: GREEN },
+            {
+              label: 'Break-even',
+              value: race.breakEvenYear ? `year ${race.breakEvenYear}` : `beyond ${HORIZON} yrs`,
+            },
+          ]}
+        />
+
+        <div className={styles.ledgerWrap}>
+          <div className={styles.ledger}>
               <div className={styles.ledgerRow}>
                 <span>Interest, first year</span>
                 <span className={styles.ledgerAmount}>{formatUSDWhole(race.interestMoYear1)}/mo</span>
@@ -173,46 +204,18 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
                 <span className={styles.ledgerAmount}>{formatUSDWhole(rent)}/mo</span>
               </div>
             </div>
-            <p className={styles.note}>
-              Only the principal line becomes wealth: {formatUSDWhole(race.principalMoYear1)} of
-              the {formatUSDWhole(race.ownerMonthlyYear1)} the owner pays each month, a share that
-              grows every year as interest falls. If the whole payment built equity, owning would
-              win immediately.
-            </p>
-          </div>
-
-          <div className={styles.chartCol}>
-            <div className={styles.legend}>
-              <span style={{ color: GOLD }}>&#9632; owner&rsquo;s wealth if sold that year</span>
-              <span style={{ color: GREEN }}>&#9632; renter&rsquo;s invested wealth</span>
+            <div className={styles.ledgerAside}>
+              <p className={styles.note}>
+                Only the principal line becomes wealth: {formatUSDWhole(race.principalMoYear1)} of
+                the {formatUSDWhole(race.ownerMonthlyYear1)} the owner pays each month, a share that
+                grows every year as interest falls. If the whole payment built equity, owning would
+                win immediately.
+              </p>
+              <Callout tone="mark" label="How the comparison shifts with time">
+                As years pass, the principal share grows, rents rise against a flat payment, and the
+                one-time costs spread out. The break-even year is the number to watch.
+              </Callout>
             </div>
-            <StationChart
-              x={x}
-              yMin={yMin}
-              yMax={yMax}
-              lines={[
-                { ys: renter, color: GREEN, width: 3, label: 'Renter, investing the difference' },
-                { ys: owner, color: GOLD, width: 3, label: 'Owner, if sold that year' },
-              ]}
-              xTickFormat={(v) => `${Math.round(v)} yr`}
-              xHoverLabel={(v) => `Year ${Math.round(v)}`}
-              figure="Figure 1."
-              caption={`The owner starts behind the renter: closing and selling costs come out before equity builds.`}
-              ariaLabel="Owner versus renter wealth over the life of the loan"
-              exportStats={[
-                { label: `Owner, year ${HORIZON}`, value: formatUSDWhole(last.owner), color: GOLD },
-                { label: `Renter, year ${HORIZON}`, value: formatUSDWhole(last.renter), color: GREEN },
-                {
-                  label: 'Break-even',
-                  value: race.breakEvenYear ? `year ${race.breakEvenYear}` : `beyond ${HORIZON} yrs`,
-                },
-              ]}
-            />
-            <Callout tone="mark" label="How the comparison shifts with time">
-              As years pass, the principal share grows, rents rise against a flat payment, and the
-              one-time costs spread out. The break-even year is the number to watch.
-            </Callout>
-          </div>
         </div>
       </Card>
 

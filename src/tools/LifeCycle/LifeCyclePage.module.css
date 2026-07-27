@@ -267,7 +267,7 @@
 .controlsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-7);
+  gap: var(--space-4) var(--space-5);
   /* Top-align so every control's label sits on the same line; notes hang
      below without pushing neighbors around. */
   align-items: start;

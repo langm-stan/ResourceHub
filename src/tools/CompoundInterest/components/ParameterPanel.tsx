@@ -1,12 +1,6 @@
-import {
-  NumberField,
-  SegmentedControl,
-  Slider,
-  Toggle,
-  type Segment,
-} from '../../../design-system'
+import { SegmentedControl, Slider, Toggle, type Segment } from '../../../design-system'
 import { effectiveAnnualRate, FREQUENCIES, type FrequencyName } from '../../../lib/finance'
-import { formatPercent, formatUSDWhole } from '../../../lib/format'
+import { formatPercent } from '../../../lib/format'
 import type { Mode, Scenario } from '../state'
 import styles from './ParameterPanel.module.css'
 
@@ -50,69 +44,41 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
         }
       />
 
-      <div className={styles.group}>
-        <NumberField
-          label={isPv ? 'Future amount' : 'Initial amount'}
-          value={scenario.principal}
-          onChange={(principal) => onChange({ principal })}
-          min={0}
-          max={1_000_000}
-          prefix="$"
-          precision={0}
-        />
-        <Slider
-          label=""
-          value={Math.min(scenario.principal, 100_000)}
-          onChange={(principal) => onChange({ principal })}
-          min={0}
-          max={100_000}
-          step={500}
-          readout={formatUSDWhole(scenario.principal)}
-        />
-      </div>
-
-      <div className={styles.group}>
-        <NumberField
-          label="Annual rate"
-          value={scenario.ratePct}
-          onChange={(ratePct) => onChange({ ratePct })}
-          min={0}
-          max={40}
-          suffix="%"
-          precision={1}
-        />
-        <Slider
-          label=""
-          value={Math.min(scenario.ratePct, 20)}
-          onChange={(ratePct) => onChange({ ratePct })}
-          min={0}
-          max={20}
-          step={0.1}
-          readout={`${scenario.ratePct}%`}
-          note={earNote}
-        />
-      </div>
-
-      <div className={styles.group}>
-        <NumberField
-          label={isPv ? 'Time until paid' : 'Time horizon'}
-          value={scenario.years}
-          onChange={(years) => onChange({ years })}
-          min={1}
-          max={100}
-          suffix="years"
-          precision={0}
-        />
-        <Slider
-          label=""
-          value={Math.min(scenario.years, 60)}
-          onChange={(years) => onChange({ years })}
-          min={1}
-          max={60}
-          step={1}
-          readout={`${scenario.years} years`}
-        />
-      </div>
+      <Slider
+        label={isPv ? 'Future amount' : 'Initial amount'}
+        value={scenario.principal}
+        onChange={(principal) => onChange({ principal })}
+        min={0}
+        max={100_000}
+        step={500}
+        editable
+        inputMax={1_000_000}
+        prefix="$"
+      />
+      <Slider
+        label="Annual rate"
+        value={scenario.ratePct}
+        onChange={(ratePct) => onChange({ ratePct })}
+        min={0}
+        max={20}
+        step={0.1}
+        editable
+        inputMax={40}
+        suffix="%"
+        precision={1}
+        note={earNote}
+      />
+      <Slider
+        label={isPv ? 'Time until paid' : 'Time horizon'}
+        value={scenario.years}
+        onChange={(years) => onChange({ years })}
+        min={1}
+        max={60}
+        step={1}
+        editable
+        inputMax={100}
+        suffix="years"
+      />
 
       <SegmentedControl
         label="Compounding"
@@ -139,16 +105,18 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
           />
           {scenario.contribution && (
             <div className={styles.contribFields}>
-              <NumberField
+              <Slider
                 label={scenario.frequency === 'continuous' ? 'Each month' : 'Each period'}
                 value={scenario.contribution.amount}
                 onChange={(amount) =>
                   onChange({ contribution: { ...scenario.contribution!, amount } })
                 }
                 min={0}
-                max={10_000}
+                max={2_000}
+                step={25}
+                editable
+                inputMax={10_000}
                 prefix="$"
-                precision={0}
               />
               <SegmentedControl
                 label="Timing"

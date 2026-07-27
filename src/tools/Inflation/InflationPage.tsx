@@ -146,34 +146,36 @@ export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
         <aside className={styles.rail}>
           <div className={styles.railSticky}>
             <StepHeader title="Set up your scenario" />
-            <NumberField
-              label="Today's price"
-              value={price}
-              onChange={setPrice}
-              min={1}
-              max={1000000}
-              prefix="$"
-              precision={0}
-            />
-            <NumberField
-              label="Inflation each year"
-              value={rate}
-              onChange={setRate}
-              min={0}
-              max={15}
-              suffix="%"
-              precision={1}
-            />
-            <Slider
-              label="For how long"
-              value={years}
-              onChange={setYears}
-              min={1}
-              max={150}
-              step={1}
-              editable
-              suffix="years"
-            />
+            <div className={styles.controlsRow}>
+              <NumberField
+                label="Today's price"
+                value={price}
+                onChange={setPrice}
+                min={1}
+                max={1000000}
+                prefix="$"
+                precision={0}
+              />
+              <NumberField
+                label="Inflation each year"
+                value={rate}
+                onChange={setRate}
+                min={0}
+                max={15}
+                suffix="%"
+                precision={1}
+              />
+              <Slider
+                label="For how long"
+                value={years}
+                onChange={setYears}
+                min={1}
+                max={150}
+                step={1}
+                editable
+                suffix="years"
+              />
+            </div>
             <p className={styles.railNote}>
               The Federal Reserve targets 2%; the long-run U.S. average is about 3%; the June 2022
               peak was 9%.

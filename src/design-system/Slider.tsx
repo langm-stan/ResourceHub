@@ -19,6 +19,8 @@ interface SliderProps {
   precision?: number
   /** Ceiling for typed values when it exceeds the track's max; the slider still ends at max. */
   inputMax?: number
+  /** Skip digit grouping in the editable input (years: 1928, not 1,928). */
+  plain?: boolean
 }
 
 /** A labeled range control with a tabular-mono readout (optionally a typed input). */
@@ -36,6 +38,7 @@ export function Slider({
   suffix,
   precision = 0,
   inputMax,
+  plain = false,
 }: SliderProps) {
   const id = useId()
   const pct = max === min ? 0 : Math.min(100, ((value - min) / (max - min)) * 100)
@@ -65,7 +68,7 @@ export function Slider({
             <input
               className={`${styles.readInput} tnum`}
               inputMode="decimal"
-              value={draft ?? value.toLocaleString('en-US')}
+              value={draft ?? (plain ? String(value) : value.toLocaleString('en-US'))}
               aria-label={label}
               onFocus={(e) => {
                 setDraft(String(value))

@@ -133,16 +133,6 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           ))}
         </div>
 
-        <SegmentedControl
-          label="Coupons paid"
-          options={[
-            { value: '1', label: 'Annually' },
-            { value: '2', label: 'Semiannually' },
-            { value: '4', label: 'Quarterly' },
-          ]}
-          value={String(perYear)}
-          onChange={(v) => setPerYear(Number(v))}
-        />
         <div className={styles.controlsRow}>
           <Slider
             label="Face value"
@@ -189,6 +179,16 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
             precision={2}
           />
         </div>
+        <SegmentedControl
+          label="Coupons paid"
+          options={[
+            { value: '1', label: 'Annually' },
+            { value: '2', label: 'Semiannually' },
+            { value: '4', label: 'Quarterly' },
+          ]}
+          value={String(perYear)}
+          onChange={(v) => setPerYear(Number(v))}
+        />
 
         <div className={styles.stats}>
           <Stat

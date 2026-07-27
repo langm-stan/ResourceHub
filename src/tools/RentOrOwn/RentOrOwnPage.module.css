@@ -27,25 +27,32 @@
   max-width: 66ch;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-  gap: var(--space-6);
-  align-items: start;
-}
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.controlsCol {
+/* Stacked flow: parameters across the top, full-width chart, then the ledger. */
+.stack {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
-.chartCol {
-  min-width: 0;
+.controlsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+}
+/* The ledger and its reading sit side by side under the chart. */
+.ledgerWrap {
+  display: grid;
+  grid-template-columns: minmax(280px, 5fr) minmax(260px, 4fr);
+  gap: var(--space-4) var(--space-7);
+  align-items: start;
+  margin-top: var(--space-2);
+}
+@media (max-width: 900px) {
+  .ledgerWrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ledgerAside {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);

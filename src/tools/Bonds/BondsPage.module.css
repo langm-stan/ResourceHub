@@ -41,14 +41,9 @@
 
 .controlsRow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4) var(--space-5);
   align-items: start;
-}
-@media (max-width: 720px) {
-  .controlsRow {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 .stats {

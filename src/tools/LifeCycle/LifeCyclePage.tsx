@@ -4,7 +4,6 @@ import {
   Callout,
   Card,
   FormulaBlock,
-  NumberField,
   SegmentedControl,
   Slider,
   Stat,
@@ -95,37 +94,78 @@ export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
             Reset to defaults
           </Button>
         </div>
-        <p className={styles.groupLabel}>Working years</p>
         <div className={styles.controlsGrid}>
-          <NumberField label="Start working at age" value={state.startAge} onChange={(v) => { const a = Math.min(v, state.retireAge - 5); update({ startAge: a, peakAge: Math.max(state.peakAge, a + 5) }) }} min={16} max={40} precision={0} />
-          <NumberField label="Starting salary ($/yr)" value={state.startIncome} onChange={(v) => update({ startIncome: v, peakIncome: Math.max(state.peakIncome, v) })} min={0} max={1_000_000} prefix="$" precision={0} />
-          <NumberField label="Peak salary ($/yr)" value={state.peakIncome} onChange={(v) => update({ peakIncome: Math.max(v, state.startIncome) })} min={0} max={2_000_000} prefix="$" precision={0} />
           <Slider
-            label="Salary peaks at"
+            label="Start working at age"
+            value={state.startAge}
+            onChange={(v) => { const a = Math.min(v, state.retireAge - 5); update({ startAge: a, peakAge: Math.max(state.peakAge, a + 5) }) }}
+            min={16}
+            max={40}
+            step={1}
+            editable
+          />
+          <Slider
+            label="Salary peaks at age"
             value={state.peakAge}
             onChange={(v) => update({ peakAge: Math.min(Math.max(v, state.startAge + 5), state.retireAge) })}
             min={30}
             max={75}
             step={1}
-            readout={state.peakAge >= state.retireAge ? 'rises until retirement' : `age ${state.peakAge}`}
-            note="Earnings typically peak around 50."
+            editable
+            note={state.peakAge >= state.retireAge ? 'Rises until retirement.' : 'Earnings typically peak around 50.'}
           />
-        </div>
-
-        <p className={styles.groupLabel}>Retirement</p>
-        <div className={styles.controlsGrid}>
           <Slider
-            label="Retire at"
+            label="Retire at age"
             value={state.retireAge}
             onChange={(v) => update({ retireAge: v, startAge: Math.min(state.startAge, v - 5), peakAge: Math.min(state.peakAge, v), endAge: Math.max(state.endAge, v + 5) })}
             min={40}
             max={75}
             step={1}
-            readout={`age ${state.retireAge}`}
+            editable
             note="67 is Social Security's full retirement age."
           />
-          <Slider label="Plan to age" value={state.endAge} onChange={(v) => update({ endAge: Math.max(v, state.retireAge + 5) })} min={70} max={105} step={1} readout={`age ${state.endAge}`} note="Most people underestimate this." />
-          <NumberField label="Retirement income ($/yr)" value={state.retirementIncome} onChange={(v) => update({ retirementIncome: v })} min={0} max={500_000} prefix="$" precision={0} />
+          <Slider
+            label="Plan to age"
+            value={state.endAge}
+            onChange={(v) => update({ endAge: Math.max(v, state.retireAge + 5) })}
+            min={70}
+            max={105}
+            step={1}
+            editable
+          />
+          <Slider
+            label="Starting salary ($/yr)"
+            value={state.startIncome}
+            onChange={(v) => update({ startIncome: v, peakIncome: Math.max(state.peakIncome, v) })}
+            min={0}
+            max={300_000}
+            step={5_000}
+            editable
+            inputMax={1_000_000}
+            prefix="$"
+          />
+          <Slider
+            label="Peak salary ($/yr)"
+            value={state.peakIncome}
+            onChange={(v) => update({ peakIncome: Math.max(v, state.startIncome) })}
+            min={0}
+            max={500_000}
+            step={5_000}
+            editable
+            inputMax={2_000_000}
+            prefix="$"
+          />
+          <Slider
+            label="Retirement income ($/yr)"
+            value={state.retirementIncome}
+            onChange={(v) => update({ retirementIncome: v })}
+            min={0}
+            max={200_000}
+            step={1_000}
+            editable
+            inputMax={500_000}
+            prefix="$"
+          />
           <Slider
             label="Retirement income starts at"
             value={state.ssStartAge}
@@ -133,29 +173,27 @@ export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
             min={40}
             max={75}
             step={1}
-            readout={`age ${state.ssStartAge}`}
+            editable
             note={
               state.ssStartAge > state.retireAge
-                ? `No income between retiring at ${state.retireAge} and ${state.ssStartAge}; savings cover those ${state.ssStartAge - state.retireAge} years.`
-                : 'Social Security begins between 62 and 70; pensions can start earlier.'
+                ? `Savings cover the ${state.ssStartAge - state.retireAge} years between retiring and ${state.ssStartAge}.`
+                : 'Social Security begins between 62 and 70.'
             }
           />
-        </div>
-
-        <p className={styles.groupLabel}>Savings and borrowing</p>
-        <div className={styles.controlsGrid}>
           <Slider
-            label="Return on savings/investments after inflation"
+            label="Return after inflation"
             value={state.realRatePct}
             onChange={(v) => update({ realRatePct: v })}
             min={0}
             max={7}
             step={0.5}
-            readout={`${state.realRatePct}% per year`}
+            editable
+            suffix="%"
+            precision={1}
             note={
               state.realRatePct === 0
-                ? 'Savings just keep up with prices, like an account paying 3% with 3% inflation.'
-                : `Invested money buys ${state.realRatePct}% more each year, like earning ${state.realRatePct + 3}% while prices rise 3%.`
+                ? 'Savings just keep up with prices.'
+                : `Like earning ${state.realRatePct + 3}% while prices rise 3%.`
             }
           />
           <Toggle

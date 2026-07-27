@@ -174,8 +174,9 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
           min={HISTORY_FIRST_YEAR}
           max={maxStart}
           step={1}
-          readout={String(start)}
-          note={`The chart runs from ${start} to ${HISTORY_LAST_YEAR}; each window looks back over its own length.`}
+          editable
+          plain
+          note={`The chart runs from ${start} to ${HISTORY_LAST_YEAR}.`}
         />
         <SegmentedControl
           label="Stocks rolling window"
