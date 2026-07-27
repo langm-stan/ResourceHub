@@ -372,6 +372,49 @@
   gap: var(--space-3) var(--space-5);
 }
 
+/* Part two's return report: basket, market, and difference by horizon. */
+.compareTable {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  margin-top: var(--space-2);
+}
+.compareHead {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.compareLabel {
+  font-size: var(--fs-ui);
+  color: var(--text-muted);
+}
+.compareValue {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .compareTable {
+    column-gap: var(--space-3);
+  }
+  .compareValue {
+    font-size: var(--fs-body);
+  }
+}
+.compareRule {
+  grid-column: 1 / -1;
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+.compareNote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  margin: var(--space-1) 0 0;
+}
+
 .returnRows {
   display: flex;
   flex-direction: column;

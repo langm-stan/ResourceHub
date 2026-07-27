@@ -346,41 +346,48 @@ function StockPicker() {
               ]}
             />
 
-            <div className={styles.stats}>
-              <Stat
-                label={`Your basket of ${basketSize} returned (10 yr)`}
-                value={basketR10}
-                format={(v) => fmtSignedPct(Math.round(v))}
-                emphasis
-                accentColor={basketR10 >= sp.r10 ? GREEN : RED}
-                animate={false}
-                note={basketSize === 1 ? 'the whole $1,000 on one ticket' : 'equal dollars in every ticket'}
-              />
-              <Stat
-                label="The market (S&P 500) returned (10 yr)"
-                value={sp.r10}
-                format={fmtSignedPct}
-                emphasis
-                accentColor={sp.r10 >= 0 ? GREEN : RED}
-                animate={false}
-                note="the benchmark the basket is settling onto"
-              />
-              {gaps.map((g, i) => (
-                <Stat
-                  key={g.h}
-                  label={`Basket minus market (${g.h})`}
-                  value={g.v}
-                  format={fmtSignedPts}
-                  accentColor={g.v >= 0 ? GREEN : RED}
-                  animate={false}
-                  note={
-                    i === gaps.length - 1
-                      ? `a single ticket here typically strays ${Math.round(typicalStray)} pts from the market`
-                      : undefined
-                  }
-                />
+            <div className={styles.compareTable}>
+              <span />
+              {['1 year', '5 years', '10 years'].map((h) => (
+                <span key={h} className={styles.compareHead}>
+                  {h}
+                </span>
               ))}
+
+              <span className={styles.compareLabel}>Your basket of {basketSize}</span>
+              {(['r1', 'r5', 'r10'] as const).map((k) => {
+                const v = basketAvg(k)
+                return (
+                  <span key={k} className={`${styles.compareValue} tnum`} style={{ color: v >= 0 ? GREEN : RED }}>
+                    {fmtSignedPct(v)}
+                  </span>
+                )
+              })}
+
+              <span className={styles.compareLabel}>The market (S&amp;P 500)</span>
+              {[sp.r1, sp.r5, sp.r10].map((v, i) => (
+                <span key={i} className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                  {fmtSignedPct(v)}
+                </span>
+              ))}
+
+              <span className={styles.compareRule} />
+
+              <span className={styles.compareLabel}>Difference</span>
+              {gaps.map((g) => {
+                const r = Math.round(g.v)
+                return (
+                  <span key={g.h} className={`${styles.compareValue} tnum`} style={{ color: g.v >= 0 ? GREEN : RED }}>
+                    {`${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}`}
+                  </span>
+                )
+              })}
             </div>
+            <p className={styles.compareNote}>
+              Difference is your basket minus the market at each mark, in percentage points; a
+              single ticket on this board typically strays {Math.round(typicalStray)} points from
+              the market&rsquo;s path.
+            </p>
 
             <Callout tone="mark" label="More tickets make the basket move like the market">
               Each extra ticket is another company whose good and bad luck is mostly its own, so
