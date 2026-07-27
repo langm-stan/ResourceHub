@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Button, Callout, Card, SegmentedControl, Stat } from '../../design-system'
 import { REAL_BOARDS } from './realBoards'
-import { drawBasket } from './compute'
+import { drawBasket, sampleBasketReturns } from './compute'
 import { StationChart } from './components/StationChart'
+import { BasketHistogram } from './components/BasketHistogram'
 import styles from './ChanceOwnershipPage.module.css'
 
 /*
@@ -18,6 +19,10 @@ import styles from './ChanceOwnershipPage.module.css'
 const BASKET_SIZES = [1, 5, 10, 25]
 /** Tickets drawn up front per basket, so growing the basket adds tickets. */
 const BASKET_POOL = 25
+/** Part three's simulation: this many random baskets of each size. */
+const SIM_DRAWS = 2000
+const SIM_SMALL = 5
+const SIM_LARGE = 25
 
 const RED = 'var(--c-accent)'
 const GREEN = 'var(--c-series-1)'
@@ -129,6 +134,13 @@ function StockPicker() {
     .map((s) => strayFrom(s.r1 ?? -100, s.r5 ?? -100, s.r10 ?? -100))
     .sort((a, b) => a - b)
   const typicalStray = allStrays[Math.floor(allStrays.length / 2)]!
+
+  /* Part three: many random baskets of two sizes from this board. */
+  const simSmall = useMemo(() => sampleBasketReturns(r10s, SIM_SMALL, SIM_DRAWS, year * 31 + SIM_SMALL), [r10s, year])
+  const simLarge = useMemo(() => sampleBasketReturns(r10s, SIM_LARGE, SIM_DRAWS, year * 31 + SIM_LARGE), [r10s, year])
+  const q = (arr: number[], p: number) => arr[Math.min(arr.length - 1, Math.floor(p * arr.length))]!
+  const spanSmall = q(simSmall, 0.9) - q(simSmall, 0.1)
+  const spanLarge = q(simLarge, 0.9) - q(simLarge, 0.1)
 
   /* The decade as a path: $1,000 at purchase and at the real 1, 5, and
    * 10-year marks, for each ticket alone, the basket, and the index. */
@@ -399,6 +411,70 @@ function StockPicker() {
               itself, not safety. In the lecture&rsquo;s numbers, one large-cap stock swings about
               40% in a typical year while the whole market still swings about 20%; that remaining
               swing is systematic risk, and no number of tickets removes it.
+            </Callout>
+          </div>
+
+          <div className={styles.basketSection}>
+            <h3 className={styles.basketTitle}>
+              Part three: {SIM_DRAWS.toLocaleString()} baskets of {SIM_SMALL} versus{' '}
+              {SIM_DRAWS.toLocaleString()} baskets of {SIM_LARGE}
+            </h3>
+            <p className={styles.stationLede}>
+              Your basket above is a single draw, so its settling toward the market could still be
+              luck. To rule that out, draw {SIM_DRAWS.toLocaleString()} random baskets of{' '}
+              {SIM_SMALL} and {SIM_DRAWS.toLocaleString()} random baskets of {SIM_LARGE} from this
+              same board and line up every basket&rsquo;s 10-year return.
+            </p>
+
+            <BasketHistogram
+              small={simSmall}
+              large={simLarge}
+              smallSize={SIM_SMALL}
+              largeSize={SIM_LARGE}
+              market={sp.r10}
+              exportStats={[
+                { label: 'Baskets drawn', value: `${SIM_DRAWS.toLocaleString()} of each size` },
+                { label: `Middle 80% span, baskets of ${SIM_SMALL}`, value: `${Math.round(spanSmall)} pts`, color: SLATE },
+                { label: `Middle 80% span, baskets of ${SIM_LARGE}`, value: `${Math.round(spanLarge)} pts`, color: GREEN },
+                { label: 'Market 10-yr return', value: fmtSignedPct(sp.r10), color: RED },
+              ]}
+              caption={`${SIM_DRAWS.toLocaleString()} random baskets of ${SIM_SMALL} (wide grey bars) and ${SIM_DRAWS.toLocaleString()} random baskets of ${SIM_LARGE} (narrow green bars) from the January ${year} board, sorted into bins by 10-year return; the dashed line is the market's own result. Every basket draws from the same 100 tickets. The grey pile sprawls; the green pile stands tall and tight around the board's average.`}
+            />
+
+            <div className={styles.stats}>
+              <Stat
+                label={`Middle 80% of baskets of ${SIM_SMALL} span`}
+                value={spanSmall}
+                format={(v) => `${Math.round(v)} pts`}
+                accentColor={SLATE}
+                animate={false}
+              />
+              <Stat
+                label={`Middle 80% of baskets of ${SIM_LARGE} span`}
+                value={spanLarge}
+                format={(v) => `${Math.round(v)} pts`}
+                emphasis
+                accentColor={GREEN}
+                animate={false}
+              />
+              <Stat
+                label={`How much wider the ${SIM_SMALL}-ticket spread is`}
+                value={spanSmall / spanLarge}
+                format={(v) => `${v.toFixed(1)}×`}
+                accentColor={RED}
+                animate={false}
+                note="same board, same tickets available to every basket"
+              />
+            </div>
+
+            <Callout tone="mark" label="The spread comes from how many tickets, not which ones">
+              These are the lecture&rsquo;s coin-flip charts played with real companies. Every
+              basket here draws from the same board, so the two piles differ in one way only: how
+              many tickets each basket holds. Five tickets leave the decade wide open; twenty-five
+              squeeze it into a narrow band around the board&rsquo;s average, close to the
+              market&rsquo;s own result. Your basket of {SIM_LARGE} above is one draw from the
+              green pile. And the band never squeezes to a point, because every basket rides the
+              market&rsquo;s own decade; that shared fate is systematic risk.
             </Callout>
             <Callout tone="note" label="A broad fund holds every ticket at once">
               Assembling 25 tickets by hand is a chore, and the basket above still covers only a

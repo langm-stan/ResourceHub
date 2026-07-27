@@ -112,6 +112,30 @@ export function drawBasket(total: number, k: number, include: number, seed: numb
   return pool.slice(0, k)
 }
 
+/**
+ * Sample equal-weight baskets of `size` distinct tickets drawn from the
+ * board's returns; the sorted results feed part three's histogram. This
+ * is the lecture's coin-flip distribution built from real companies.
+ */
+export function sampleBasketReturns(returns: number[], size: number, samples: number, seed: number): number[] {
+  const rng = makeRng(seed)
+  const total = returns.length
+  const pool = Array.from({ length: total }, (_, i) => i)
+  const out = new Float64Array(samples)
+  for (let s = 0; s < samples; s++) {
+    let sum = 0
+    for (let i = 0; i < size; i++) {
+      const j = i + Math.floor(rng() * (total - i))
+      const t = pool[i]!
+      pool[i] = pool[j]!
+      pool[j] = t
+      sum += returns[pool[i]!]!
+    }
+    out[s] = sum / size
+  }
+  return [...out].sort((a, b) => a - b)
+}
+
 /* ------------------------------------------------------------------ */
 /* Index fund: the same monthly habit at two expense ratios.           */
 /* ------------------------------------------------------------------ */
