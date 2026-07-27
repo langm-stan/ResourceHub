@@ -24,27 +24,33 @@ export function PortfolioRiskChart({
   n,
   caption,
   exportStats,
+  figure = 'Figure 2.',
+  noun = 'stock',
 }: {
   points: PortfolioPoint[]
   n: number
   caption: string
   exportStats?: ExportStat[]
+  /** Figure label; pass an empty string to omit. */
+  figure?: string
+  /** What one holding is called on the hosting page, e.g. "ticket". */
+  noun?: string
 }) {
   return (
     <ChartFrame
       ratio={0.42}
       maxHeight={380}
-      figure="Figure 2."
+      figure={figure || undefined}
       caption={caption}
       exportStats={exportStats}
-      ariaLabel="Portfolio risk falling toward the market floor as stocks are added"
+      ariaLabel={`Portfolio risk falling toward the market floor as ${noun}s are added`}
     >
-      <Inner points={points} n={n} />
+      <Inner points={points} n={n} noun={noun} />
     </ChartFrame>
   )
 }
 
-function Inner({ points, n }: { points: PortfolioPoint[]; n: number }) {
+function Inner({ points, n, noun }: { points: PortfolioPoint[]; n: number; noun: string }) {
   const { innerWidth, innerHeight } = useChart()
   const maxN = points[points.length - 1]!.n
 
@@ -134,7 +140,7 @@ function Inner({ points, n }: { points: PortfolioPoint[]; n: number }) {
         fontWeight={600}
         fill="var(--c-series-1)"
       >
-        {current.n} {current.n === 1 ? 'stock' : 'stocks'} · {formatPercent(current.real, 0)}
+        {current.n} {current.n === 1 ? noun : `${noun}s`} · {formatPercent(current.real, 0)}
       </text>
 
       <HoverProbe
@@ -142,7 +148,7 @@ function Inner({ points, n }: { points: PortfolioPoint[]; n: number }) {
         x={(d: PortfolioPoint) => d.n}
         xScale={x}
         yScale={y}
-        xLabel={(v) => `${Math.round(v)} ${Math.round(v) === 1 ? 'stock' : 'stocks'}`}
+        xLabel={(v) => `${Math.round(v)} ${Math.round(v) === 1 ? noun : `${noun}s`}`}
         series={[
           {
             label: 'Real stocks, moving together',

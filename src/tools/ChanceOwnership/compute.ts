@@ -90,6 +90,29 @@ export function simulateBettors({ n, bets, stake, start, winProb, winMult, feeOn
 }
 
 /* ------------------------------------------------------------------ */
+/* Stock picker, part two: baskets of tickets from the real board.     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Draw `k` distinct indices from 0..total-1. When `include` is given it is
+ * always the first element, so growing k keeps every earlier ticket: the
+ * basket adds tickets rather than reshuffling.
+ */
+export function drawBasket(total: number, k: number, include: number, seed: number): number[] {
+  const rng = makeRng(seed)
+  const pool = Array.from({ length: total }, (_, i) => i)
+  pool[include] = 0
+  pool[0] = include
+  for (let i = 1; i < k; i++) {
+    const j = i + Math.floor(rng() * (total - i))
+    const t = pool[i]!
+    pool[i] = pool[j]!
+    pool[j] = t
+  }
+  return pool.slice(0, k)
+}
+
+/* ------------------------------------------------------------------ */
 /* Index fund: the same monthly habit at two expense ratios.           */
 /* ------------------------------------------------------------------ */
 

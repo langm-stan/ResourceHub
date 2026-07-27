@@ -172,8 +172,15 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-5) var(--space-6);
 }
+.slidersRowWide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+}
 @media (max-width: 720px) {
-  .slidersRow {
+  .slidersRow,
+  .slidersRowWide {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -294,6 +301,12 @@
   opacity: 0.45;
   cursor: default;
 }
+.ticketInBasket {
+  background: color-mix(in srgb, var(--c-series-1) 26%, var(--surface-sunken));
+  border-color: var(--c-series-1);
+  color: var(--text-primary);
+  cursor: default;
+}
 .boardScale {
   display: flex;
   justify-content: space-between;
@@ -333,6 +346,30 @@
 }
 .pickResultNumber {
   color: var(--c-series-2);
+}
+
+.basketSection {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.basketSection > * {
+  width: 100%;
+}
+.basketTitle {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semibold);
+  margin: 0;
+}
+.basketRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3) var(--space-5);
 }
 
 .returnRows {
