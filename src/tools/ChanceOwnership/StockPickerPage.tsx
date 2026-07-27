@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Button, Callout, Card, SegmentedControl, Stat } from '../../design-system'
 import { REAL_BOARDS } from './realBoards'
 import { drawBasket, sampleBasketReturns } from './compute'
@@ -173,12 +173,13 @@ function StockPicker() {
   }, [dealing, dealt])
 
   const q = (arr: number[], p: number) => arr[Math.min(arr.length - 1, Math.floor(p * arr.length))]!
-  const spanOf = (pile: number[]) => {
+  const pileStats = (pile: number[]) => {
     const s = pile.slice(0, dealt).sort((a, b) => a - b)
-    return q(s, 0.9) - q(s, 0.1)
+    const mean = s.reduce((a, b) => a + b, 0) / Math.max(1, s.length)
+    return { mean, p10: q(s, 0.1), p90: q(s, 0.9), span: q(s, 0.9) - q(s, 0.1) }
   }
-  const spanA = dealt > 0 ? spanOf(pileA) : 0
-  const spanB = dealt > 0 && pileB ? spanOf(pileB) : null
+  const statsA = dealt > 0 ? pileStats(pileA) : null
+  const statsB = dealt > 0 && pileB ? pileStats(pileB) : null
 
   /* The decade as a path: $1,000 at purchase and at the real 1, 5, and
    * 10-year marks, for each ticket alone, the basket, and the index. */
@@ -500,11 +501,25 @@ function StockPicker() {
               market={sp.r10}
               exportStats={[
                 { label: 'Baskets dealt', value: `${dealt.toLocaleString()} of each size` },
-                { label: `Middle 80% span, baskets of ${sizeA}`, value: `${Math.round(spanA)} pts`, color: pileB ? SLATE : GREEN },
-                ...(spanB !== null
-                  ? [{ label: `Middle 80% span, baskets of ${sizeB}`, value: `${Math.round(spanB)} pts`, color: GREEN }]
+                ...(statsA
+                  ? [
+                      {
+                        label: `Baskets of ${sizeA}: average / spread`,
+                        value: `${fmtSignedPct(Math.round(statsA.mean))} / ${Math.round(statsA.span)} pts`,
+                        color: pileB ? SLATE : GREEN,
+                      },
+                    ]
                   : []),
-                { label: 'Market 10-yr return', value: fmtSignedPct(sp.r10), color: RED },
+                ...(statsB
+                  ? [
+                      {
+                        label: `Baskets of ${sizeB}: average / spread`,
+                        value: `${fmtSignedPct(Math.round(statsB.mean))} / ${Math.round(statsB.span)} pts`,
+                        color: GREEN,
+                      },
+                    ]
+                  : []),
+                { label: 'The market (10 yr)', value: fmtSignedPct(sp.r10), color: RED },
               ]}
               caption={`${SIM_DRAWS.toLocaleString()} random baskets of ${sizeA}${
                 pileB ? ` (wide grey bars) and ${SIM_DRAWS.toLocaleString()} random baskets of ${sizeB} (narrow green bars)` : ' (green bars)'
@@ -517,37 +532,54 @@ function StockPicker() {
               }`}
             />
 
-            {dealt > 0 && (
-              <div className={styles.stats}>
-                <Stat
-                  label={`Middle 80% of baskets of ${sizeA} span`}
-                  value={spanA}
-                  format={(v) => `${Math.round(v)} pts`}
-                  accentColor={pileB ? SLATE : GREEN}
-                  emphasis={!pileB}
-                  animate={false}
-                />
-                {spanB !== null && (
-                  <Stat
-                    label={`Middle 80% of baskets of ${sizeB} span`}
-                    value={spanB}
-                    format={(v) => `${Math.round(v)} pts`}
-                    emphasis
-                    accentColor={GREEN}
-                    animate={false}
-                  />
-                )}
-                {spanB !== null && Math.min(spanA, spanB) > 0 && sizeA !== sizeB && (
-                  <Stat
-                    label={`How much wider the ${spanA >= spanB ? sizeA : sizeB}-ticket spread is`}
-                    value={Math.max(spanA, spanB) / Math.min(spanA, spanB)}
-                    format={(v) => `${v.toFixed(1)}×`}
-                    accentColor={RED}
-                    animate={false}
-                    note="same board, same tickets available to every basket"
-                  />
-                )}
-              </div>
+            {statsA && (
+              <>
+                <div className={styles.simTable}>
+                  <span />
+                  <span className={styles.compareHead}>average (10 yr)</span>
+                  <span className={styles.compareHead}>middle 80% land between</span>
+                  <span className={styles.compareHead}>spread</span>
+
+                  {[
+                    { label: `Baskets of ${sizeA}`, s: statsA },
+                    ...(statsB ? [{ label: `Baskets of ${sizeB}`, s: statsB }] : []),
+                  ].map(({ label, s }) => (
+                    <Fragment key={label}>
+                      <span className={styles.compareLabel}>{label}</span>
+                      <span
+                        className={`${styles.compareValue} tnum`}
+                        style={{ color: s.mean >= 0 ? GREEN : RED }}
+                      >
+                        {fmtSignedPct(Math.round(s.mean))}
+                      </span>
+                      <span className={`${styles.compareValueSm} tnum`}>
+                        {fmtSignedPct(Math.round(s.p10))} to {fmtSignedPct(Math.round(s.p90))}
+                      </span>
+                      <span className={`${styles.compareValueSm} tnum`}>{Math.round(s.span)} pts</span>
+                    </Fragment>
+                  ))}
+
+                  <span className={styles.compareRule} />
+
+                  <span className={styles.compareLabel}>The market (S&amp;P 500)</span>
+                  <span className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                    {fmtSignedPct(sp.r10)}
+                  </span>
+                  <span className={styles.compareValueSm}>one result</span>
+                  <span className={`${styles.compareValueSm} tnum`}>0 pts</span>
+                </div>
+                <p className={styles.compareNote}>
+                  Every basket size averages out near the board&rsquo;s mean, so more tickets never
+                  bought a better expected return. What shrinks is the spread around that average
+                  {statsB && sizeA !== sizeB && Math.min(statsA.span, statsB.span) > 0
+                    ? `: the ${statsA.span >= statsB.span ? sizeA : sizeB}-ticket baskets spread ${(
+                        Math.max(statsA.span, statsB.span) / Math.min(statsA.span, statsB.span)
+                      ).toFixed(1)} times as wide`
+                    : ''}
+                  . The market row has no spread at all: holding the whole market is one result,
+                  not a draw.
+                </p>
+              </>
             )}
 
             <Callout tone="mark" label="The spread comes from how many tickets, not which ones">
