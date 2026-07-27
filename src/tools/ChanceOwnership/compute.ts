@@ -114,14 +114,15 @@ export function drawBasket(total: number, k: number, include: number, seed: numb
 
 /**
  * Sample equal-weight baskets of `size` distinct tickets drawn from the
- * board's returns; the sorted results feed part three's histogram. This
- * is the lecture's coin-flip distribution built from real companies.
+ * board's returns, kept in draw order so part three can deal them out
+ * live. This is the lecture's coin-flip distribution built from real
+ * companies; callers sort a copy for quantiles.
  */
 export function sampleBasketReturns(returns: number[], size: number, samples: number, seed: number): number[] {
   const rng = makeRng(seed)
   const total = returns.length
   const pool = Array.from({ length: total }, (_, i) => i)
-  const out = new Float64Array(samples)
+  const out: number[] = new Array(samples)
   for (let s = 0; s < samples; s++) {
     let sum = 0
     for (let i = 0; i < size; i++) {
@@ -133,7 +134,7 @@ export function sampleBasketReturns(returns: number[], size: number, samples: nu
     }
     out[s] = sum / size
   }
-  return [...out].sort((a, b) => a - b)
+  return out
 }
 
 /* ------------------------------------------------------------------ */
