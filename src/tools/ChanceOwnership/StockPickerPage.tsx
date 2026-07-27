@@ -345,12 +345,10 @@ function StockPicker() {
           <div className={styles.basketSection}>
             <h3 className={styles.basketTitle}>Part two: spreading the same $1,000 across more tickets</h3>
             <p className={styles.stationLede}>
-              In lecture, splitting one dollar across more coin flips made the extreme outcomes
-              rare without changing the average. This board plays the same game with real
-              companies: keep ticket #{pick! + 1} and split the $1,000 equally across extra
-              tickets drawn at random, highlighted on the board above. Watch the chart as the
-              basket grows from 1 ticket to 25: the individual tickets stay as wild as ever, but
-              their average starts to move like the market itself.
+              Keep ticket #{pick! + 1} and split the $1,000 equally across extra tickets drawn at
+              random, highlighted on the board above. As the basket grows from 1 ticket to 25,
+              each ticket is as volatile as before, but their average moves more and more like the
+              market.
             </p>
 
             <div className={styles.basketRow}>
@@ -383,7 +381,7 @@ function StockPicker() {
                 basketSize === 1
                   ? `all of it on ticket #${pick! + 1}`
                   : `$${(1000 / basketSize).toLocaleString(undefined, { maximumFractionDigits: 0 })} on ticket #${pick! + 1} and on each of ${basketSize - 1} random tickets`
-              }, held for the real decade. Thin grey lines: each ticket in the basket on its own, scaled to the full $1,000. Green: your basket, the average of the thin lines. Dashed red: the same $1,000 in the S&P 500. Segments connect the measured 1, 5, and 10-year marks; tickets that left the chart's top kept their gains. More tickets do not tame the thin lines, they tame the average.`}
+              }, held for the real decade. Thin grey lines: each ticket in the basket on its own, scaled to the full $1,000. Green: your basket, the average of the thin lines. Dashed red: the same $1,000 in the S&P 500. Segments connect the measured 1, 5, and 10-year marks; tickets that left the chart's top kept their gains. Adding tickets leaves each grey line unchanged and smooths only their average.`}
               ariaLabel={`Value of $1,000 over ten years from January ${year}: each ticket in the basket, the basket itself, and the S&P 500`}
               exportStats={[
                 { label: 'Tickets held', value: `${basketSize}` },
@@ -441,27 +439,26 @@ function StockPicker() {
             </p>
 
             <Callout tone="mark" label="More tickets make the basket move like the market">
-              Each extra ticket is another company whose good and bad luck is mostly its own, so
-              the swings cancel, just as the coin game predicted: a single ticket on this board
-              typically strays {Math.round(typicalStray)} points from the market&rsquo;s path, and
-              your basket of {basketSize} strays {Math.round(basketStray)}. Notice what the
-              cancelling did not do: it never promised a better return than the market, only the
-              market&rsquo;s return with less luck involved. And the destination is the market
-              itself, not safety. In the lecture&rsquo;s numbers, one large-cap stock swings about
-              40% in a typical year while the whole market still swings about 20%; that remaining
-              swing is systematic risk, and no number of tickets removes it.
+              Each company&rsquo;s good and bad years are mostly its own, so across many tickets
+              they partly cancel: a single ticket on this board typically strays{' '}
+              {Math.round(typicalStray)} points from the market&rsquo;s path, while your basket of{' '}
+              {basketSize} strays {Math.round(basketStray)}. The averaging does not raise the
+              expected return; it narrows the range of outcomes around it. It also has a limit. A
+              typical large-cap stock&rsquo;s annual return has a standard deviation near 40%, and
+              the S&amp;P 500&rsquo;s is still near 20%; that shared movement is systematic risk,
+              which diversification cannot remove.
             </Callout>
           </div>
 
           <div className={styles.basketSection}>
             <h3 className={styles.basketTitle}>
-              Part three: deal thousands of baskets and watch the piles form
+              Part three: repeating the draw {SIM_DRAWS.toLocaleString()} times
             </h3>
             <p className={styles.stationLede}>
-              Your basket above is a single draw, so its settling toward the market could still be
-              luck. Choose one or two basket sizes, then deal {SIM_DRAWS.toLocaleString()} random
-              baskets of each from this same board and watch where every one of them lands after
-              ten years.
+              Your basket above is a single draw, and one draw can be lucky. To see whether the
+              pattern holds in general, choose one or two basket sizes and deal{' '}
+              {SIM_DRAWS.toLocaleString()} random baskets of each from this board; the chart
+              records where every one of them lands after ten years.
             </p>
 
             <div className={styles.basketRow}>
@@ -569,33 +566,31 @@ function StockPicker() {
                   <span className={`${styles.compareValueSm} tnum`}>0 pts</span>
                 </div>
                 <p className={styles.compareNote}>
-                  Every basket size averages out near the board&rsquo;s mean, so more tickets never
-                  bought a better expected return. What shrinks is the spread around that average
+                  Every basket size averages close to the board&rsquo;s mean; adding tickets does
+                  not raise the expected return. It narrows the spread around it
                   {statsB && sizeA !== sizeB && Math.min(statsA.span, statsB.span) > 0
                     ? `: the ${statsA.span >= statsB.span ? sizeA : sizeB}-ticket baskets spread ${(
                         Math.max(statsA.span, statsB.span) / Math.min(statsA.span, statsB.span)
                       ).toFixed(1)} times as wide`
                     : ''}
-                  . The market row has no spread at all: holding the whole market is one result,
-                  not a draw.
+                  . The market itself has no spread; holding all of it gives the same result every
+                  time.
                 </p>
               </>
             )}
 
-            <Callout tone="mark" label="The spread comes from how many tickets, not which ones">
-              These are the lecture&rsquo;s coin-flip charts played with real companies. Every
-              basket deals from the same board, so the piles differ in one way only: how many
-              tickets each basket holds. Fewer tickets leave the decade wide open; more tickets
-              squeeze it into a narrow band around the board&rsquo;s average, close to the
-              market&rsquo;s own result. And the band never squeezes to a point, because every
-              basket rides the market&rsquo;s own decade; that shared fate is systematic risk.
+            <Callout tone="mark" label="The spread depends on how many tickets, not which ones">
+              Every basket draws from the same board, so the piles differ only in how many tickets
+              each basket holds. With fewer tickets the outcomes range widely; with more they
+              concentrate near the board&rsquo;s average, close to the market&rsquo;s result. The
+              concentration has a limit: the stocks on this board move together with the market,
+              and that shared movement, systematic risk, does not diversify away.
             </Callout>
             <Callout tone="note" label="A broad fund holds every ticket at once">
-              Assembling 25 tickets by hand is a chore, and the basket above still covers only a
-              quarter of the board. One share of a broad index fund or ETF holds every company
-              here plus hundreds of smaller ones, for a fee of pennies per year on $1,000. The
-              spreading you just did by clicking is what the fund does automatically, which is why
-              the advice lands on funds rather than on picking more tickets.
+              Holding 25 individual stocks takes effort to assemble and maintain, and it still
+              covers only a quarter of this board. One share of a broad index fund or ETF holds
+              every company here plus hundreds of smaller ones, at a cost of a few cents per year
+              on $1,000. A fund is the standard way to get the diversification shown above.
             </Callout>
           </div>
         </>
@@ -625,10 +620,10 @@ export function StockPickerPage({ intro = true }: { intro?: boolean } = {}) {
           <h1 className={styles.h1}>Stock Picker</h1>
           <p className={styles.lead}>
             Picking a single stock is ownership, not a bet: the company earns money and some of it is
-            yours. But owning one company is a gamble of a different kind. Commit to one ticket from a
-            real January and watch its actual decade. Most single picks trail the index they belong
-            to, because a few extreme winners carry the whole market. Then spread the same $1,000
-            across more tickets and watch the extreme outcomes cancel out.
+            yours. But owning one company still leaves a lot to chance. Commit $1,000 to one ticket
+            from a real January and see its actual decade; most single picks trail their index,
+            because a few extreme winners carry the whole market. Then spread the same $1,000 across
+            more tickets and see how the basket comes to track the index.
           </p>
         </header>
       )}
