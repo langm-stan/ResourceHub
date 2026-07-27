@@ -62,12 +62,11 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
         </header>
       )}
 
-      <Card tone="raised">
-        <div className={styles.grid}>
-          <div className={styles.controlsCol}>
-            <p className={styles.lede}>
-              Use the defaults or numbers from real listings. Nothing down on either loan.
-            </p>
+      <Card tone="raised" className={styles.stack}>
+        <p className={styles.lede}>
+          Use the defaults or numbers from real listings. Nothing down on either loan.
+        </p>
+        <div className={styles.controlsRow}>
             <Slider
               label="Price new"
               value={price}
@@ -135,7 +134,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               editable
               suffix="months"
             />
-            <div className={styles.stats}>
+        </div>
+        <div className={styles.stats}>
               <Stat
                 label={`New at ${newRate.toFixed(2)}%`}
                 value={deals.new.payment}
@@ -172,9 +172,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
                 </>
               )}
             </p>
-          </div>
 
-          <div className={styles.chartCol}>
             <SegmentedControl
               label="Show the loan on"
               options={[
@@ -197,6 +195,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               ]}
               xTickFormat={(v) => `${Math.round(v)} yr`}
               xHoverLabel={(v) => `Car age ${v.toFixed(1)} yrs`}
+              ratio={0.42}
+              maxHeight={460}
               figure="Figure 1."
               caption={
                 pick === 'new'
@@ -215,8 +215,6 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               a higher one. The real difference is the price paid, traded against repair risk and
               a shorter warranty.
             </Callout>
-          </div>
-        </div>
       </Card>
 
       <p className={styles.footnote}>
