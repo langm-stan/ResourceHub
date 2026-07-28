@@ -219,9 +219,9 @@ export const COURSE_UNITS: CourseUnit[] = [
       },
       {
         slug: 'stock-picker',
-        label: 'Stock Picker',
-        description: 'Commit $1,000 to one of the 100 largest US companies of a real January and watch its actual decade against the index. Most single picks trail.',
-        keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'market cap'],
+        label: 'Stock Diversifier',
+        description: 'Commit $1,000 to one of the 100 largest US companies of a real January and see its decade against the index, then spread the same $1,000 across more tickets until the basket tracks the market.',
+        keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'stock picker', 'market cap', 'basket'],
       },
       {
         slug: 'index-fund-fees',

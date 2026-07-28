@@ -114,9 +114,9 @@ const SECTIONS: Record<string, SectionConfig> = {
     content: <GamblingSimPage intro={false} />,
   },
   'stock-picker': {
-    title: 'Stock Picker',
+    title: 'Stock Diversifier',
     toolkit: true,
-    instructor: { label: 'Stock Picker', path: 'teacher-training/stock-picker' },
+    instructor: { label: 'Stock Diversifier', path: 'teacher-training/stock-picker' },
     content: <StockPickerPage intro={false} />,
   },
   'index-fund-fees': {

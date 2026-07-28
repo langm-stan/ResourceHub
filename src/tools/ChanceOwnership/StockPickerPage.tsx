@@ -7,7 +7,9 @@ import { BasketHistogram } from './components/BasketHistogram'
 import styles from './ChanceOwnershipPage.module.css'
 
 /*
- * Stock Picker (formerly the middle station of Chance & Ownership):
+ * Stock Diversifier (formerly Stock Picker, the middle station of
+ * Chance & Ownership; the stock-picker slug is kept so deck and
+ * worksheet links stay live):
  * commit $1,000 to one of the 100 largest US companies of a real January,
  * then see its actual decade against the index. Most single picks trail.
  * Part two spreads the same $1,000 across more tickets from the same
@@ -628,7 +630,7 @@ export function StockPickerPage({ intro = true }: { intro?: boolean } = {}) {
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
-          <h1 className={styles.h1}>Stock Picker</h1>
+          <h1 className={styles.h1}>Stock Diversifier</h1>
           <p className={styles.lead}>
             Picking a single stock is ownership, not a bet: the company earns money and some of it is
             yours. But owning one company still leaves a lot to chance. Commit $1,000 to one ticket
