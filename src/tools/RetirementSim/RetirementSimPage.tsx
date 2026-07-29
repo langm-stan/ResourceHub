@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Button, Callout, Card, FormulaBlock, NumberField, SegmentedControl, SelectField, Slider, Stat, Toggle } from '../../design-system'
+import { Button, Callout, Card, MathSection, NumberField, SegmentedControl, SelectField, Slider, Stat, Toggle, type MathRow } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -195,6 +195,49 @@ function TakeHomePay() {
    * is owed on every wage dollar, deferred or not, so its band covers the
    * 401(k) and deduction slices too.
    */
+
+  // The worked-math report: only the pieces switched on appear as steps.
+  const mathRows: MathRow[] = useMemo(() => {
+    const rows: MathRow[] = [
+      {
+        tex: `\\text{taxable income} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''}${deduction > 0 ? ` - ${texUSD(deduction)}` : ''} = \\boxed{${texUSD(cur.fed.taxable)}}`,
+        caption: `Step 1. Wages${cur.k > 0 ? ' minus the 401(k) contribution' : ''}${deduction > 0 ? `${cur.k > 0 ? ' and' : ' minus'} the federal deduction` : ''}${cur.k === 0 && deduction === 0 ? ' with no deduction: every dollar is taxable' : '. The brackets apply to this number, not gross wages'}.`,
+      },
+    ]
+    const terms = cur.fed.slices.map((s) => `${s.rate.toFixed(2)} \\times ${texUSD(s.amount)}`)
+    const lines: string[] = []
+    for (let i = 0; i < terms.length; i += 2) lines.push(terms.slice(i, i + 2).join(' + '))
+    rows.push({
+      tex:
+        terms.length === 0
+          ? `\\text{federal income tax} = ${texUSD(0)}`
+          : `\\begin{aligned} \\text{federal tax} &= ${lines
+              .map((l, i) => (i === 0 ? l : `\\quad + ${l}`))
+              .join(' \\\\ &')} \\\\ &= \\boxed{${texUSD(cur.fed.tax)}} \\end{aligned}`,
+      caption: 'Step 2. Each rate multiplies only the income inside its own bracket, and the pieces are summed.',
+      muted: true,
+    })
+    if (withState && cur.state && cur.state.hasTax) {
+      rows.push({
+        tex: `\\text{state taxable} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''}${cur.state.deduction > 0 ? ` - ${texUSD(cur.state.deduction)}` : ''} = ${texUSD(cur.state.taxable)} \\;\\Rightarrow\\; \\text{state tax} = \\boxed{${texUSD(cur.state.tax)}}`,
+        caption: `Step 3. ${cur.state.name} runs the same machine on its own schedule${cur.state.deduction > 0 ? ` after its ${formatUSDWhole(cur.state.deduction)} deduction` : ''}${cur.state.credit > 0 ? `, minus a ${formatUSDWhole(cur.state.credit)} exemption credit off the tax` : ''}.`,
+        muted: true,
+      })
+    }
+    if (withPayroll) {
+      const ss = 0.062 * Math.min(gross, SS_WAGE_BASE)
+      rows.push({
+        tex: `\\text{payroll} = \\underbrace{${texUSD(ss)}}_{\\text{Social Security}} + \\underbrace{${texUSD(cur.payroll - ss)}}_{\\text{Medicare}} = \\boxed{${texUSD(cur.payroll)}}`,
+        caption: `Step ${withState && cur.state?.hasTax ? 4 : 3}. Social Security is 6.2% of wages up to ${formatUSDWhole(SS_WAGE_BASE)}; Medicare is 1.45% of every wage dollar${gross > 200_000 ? ', plus the 0.9% surtax above the threshold' : ''}. Both apply to gross wages, 401(k) contributions included.`,
+        muted: true,
+      })
+    }
+    rows.push({
+      tex: `\\text{take-home} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''} - ${texUSD(cur.fed.tax)}${withState && cur.state ? ` - ${texUSD(cur.state.tax)}` : ''}${withPayroll ? ` - ${texUSD(cur.payroll)}` : ''} = \\boxed{${texUSD(cur.takeHome)}}`,
+      caption: `Last step. Wages minus ${cur.k > 0 ? 'the 401(k) contribution (still yours) and ' : ''}every tax switched on.`,
+    })
+    return rows
+  }, [gross, cur, deduction, withState, withPayroll])
   const taxableBase = Math.max(0, gross - cur.k)
   const payrollRate = withPayroll && gross > 0 ? cur.payroll / gross : 0
   const stateRate = withState && cur.state && taxableBase > 0 ? cur.state.tax / taxableBase : 0
@@ -496,6 +539,11 @@ function TakeHomePay() {
           )}
         </div>
       </div>
+
+      <MathSection
+        hint="The calculations behind the numbers above, with your controls substituted in. Only the pieces switched on appear as steps."
+        rows={mathRows}
+      />
     </div>
   )
 }
@@ -654,6 +702,34 @@ function AccountTaxation() {
           Married-couple phase-out ranges are higher.
         </p>
       </div>
+
+      <MathSection
+        hint="All three jars are the same annuity future value; only where the tax lands differs. Evaluated with the sliders' current values."
+        rows={(() => {
+          const r2 = +((ret / 100) * (1 - taxLater / 100)).toFixed(6)
+          return [
+            {
+              tex: `FV = PMT \\times \\frac{(1 + r)^{Y} - 1}{r}`,
+              caption: `Future value of a yearly deposit PMT after Y = ${years} years at the return r. Each account changes only the deposit or the rate.`,
+            },
+            {
+              tex: `\\text{Roth} = ${texUSD(earn)}(1 - ${texRate(taxNow)}) \\times \\frac{(1 + ${texRate(ret)})^{${years}} - 1}{${texRate(ret)}} = \\boxed{${texUSD(last.roth)}}`,
+              caption: 'Taxed once going in: the deposit shrinks, then compounds untouched.',
+              muted: true,
+            },
+            {
+              tex: `\\text{Traditional} = ${texUSD(earn)} \\times \\frac{(1 + ${texRate(ret)})^{${years}} - 1}{${texRate(ret)}} \\times (1 - ${texRate(taxLater)}) = \\boxed{${texUSD(last.traditional)}}`,
+              caption: 'Taxed once at withdrawal: the full deposit compounds, then the exit tax takes its share.',
+              muted: true,
+            },
+            {
+              tex: `\\text{Taxable} = ${texUSD(earn)}(1 - ${texRate(taxNow)}) \\times \\frac{(1 + ${r2})^{${years}} - 1}{${r2}} = \\boxed{${texUSD(last.taxable)}}`,
+              caption: `Taxed going in and on every year's returns, so it compounds at the reduced rate r(1 - t) = ${r2}. That drag is the whole gap in Figure 1.`,
+              muted: true,
+            },
+          ]
+        })()}
+      />
     </div>
   )
 }
@@ -747,6 +823,26 @@ function EmployerMatching() {
         advice is to contribute at least up to the cap before saving anywhere else. Roughly 1 in 4
         employees with a match stops short of the full amount (Financial Engines, 2015).
       </Callout>
+
+      <MathSection
+        hint="Each scenario is one annuity future value; the match only raises the yearly deposit. Evaluated with the sliders' current values."
+        rows={[
+          {
+            tex: `\\text{after tax} = (\\text{you} + \\text{match}) \\times \\frac{(1 + r)^{Y} - 1}{r} \\times (1 - ${texRate(MATCH_TAX * 100)})`,
+            caption: `Yearly deposits compound for Y = ${years} years at r = ${texRate(retPct)}, then the ${pct(MATCH_TAX)} withdrawal tax comes off once. You contribute ${formatUSDWhole(contrib)}/yr; the match lands on ${formatUSDWhole(matched)} of it.`,
+          },
+          {
+            tex: `\\text{100\\% match} = (${texUSD(contrib)} + ${texUSD(matched)}) \\times \\frac{(1 + ${texRate(retPct)})^{${years}} - 1}{${texRate(retPct)}} \\times ${texRate((1 - MATCH_TAX) * 100)} = \\boxed{${texUSD(last.fullMatch)}}`,
+            caption: 'A dollar per contributed dollar, on contributions up to 6% of salary. The 50% match replaces the second term with half of it.',
+            muted: true,
+          },
+          {
+            tex: `\\text{no match} = ${texUSD(contrib)} \\times \\frac{(1 + ${texRate(retPct)})^{${years}} - 1}{${texRate(retPct)}} \\times ${texRate((1 - MATCH_TAX) * 100)} = \\boxed{${texUSD(last.noMatch)}}`,
+            caption: 'The same saving with no employer money. Everything separating this line from the one above was free.',
+            muted: true,
+          },
+        ]}
+      />
     </div>
   )
 }
@@ -1050,44 +1146,38 @@ function RetirementTiming() {
         replace, so the first ten points of savings rate move the age more than the last ten.
       </Callout>
 
-      <div>
-        <p className={styles.rulesTitle}>The detailed math</p>
-        <p className={styles.sectionLede}>
-          Both steps are one time-value-of-money formula each, evaluated here with the sliders&rsquo;
-          current values.
-        </p>
-      </div>
-      <FormulaBlock
-        tex={'\\text{Step 1: target} = \\text{income} \\times \\frac{1 - (1 + r)^{-n}}{r}'}
-        caption={`Present value of n years of withdrawals at the return r of the safer withdrawal portfolio. Here r = ${texRate(retiredPct)} and n = ${retYears}.`}
+      <MathSection
+        hint="Both steps are one time-value-of-money formula each, evaluated here with the sliders' current values."
+        rows={[
+          {
+            tex: '\\text{Step 1: target} = \\text{income} \\times \\frac{1 - (1 + r)^{-n}}{r}',
+            caption: `Present value of n years of withdrawals at the return r of the safer withdrawal portfolio. Here r = ${texRate(retiredPct)} and n = ${retYears}.`,
+          },
+          {
+            tex: `${texUSD(income)} \\times \\frac{1 - (1 + ${texRate(retiredPct)})^{-${retYears}}}{${texRate(retiredPct)}} = \\boxed{${texUSD(plan.target)}}`,
+            caption: `On the TVM calculator: N = ${retYears}, I/Y = ${retiredPct}, PMT = ${Math.round(income).toLocaleString('en-US')}, FV = 0; solve for PV.`,
+            muted: true,
+          },
+          {
+            tex: '\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}',
+            caption: `The level yearly saving whose future value reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`,
+          },
+          {
+            tex: `${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`,
+            caption: `On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = 0, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`,
+            muted: true,
+          },
+          {
+            tex: '\\text{Figure 3: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{65 - a} - 1}',
+            caption: 'Figure 3 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars.',
+          },
+          {
+            tex: `\\text{Figure 4: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
+            caption: `Future value of the same saving at the actual return. At the slider's ${actualPct}%: ${formatUSDWhole(plan.saving)} grows to ${formatUSDWhole(planEnd.actual)}, and dividing by the step 1 factor at the shifted withdrawal return of ${pct(plan.retiredR, 1)} gives the ${formatUSDWhole(plan.actualIncome)} it funds.`,
+          },
+        ]}
+        note={`Figure 5 iterates the same two steps at every savings rate: each year the balance grows at ${plannedPct} and receives the year's saving, and work becomes optional once the balance covers the step 1 target for current spending.`}
       />
-      <FormulaBlock
-        tex={`${texUSD(income)} \\times \\frac{1 - (1 + ${texRate(retiredPct)})^{-${retYears}}}{${texRate(retiredPct)}} = \\boxed{${texUSD(plan.target)}}`}
-        caption={`On the TVM calculator: N = ${retYears}, I/Y = ${retiredPct}, PMT = ${Math.round(income).toLocaleString('en-US')}, FV = 0; solve for PV.`}
-        muted
-      />
-      <FormulaBlock
-        tex={'\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}'}
-        caption={`The level yearly saving whose future value reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`}
-      />
-      <FormulaBlock
-        tex={`${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`}
-        caption={`On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = 0, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`}
-        muted
-      />
-      <FormulaBlock
-        tex={'\\text{Figure 3: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{65 - a} - 1}'}
-        caption="Figure 3 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars."
-      />
-      <FormulaBlock
-        tex={`\\text{Figure 4: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`}
-        caption={`Future value of the same saving at the actual return. At the slider's ${actualPct}%: ${formatUSDWhole(plan.saving)} grows to ${formatUSDWhole(planEnd.actual)}, and dividing by the step 1 factor at the shifted withdrawal return of ${pct(plan.retiredR, 1)} gives the ${formatUSDWhole(plan.actualIncome)} it funds.`}
-      />
-      <p className={styles.note}>
-        Figure 5 iterates the same two steps at every savings rate: each year the balance grows at{' '}
-        {plannedPct} and receives the year&rsquo;s saving, and work becomes optional once the
-        balance covers the step 1 target for current spending.
-      </p>
     </div>
   )
 }

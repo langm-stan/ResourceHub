@@ -157,15 +157,7 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
           <Card tone="raised" className={styles.panel}>
             {active === 'overview' && <OverviewPanel scenario={scenario} results={results} />}
             {active === 'breakdown' && <BreakdownPanel results={results} />}
-            {active === 'math' && (
-              <>
-                <StepHeader
-                  title="See the math"
-                  hint="The formula behind the chart, with your numbers filled in."
-                />
-                <MathReport scenario={scenario} results={results} />
-              </>
-            )}
+            {active === 'math' && <MathReport scenario={scenario} results={results} />}
             {active === 'experiment' && (
               <>
                 <StepHeader

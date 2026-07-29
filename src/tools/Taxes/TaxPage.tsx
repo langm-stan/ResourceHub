@@ -634,8 +634,8 @@ function TaxMathView({
   return (
     <>
       <StepHeader
-        title="Every number on this page, derived"
-        hint="The same calculations the tool runs, written out with your inputs substituted in. Change the panel and the derivations update."
+        title="See the math"
+        hint="Every number on this page, derived with your inputs substituted in. Change the panel and the derivations update."
       />
 
       <FormulaBlock

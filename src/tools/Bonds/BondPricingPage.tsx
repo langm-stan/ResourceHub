@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   Callout,
   Card,
-  FormulaBlock,
+  MathSection,
   ScenarioChip,
   SegmentedControl,
   Slider,
@@ -302,20 +302,46 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
         />
 
-        <StepHeader title="The math" hint="Price the coupons as an annuity and the face value as a lump sum." />
-        <FormulaBlock
-          tex={`P \\;=\\; PMT \\cdot \\frac{1 - (1+i)^{-N}}{i} \\;+\\; \\frac{FV}{(1+i)^{N}} \\;=\\; ${fmtMoney(quote.price).replace('$', '\\$')}`}
-          caption={
-            quote.zero
-              ? `With no coupons the first term vanishes: the price is the face value discounted at the market rate for ${years} ${years === 1 ? 'year' : 'years'}.`
-              : `i is the market rate per period (${market}% ÷ ${perYear} = ${(quote.perPeriodRate * 100).toFixed(2)}%); N is the ${quote.n} payments; PMT is the ${fmtMoney(quote.pmt)} coupon.`
-          }
-        />
-        <Callout tone="note" label="The same five keys">
-          On the TVM calculator: N = {quote.zero ? years : quote.n}, I/Y ={' '}
-          {(quote.perPeriodRate * 100).toFixed(2)}, PMT = {quote.zero ? 0 : Math.round(quote.pmt)},
-          FV = {face.toLocaleString()}; solve for PV. The price is what you give up today.
-        </Callout>
+        <MathSection
+          hint="Price the coupons as an annuity and the face value as a lump sum, with your bond's numbers substituted in."
+          rows={(() => {
+            const money = (v: number) => fmtMoney(v).replace('$', '\\$')
+            const iTex = quote.perPeriodRate.toFixed(4)
+            if (quote.zero) {
+              return [
+                {
+                  tex: `P \\;=\\; \\frac{FV}{(1+r)^{t}}`,
+                  caption: `With no coupons the annuity term vanishes: the price is the face value discounted at the market rate for ${years} ${years === 1 ? 'year' : 'years'}.`,
+                },
+                {
+                  tex: `P \\;=\\; \\frac{${money(face)}}{(1 + ${iTex})^{${years}}} \\;=\\; \\boxed{${money(quote.price)}}`,
+                  muted: true,
+                },
+              ]
+            }
+            const couponPart = quote.pmt * ((1 - Math.pow(1 + quote.perPeriodRate, -quote.n)) / quote.perPeriodRate)
+            return [
+              {
+                tex: `P \\;=\\; PMT \\cdot \\frac{1 - (1+i)^{-N}}{i} \\;+\\; \\frac{FV}{(1+i)^{N}}`,
+                caption: `i is the market rate per period (${market}% ÷ ${perYear} = ${(quote.perPeriodRate * 100).toFixed(2)}%); N is the ${quote.n} payments; PMT is the ${fmtMoney(quote.pmt)} coupon.`,
+              },
+              {
+                tex: `P \\;=\\; ${money(quote.pmt)} \\cdot \\frac{1 - (1 + ${iTex})^{-${quote.n}}}{${iTex}} \\;+\\; \\frac{${money(face)}}{(1 + ${iTex})^{${quote.n}}}`,
+                muted: true,
+              },
+              {
+                tex: `P \\;=\\; \\underbrace{${money(couponPart)}}_{\\text{the coupons}} + \\underbrace{${money(quote.price - couponPart)}}_{\\text{the face value}} \\;=\\; \\boxed{${money(quote.price)}}`,
+                muted: true,
+              },
+            ]
+          })()}
+        >
+          <Callout tone="note" label="The same five keys">
+            On the TVM calculator: N = {quote.zero ? years : quote.n}, I/Y ={' '}
+            {(quote.perPeriodRate * 100).toFixed(2)}, PMT = {quote.zero ? 0 : Math.round(quote.pmt)},
+            FV = {face.toLocaleString()}; solve for PV. The price is what you give up today.
+          </Callout>
+        </MathSection>
       </Card>
 
       <p className={styles.footnote}>

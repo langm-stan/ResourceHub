@@ -1,13 +1,7 @@
-import { FormulaBlock } from '../../../design-system'
+import { MathSection } from '../../../design-system'
+import { texNumber as tex } from '../../../lib/format'
 import type { TvmResults } from '../compute'
 import type { TvmState } from '../state'
-
-function tex(value: number, decimals = 2): string {
-  const fixed = value.toFixed(decimals)
-  const [int, frac] = fixed.split('.')
-  const grouped = int!.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return frac ? `${grouped}.${frac}` : grouped
-}
 
 export function TvmMath({ state, results }: { state: TvmState; results: TvmResults }) {
   const i = results.periodRate
@@ -34,7 +28,7 @@ export function TvmMath({ state, results }: { state: TvmState; results: TvmResul
       ? `PMT = \\dfrac{${tex(state.amount, 0)} \\cdot ${tex(i, 6)}}{1 - (1 + ${tex(i, 6)})^{-${n}}}`
       : `PMT = \\dfrac{${tex(state.amount, 0)} \\cdot ${tex(i, 6)}}{(1 + ${tex(i, 6)})^{${n}} - 1}`
 
-  const evaluated = `PMT = \\boxed{${tex(results.payment)}}\\ \\text{per month}`
+  const evaluated = `PMT = \\boxed{${tex(results.payment, 2)}}\\ \\text{per month}`
 
   const note = isLoan
     ? `Over ${n} payments you pay ${plain(results.totalPaid)} in total; ${plain(
@@ -45,29 +39,20 @@ export function TvmMath({ state, results }: { state: TvmState; results: TvmResul
       )} comes from interest.`
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <FormulaBlock
-        tex={general}
-        caption={
-          zeroRate
+    <MathSection
+      hint="The payment formula, with your numbers filled in."
+      rows={[
+        {
+          tex: general,
+          caption: zeroRate
             ? `${intro} · at a 0% rate the amount divides evenly across the n months`
-            : `${intro} · i is the monthly rate, n the number of months`
-        }
-      />
-      <FormulaBlock tex={substituted} muted />
-      <FormulaBlock tex={evaluated} muted />
-      <p
-        style={{
-          fontSize: 'var(--fs-ui)',
-          color: 'var(--text-muted)',
-          lineHeight: 1.6,
-          borderTop: '1px solid var(--border-hairline)',
-          paddingTop: 'var(--space-4)',
-        }}
-      >
-        {note}
-      </p>
-    </div>
+            : `${intro} · i is the monthly rate, n the number of months`,
+        },
+        { tex: substituted, muted: true },
+        { tex: evaluated, muted: true },
+      ]}
+      note={note}
+    />
   )
 }
 

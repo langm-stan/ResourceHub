@@ -689,8 +689,8 @@ function HousingMathView({
   return (
     <>
       <StepHeader
-        title="Every number on this page, derived"
-        hint="The tool&rsquo;s calculations, written out with your inputs substituted in."
+        title="See the math"
+        hint="Every number on this page, derived with your inputs substituted in."
       />
       <FormulaBlock
         tex={`${texUSD(m.price)} - \\underbrace{${texUSD(m.downPayment)}}_{${formatPercent(m.downPct, 0).replace('%', '\\%')}\\text{ down}} = ${texUSD(m.loan)}\\text{ borrowed}`}

@@ -573,8 +573,8 @@ function MathView({
   return (
     <>
       <StepHeader
-        title="Why consumption is constant"
-        hint="Modigliani's result (1954, Nobel Prize 1985): choose the steady spending level whose lifetime cost equals lifetime income."
+        title="See the math"
+        hint="Why consumption is constant: Modigliani's result (1954, Nobel Prize 1985) chooses the steady spending level whose lifetime cost equals lifetime income."
       />
       <FormulaBlock
         tex={`\\sum_{t=1}^{T} \\frac{c}{(1+r)^{t}} \\;=\\; \\sum_{t=1}^{T} \\frac{y_t}{(1+r)^{t}}`}

@@ -362,8 +362,8 @@ function MathView() {
   return (
     <>
       <StepHeader
-        title="Expected value, in three lines"
-        hint="One definition and two worked examples carry the whole lesson."
+        title="See the math"
+        hint="Expected value in three lines: one definition and two worked examples carry the whole lesson."
       />
       <FormulaBlock
         tex={`\\mathbb{E}[X] \\;=\\; p_1 x_1 + p_2 x_2 + \\cdots + p_k x_k`}

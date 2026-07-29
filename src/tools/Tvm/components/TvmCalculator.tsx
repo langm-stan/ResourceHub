@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
 import {
   Callout,
-  FormulaBlock,
+  MathSection,
   NumberField,
   SegmentedControl,
   SelectField,
   Toggle,
+  type MathRow,
   type Segment,
 } from '../../../design-system'
 import {
@@ -14,7 +15,7 @@ import {
   type TvmRegisters,
   type TvmVar,
 } from '../../../lib/finance'
-import { formatPercent, formatUSD } from '../../../lib/format'
+import { formatPercent, formatUSD, texNumber } from '../../../lib/format'
 import { usePersistentState } from '../../../hooks/usePersistentState'
 import styles from './TvmCalculator.module.css'
 
@@ -194,10 +195,87 @@ export function TvmCalculator() {
         </Callout>
       )}
 
-      <FormulaBlock
-        tex={`PV\\,(1+i)^{N} + PMT\\,\\dfrac{(1+i)^{N}-1}{i}\\,d + FV = 0`}
-        caption="The equation every financial calculator solves · i = (I/Y ÷ P/Y) ÷ 100, d = (1+i) in begin mode"
+      <MathSection
+        hint="The one equation every financial calculator solves, with your registers substituted in."
+        rows={workedRows(registers, solveFor, solved.value, solved.error != null)}
+        note="One sign convention balances the three cash-flow keys: money you receive is positive, money you pay out is negative. The equation grows every cash flow to the same date and requires the total to come out to zero."
       />
     </div>
   )
+}
+
+/* KaTeX for a signed dollar register, e.g. −$100 → "-\$100". */
+function texMoney(v: number): string {
+  return v < 0 ? `-\\$${texNumber(-v, 2)}` : `\\$${texNumber(v, 2)}`
+}
+
+/**
+ * The master equation, then the reader's own solve: the per-period rate, the
+ * equation with the four known registers substituted and the unknown left as
+ * its symbol, and the boxed answer. Follows the house symbolic → substituted
+ * → evaluated convention.
+ */
+function workedRows(reg: TvmRegisters, solveFor: TvmVar, answer: number, errored: boolean): MathRow[] {
+  const rows: MathRow[] = [
+    {
+      tex: `PV\\,(1+i)^{N} + PMT\\,\\dfrac{(1+i)^{N}-1}{i}\\,d + FV = 0`,
+      caption:
+        'The equation every financial calculator solves · i = (I/Y ÷ P/Y) ÷ 100, d = (1 + i) in begin mode, 1 otherwise',
+    },
+  ]
+  if (errored || !Number.isFinite(answer)) return rows
+
+  const solvingRate = solveFor === 'iy'
+  const iy = solvingRate ? answer : reg.iy
+  const i = iy / reg.py / 100
+  const dTex = reg.due ? `\\,(1+i)` : ''
+
+  // The per-period rate, the one derived register.
+  if (!solvingRate) {
+    rows.push({
+      tex: `i = \\dfrac{I/Y \\div P/Y}{100} = \\dfrac{${texNumber(reg.iy, 3)} \\div ${reg.py}}{100} = ${texNumber(i, 6)}`,
+      muted: true,
+    })
+  }
+
+  // The equation with the knowns in and the unknown left standing.
+  const sym = { n: 'N', iy: 'i', pv: 'PV', pmt: 'PMT', fv: 'FV' } as const
+  const show = (v: TvmVar, x: number) => (solveFor === v ? sym[v] : texMoney(x))
+  const nTex = solveFor === 'n' ? 'N' : `${texNumber(reg.n)}`
+  const growth = solvingRate ? `(1+i)` : `(${texNumber(1 + i, 6)})`
+  if (i === 0 && !solvingRate) {
+    // At a 0% rate nothing grows; the cash flows simply have to add to zero.
+    rows.push({
+      tex: `${show('pv', reg.pv)} + ${show('pmt', reg.pmt)} \\cdot ${nTex} + ${show('fv', reg.fv)} = 0`,
+      caption: 'At a 0% rate nothing grows, so the cash flows simply add to zero.',
+      muted: true,
+    })
+  } else {
+    rows.push({
+      tex: `${show('pv', reg.pv)}\\,${growth}^{${nTex}} + ${show('pmt', reg.pmt)}\\,\\dfrac{${growth}^{${nTex}}-1}{${solvingRate ? 'i' : texNumber(i, 6)}}${solvingRate ? (reg.due ? dTex : '') : reg.due ? `\\,(${texNumber(1 + i, 6)})` : ''} + ${show('fv', reg.fv)} = 0`,
+      caption: solvingRate
+        ? 'No formula isolates the rate; the calculator searches for the i that balances the equation.'
+        : solveFor === 'n'
+          ? 'Taking logarithms isolates N.'
+          : `Rearranging isolates ${sym[solveFor]}.`,
+      muted: true,
+    })
+  }
+
+  // The boxed answer, in the register's own units.
+  if (solvingRate) {
+    rows.push({
+      tex: `i = ${texNumber(i, 6)} \\;\\Rightarrow\\; I/Y = i \\times ${reg.py} \\times 100 = \\boxed{${texNumber(answer, 3)}\\%}`,
+      muted: true,
+    })
+  } else if (solveFor === 'n') {
+    const years = reg.py > 0 ? answer / reg.py : NaN
+    rows.push({
+      tex: `N = \\boxed{${texNumber(answer, 2)}}\\ \\text{periods}${Number.isFinite(years) ? ` \\approx ${texNumber(years, 1)}\\ \\text{years}` : ''}`,
+      muted: true,
+    })
+  } else {
+    rows.push({ tex: `${sym[solveFor]} = \\boxed{${texMoney(answer)}}`, muted: true })
+  }
+  return rows
 }

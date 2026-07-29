@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, Slider, Stat } from '../../design-system'
-import { formatUSDWhole } from '../../lib/format'
+import { Callout, Card, MathSection, Slider, Stat } from '../../design-system'
+import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { CHEAP_FEE, DEFAULT_RETURN_PCT, buildFeeSeries } from './compute'
 import { StationChart } from './components/StationChart'
 import styles from './ChanceOwnershipPage.module.css'
@@ -122,6 +122,30 @@ function IndexFund() {
           why the gap between the lines widens with time.
         </Callout>
       </div>
+
+      <MathSection
+        hint="Both lines are the same annuity future value; the fee comes straight off the return before it compounds."
+        rows={(() => {
+          const n = years * 12
+          const iCheap = (ret - CHEAP_FEE) / 100 / 12
+          const iCostly = (ret - fee) / 100 / 12
+          return [
+            {
+              tex: `FV = PMT \\times \\frac{(1 + i)^{n} - 1}{i}, \\qquad i = \\frac{\\text{return} - \\text{fee}}{12}`,
+              caption: `The monthly deposit compounds at the return net of the expense ratio, for n = ${n} months.`,
+            },
+            {
+              tex: `\\text{at } ${CHEAP_FEE.toFixed(2)}\\%: \\; FV = ${texUSD(monthly)} \\times \\frac{(1 + ${texNumber(iCheap, 6)})^{${n}} - 1}{${texNumber(iCheap, 6)}} = \\boxed{${texUSD(cheapFinal)}}`,
+              muted: true,
+            },
+            {
+              tex: `\\text{at } ${fee.toFixed(2)}\\%: \\; FV = ${texUSD(monthly)} \\times \\frac{(1 + ${texNumber(iCostly, 6)})^{${n}} - 1}{${texNumber(iCostly, 6)}} = \\boxed{${texUSD(costlyFinal)}}`,
+              muted: true,
+            },
+          ]
+        })()}
+        note={`The only difference between the two formulas is a tiny change in i, and it costs ${formatUSDWhole(cheapFinal - costlyFinal)} over ${years} years. A fee is a negative return, charged every year, on the whole balance.`}
+      />
     </div>
   )
 }

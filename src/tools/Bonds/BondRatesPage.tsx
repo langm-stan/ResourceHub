@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, ScenarioChip, Slider, Stat, StepHeader } from '../../design-system'
+import { Callout, Card, MathSection, ScenarioChip, Slider, Stat, StepHeader } from '../../design-system'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { priceBond, priceCurve, rateRange } from './compute'
 import styles from './BondsPage.module.css'
@@ -248,6 +248,25 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           Every point on these curves is the Pricing a Bond calculation: the same promised payments,
           discounted at a different market rate. Coupons here are paid semiannually, like Treasuries.
         </Callout>
+
+        <MathSection
+          hint="Your bond repriced at today's rate: the same promised payments, discounted at the new rate."
+          rows={(() => {
+            const money = (v: number) => fmtMoney(v).replace('$', '\\$')
+            const iTex = quote.perPeriodRate.toFixed(4)
+            return [
+              {
+                tex: `P \\;=\\; PMT \\cdot \\frac{1 - (1+i)^{-N}}{i} \\;+\\; \\frac{FV}{(1+i)^{N}}`,
+                caption: `The bond still promises its ${fmtMoney(quote.pmt)} semiannual coupon for N = ${quote.n} payments plus the $1,000 face value; only the discount rate moved. i is today's rate per period: ${rate}% ÷ 2 = ${(quote.perPeriodRate * 100).toFixed(2)}%.`,
+              },
+              {
+                tex: `P \\;=\\; ${money(quote.pmt)} \\cdot \\frac{1 - (1 + ${iTex})^{-${quote.n}}}{${iTex}} \\;+\\; \\frac{\\$1{,}000}{(1 + ${iTex})^{${quote.n}}} \\;=\\; \\boxed{${money(quote.price)}}`,
+                muted: true,
+              },
+            ]
+          })()}
+          note={`You paid $1,000 at par, when the coupon matched the market. Repriced at today's ${rate}%, the same bond is worth ${fmtMoney(quote.price)}: ${fmtPct(pct)}.`}
+        />
       </Card>
 
       <p className={styles.footnote}>

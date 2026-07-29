@@ -1,7 +1,6 @@
-import { FormulaBlock } from '../../../design-system'
+import { MathSection } from '../../../design-system'
 import { freqOf, rateOf, type Scenario } from '../state'
 import type { Results } from '../compute'
-import styles from './MathReport.module.css'
 
 function tex(value: number, decimals = 2): string {
   const fixed = value.toFixed(decimals)
@@ -176,13 +175,10 @@ function MathRows({
   note: string
 }) {
   return (
-    <div className={styles.report}>
-      <div className={styles.rows}>
-        {rows.map((row, idx) => (
-          <FormulaBlock key={idx} tex={row.tex} caption={row.caption} muted={row.muted} />
-        ))}
-      </div>
-      <p className={styles.note}>{note}</p>
-    </div>
+    <MathSection
+      hint="The formula behind the chart, with your numbers filled in."
+      rows={rows}
+      note={note}
+    />
   )
 }

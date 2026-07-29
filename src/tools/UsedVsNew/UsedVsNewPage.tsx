@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, SegmentedControl, Slider, Stat } from '../../design-system'
-import { formatUSDWhole } from '../../lib/format'
+import { Callout, Card, MathSection, SegmentedControl, Slider, Stat } from '../../design-system'
+import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { NEW_APR, USED_APR, carValue, dealPath, fastPayoffMonths } from './compute'
@@ -215,6 +215,36 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               a higher one. The real difference is the price paid, traded against repair risk and
               a shorter warranty.
             </Callout>
+
+            <MathSection
+              hint="Both payments come from the same installment-loan formula; only the amount borrowed and the rate differ."
+              rows={(() => {
+                const iNew = aprNew / 12
+                const iUsed = aprUsed / 12
+                return [
+                  {
+                    tex: `PMT = \\frac{L \\cdot i}{1 - (1+i)^{-N}}`,
+                    caption: `L is the amount borrowed (the full price, nothing down), i the monthly rate (APR ÷ 12), N the ${months} payments.`,
+                  },
+                  {
+                    tex: `\\text{new: } PMT = \\frac{${texUSD(deals.new.pricePaid)} \\times ${texNumber(iNew, 6)}}{1 - (1 + ${texNumber(iNew, 6)})^{-${months}}} = \\boxed{\\$${texNumber(deals.new.payment, 2)}}\\ \\text{per month}`,
+                    caption: `${newRate.toFixed(2)}% APR on the new-car price.`,
+                    muted: true,
+                  },
+                  {
+                    tex: `\\text{used: } PMT = \\frac{${texUSD(deals.used.pricePaid)} \\times ${texNumber(iUsed, 6)}}{1 - (1 + ${texNumber(iUsed, 6)})^{-${months}}} = \\boxed{\\$${texNumber(deals.used.payment, 2)}}\\ \\text{per month}`,
+                    caption: `${usedRate.toFixed(2)}% APR on the ${age}-year-old price.`,
+                    muted: true,
+                  },
+                  {
+                    tex: `\\text{total interest} = N \\times PMT - L = ${texUSD(deals.new.totalInterest)}\\ \\text{(new)} \\quad \\text{vs.} \\quad ${texUSD(deals.used.totalInterest)}\\ \\text{(used)}`,
+                    caption: 'Everything paid beyond the amount borrowed is interest.',
+                    muted: true,
+                  },
+                ]
+              })()}
+              note={`The car's value follows the depreciation curve: about 20% in year one, then 15% a year. The loan is underwater whenever the red line sits above the gold one.`}
+            />
       </Card>
 
       <p className={styles.footnote}>

@@ -324,8 +324,8 @@ function MathView() {
   return (
     <>
       <StepHeader
-        title="Why the risk falls, and where it stops"
-        hint="Two formulas: one for independent bets like coins, one for stocks that move together."
+        title="See the math"
+        hint="Why the risk falls and where it stops. Two formulas: one for independent bets like coins, one for stocks that move together."
       />
       <FormulaBlock
         tex={`\\sigma_p \\;=\\; \\frac{\\sigma}{\\sqrt{n}}`}

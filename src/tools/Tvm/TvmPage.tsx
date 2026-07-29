@@ -160,12 +160,7 @@ function GuidedView({
             <ScheduleTable rows={results.yearly} />
           </>
         )}
-        {active === 'math' && (
-          <>
-            <StepHeader title="See the math" hint="The payment formula, with your numbers filled in." />
-            <TvmMath state={state} results={results} />
-          </>
-        )}
+        {active === 'math' && <TvmMath state={state} results={results} />}
       </Card>
     </>
   )

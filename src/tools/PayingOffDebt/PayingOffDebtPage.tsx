@@ -2,15 +2,16 @@ import { useMemo, useState } from 'react'
 import {
   Callout,
   Card,
-  FormulaBlock,
+  MathSection,
   ScenarioChip,
   SegmentedControl,
   Slider,
   Stat,
   StepHeader,
   Toggle,
+  type MathRow,
 } from '../../design-system'
-import { formatUSDWhole } from '../../lib/format'
+import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { buildSchedule, firstMonthInterest, padTo, paymentFor } from './compute'
@@ -359,21 +360,57 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
         />
 
-        <StepHeader title="The math" hint="The installment-loan equation, solved both ways." />
-        <FormulaBlock
-          tex={`PV \\;=\\; PMT \\cdot \\frac{1 - (1+i)^{-N}}{i}`}
-          caption="The amount borrowed equals the present value of the payments. i is the monthly rate (APR ÷ 12); N is the number of payments."
-        />
-        <FormulaBlock
-          tex={`N \\;=\\; \\frac{-\\ln\\!\\left(1 - i \\cdot PV / PMT\\right)}{\\ln(1+i)}`}
-          caption="Solved for the horizon. A solution exists only when the payment beats the month's interest, i × PV."
-          muted
-        />
-        <Callout tone="note" label="The same five keys">
-          This is the TVM calculator with FV = 0: the amount borrowed is PV, the payment is PMT,
-          the rate is I/Y, the horizon is N. Any number here can be reproduced on the TVM
-          Calculator in Foundations.
-        </Callout>
+        <MathSection
+          hint="The installment-loan equation, solved with your numbers."
+          rows={(() => {
+            const i = apr / 1200
+            const iTex = texNumber(i, 6)
+            const rows: MathRow[] = [
+              {
+                tex: `PV \\;=\\; PMT \\cdot \\frac{1 - (1+i)^{-N}}{i}`,
+                caption: `The amount borrowed equals the present value of the payments. i is the monthly rate: ${apr}% ÷ 12 = ${(i * 100).toFixed(4)}% per month. N is the number of payments.`,
+              },
+            ]
+            if (mode === 'payment') {
+              rows.push({
+                tex: `N \\;=\\; \\frac{-\\ln\\!\\left(1 - i \\cdot PV / PMT\\right)}{\\ln(1+i)}`,
+                caption: "Solved for the horizon. A solution exists only when the payment beats the month's interest, i × PV.",
+                muted: true,
+              })
+              if (main.paymentBelowInterest) {
+                rows.push({
+                  tex: `PMT = ${texUSD(payment)} \\;\\le\\; i \\times PV = ${iTex} \\times ${texUSD(pv)} = \\$${texNumber(monthlyInterest, 2)}`,
+                  caption: 'Your payment never beats the first month’s interest, so there is no N: the balance grows instead of shrinking.',
+                  muted: true,
+                })
+              } else {
+                const nExact = -Math.log(1 - (i * pv) / payment) / Math.log(1 + i)
+                rows.push({
+                  tex: `N \\;=\\; \\frac{-\\ln\\!\\left(1 - ${iTex} \\times ${texUSD(pv)} / ${texUSD(payment)}\\right)}{\\ln(1 + ${iTex})} = \\boxed{${texNumber(Math.ceil(nExact))}}\\ \\text{months}`,
+                  caption: `The last payment is partial, so the schedule above rounds up to whole months${main.neverEnds ? '; this payoff lies beyond the chart’s horizon' : ''}.`,
+                  muted: true,
+                })
+              }
+            } else {
+              rows.push({
+                tex: `PMT \\;=\\; \\frac{PV \\cdot i}{1 - (1+i)^{-N}}`,
+                caption: 'Solved for the payment a chosen term requires.',
+                muted: true,
+              })
+              rows.push({
+                tex: `PMT \\;=\\; \\frac{${texUSD(pv)} \\times ${iTex}}{1 - (1 + ${iTex})^{-${years * 12}}} = \\boxed{\\$${texNumber(main.payment, 2)}}\\ \\text{per month}`,
+                muted: true,
+              })
+            }
+            return rows
+          })()}
+        >
+          <Callout tone="note" label="The same five keys">
+            This is the TVM calculator with FV = 0: the amount borrowed is PV, the payment is PMT,
+            the rate is I/Y, the horizon is N. Any number here can be reproduced on the TVM
+            Calculator in Foundations.
+          </Callout>
+        </MathSection>
       </Card>
 
       <p className={styles.footnote}>
