@@ -273,6 +273,63 @@
   padding-right: 0;
 }
 
+/* ---------------------- bracket schedule tables -------------------- */
+
+.bracketTables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5) var(--space-7);
+  align-items: start;
+  margin-top: var(--space-5);
+}
+.bracketTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.bracketTable th,
+.bracketTable td {
+  padding: var(--space-1) var(--space-3);
+  border-top: var(--hairline) solid var(--border-hairline);
+  text-align: left;
+  vertical-align: top;
+}
+.bracketTable thead th {
+  border-top: none;
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding-top: 0;
+}
+.bracketTable td {
+  color: var(--text-muted);
+}
+.bracketTable th:first-child,
+.bracketTable td:first-child {
+  padding-left: 0;
+}
+.bracketTable th:last-child,
+.bracketTable td:last-child {
+  padding-right: 0;
+}
+.bracketRowActive td {
+  color: var(--text-primary);
+  font-weight: var(--fw-semibold);
+}
+.bracketRowActive td:first-child {
+  color: var(--c-accent);
+}
+.bracketTableNote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  margin-top: var(--space-2);
+  max-width: 52ch;
+}
+
 .footnote {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);

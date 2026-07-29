@@ -35,6 +35,18 @@ import styles from './TaxPage.module.css'
 
 type Surface = 'brackets' | 'paycheck' | 'rates' | 'roth' | 'math'
 
+type DeductionMode = 'standard' | 'itemized' | 'none'
+
+/**
+ * The deduction as a mid-sentence phrase: "the $16,100 standard deduction" or
+ * "$20,000 of itemized deductions". Callers handle the zero-deduction case.
+ */
+function describeDeduction(amount: number, mode: DeductionMode): string {
+  return mode === 'itemized'
+    ? `${formatUSDWhole(amount)} of itemized deductions`
+    : `the ${formatUSDWhole(amount)} standard deduction`
+}
+
 const TABS: TabItem<Surface>[] = [
   { value: 'brackets', label: 'Your brackets' },
   { value: 'paycheck', label: 'Your paycheck' },
@@ -56,10 +68,19 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
   const [status, setStatus] = useState<FilingStatus>('single')
   const [stateCode, setStateCode] = useState('CA')
   const [k401, setK401] = useState(5_000)
+  const [deductionMode, setDeductionMode] = useState<DeductionMode>('standard')
+  const [itemized, setItemized] = useState(25_000)
+
+  const federalDeduction =
+    deductionMode === 'standard'
+      ? STANDARD_DEDUCTION[status]
+      : deductionMode === 'itemized'
+        ? itemized
+        : 0
 
   const paycheck = useMemo(
-    () => computePaycheck(gross, status, k401, stateCode),
-    [gross, status, k401, stateCode]
+    () => computePaycheck(gross, status, k401, stateCode, federalDeduction),
+    [gross, status, k401, stateCode, federalDeduction]
   )
 
   return (
@@ -100,11 +121,36 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
             prefix="$"
             precision={0}
           />
+          <SegmentedControl
+            label="Federal deduction"
+            options={[
+              { value: 'standard', label: 'Standard' },
+              { value: 'itemized', label: 'Itemized' },
+              { value: 'none', label: 'None' },
+            ]}
+            value={deductionMode}
+            onChange={setDeductionMode}
+          />
+          {deductionMode === 'itemized' && (
+            <NumberField
+              label="Itemized deductions ($/yr)"
+              value={itemized}
+              onChange={setItemized}
+              min={0}
+              max={200_000}
+              prefix="$"
+              precision={0}
+            />
+          )}
         </div>
         <p className={styles.footnote}>
-          Tax year {TAX_YEAR}, wage income only, federal standard deduction (
-          {formatUSDWhole(STANDARD_DEDUCTION[status])} {FILING_LABELS[status].toLowerCase()}), plus{' '}
-          {paycheck.state.name} state income tax
+          Tax year {TAX_YEAR}, wage income only,{' '}
+          {deductionMode === 'standard'
+            ? `federal standard deduction (${formatUSDWhole(STANDARD_DEDUCTION[status])} ${FILING_LABELS[status].toLowerCase()})`
+            : deductionMode === 'itemized'
+              ? `federal itemized deductions of ${formatUSDWhole(itemized)} in place of the standard deduction`
+              : 'no federal deduction'}
+          , plus {paycheck.state.name} state income tax
           {paycheck.state.hasTax
             ? paycheck.state.deduction > 0
               ? `, after its own ${formatUSDWhole(paycheck.state.deduction)} deduction`
@@ -112,6 +158,12 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
             : ', which taxes no wages'}
           . The 401(k) cap is the {TAX_YEAR} limit of {formatUSDWhole(CONTRIBUTION_LIMITS.k401)}.
           {paycheck.state.note ? ` ${paycheck.state.note}` : ''}
+          {deductionMode === 'itemized' && itemized < STANDARD_DEDUCTION[status]
+            ? ` Note: filers take whichever deduction is larger, and ${formatUSDWhole(itemized)} of itemized deductions is below the ${formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction, so a real filer would take the standard instead. The tool applies your choice so you can compare.`
+            : ''}
+          {deductionMode === 'none'
+            ? ' Turning the deduction off is a what-if for comparison: a real filer always gets at least the standard deduction.'
+            : ''}
         </p>
       </Card>
 
@@ -158,20 +210,30 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
           <Tabs items={TABS} value={surface} onChange={setSurface} />
         </div>
         <Card tone="raised" className={styles.panel}>
-          {surface === 'brackets' && <BracketsView paycheck={paycheck} status={status} />}
-          {surface === 'paycheck' && <PaycheckView paycheck={paycheck} status={status} />}
-          {surface === 'rates' && <RatesView paycheck={paycheck} status={status} />}
+          {surface === 'brackets' && (
+            <BracketsView paycheck={paycheck} status={status} deductionMode={deductionMode} />
+          )}
+          {surface === 'paycheck' && (
+            <PaycheckView paycheck={paycheck} status={status} deductionMode={deductionMode} />
+          )}
+          {surface === 'rates' && (
+            <RatesView paycheck={paycheck} status={status} deductionMode={deductionMode} />
+          )}
           {surface === 'roth' && (
             <RothView marginalPct={Math.round(paycheck.marginalIncomeTaxRate * 100)} />
           )}
-          {surface === 'math' && <TaxMathView paycheck={paycheck} status={status} />}
+          {surface === 'math' && (
+            <TaxMathView paycheck={paycheck} status={status} deductionMode={deductionMode} />
+          )}
         </Card>
         <Callout tone="plain" label="Educational model, not tax advice">
-          This simplification skips credits, itemized deductions, local income taxes (city and
-          county), capital gains rates, deduction phase-outs, and new {TAX_YEAR} provisions such as
-          the senior deduction and the tips and overtime deductions. State figures come from the Tax
-          Foundation&rsquo;s {TAX_YEAR} state tax tables. It shows the structure of the system, not
-          a filing estimate.
+          This simplification skips credits, local income taxes (city and county), capital gains
+          rates, deduction phase-outs, and new {TAX_YEAR} provisions such as the senior deduction
+          and the tips and overtime deductions. The itemized option takes one total rather than
+          building it category by category (mortgage interest, state and local taxes, charity), and
+          the deduction choice applies to the federal return only: states keep their own standard
+          deductions. State figures come from the Tax Foundation&rsquo;s {TAX_YEAR} state tax
+          tables. It shows the structure of the system, not a filing estimate.
         </Callout>
       </div>
     </div>
@@ -211,22 +273,30 @@ function BracketContainers({ segments }: { segments: BracketSegment[] }) {
   )
 }
 
-function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
+function BracketsView({
+  paycheck,
+  status,
+  deductionMode,
+}: {
+  paycheck: PaycheckResult
+  status: FilingStatus
+  deductionMode: DeductionMode
+}) {
   const { incomeTax, state } = paycheck
   // The $1,000-raise experiment, run exactly: federal and state together. The
   // raise lands on gross wages, so it runs through the same pipeline as the
-  // real numbers — any unused standard deduction absorbs it first.
+  // real numbers — any unused deduction absorbs it first.
   const raise = useMemo(() => {
     const fedTaxable = Math.max(
       0,
-      paycheck.gross + 1_000 - paycheck.contribution401k - paycheck.standardDeduction
+      paycheck.gross + 1_000 - paycheck.contribution401k - paycheck.federalDeduction
     )
     const fed = computeIncomeTax(fedTaxable, status).tax - incomeTax.tax
     const st =
       computeStateTax(paycheck.gross + 1_000, paycheck.contribution401k, status, state.code).tax -
       state.tax
     return fed + st
-  }, [incomeTax, status, paycheck.gross, paycheck.contribution401k, paycheck.standardDeduction, state])
+  }, [incomeTax, status, paycheck.gross, paycheck.contribution401k, paycheck.federalDeduction, state])
 
   return (
     <>
@@ -264,8 +334,11 @@ function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: 
       </p>
       <p className={styles.derivation}>
         Taxable income = {formatUSDWhole(paycheck.gross)} wages − {formatUSDWhole(paycheck.contribution401k)}{' '}
-        401(k) − {formatUSDWhole(paycheck.standardDeduction)} standard deduction ={' '}
-        <strong>{formatUSDWhole(incomeTax.taxable)}</strong>
+        401(k)
+        {paycheck.federalDeduction > 0
+          ? ` − ${formatUSDWhole(paycheck.federalDeduction)} ${deductionMode === 'itemized' ? 'itemized deductions' : 'standard deduction'}`
+          : ' (no federal deduction)'}{' '}
+        = <strong>{formatUSDWhole(incomeTax.taxable)}</strong>
       </p>
       <BracketContainers segments={incomeTax.segments} />
 
@@ -303,10 +376,18 @@ function BracketsView({ paycheck, status }: { paycheck: PaycheckResult; status: 
 
 /* ------------------------------------------------------------------ */
 
-function PaycheckView({ paycheck: p, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
+function PaycheckView({
+  paycheck: p,
+  status,
+  deductionMode,
+}: {
+  paycheck: PaycheckResult
+  status: FilingStatus
+  deductionMode: DeductionMode
+}) {
   const noContrib = useMemo(
-    () => computePaycheck(p.gross, status, 0, p.state.code),
-    [p.gross, status, p.state.code]
+    () => computePaycheck(p.gross, status, 0, p.state.code, p.federalDeduction),
+    [p.gross, status, p.state.code, p.federalDeduction]
   )
   const rows = [
     {
@@ -317,7 +398,10 @@ function PaycheckView({ paycheck: p, status }: { paycheck: PaycheckResult; statu
     },
     {
       label: 'Federal income tax',
-      note: `after the ${formatUSDWhole(p.standardDeduction)} standard deduction`,
+      note:
+        p.federalDeduction > 0
+          ? `after ${describeDeduction(p.federalDeduction, deductionMode)}`
+          : 'no federal deduction applied',
       value: p.federalTax,
       color: CARDINAL,
     },
@@ -421,8 +505,24 @@ function PaycheckView({ paycheck: p, status }: { paycheck: PaycheckResult; statu
 
 /* ------------------------------------------------------------------ */
 
-function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
+function RatesView({
+  paycheck: p,
+  status,
+  deductionMode,
+}: {
+  paycheck: PaycheckResult
+  status: FilingStatus
+  deductionMode: DeductionMode
+}) {
   const keepOfNext100 = 100 * (1 - p.marginalAllInRate)
+  const taxableLabel =
+    p.federalDeduction > 0
+      ? p.contribution401k > 0
+        ? 'Taxable income (after 401(k) + deduction)'
+        : 'Taxable income (after deduction)'
+      : p.contribution401k > 0
+        ? 'Taxable income (after 401(k), no deduction)'
+        : 'Taxable income (no deduction)'
   return (
     <>
       <StepHeader
@@ -455,26 +555,35 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
         contribution401k={p.contribution401k}
         stateCode={p.state.code}
         stateName={p.state.name}
+        federalDeduction={p.federalDeduction}
         exportStats={[
           { label: 'Gross income (wages)', value: formatUSDWhole(p.gross) },
-          {
-            label: p.contribution401k > 0 ? 'Taxable income (after 401(k) + deduction)' : 'Taxable income (after deduction)',
-            value: formatUSDWhole(p.taxable),
-          },
+          { label: taxableLabel, value: formatUSDWhole(p.taxable) },
           { label: 'Total taxes (federal + state + payroll)', value: formatUSDWhole(p.totalTax) },
           { label: 'Effective rate (taxes ÷ gross)', value: formatPercent(p.totalTaxRate, 1), color: GREEN },
           { label: 'Marginal rate (next dollar of wages)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
         ]}
-        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, so neither line starts at zero; the income tax joins in only once income clears any deduction. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
+        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, so neither line starts at zero; ${p.federalDeduction > 0 ? 'the income tax joins in only once income clears any deduction' : 'with no federal deduction, the income tax also starts near the first dollar'}. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
       />
 
       <Callout tone="note" label="Why the effective rate is always the lower one">
-        Your income fills the cheap brackets first. The first{' '}
-        {formatUSDWhole(p.standardDeduction)} of gross wages is covered by the standard deduction
-        and taxed at zero, the next dollars at 10%, and so on up the schedule. The effective rate
-        averages those early, lightly taxed dollars in with the later ones, so it always ends up
-        below the rate on your last dollar. This is also why a raise cannot lower your take-home pay: new dollars are
-        taxed at the margin and never change the tax on the dollars below them.
+        Your income fills the cheap brackets first.{' '}
+        {p.federalDeduction > 0 ? (
+          <>
+            The first {formatUSDWhole(p.federalDeduction)} of gross wages is covered by{' '}
+            {deductionMode === 'itemized' ? 'your itemized deductions' : 'the standard deduction'}{' '}
+            and taxed at zero, the next dollars at 10%, and so on up the schedule.
+          </>
+        ) : (
+          <>
+            With no deduction, the first dollars of taxable income are taxed at 10%, the next at
+            12%, and so on up the schedule.
+          </>
+        )}{' '}
+        The effective rate averages those early, lightly taxed dollars in with the later ones, so it
+        always ends up below the rate on your last dollar. This is also why a raise cannot lower
+        your take-home pay: new dollars are taxed at the margin and never change the tax on the
+        dollars below them.
       </Callout>
       <Callout tone="mark" label="The dip in the red line">
         The marginal rate does not only go up. At <strong>{formatUSDWhole(FICA.ssWageBase)}</strong>{' '}
@@ -489,13 +598,21 @@ function RatesView({ paycheck: p, status }: { paycheck: PaycheckResult; status: 
 
 /* ------------------------------------------------------------------ */
 
-function TaxMathView({ paycheck: p, status }: { paycheck: PaycheckResult; status: FilingStatus }) {
+function TaxMathView({
+  paycheck: p,
+  status,
+  deductionMode,
+}: {
+  paycheck: PaycheckResult
+  status: FilingStatus
+  deductionMode: DeductionMode
+}) {
   const t = p.incomeTax
   // The federal share of the derived income-tax marginal, taken numerically
   // like the combined rate, so the breakdown always sums to the number shown.
   const fedMarginal =
     (computeIncomeTax(
-      Math.max(0, p.gross + 100 - p.contribution401k - p.standardDeduction),
+      Math.max(0, p.gross + 100 - p.contribution401k - p.federalDeduction),
       status
     ).tax -
       t.tax) /
@@ -522,8 +639,16 @@ function TaxMathView({ paycheck: p, status }: { paycheck: PaycheckResult; status
       />
 
       <FormulaBlock
-        tex={`${texUSD(p.gross)} - ${texUSD(p.contribution401k)} - ${texUSD(p.standardDeduction)} = ${texUSD(t.taxable)}`}
-        caption="Step 1. Taxable income equals wages minus the 401(k) contribution minus the standard deduction. Deductions come off the top, at your highest rate."
+        tex={
+          p.federalDeduction > 0
+            ? `${texUSD(p.gross)} - ${texUSD(p.contribution401k)} - ${texUSD(p.federalDeduction)} = ${texUSD(t.taxable)}`
+            : `${texUSD(p.gross)} - ${texUSD(p.contribution401k)} = ${texUSD(t.taxable)}`
+        }
+        caption={
+          p.federalDeduction > 0
+            ? `Step 1. Taxable income equals wages minus the 401(k) contribution minus ${describeDeduction(p.federalDeduction, deductionMode)}. Deductions come off the top, at your highest rate.`
+            : 'Step 1. Taxable income equals wages minus the 401(k) contribution. With no deduction, every remaining dollar of wages is taxable.'
+        }
       />
       <FormulaBlock
         tex={bracketSum}

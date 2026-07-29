@@ -1,9 +1,12 @@
 /*
  * Federal and state tax math for the teaching tool. Deliberate
- * simplifications, stated in the UI: standard deduction only, wage income
- * only, no credits beyond the state exemption credits, no local taxes. The
- * goal is the *structure* — marginal vs. effective rates, how a paycheck
- * splits, and how pre-tax saving changes the picture — not a filing estimate.
+ * simplifications, stated in the UI: wage income only, no credits beyond the
+ * state exemption credits, no local taxes. The federal deduction defaults to
+ * the standard deduction but can be overridden (an itemized total, or zero to
+ * show the no-deduction counterfactual); states always keep their own
+ * standard deductions. The goal is the *structure* — marginal vs. effective
+ * rates, how a paycheck splits, and how pre-tax saving changes the picture —
+ * not a filing estimate.
  */
 import { annuityFV } from '../../lib/finance'
 import {
@@ -147,24 +150,31 @@ export function totalTaxAt(
   gross: number,
   status: FilingStatus,
   contribution401k: number,
-  stateCode: string
+  stateCode: string,
+  federalDeduction: number = STANDARD_DEDUCTION[status],
+  // The Tax Advantages tool builds the bill piece by piece, so the sweep can
+  // leave state or payroll tax out; the Taxes tool always includes both.
+  include: { state?: boolean; payroll?: boolean } = {}
 ): number {
+  const { state: withState = true, payroll: withPayroll = true } = include
   const g = Math.max(0, gross)
   const k = Math.min(Math.max(0, contribution401k), g)
-  const taxable = Math.max(0, g - k - STANDARD_DEDUCTION[status])
+  const taxable = Math.max(0, g - k - Math.max(0, federalDeduction))
   const federal = computeBracketTax(taxable, BRACKETS[status]).tax
-  const state = computeStateTax(g, k, status, stateCode).tax
+  const state = withState ? computeStateTax(g, k, status, stateCode).tax : 0
   const socialSecurity = FICA.ssRate * Math.min(g, FICA.ssWageBase)
   const medicare = FICA.medicareRate * g
   const additionalMedicare =
     FICA.additionalMedicareRate * Math.max(0, g - FICA.additionalMedicareThreshold[status])
-  return federal + state + socialSecurity + medicare + additionalMedicare
+  const payroll = withPayroll ? socialSecurity + medicare + additionalMedicare : 0
+  return federal + state + payroll
 }
 
 export interface PaycheckResult {
   gross: number
   contribution401k: number
-  standardDeduction: number
+  /** The federal deduction actually applied (standard, itemized, or zero). */
+  federalDeduction: number
   taxable: number
   federalTax: number
   socialSecurity: number
@@ -193,7 +203,8 @@ export function computePaycheck(
   gross: number,
   status: FilingStatus,
   contribution401k: number,
-  stateCode: string
+  stateCode: string,
+  federalDeduction: number = STANDARD_DEDUCTION[status]
 ): PaycheckResult {
   const g = Math.max(0, gross)
 
@@ -206,9 +217,9 @@ export function computePaycheck(
   // 401(k) deferrals reduce income tax but NOT payroll (FICA) tax — FICA is
   // computed on gross wages. Nearly every taxing state follows the federal
   // pre-tax treatment of deferrals (PA is the exception, noted in its data).
-  const standardDeduction = STANDARD_DEDUCTION[status]
+  const deduction = Math.max(0, federalDeduction)
   const evaluate = (kk: number) => {
-    const taxable = Math.max(0, g - kk - standardDeduction)
+    const taxable = Math.max(0, g - kk - deduction)
     const incomeTax = computeIncomeTax(taxable, status)
     const state = computeStateTax(g, kk, status, stateCode)
     const totalTax = incomeTax.tax + state.tax + payrollTax
@@ -238,21 +249,21 @@ export function computePaycheck(
   // The all-in marginal rate, taken numerically over the next $100 of wages
   // so bracket edges, the SS wage cap, and the Medicare surtax threshold all
   // come out right without special cases.
-  const marginalAllInRate = (totalTaxAt(g + 100, status, k, stateCode) - totalTax) / 100
+  const marginalAllInRate = (totalTaxAt(g + 100, status, k, stateCode, deduction) - totalTax) / 100
 
   // The income-tax-only marginal rate (federal + state, payroll excluded),
   // also taken numerically. The bracket-schedule rates overstate this at low
-  // incomes, where the next dollar is absorbed by an unused standard
-  // deduction or a state exemption credit before any tax is actually owed.
+  // incomes, where the next dollar is absorbed by an unused deduction or a
+  // state exemption credit before any tax is actually owed.
   const incomeTaxOnlyAt = (gg: number) =>
-    computeIncomeTax(Math.max(0, gg - k - standardDeduction), status).tax +
+    computeIncomeTax(Math.max(0, gg - k - deduction), status).tax +
     computeStateTax(gg, k, status, stateCode).tax
   const marginalIncomeTaxRate = (incomeTaxOnlyAt(g + 100) - (incomeTax.tax + state.tax)) / 100
 
   return {
     gross: g,
     contribution401k: k,
-    standardDeduction,
+    federalDeduction: deduction,
     taxable,
     federalTax: incomeTax.tax,
     socialSecurity,

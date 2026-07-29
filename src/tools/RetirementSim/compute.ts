@@ -4,10 +4,10 @@
  * come from the vetted Taxes tool data (single source for annual updates).
  * Pure functions, no React.
  */
-import { BRACKETS, FICA, STANDARD_DEDUCTION } from '../Taxes/data2026'
+import { BRACKETS, FICA, STANDARD_DEDUCTION, type FilingStatus } from '../Taxes/data2026'
 
-export { ACCOUNT_RULES, CONTRIBUTION_LIMITS, TAX_YEAR } from '../Taxes/data2026'
-export const STD_DEDUCTION = STANDARD_DEDUCTION.single
+export { ACCOUNT_RULES, CONTRIBUTION_LIMITS, STANDARD_DEDUCTION, TAX_YEAR } from '../Taxes/data2026'
+export type { FilingStatus } from '../Taxes/data2026'
 export const SS_WAGE_BASE = FICA.ssWageBase
 
 /* ------------------------ part 1: paycheck ------------------------ */
@@ -25,14 +25,21 @@ export interface FederalTax {
   slices: BracketSlice[]
 }
 
-/** Federal income tax for a single filer taking the standard deduction. */
-export function federalTax(gross: number): FederalTax {
-  const taxable = Math.max(0, gross - STD_DEDUCTION)
+/**
+ * Federal income tax. The deduction defaults to the filing status's standard
+ * deduction; pass an itemized total, or zero for no deduction.
+ */
+export function federalTax(
+  gross: number,
+  status: FilingStatus = 'single',
+  deduction: number = STANDARD_DEDUCTION[status]
+): FederalTax {
+  const taxable = Math.max(0, gross - Math.max(0, deduction))
   let tax = 0
   let prev = 0
   let marginal = 0
   const slices: BracketSlice[] = []
-  for (const b of BRACKETS.single) {
+  for (const b of BRACKETS[status]) {
     if (taxable > prev) {
       const amount = Math.min(taxable, b.upTo) - prev
       tax += amount * b.rate
@@ -46,10 +53,10 @@ export function federalTax(gross: number): FederalTax {
 }
 
 /** Employee-side FICA (Social Security to the wage base, Medicare on all wages). */
-export function fica(gross: number): number {
+export function fica(gross: number, status: FilingStatus = 'single'): number {
   const ss = FICA.ssRate * Math.min(gross, FICA.ssWageBase)
-  const extra = gross > FICA.additionalMedicareThreshold.single
-    ? FICA.additionalMedicareRate * (gross - FICA.additionalMedicareThreshold.single)
+  const extra = gross > FICA.additionalMedicareThreshold[status]
+    ? FICA.additionalMedicareRate * (gross - FICA.additionalMedicareThreshold[status])
     : 0
   return ss + FICA.medicareRate * gross + extra
 }

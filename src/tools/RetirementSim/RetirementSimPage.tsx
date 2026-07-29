@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Button, Callout, Card, FormulaBlock, NumberField, SelectField, Slider, Stat, Toggle } from '../../design-system'
+import { Button, Callout, Card, FormulaBlock, NumberField, SegmentedControl, SelectField, Slider, Stat, Toggle } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 // The vetted Taxes tool provides the state schedules; Part 1 reuses them.
 import { computeStateTax } from '../Taxes/compute'
-import { STATE_OPTIONS } from '../Taxes/stateData2026'
+import { RateChart } from '../Taxes/components/RateChart'
+import { BRACKETS, type Bracket } from '../Taxes/data2026'
+import { STATE_OPTIONS, STATE_TAXES } from '../Taxes/stateData2026'
 import {
   ACCOUNT_RULES,
   CONTRIBUTION_LIMITS,
@@ -18,8 +20,9 @@ import {
   RETIRE_AGE,
   RETIREMENT_YEARS,
   SS_WAGE_BASE,
-  STD_DEDUCTION,
+  STANDARD_DEDUCTION,
   TAX_YEAR,
+  type FilingStatus,
   federalTax,
   fica,
   jarSeries,
@@ -57,6 +60,58 @@ const texRate = (p: number) => String(p / 100)
 
 /* ================= Part 1: Take-Home Pay ================= */
 
+type DeductionMode = 'standard' | 'itemized' | 'none'
+
+/**
+ * One rate schedule as a reference table. The row holding the reader's last
+ * taxed dollar is highlighted, tying the table to the marginal rate above.
+ */
+function BracketScheduleTable({
+  title,
+  brackets,
+  taxable,
+  note,
+}: {
+  title: string
+  brackets: Bracket[]
+  taxable: number
+  note?: string
+}) {
+  let from = 0
+  const rows = brackets.map((b) => {
+    const row = { rate: b.rate, from, to: b.upTo, active: taxable > from && taxable <= b.upTo }
+    from = b.upTo
+    return row
+  })
+  return (
+    <div>
+      <p className={styles.rulesTitle}>{title}</p>
+      <table className={styles.bracketTable}>
+        <thead>
+          <tr>
+            <th>Rate</th>
+            <th>Taxable income</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.from} className={r.active ? styles.bracketRowActive : undefined}>
+              <td className="tnum">{+(r.rate * 100).toFixed(2)}%</td>
+              <td className="tnum">
+                {Number.isFinite(r.to)
+                  ? `${formatUSDWhole(r.from)} – ${formatUSDWhole(r.to)}`
+                  : `over ${formatUSDWhole(r.from)}`}
+                {r.active ? ' ← your top dollar' : ''}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {note && <p className={styles.bracketTableNote}>{note}</p>}
+    </div>
+  )
+}
+
 function TakeHomePay() {
   const [salary, setSalary] = useState(60000)
   const [raiseOn, setRaiseOn] = useState(false)
@@ -67,22 +122,31 @@ function TakeHomePay() {
   const [withPayroll, setWithPayroll] = useState(false)
   const [with401k, setWith401k] = useState(false)
   const [k401, setK401] = useState(5000)
+  const [status, setStatus] = useState<FilingStatus>('single')
+  const [deductionMode, setDeductionMode] = useState<DeductionMode>('standard')
+  const [itemized, setItemized] = useState(25000)
 
   const gross = raiseOn ? salary + 2000 : salary
+  const deduction =
+    deductionMode === 'standard'
+      ? STANDARD_DEDUCTION[status]
+      : deductionMode === 'itemized'
+        ? itemized
+        : 0
 
   const taxesAt = useMemo(() => {
     return (g: number) => {
       // Payroll tax is owed on gross wages even when every remaining dollar
       // is deferred, so cap the contribution at what is left after it; the
       // take-home figure can then never go negative.
-      const payroll = withPayroll ? fica(g) : 0
+      const payroll = withPayroll ? fica(g, status) : 0
       const k = with401k ? Math.min(Math.max(0, k401), Math.max(0, g - payroll)) : 0
-      const fed = federalTax(Math.max(0, g - k))
-      const state = withState ? computeStateTax(g, k, 'single', stateCode) : null
+      const fed = federalTax(Math.max(0, g - k), status, deduction)
+      const state = withState ? computeStateTax(g, k, status, stateCode) : null
       const total = fed.tax + (state?.tax ?? 0) + payroll
       return { k, fed, state, payroll, total, takeHome: g - k - total }
     }
-  }, [with401k, k401, withState, stateCode, withPayroll])
+  }, [with401k, k401, withState, stateCode, withPayroll, status, deduction])
 
   const cur = useMemo(() => taxesAt(gross), [taxesAt, gross])
   const raiseDelta = cur.takeHome - taxesAt(salary).takeHome
@@ -93,13 +157,17 @@ function TakeHomePay() {
       ...(cur.k > 0
         ? [{ name: '401(k) contribution', total: cur.k, taken: 0, rate: 0, invested: true }]
         : []),
-      {
-        name: 'standard deduction',
-        total: Math.min(Math.max(0, gross - cur.k), STD_DEDUCTION),
-        taken: 0,
-        rate: 0,
-        invested: false,
-      },
+      ...(deduction > 0
+        ? [
+            {
+              name: deductionMode === 'itemized' ? 'itemized deductions' : 'standard deduction',
+              total: Math.min(Math.max(0, gross - cur.k), deduction),
+              taken: 0,
+              rate: 0,
+              invested: false,
+            },
+          ]
+        : []),
       ...cur.fed.slices.map((s) => ({
         name: `${pct(s.rate)} bracket`,
         total: s.amount,
@@ -115,7 +183,7 @@ function TakeHomePay() {
       acc += w
       return seg
     })
-  }, [gross, cur])
+  }, [gross, cur, deduction, deductionMode])
   const tip = hover != null ? segments[hover] : null
 
   /*
@@ -125,7 +193,7 @@ function TakeHomePay() {
    * progressive, band by bracket. State tax skips the 401(k) slice (the
    * deferral is excluded from state taxable income here), but payroll (FICA)
    * is owed on every wage dollar, deferred or not, so its band covers the
-   * 401(k) and standard-deduction slices too.
+   * 401(k) and deduction slices too.
    */
   const taxableBase = Math.max(0, gross - cur.k)
   const payrollRate = withPayroll && gross > 0 ? cur.payroll / gross : 0
@@ -182,6 +250,36 @@ function TakeHomePay() {
               onChange={setK401}
               min={0}
               max={CONTRIBUTION_LIMITS.k401}
+              prefix="$"
+              precision={0}
+            />
+          )}
+          <SegmentedControl
+            label="Filing status"
+            options={[
+              { value: 'single', label: 'Single' },
+              { value: 'mfj', label: 'Married (joint)' },
+            ]}
+            value={status}
+            onChange={setStatus}
+          />
+          <SegmentedControl
+            label="Federal deduction"
+            options={[
+              { value: 'standard', label: 'Standard' },
+              { value: 'itemized', label: 'Itemized' },
+              { value: 'none', label: 'None' },
+            ]}
+            value={deductionMode}
+            onChange={setDeductionMode}
+          />
+          {deductionMode === 'itemized' && (
+            <NumberField
+              label="Itemized deductions ($/yr)"
+              value={itemized}
+              onChange={setItemized}
+              min={0}
+              max={200_000}
               prefix="$"
               precision={0}
             />
@@ -288,11 +386,22 @@ function TakeHomePay() {
               still your money
             </li>
           )}
-          <li>
-            {cur.k > 0 ? 'Next' : 'First'}{' '}
-            {formatUSDWhole(Math.min(Math.max(0, gross - cur.k), STD_DEDUCTION))}: standard
-            deduction, no tax
-          </li>
+          {deduction > 0 ? (
+            <li>
+              {cur.k > 0 ? 'Next' : 'First'}{' '}
+              {formatUSDWhole(Math.min(Math.max(0, gross - cur.k), deduction))}:{' '}
+              {deductionMode === 'itemized' ? 'itemized deductions' : 'standard deduction'}, no tax
+              {deductionMode === 'itemized' && itemized < STANDARD_DEDUCTION[status]
+                ? `. Filers take whichever deduction is larger, so a real filer would take the ${formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction instead`
+                : ''}
+            </li>
+          ) : (
+            <li>
+              No federal deduction (a what-if: real filers always get at least the{' '}
+              {formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction), so the brackets
+              start at the first {cur.k > 0 ? 'dollar after the 401(k)' : 'dollar'}
+            </li>
+          )}
           {cur.fed.slices.map((s, i) => (
             <li key={i}>
               {pct(s.rate)} on {formatUSDWhole(s.amount)} &rarr; <strong>{formatUSDWhole(s.tax)}</strong>
@@ -321,6 +430,72 @@ function TakeHomePay() {
         The $2,000 sits on top of the existing income, so only the new dollars are taxed at the
         marginal rate; the dollars below keep their old rates.
       </Callout>
+
+      <div>
+        <p className={styles.sectionLede}>
+          The bar above shows one salary. Sweeping every salary through the same machine gives the
+          two rates worth knowing: the marginal rate on the next dollar, and the effective rate on
+          the year as a whole. The chart counts only the pieces switched on above, so toggling
+          payroll or state tax moves the lines.
+        </p>
+        <RateChart
+          gross={gross}
+          status={status}
+          contribution401k={cur.k}
+          stateCode={stateCode}
+          stateName={withState && cur.state ? cur.state.name : ''}
+          federalDeduction={deduction}
+          includeState={withState}
+          includePayroll={withPayroll}
+          exportStats={[
+            { label: 'Salary (gross wages)', value: formatUSDWhole(gross) },
+            { label: 'Total tax counted', value: formatUSDWhole(cur.total) },
+            {
+              label: 'Effective rate (taxes ÷ gross)',
+              value: pct(gross > 0 ? cur.total / gross : 0, 1),
+              color: GREEN,
+            },
+            { label: 'Marginal rate (next dollar)', value: pct(marginalAllIn, 1), color: RED },
+          ]}
+          caption={`Both rates by gross income for a ${status === 'mfj' ? 'married' : 'single'} filer, counting the pieces switched on above: federal income tax${withState && cur.state ? ` plus ${cur.state.name} state income tax` : ''}${withPayroll ? ' plus payroll taxes' : ''}. ${
+            withPayroll
+              ? `Payroll taxes start at the first dollar of wages, so neither line starts at zero, and the marginal rate (red) drops at the ${formatUSDWhole(SS_WAGE_BASE)} Social Security cap.`
+              : deduction > 0
+                ? `The first ${formatUSDWhole(deduction)} of income is covered by the deduction, so both lines start at zero.`
+                : 'With no deduction, the brackets start at the first dollar.'
+          } At your salary the effective rate is ${pct(gross > 0 ? cur.total / gross : 0, 1)} and the marginal rate is ${pct(marginalAllIn, 1)}: the average of every dollar always trails the rate on the next one.`}
+        />
+
+        <div className={styles.bracketTables}>
+          <BracketScheduleTable
+            title={`Federal brackets · ${status === 'mfj' ? 'Married filing jointly' : 'Single'} · ${TAX_YEAR}`}
+            brackets={BRACKETS[status]}
+            taxable={cur.fed.taxable}
+            note={
+              deduction > 0
+                ? `Applied to taxable income: wages minus ${cur.k > 0 ? 'the 401(k) contribution and ' : ''}the ${formatUSDWhole(deduction)} deduction.`
+                : `Applied to ${cur.k > 0 ? 'every dollar of wages after the 401(k) contribution' : 'every dollar of wages'}, since the deduction is switched off.`
+            }
+          />
+          {withState && cur.state && (
+            cur.state.hasTax && STATE_TAXES[stateCode].brackets ? (
+              <BracketScheduleTable
+                title={`${cur.state.name} brackets · ${status === 'mfj' ? 'Married filing jointly' : 'Single'} · ${TAX_YEAR}`}
+                brackets={STATE_TAXES[stateCode].brackets![status]}
+                taxable={cur.state.taxable}
+                note={`Applied to state taxable income: wages${cur.k > 0 ? ' minus the 401(k) contribution' : ''}${cur.state.deduction > 0 ? `${cur.k > 0 ? ' and' : ' minus'} the state's own ${formatUSDWhole(cur.state.deduction)} deduction` : ''}.${cur.state.credit > 0 ? ` A ${formatUSDWhole(cur.state.credit)} exemption credit then comes off the tax.` : ''}${cur.state.note ? ` ${cur.state.note}` : ''}`}
+              />
+            ) : (
+              <div>
+                <p className={styles.rulesTitle}>{cur.state.name} brackets</p>
+                <p className={styles.bracketTableNote}>
+                  {cur.state.name} levies no income tax on wages, so there is no schedule to show.
+                </p>
+              </div>
+            )
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -967,8 +1142,10 @@ export function TaxAdvantagesPage({ intro = true }: { intro?: boolean } = {}) {
       </Card>
 
       <p className={styles.footnote}>
-        Tax math: {TAX_YEAR} federal brackets and the {formatUSDWhole(STD_DEDUCTION)} standard
-        deduction, single filer (IRS Rev. Proc. 2025-32); FICA with the{' '}
+        Tax math: {TAX_YEAR} federal brackets for the filing status chosen in Part 1 (single by
+        default), with its standard deduction ({formatUSDWhole(STANDARD_DEDUCTION.single)} single,{' '}
+        {formatUSDWhole(STANDARD_DEDUCTION.mfj)} married filing jointly) unless switched to an
+        itemized total or none (IRS Rev. Proc. 2025-32); FICA with the{' '}
         {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base; optional state income tax from
         the Tax Foundation&rsquo;s {TAX_YEAR} state tables. These three parts use simplified annual
         compounding for teaching; they are illustrations, not financial advice.
