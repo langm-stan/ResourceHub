@@ -246,10 +246,11 @@ export function computePaycheck(
   }
   const { taxable, incomeTax, state, totalTax, takeHomeYear } = result
 
-  // The all-in marginal rate, taken numerically over the next $100 of wages
-  // so bracket edges, the SS wage cap, and the Medicare surtax threshold all
-  // come out right without special cases.
-  const marginalAllInRate = (totalTaxAt(g + 100, status, k, stateCode, deduction) - totalTax) / 100
+  // The all-in marginal rate, taken numerically on literally the next dollar
+  // of wages, so bracket edges, the SS wage cap, and the Medicare surtax
+  // threshold all land exactly. A wider step would blend two brackets right
+  // below an edge: at taxable $12,399 the next dollar pays 10%, not 12%.
+  const marginalAllInRate = totalTaxAt(g + 1, status, k, stateCode, deduction) - totalTax
 
   // The income-tax-only marginal rate (federal + state, payroll excluded),
   // also taken numerically. The bracket-schedule rates overstate this at low
@@ -258,7 +259,7 @@ export function computePaycheck(
   const incomeTaxOnlyAt = (gg: number) =>
     computeIncomeTax(Math.max(0, gg - k - deduction), status).tax +
     computeStateTax(gg, k, status, stateCode).tax
-  const marginalIncomeTaxRate = (incomeTaxOnlyAt(g + 100) - (incomeTax.tax + state.tax)) / 100
+  const marginalIncomeTaxRate = incomeTaxOnlyAt(g + 1) - (incomeTax.tax + state.tax)
 
   return {
     gross: g,

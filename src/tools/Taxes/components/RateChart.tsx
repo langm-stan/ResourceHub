@@ -64,19 +64,20 @@ export function RateChart({
   const points = useMemo(() => {
     const N = 280
     const step = xMax / N
-    // One extra sample past the right edge feeds the forward difference for
-    // the final point, so both lines run all the way to the axis edge.
-    const taxes: number[] = []
-    for (let i = 0; i <= N + 1; i++) taxes.push(totalTaxAt(i * step, status, contribution401k, stateCode, federalDeduction, include))
+    const taxAt = (g: number) =>
+      totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include)
     const pts: RatePoint[] = []
     for (let i = 0; i <= N; i++) {
       const g = i * step
+      const tax = taxAt(g)
       pts.push({
         gross: g,
         // At $0 the ratio is 0/0; take its limit numerically: the tax rate on
         // the first dollar (7.65% with payroll included, 0 without).
-        effective: g > 0 ? taxes[i] / g : (taxes[1] - taxes[0]) / step,
-        marginal: (taxes[i + 1] - taxes[i]) / step,
+        effective: g > 0 ? tax / g : taxAt(1) - tax,
+        // The rate on literally the next dollar, so the marginal line reads
+        // the true bracket at every sample instead of blending across a step.
+        marginal: taxAt(g + 1) - tax,
       })
     }
     return pts
@@ -125,15 +126,18 @@ function Inner({
   )
 
   // The reader's own two rates, computed exactly (not read off the samples).
-  const ownTax = totalTaxAt(gross, status, contribution401k, stateCode, federalDeduction, include)
+  // The marginal rate is the tax on literally the next dollar of wages.
+  const taxAt = (g: number) =>
+    totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include)
+  const ownTax = taxAt(gross)
   const ownEffective = gross > 0 ? ownTax / gross : 0
-  const ownMarginal = (totalTaxAt(gross + 100, status, contribution401k, stateCode, federalDeduction, include) - ownTax) / 100
+  const ownMarginal = taxAt(gross + 1) - ownTax
 
   // Where the Social Security cap bites: mark the marginal rate just past it.
   // Without payroll tax in the lines there is no dip to annotate.
   const cap = FICA.ssWageBase
-  const pastCap = (totalTaxAt(cap + 1_100, status, contribution401k, stateCode, federalDeduction, include) - totalTaxAt(cap + 1_000, status, contribution401k, stateCode, federalDeduction, include)) / 100
-  const preCap = (totalTaxAt(cap - 1_000, status, contribution401k, stateCode, federalDeduction, include) - totalTaxAt(cap - 1_100, status, contribution401k, stateCode, federalDeduction, include)) / 100
+  const pastCap = taxAt(cap + 1_001) - taxAt(cap + 1_000)
+  const preCap = taxAt(cap - 1_000) - taxAt(cap - 1_001)
   const showCap = include.payroll && cap < xMax * 0.92 && Math.abs(x(cap) - x(gross)) > innerWidth * 0.12
 
   return (

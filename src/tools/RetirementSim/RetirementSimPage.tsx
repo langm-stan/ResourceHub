@@ -150,7 +150,10 @@ function TakeHomePay() {
 
   const cur = useMemo(() => taxesAt(gross), [taxesAt, gross])
   const raiseDelta = cur.takeHome - taxesAt(salary).takeHome
-  const marginalAllIn = (taxesAt(gross + 100).total - cur.total) / 100
+  // The rate on literally the next dollar: a wider step would blend two
+  // brackets right below an edge (at taxable $12,399 the next dollar pays
+  // 10%, not 12%).
+  const marginalAllIn = taxesAt(gross + 1).total - cur.total
 
   const segments = useMemo(() => {
     const raw = [

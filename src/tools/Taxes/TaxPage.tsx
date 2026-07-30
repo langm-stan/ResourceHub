@@ -609,14 +609,13 @@ function TaxMathView({
 }) {
   const t = p.incomeTax
   // The federal share of the derived income-tax marginal, taken numerically
-  // like the combined rate, so the breakdown always sums to the number shown.
+  // on the same next dollar as the combined rate, so the breakdown always
+  // sums to the number shown.
   const fedMarginal =
-    (computeIncomeTax(
-      Math.max(0, p.gross + 100 - p.contribution401k - p.federalDeduction),
+    computeIncomeTax(
+      Math.max(0, p.gross + 1 - p.contribution401k - p.federalDeduction),
       status
-    ).tax -
-      t.tax) /
-    100
+    ).tax - t.tax
   const stateMarginal = p.marginalIncomeTaxRate - fedMarginal
   const used = t.segments.filter((s) => s.amount > 0)
   // Two bracket terms per line so the sum never overflows the panel — a high
