@@ -1,17 +1,11 @@
 /*
- * Bitcoin Mining: the chain math. A block stores only what a student typed
- * (miner, reward, difficulty, nonce, optional transaction); every hash is
- * recomputed from that, so a chain serialized into a QR code is re-derived
- * and re-verified on whatever device scans it. Nothing here is async: the
- * SHA-256 below is a plain synchronous implementation so the calculated
- * hash can update on every keystroke.
+ * Bitcoin Mining: the chain math behind the "Chain Rail" design. A block
+ * stores only what a student typed (miner, nonce, difficulty, optional
+ * payment); every hash is re-derived from that, so a chain serialized into
+ * a QR code is re-derived and re-verified on whatever device scans it.
+ * Nothing here is async: the SHA-256 below is a plain synchronous
+ * implementation so the hash readout can update on every keystroke.
  */
-
-export interface Tx {
-  from: string
-  to: string
-  amount: number
-}
 
 export interface Block {
   miner: string
@@ -19,52 +13,18 @@ export interface Block {
   /** Leading zeros required of this block's hash, recorded so old blocks stay verifiable after the instructor changes the dial. */
   difficulty: number
   nonce: string
-  tx?: Tx
+  sender: string
+  receiver: string
+  amount: number
 }
 
-export interface MinedBlock {
-  block: Block
-  prevHash: string
-  data: string
-  hash: string
-  /** Whether the derived hash still meets the block's difficulty. Tampering anywhere upstream breaks this. */
-  valid: boolean
-}
-
-export const GENESIS_HASH = '0'
+export const GENESIS_HASH = '0'.repeat(64)
 export const MAX_DIFFICULTY = 4
 export const INITIAL_REWARD = 50
 /** Blocks between reward halvings. Real Bitcoin waits 210,000 blocks; a class period gets two. */
 export const HALVING_INTERVAL = 2
-/**
- * The most BTC the classroom coin can ever have: the halving schedule is a
- * geometric series that sums to interval x initial x 2, the same arithmetic
- * that caps real Bitcoin at 21 million.
- */
+/** The geometric series the halving schedule sums to: the same arithmetic that caps real Bitcoin at 21 million. */
 export const MAX_SUPPLY = INITIAL_REWARD * HALVING_INTERVAL * 2
-
-export function leadingZeros(hash: string): number {
-  let n = 0
-  while (n < hash.length && hash[n] === '0') n++
-  return n
-}
-
-/** How many of the 64 hash characters differ between two hashes (the avalanche effect made countable). */
-export function countChanged(a: string, b: string): number {
-  let n = 0
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++
-  return n
-}
-
-/**
- * A stable identity color for a hash, so the eye can follow one hash into the
- * next block's "previous hash" slot. Derived from the LAST six characters:
- * the leading ones are all zeros on any mined hash, which would give every
- * block the same color.
- */
-export function hashHue(hash: string): number {
-  return (parseInt(hash.slice(-6), 16) / 0xffffff) * 360
-}
 
 /* ------------------------------ SHA-256 ------------------------------ */
 
@@ -128,30 +88,84 @@ export function sha256Hex(message: string): string {
 
 /* ------------------------------ the chain ------------------------------ */
 
-/**
- * The exact string that gets hashed, in the classroom's original format:
- * previousHash|miner-reward|sender-receiver-amount|nonce (the transaction
- * segment only when the block carries one).
- */
-export function blockData(prevHash: string, b: Block): string {
-  const tx = b.tx ? `|${b.tx.from}-${b.tx.to}-${b.tx.amount}` : ''
-  return `${prevHash}|${b.miner}-${b.reward}${tx}|${b.nonce}`
+/** The exact string that gets hashed: prevHash|miner|reward|sender|receiver|amount|nonce. */
+export function blockData(prevHash: string, b: Omit<Block, 'difficulty'>): string {
+  return [prevHash, b.miner, b.reward, b.sender || '', b.receiver || '', b.amount || 0, b.nonce].join('|')
 }
 
 export function meetsDifficulty(hash: string, difficulty: number): boolean {
   return hash.startsWith('0'.repeat(difficulty))
 }
 
-/** Derive every block's data string and hash, chaining each hash into the next block. */
-export function computeChain(blocks: Block[]): MinedBlock[] {
+/** The reward at a given chain height, halving every HALVING_INTERVAL blocks. */
+export function rewardAt(height: number): number {
+  return INITIAL_REWARD / 2 ** Math.floor(height / HALVING_INTERVAL)
+}
+
+export interface ChainView {
+  block: Block
+  /** The prev-hash the block recorded when it was mined; tampering never rewrites it. */
+  prevHash: string
+  /** The block's current hash: re-derived from the tamper text when the block was edited. */
+  hash: string
+  contents: string
+  tampered: boolean
+  /** meets its difficulty AND still points at the previous block's current hash AND every earlier block is valid. */
+  valid: boolean
+}
+
+/**
+ * Derive the whole chain. `tamper` maps a block index to replacement
+ * contents text; an edited block re-hashes with its RECORDED prev-hash (that
+ * pointer is history and does not move), so its new hash both misses its
+ * difficulty and no longer matches what the next block recorded. Everything
+ * downstream flips invalid: rewriting one block means re-mining them all.
+ */
+export function deriveChain(blocks: Block[], tamper: Record<number, string> = {}): ChainView[] {
+  // First pass: the hashes as mined, which is what each block recorded.
+  const stored: { prev: string; hash: string }[] = []
   let prev = GENESIS_HASH
-  return blocks.map((block) => {
-    const data = blockData(prev, block)
-    const hash = sha256Hex(data)
-    const mined: MinedBlock = { block, prevHash: prev, data, hash, valid: meetsDifficulty(hash, block.difficulty) }
+  for (const b of blocks) {
+    const hash = sha256Hex(blockData(prev, b))
+    stored.push({ prev, hash })
     prev = hash
-    return mined
+  }
+  // Second pass: apply tamper text and grade validity cumulatively.
+  let prevCurrent = GENESIS_HASH
+  let broken = false
+  return blocks.map((b, i) => {
+    const text = tamper[i]
+    const tampered = text != null
+    const hash = tampered ? sha256Hex(blockData(stored[i]!.prev, { ...b, miner: text })) : stored[i]!.hash
+    const valid = !broken && meetsDifficulty(hash, b.difficulty) && stored[i]!.prev === prevCurrent
+    if (!valid) broken = true
+    prevCurrent = hash
+    return {
+      block: b,
+      prevHash: stored[i]!.prev,
+      hash,
+      tampered,
+      valid,
+      contents: tampered
+        ? text
+        : `${b.miner} mined ${fmtBtc(b.reward)} BTC${b.amount ? ` · ${b.sender} → ${b.receiver} ${fmtBtc(b.amount)}` : ''}`,
+    }
   })
+}
+
+/* ------------------------------ display helpers ------------------------------ */
+
+/** A hash's identity color: its own first six hex characters, worn as a swatch. Genesis is near-black. */
+export function swatch(hash: string): string {
+  return hash === GENESIS_HASH ? '#111' : `#${hash.slice(0, 6)}`
+}
+
+export function shortHash(hash: string): string {
+  return `${hash.slice(0, 10)}…${hash.slice(-6)}`
+}
+
+export function fmtBtc(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
 }
 
 /* ------------------------------ the ledger ------------------------------ */
@@ -159,91 +173,66 @@ export function computeChain(blocks: Block[]): MinedBlock[] {
 export interface LedgerRow {
   name: string
   balance: number
+  blocksWon: number
+  /** Net change from the newest block, 0 when this participant sat it out. */
+  delta: number
+  touchedLast: boolean
 }
 
-/** Every balance follows from the chain: rewards in, transactions across. */
+/** Every balance follows from the chain: rewards in, payments across. Sorted by balance, richest first. */
 export function buildLedger(blocks: Block[]): LedgerRow[] {
-  const balances = new Map<string, number>()
-  const add = (name: string, amount: number) => balances.set(name, (balances.get(name) ?? 0) + amount)
-  for (const b of blocks) {
-    add(b.miner, b.reward)
-    if (b.tx) {
-      add(b.tx.from, -b.tx.amount)
-      add(b.tx.to, b.tx.amount)
+  const accounts = new Map<string, { balance: number; blocksWon: number; delta: number; touchedLast: boolean }>()
+  const touch = (name: string) => {
+    let acc = accounts.get(name)
+    if (!acc) {
+      acc = { balance: 0, blocksWon: 0, delta: 0, touchedLast: false }
+      accounts.set(name, acc)
     }
+    return acc
   }
-  return [...balances.entries()]
-    .map(([name, balance]) => ({ name, balance }))
-    .sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name))
-}
-
-/**
- * The classroom spreadsheet, derived: one column per block, one row per
- * participant, each cell the participant's balance after that block (blank
- * before they first appear, exactly like the hand-kept Excel grid).
- */
-export interface BalanceGrid {
-  /** Participants in order of first appearance on the chain. */
-  names: string[]
-  /** balances[round][i] = names[i]'s balance after that block, undefined before they appear. */
-  balances: (number | undefined)[][]
-  /** The reward paid out in each round. */
-  rewards: number[]
-  /** Circulating supply after each round. */
-  supply: number[]
-}
-
-export function buildBalanceGrid(blocks: Block[]): BalanceGrid {
-  const current = new Map<string, number>()
-  const firstSeen = new Map<string, number>()
-  const rounds: Map<string, number>[] = []
-  blocks.forEach((b, r) => {
-    const touch = (name: string) => {
-      if (!firstSeen.has(name)) firstSeen.set(name, r)
-      if (!current.has(name)) current.set(name, 0)
+  const last = blocks.length - 1
+  blocks.forEach((b, i) => {
+    const isLast = i === last
+    const acc = touch(b.miner)
+    acc.balance += b.reward
+    acc.blocksWon++
+    if (isLast) {
+      acc.delta += b.reward
+      acc.touchedLast = true
     }
-    touch(b.miner)
-    current.set(b.miner, current.get(b.miner)! + b.reward)
-    if (b.tx) {
-      touch(b.tx.from)
-      touch(b.tx.to)
-      current.set(b.tx.from, current.get(b.tx.from)! - b.tx.amount)
-      current.set(b.tx.to, current.get(b.tx.to)! + b.tx.amount)
+    if (b.amount && b.sender && b.receiver) {
+      const from = touch(b.sender)
+      const to = touch(b.receiver)
+      from.balance -= b.amount
+      to.balance += b.amount
+      if (isLast) {
+        from.delta -= b.amount
+        from.touchedLast = true
+        to.delta += b.amount
+        to.touchedLast = true
+      }
     }
-    rounds.push(new Map(current))
   })
-  const names = [...firstSeen.keys()].sort((a, b) => firstSeen.get(a)! - firstSeen.get(b)!)
-  return {
-    names,
-    balances: rounds.map((snap) => names.map((n) => snap.get(n))),
-    rewards: blocks.map((b) => b.reward),
-    supply: rounds.map((snap) => [...snap.values()].reduce((s, v) => s + v, 0)),
-  }
+  return [...accounts.entries()]
+    .map(([name, acc]) => ({ name, ...acc }))
+    .sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name))
 }
 
 export function circulatingSupply(blocks: Block[]): number {
   return blocks.reduce((sum, b) => sum + b.reward, 0)
 }
 
-/** The reward the schedule suggests for the next block, halving every HALVING_INTERVAL blocks. */
-export function suggestedReward(blocksMined: number): number {
-  return INITIAL_REWARD / 2 ** Math.floor(blocksMined / HALVING_INTERVAL)
-}
-
 /* ---------------------- QR / URL serialization ---------------------- */
 
 /*
  * Only the typed inputs travel; hashes are re-derived on arrival. A block is
- * [miner, reward, difficulty, nonce] or, with a transaction,
- * [miner, reward, difficulty, nonce, from, to, amount]. The array is JSON
- * encoded then base64url encoded for the ?chain= param.
+ * [miner, reward, difficulty, nonce, sender, receiver, amount], JSON encoded
+ * then base64url encoded for the ?chain= param.
  */
-type Packed = [string, number, number, string] | [string, number, number, string, string, string, number]
+type Packed = [string, number, number, string, string, string, number]
 
 export function encodeChain(blocks: Block[]): string {
-  const packed: Packed[] = blocks.map((b) =>
-    b.tx ? [b.miner, b.reward, b.difficulty, b.nonce, b.tx.from, b.tx.to, b.tx.amount] : [b.miner, b.reward, b.difficulty, b.nonce],
-  )
+  const packed: Packed[] = blocks.map((b) => [b.miner, b.reward, b.difficulty, b.nonce, b.sender, b.receiver, b.amount])
   const bytes = new TextEncoder().encode(JSON.stringify(packed))
   let bin = ''
   for (const byte of bytes) bin += String.fromCharCode(byte)
@@ -259,15 +248,19 @@ export function decodeChain(code: string): Block[] | null {
     if (!Array.isArray(parsed)) return null
     const blocks: Block[] = []
     for (const entry of parsed) {
-      if (!Array.isArray(entry) || (entry.length !== 4 && entry.length !== 7)) return null
-      const [miner, reward, difficulty, nonce, from, to, amount] = entry as unknown[]
-      if (typeof miner !== 'string' || typeof reward !== 'number' || typeof difficulty !== 'number' || typeof nonce !== 'string') return null
-      const block: Block = { miner, reward, difficulty, nonce }
-      if (entry.length === 7) {
-        if (typeof from !== 'string' || typeof to !== 'string' || typeof amount !== 'number') return null
-        block.tx = { from, to, amount }
-      }
-      blocks.push(block)
+      if (!Array.isArray(entry) || entry.length !== 7) return null
+      const [miner, reward, difficulty, nonce, sender, receiver, amount] = entry as unknown[]
+      if (
+        typeof miner !== 'string' ||
+        typeof reward !== 'number' ||
+        typeof difficulty !== 'number' ||
+        typeof nonce !== 'string' ||
+        typeof sender !== 'string' ||
+        typeof receiver !== 'string' ||
+        typeof amount !== 'number'
+      )
+        return null
+      blocks.push({ miner, reward, difficulty, nonce, sender, receiver, amount })
     }
     return blocks
   } catch {
@@ -286,7 +279,10 @@ export function isBlockArray(v: unknown): boolean {
         typeof (b as Block).miner === 'string' &&
         typeof (b as Block).reward === 'number' &&
         typeof (b as Block).difficulty === 'number' &&
-        typeof (b as Block).nonce === 'string',
+        typeof (b as Block).nonce === 'string' &&
+        typeof (b as Block).sender === 'string' &&
+        typeof (b as Block).receiver === 'string' &&
+        typeof (b as Block).amount === 'number',
     )
   )
 }

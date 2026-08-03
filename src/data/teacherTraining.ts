@@ -233,7 +233,7 @@ export const COURSE_UNITS: CourseUnit[] = [
         slug: 'bitcoin-mining',
         label: 'Bitcoin Mining',
         description:
-          'The class becomes the network: race to find a nonce, add the block, and read the ledger off the chain. A QR code after each round syncs every phone, no server involved.',
+          'The class becomes the network: race to find a nonce, watch the block snap onto the chain, and read the ledger straight off it. A QR code after each round syncs every phone, no server involved.',
         keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
       },
     ],

@@ -1,4 +1,10 @@
-/* The tool fills the shell's content column; the shell owns the outer width. */
+/*
+ * Chain Rail design (handoff option 1A): literal values from the design's
+ * token sheet, deliberately not the site tokens. The card is a
+ * self-contained light surface so it reads identically in the shell, the
+ * embed, and on a projector.
+ */
+
 .page {
   max-width: none;
   margin: 0;
@@ -9,308 +15,683 @@
   margin-bottom: var(--space-6);
 }
 .eyebrow {
-  font-size: var(--fs-ui);
-  font-weight: var(--fw-semibold);
-  color: var(--c-cardinal);
-  margin-bottom: var(--space-2);
+  font: 600 11px 'Source Sans 3', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8c1515;
+  margin-bottom: 6px;
 }
 .h1 {
-  font-size: var(--fs-h1);
-  font-weight: var(--fw-semibold);
-  letter-spacing: -0.01em;
-  margin-bottom: var(--space-2);
+  font: 700 30px 'Source Serif 4', Georgia, serif;
+  color: #1a1a1a;
+  margin-bottom: 8px;
 }
 .lead {
-  font-size: var(--fs-lead);
-  line-height: 1.55;
-  color: var(--text-muted);
-  max-width: 66ch;
+  font: 400 14px/1.55 'Source Sans 3', sans-serif;
+  color: #555;
+  max-width: 560px;
 }
 
-.panel {
-  padding: var(--space-5);
+/* ------------------------------ the card ------------------------------ */
+
+.card {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  color: #333;
+  font-family: 'Source Sans 3', sans-serif;
 }
 
-.stack {
+.sectionRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sectionGap {
+  margin-top: 34px;
+}
+.badge {
+  background: #8c1515;
+  color: #fff;
+  font: 700 12px 'Source Sans 3', sans-serif;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  align-self: center;
+}
+.secTitle {
+  font: 700 22px 'Source Serif 4', Georgia, serif;
+  color: #1a1a1a;
+}
+.secHint {
+  font-size: 13px;
+  color: #777;
+}
+.spacer {
+  flex: 1;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.lede {
-  font-size: var(--fs-body);
-  line-height: 1.55;
-  color: var(--text-muted);
-  max-width: 70ch;
-  margin: 0;
-}
-
-/* The parameter band: one compact full-width grid above the results. */
-.band {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-3) var(--space-4);
-  align-items: end;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-.fieldLabel {
-  font-size: var(--fs-ui);
-  font-weight: var(--fw-medium);
-  color: var(--text-muted);
-}
-.textInput {
-  font-family: var(--ff-ui);
-  font-size: var(--fs-body);
-  color: var(--text-primary);
-  background: var(--surface);
-  border: var(--hairline) solid var(--border-hairline);
-  border-radius: var(--radius);
-  padding: var(--space-2) var(--space-3);
-  min-width: 0;
-  width: 100%;
-}
-.textInput:focus-visible {
-  outline: 2px solid var(--c-accent);
-  outline-offset: 1px;
-}
-
-/* Hash and data readouts: long hex strings that must wrap, never overflow. */
-.mono {
-  font-family: var(--ff-mono);
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-  word-break: break-all;
-}
-.readout {
-  background: var(--surface-sunken);
-  border: var(--hairline) solid var(--border-hairline);
-  border-radius: var(--radius);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--fs-ui);
-  line-height: 1.5;
-}
-.readoutLabel {
-  font-size: var(--fs-micro);
-  font-weight: var(--fw-semibold);
-  letter-spacing: 0.08em;
+.label {
+  font: 600 10px 'Source Sans 3', sans-serif;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  margin-bottom: var(--space-1);
-}
-.readouts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--space-3) var(--space-4);
-}
-.hashOk {
-  border-color: var(--c-series-1);
-  box-shadow: 0 0 0 1px var(--c-series-1) inset;
-}
-.zeroHit {
-  color: var(--c-series-1);
-  font-weight: var(--fw-semibold);
-}
-.zeroMiss {
-  color: var(--c-accent);
-  font-weight: var(--fw-semibold);
+  color: #999;
 }
 
-/* Hash identity swatch: the same hash always gets the same color, so the
-   chain reads as touching colors between a hash and the next prev-hash. */
-.chip {
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
   display: inline-block;
+}
+.swatchSm {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
-  margin-right: var(--space-2);
-  vertical-align: baseline;
-  flex-shrink: 0;
+  border-radius: 2px;
+  flex: none;
+  display: inline-block;
 }
 
-/* The avalanche readout: last guess's hash, changed characters lit up. */
-.avalanche {
+/* --------------------------- mining console --------------------------- */
+
+.twoCol {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 860px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+.panel {
+  background: #faf9f7;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.hashRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.hashRowText {
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: #444;
+  word-break: break-all;
+}
+
+.dialsRow {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.diffPills {
+  display: flex;
+  gap: 4px;
+}
+.diffPill {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #555;
+  font: 600 13px 'Source Sans 3', sans-serif;
+  cursor: pointer;
+}
+.diffPillActive {
+  border-color: #8c1515;
+  background: #8c1515;
+  color: #fff;
+}
+.paceCopy {
+  font-size: 12px;
+  color: #888;
+  padding-bottom: 7px;
+}
+
+.input {
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font: 400 14px 'Source Sans 3', sans-serif;
+  color: #1a1a1a;
+  background: #fff;
+}
+.input::placeholder {
+  color: #aaa;
+}
+.input:focus-visible {
+  outline: 2px solid #8c1515;
+  outline-offset: 1px;
+}
+.inputSm {
+  font-size: 13px;
+}
+.peopleInput {
+  width: 60px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.span2 {
+  grid-column: span 2;
+}
+.fieldLabel {
+  composes: label;
+  display: block;
+  margin-bottom: 6px;
+}
+.rewardValue {
+  padding: 6px 8px;
+  font: 600 14px 'Source Sans 3', sans-serif;
+  color: #1a7f37;
+}
+
+/* ----------------------------- live hash bar ----------------------------- */
+
+.hashBar {
+  margin-top: 16px;
+  border-radius: 6px;
+  padding: 18px 20px;
+  border: 1px solid #eee;
+  background: #faf9f7;
+  position: relative;
+  overflow: hidden;
+}
+.hashBarValid {
+  border-color: #a8d8b5;
+  background: #f2faf4;
+}
+.hashBarRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.nonceInput {
+  margin-top: 4px;
+  width: 150px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font: 600 16px 'IBM Plex Mono', monospace;
+  color: #1a1a1a;
+  background: #fff;
+}
+.nonceInput:focus-visible {
+  outline: 2px solid #8c1515;
+  outline-offset: 1px;
+}
+.liveHashCol {
+  flex: 1;
+  min-width: 260px;
+}
+.liveHash {
+  margin-top: 4px;
+  font: 500 15px 'IBM Plex Mono', monospace;
+  word-break: break-all;
+  line-height: 1.5;
+}
+.prefix {
+  border-radius: 3px;
+  padding: 1px 2px;
+  color: #c0392b;
+  background: #fbe4e4;
+}
+.prefixOk {
+  color: #0f6b2f;
+  background: #d3f2dd;
+}
+.hashRest {
+  color: #555;
+}
+.buttonCol {
+  flex: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 8px;
 }
-.avalancheHash {
-  font-size: var(--fs-caption);
-  color: var(--text-faint);
+.addBtn {
+  padding: 10px 18px;
+  border-radius: 5px;
+  border: none;
+  background: #c9c4bc;
+  color: #fff;
+  font: 700 14px 'Source Sans 3', sans-serif;
+  cursor: pointer;
 }
-.avalancheChanged {
-  color: var(--c-accent);
+.addBtnValid {
+  background: #1a7f37;
+}
+.autoBtn {
+  padding: 8px 18px;
+  border-radius: 5px;
+  border: 1px solid #8c1515;
+  background: #fff;
+  color: #8c1515;
+  font: 600 13px 'Source Sans 3', sans-serif;
+  cursor: pointer;
+}
+.autoBtn:disabled {
+  border-color: #ddd;
+  color: #aaa;
+  cursor: default;
 }
 
-.actions {
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.miningLine {
+  margin-top: 10px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: #8c1515;
+  animation: pulseDot 0.8s infinite;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300px) rotate(540deg);
+    opacity: 0;
+  }
+}
+.confettiLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.confetto {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 12px;
+  animation-name: confettiFall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+
+.halvingCopy {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* ------------------------------- the rail ------------------------------- */
+
+.ghostBtn {
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font: 600 12px 'Source Sans 3', sans-serif;
+  color: #555;
+  cursor: pointer;
+}
+.ghostBtnDanger {
+  border-color: #8c1515;
+  background: #8c1515;
+  color: #fff;
+}
+.tamperLabel {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
-}
-.hint {
-  font-size: var(--fs-caption);
-  color: var(--text-faint);
-}
-.warn {
-  font-size: var(--fs-caption);
-  color: var(--c-accent);
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
 }
 
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4) var(--space-6);
-}
-
-/* Chain and ledger tables scroll inside their own container on small screens. */
-.tableWrap {
+.rail {
+  margin-top: 16px;
   overflow-x: auto;
-  border: var(--hairline) solid var(--border-hairline);
-  border-radius: var(--radius);
+  padding: 8px 2px 16px;
 }
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--fs-ui);
+.railInner {
+  display: flex;
+  align-items: stretch;
+  min-width: max-content;
 }
-.table th {
-  font-size: var(--fs-micro);
-  font-weight: var(--fw-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--hairline) solid var(--border-hairline);
-  background: var(--surface-sunken);
-  white-space: nowrap;
+.genesisCard {
+  flex: none;
+  width: 120px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
 }
-.table td {
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--hairline) solid var(--border-hairline);
-  vertical-align: top;
+.genesisHash {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 11px 'IBM Plex Mono', monospace;
+  color: #888;
 }
-.table tr:last-child td {
-  border-bottom: none;
+.genesisNote {
+  font-size: 11px;
+  color: #aaa;
 }
-.hashCell {
-  font-family: var(--ff-mono);
-  font-size: var(--fs-caption);
-  max-width: 200px;
-  overflow-wrap: anywhere;
+
+.blockWrap {
+  display: flex;
+  align-items: stretch;
 }
-.numCell {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+@keyframes flowdash {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 24px 0;
+  }
 }
-.invalidRow td {
-  background: color-mix(in srgb, var(--c-accent) 8%, var(--surface));
+.connector {
+  flex: none;
+  width: 44px;
+  align-self: center;
+  height: 4px;
+  border-radius: 2px;
+  animation: flowdash 0.9s linear infinite;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.blockCard {
+  flex: none;
+  width: 230px;
+  border: 2px solid #dcd8d0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  animation: popIn 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.blockCardInvalid {
+  border-color: #e57373;
+  background: #fdf3f3;
+}
+.blockTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.blockTitle {
+  font: 700 15px 'Source Serif 4', Georgia, serif;
+  color: #1a1a1a;
 }
 .statusOk {
-  color: var(--c-series-1);
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
+  font: 700 11px 'Source Sans 3', sans-serif;
+  color: #1a7f37;
 }
 .statusBad {
-  color: var(--c-accent);
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
+  font: 700 11px 'Source Sans 3', sans-serif;
+  color: #c0392b;
 }
-/* The Excel-style balance grid: participants down, blocks across. */
-.stickyCol {
-  position: sticky;
-  left: 0;
-  background: var(--surface);
-  z-index: 1;
+.cardLabel {
+  font: 600 9px 'Source Sans 3', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
 }
-.table thead .stickyCol {
-  background: var(--surface-sunken);
+.cardLabelDanger {
+  composes: cardLabel;
+  color: #c0392b;
 }
-.rowHead {
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
+.cardHashRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font: 500 11px 'IBM Plex Mono', monospace;
+  color: #666;
 }
-.cellUp {
-  background: color-mix(in srgb, var(--c-series-1) 10%, var(--surface));
+.hashOkText {
+  color: #1a7f37;
 }
-.cellDown {
-  background: color-mix(in srgb, var(--c-accent) 10%, var(--surface));
+.hashBadText {
+  color: #c0392b;
 }
-.cellNow {
-  font-weight: var(--fw-semibold);
+.cardContents {
+  font-size: 12px;
+  color: #333;
+  margin-top: 2px;
 }
-.deltaUp,
-.deltaDown {
-  display: block;
-  font-size: var(--fs-micro);
-  line-height: 1.3;
+.nonceLine {
+  font-size: 11px;
+  color: #888;
+}
+.nonceValue {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  color: #555;
+}
+.tamperBox {
+  border: 1px dashed #c66;
+  border-radius: 4px;
+  padding: 6px;
+  background: #fff;
+}
+.tamperInput {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 3px;
+  padding: 4px 6px;
+  border: 1px solid #e0b4b4;
+  border-radius: 3px;
+  font: 400 12px 'Source Sans 3', sans-serif;
+}
+
+.brokenNote {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: #fdf0f0;
+  border: 1px solid #f0caca;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #a03030;
+}
+
+/* ------------------------------ stats strip ------------------------------ */
+
+.statsRow {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.statBig {
+  font: 700 26px 'Source Serif 4', Georgia, serif;
+  color: #1a1a1a;
+}
+.statUnit {
+  font: 600 14px 'Source Sans 3', sans-serif;
+  color: #888;
+}
+.supplyCol {
+  flex: 1;
+  min-width: 220px;
+}
+.progressTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: #eee;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  background: #8c1515;
+  border-radius: 3px;
+  transition: width 0.6s;
+}
+
+/* -------------------------------- ledger -------------------------------- */
+
+.ledgerTable {
+  margin-top: 14px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ledgerHead,
+.ledgerRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 10px 16px;
+  align-items: center;
+}
+.ledgerHead {
+  background: #faf9f7;
+  font: 600 10px 'Source Sans 3', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #999;
+}
+.ledgerRow {
+  padding: 12px 16px;
+  border-top: 1px solid #f2f0ec;
+}
+@keyframes flashGreen {
+  0% {
+    background: #d3f2dd;
+  }
+  100% {
+    background: transparent;
+  }
+}
+.ledgerFlash {
+  animation: flashGreen 1.6s ease-out;
+}
+.ledgerName {
+  font: 600 15px 'Source Sans 3', sans-serif;
+  color: #1a1a1a;
+}
+.ledgerWon {
+  font-size: 13px;
+  color: #666;
 }
 .deltaUp {
-  color: var(--c-series-1);
+  font: 600 13px 'Source Sans 3', sans-serif;
+  color: #1a7f37;
 }
 .deltaDown {
-  color: var(--c-accent);
+  font: 600 13px 'Source Sans 3', sans-serif;
+  color: #c0392b;
 }
-.gridRule td {
-  border-top: 2px solid var(--border-hairline);
+.deltaNone {
+  font: 600 13px 'Source Sans 3', sans-serif;
+  color: #bbb;
 }
-.supplyCell {
-  font-weight: var(--fw-semibold);
+.ledgerBalance {
+  text-align: right;
+  font: 600 16px 'IBM Plex Mono', monospace;
+  color: #1a1a1a;
 }
-
-.tamperInput {
-  font-family: var(--ff-mono);
-  font-variant-numeric: tabular-nums;
-  width: 5.5em;
-  font-size: var(--fs-ui);
-  color: var(--text-primary);
-  background: var(--surface);
-  border: var(--hairline) solid var(--c-accent);
-  border-radius: var(--radius);
-  padding: 2px var(--space-2);
+.ledgerEmpty {
+  padding: 20px 16px;
+  font-size: 13px;
+  color: #999;
 }
 
-/* The sync panel: QR on one side, the plain-language explanation beside it. */
-.qrRow {
+/* ----------------------------- sync + math ----------------------------- */
+
+.footGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 34px;
+}
+@media (max-width: 860px) {
+  .footGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.footPanel {
+  background: #faf9f7;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 18px;
+}
+.footTitle {
+  font: 700 18px 'Source Serif 4', Georgia, serif;
+  color: #1a1a1a;
+}
+.syncRow {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5);
+  gap: 16px;
+  margin-top: 12px;
   align-items: flex-start;
 }
-.qrBox {
-  background: #ffffff;
-  border: var(--hairline) solid var(--border-hairline);
-  border-radius: var(--radius);
-  padding: var(--space-2);
-  line-height: 0;
+.qrImg {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background: #fff;
+  flex: none;
+  width: 120px;
+  height: 120px;
 }
-.qrBox img {
-  width: 220px;
-  height: 220px;
-  display: block;
+.syncCopy {
+  font-size: 12.5px;
+  color: #666;
+  line-height: 1.55;
 }
-.qrCol {
-  flex: 1;
-  min-width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.mathCopy {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  margin-top: 10px;
 }
-
-.footnote {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--text-faint);
-  margin: 0;
+.codeChip {
+  font-family: 'IBM Plex Mono', monospace;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1px 5px;
 }

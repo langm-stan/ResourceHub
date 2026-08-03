@@ -1,95 +1,99 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
-import { Button, Callout, Card, MathSection, NumberField, SegmentedControl, Stat, StepHeader, Toggle } from '../../design-system'
+import '@fontsource/source-serif-4/700.css'
+import '@fontsource/source-sans-3/400.css'
+import '@fontsource/source-sans-3/600.css'
+import '@fontsource/source-sans-3/700.css'
+import '@fontsource/ibm-plex-mono/400.css'
+import '@fontsource/ibm-plex-mono/500.css'
+import '@fontsource/ibm-plex-mono/600.css'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import {
   type Block,
-  MAX_DIFFICULTY,
-  HALVING_INTERVAL,
   GENESIS_HASH,
+  HALVING_INTERVAL,
+  MAX_DIFFICULTY,
   MAX_SUPPLY,
   blockData,
-  buildBalanceGrid,
   buildLedger,
   circulatingSupply,
-  computeChain,
-  countChanged,
   decodeChain,
+  deriveChain,
   encodeChain,
-  hashHue,
+  fmtBtc,
   isBlockArray,
-  leadingZeros,
   meetsDifficulty,
+  rewardAt,
   sha256Hex,
-  suggestedReward,
+  shortHash,
+  swatch,
 } from './compute'
 import styles from './BitcoinMining.module.css'
 
 /*
- * Bitcoin Mining: the classroom mining game as one page. Students race to
- * find a nonce, the instructor verifies the winner and adds the block, and
- * the blockchain and ledger build themselves. After each round a QR code
- * carries the whole chain to every phone in the room; there is no server,
- * the code encodes the typed inputs and each device re-derives the hashes.
+ * Bitcoin Mining, "Chain Rail" design: the classroom mining game as one
+ * card. Students race to find a nonce, the winning block pops onto a
+ * hash-linked rail of block cards, and the ledger is re-derived from the
+ * chain on every change. A QR code carries the whole chain to every phone;
+ * there is no server, each device re-derives the hashes on arrival.
  */
 
-const fmtBtc = (v: number) => `${Number(v.toFixed(2))} BTC`
-const fmtCount = (v: number) => v.toLocaleString()
-
-const AUTOMINE_UNLOCK = 2
-const CHUNK = 2000
-/** A playful electricity price per guess; only shown once auto-mine has burned real guess counts. */
-const COST_PER_GUESS = 0.0001
 /** Real Bitcoin's nonce is a 32-bit integer, so the classroom one honors the same range. */
 const NONCE_MAX = 4294967295
+/** Auto-mine appears once the room has felt the work by hand. */
+const AUTOMINE_UNLOCK = 2
+const CHUNK = 600
+const CONFETTI_COLORS = ['#8C1515', '#e0b64a', '#1a7f37', '#3b5b92']
 
-function shortHash(hash: string): string {
-  return hash === GENESIS_HASH ? hash : `${hash.slice(0, 12)}…${hash.slice(-6)}`
+/** The block-found chime: four rising triangle notes, 90ms apart. */
+let audioCtx: AudioContext | null = null
+function chime() {
+  try {
+    audioCtx ||= new (window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext!)()
+    const ctx = audioCtx
+    ;[523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.frequency.value = freq
+      osc.type = 'triangle'
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.09)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.35)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime + i * 0.09)
+      osc.stop(ctx.currentTime + i * 0.09 + 0.4)
+    })
+  } catch {
+    /* no audio available: the confetti still lands */
+  }
 }
 
-/**
- * A color swatch derived from the hash itself, so a hash and the next
- * block's "previous hash" visibly match: the chain drawn as touching colors.
- */
-function HashChip({ hash }: { hash: string }) {
-  const bg = hash === GENESIS_HASH ? 'var(--text-faint)' : `hsl(${hashHue(hash).toFixed(0)}, 62%, 48%)`
-  return <span className={styles.chip} style={{ background: bg }} aria-hidden />
+function Swatch({ hash, small }: { hash: string; small?: boolean }) {
+  return <span className={small ? styles.swatchSm : styles.swatch} style={{ background: swatch(hash) }} aria-hidden />
 }
 
-/** The calculated hash with the first `difficulty` characters graded: green zeros hit the target, red characters miss it. */
-function HashReadout({ hash, difficulty }: { hash: string; difficulty: number }) {
-  const ok = meetsDifficulty(hash, difficulty)
-  return (
-    <div className={`${styles.readout} ${styles.mono} ${ok ? styles.hashOk : ''}`}>
-      {hash
-        .slice(0, difficulty)
-        .split('')
-        .map((ch, i) => (
-          <span key={i} className={ch === '0' ? styles.zeroHit : styles.zeroMiss}>
-            {ch}
-          </span>
-        ))}
-      {hash.slice(difficulty)}
-    </div>
-  )
-}
-
-function MiningStation() {
+function MiningCard() {
   const [blocks, setBlocks] = usePersistentState<Block[]>('ifdm-bitcoin-chain', [], isBlockArray)
   const [difficulty, setDifficulty] = usePersistentState<number>(
     'ifdm-bitcoin-difficulty',
     1,
     (v) => Number.isInteger(v) && v >= 1 && v <= MAX_DIFFICULTY,
   )
+  const [people, setPeople] = usePersistentState<number>('ifdm-bitcoin-room', 30, (v) => v >= 1 && v <= 100000)
+  const [peopleDraft, setPeopleDraft] = useState(() => String(people))
   const [miner, setMiner] = useState('')
-  const [reward, setReward] = useState(() => suggestedReward(blocks.length))
-  const [txFrom, setTxFrom] = useState('')
-  const [txTo, setTxTo] = useState('')
-  const [txAmount, setTxAmount] = useState(0)
   const [nonce, setNonce] = useState('')
-  const [roomSize, setRoomSize] = usePersistentState<number>('ifdm-bitcoin-room', 30, (v) => v >= 1 && v <= 100000)
-  const [importedCount, setImportedCount] = useState<number | null>(null)
+  const [sender, setSender] = useState('')
+  const [receiver, setReceiver] = useState('')
+  const [amountStr, setAmountStr] = useState('')
+  const [tamperOn, setTamperOn] = useState(false)
+  const [tamperEdits, setTamperEdits] = useState<Record<number, string>>({})
+  const [mining, setMining] = useState(false)
+  const [tried, setTried] = useState(0)
+  const [celebrateKey, setCelebrateKey] = useState(0)
+  const [copied, setCopied] = useState(false)
+  const [confirmingReset, setConfirmingReset] = useState(false)
 
   /* A scanned QR code lands here as ?chain=...; the URL wins, then is cleared so local progress takes over. */
   const [searchParams, setSearchParams] = useSearchParams()
@@ -102,165 +106,132 @@ function MiningStation() {
     setSearchParams(next, { replace: true })
     if (decoded) {
       setBlocks(decoded)
-      setReward(suggestedReward(decoded.length))
+      setTamperEdits({})
       const last = decoded[decoded.length - 1]
       if (last) setDifficulty(last.difficulty)
-      setImportedCount(decoded.length)
-      resetRound()
     }
   }, [searchParams, setSearchParams, setBlocks, setDifficulty])
 
-  /* Tamper mode edits live beside the real chain and never persist, so leaving the demo always restores the room's chain. */
-  const [tamperOn, setTamperOn] = useState(false)
-  const [edits, setEdits] = useState<Record<number, { reward?: number; amount?: number }>>({})
-  const viewBlocks = useMemo(
-    () =>
-      blocks.map((b, i) => {
-        const e = edits[i]
-        if (!e) return b
-        const nb: Block = { ...b }
-        if (e.reward != null) nb.reward = e.reward
-        if (e.amount != null && nb.tx) nb.tx = { ...nb.tx, amount: e.amount }
-        return nb
-      }),
-    [blocks, edits],
-  )
-  const tampered = Object.keys(edits).length > 0
-
-  const chain = useMemo(() => computeChain(blocks), [blocks])
-  const viewChain = useMemo(() => (tampered ? computeChain(viewBlocks) : null), [tampered, viewBlocks])
-  const shownChain = viewChain ?? chain
-  const brokenFrom = shownChain.findIndex((m) => !m.valid)
+  const chain = useMemo(() => deriveChain(blocks, tamperOn ? tamperEdits : {}), [blocks, tamperOn, tamperEdits])
+  const broken = chain.some((v) => !v.valid)
+  /* Mining always continues from the real chain, not a tamper-demo view. */
+  const tip = useMemo(() => {
+    const base = tamperOn && Object.keys(tamperEdits).length ? deriveChain(blocks) : chain
+    return base.length ? base[base.length - 1]!.hash : GENESIS_HASH
+  }, [blocks, chain, tamperOn, tamperEdits])
 
   const ledger = useMemo(() => buildLedger(blocks), [blocks])
-  const grid = useMemo(() => buildBalanceGrid(blocks), [blocks])
   const supply = useMemo(() => circulatingSupply(blocks), [blocks])
-  const prevHash = chain.length ? chain[chain.length - 1]!.hash : GENESIS_HASH
+  const reward = rewardAt(blocks.length)
+  const toHalving = HALVING_INTERVAL - (blocks.length % HALVING_INTERVAL)
 
-  /* The candidate block being mined right now, hashed live on every keystroke. */
-  const tx = txFrom.trim() && txTo.trim() && txAmount > 0 ? { from: txFrom.trim(), to: txTo.trim(), amount: txAmount } : undefined
-  const candidate: Block = { miner: miner.trim(), reward, difficulty, nonce: nonce.trim(), ...(tx ? { tx } : {}) }
-  const data = blockData(prevHash, candidate)
-  const hash = sha256Hex(data)
-  const meets = meetsDifficulty(hash, difficulty)
+  /* The candidate block, hashed live on every keystroke. */
+  const amount = parseFloat(amountStr) || 0
+  const candidate = { miner: miner.trim(), reward, sender: sender.trim(), receiver: receiver.trim(), amount, nonce: nonce.trim() }
+  const liveHash = sha256Hex(blockData(tip, candidate))
+  const liveValid = meetsDifficulty(liveHash, difficulty) && Boolean(candidate.miner) && candidate.nonce !== ''
 
-  const senderBalance = tx ? (ledger.find((r) => r.name === tx.from)?.balance ?? 0) : 0
-  const txProblem = tx && senderBalance < tx.amount
-  const canMine = Boolean(candidate.miner) && Boolean(candidate.nonce) && meets && !txProblem
+  const expGuesses = 16 ** difficulty
+  const expRoom = Math.max(1, Math.round(expGuesses / people))
+  const zeros = `${difficulty} ${difficulty === 1 ? 'zero' : 'zeros'}`
 
-  /*
-   * Personal race stats: every distinct nonce this device tries is a guess,
-   * and the best run of leading zeros so far is the student's trophy even
-   * when someone else wins the round. The previous guess's hash is kept to
-   * show the avalanche effect: one nonce change rewrites the whole hash.
-   */
-  const lastTried = useRef<{ nonce: string; hash: string } | null>(null)
-  const [prevGuess, setPrevGuess] = useState<{ nonce: string; hash: string } | null>(null)
-  const [guessCount, setGuessCount] = useState(0)
-  const [bestZeros, setBestZeros] = useState(0)
-  const trimmedNonce = candidate.nonce
-  useEffect(() => {
-    if (!trimmedNonce) return
-    if (lastTried.current?.nonce === trimmedNonce) return
-    if (lastTried.current) setPrevGuess(lastTried.current)
-    lastTried.current = { nonce: trimmedNonce, hash }
-    setGuessCount((c) => c + 1)
-    setBestZeros((b) => Math.max(b, leadingZeros(hash)))
-  }, [trimmedNonce, hash])
-
-  function resetRound() {
-    lastTried.current = null
-    setPrevGuess(null)
-    setGuessCount(0)
-    setBestZeros(0)
+  const celebrateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  function celebrate() {
+    chime()
+    const key = Date.now()
+    setCelebrateKey(key)
+    if (celebrateTimer.current) clearTimeout(celebrateTimer.current)
+    celebrateTimer.current = setTimeout(() => setCelebrateKey(0), 2400)
   }
 
-  /* Auto-mine: churn nonces in small chunks so the guess counter stays live. */
-  const autoToken = useRef<{ cancelled: boolean } | null>(null)
-  const [autoState, setAutoState] = useState<{ running: boolean; attempts: number } | null>(null)
-  const autoUnlocked = blocks.length >= AUTOMINE_UNLOCK
+  function commitBlock(block: Block) {
+    setBlocks((prev) => [...prev, block])
+    setMiner('')
+    setNonce('')
+    setSender('')
+    setReceiver('')
+    setAmountStr('')
+    setMining(false)
+    setTried(0)
+    celebrate()
+  }
 
+  function addBlock() {
+    if (!liveValid) return
+    stopAutoMine()
+    commitBlock({ ...candidate, difficulty })
+  }
+
+  /* Auto-mine: churn nonces in chunks from a random start, spinning the nonce field live, and commit on the hit. */
+  const autoToken = useRef<{ cancelled: boolean } | null>(null)
   function stopAutoMine() {
     if (autoToken.current) autoToken.current.cancelled = true
-    setAutoState(null)
+    setMining(false)
   }
-
-  function startAutoMine() {
-    if (autoToken.current) autoToken.current.cancelled = true
+  function autoMine() {
+    if (mining) {
+      stopAutoMine()
+      return
+    }
+    if (!candidate.miner) return
     const token = { cancelled: false }
     autoToken.current = token
-    const prefix = blockData(prevHash, { ...candidate, nonce: '' })
-    let n = 0
-    setAutoState({ running: true, attempts: 0 })
+    setMining(true)
+    setTried(0)
+    const base = { ...candidate }
+    const target = difficulty
+    let n = Math.floor(Math.random() * 100000)
+    let count = 0
     const step = () => {
       if (token.cancelled) return
       for (let i = 0; i < CHUNK; i++) {
-        const h = sha256Hex(prefix + n)
-        if (meetsDifficulty(h, difficulty)) {
+        const h = sha256Hex(blockData(tip, { ...base, nonce: String(n) }))
+        count++
+        if (meetsDifficulty(h, target)) {
           setNonce(String(n))
-          setAutoState({ running: false, attempts: n + 1 })
-          setGuessCount((c) => c + n)
+          setTried(count)
+          commitBlock({ ...base, nonce: String(n), difficulty: target })
           return
         }
         n++
       }
-      setAutoState({ running: true, attempts: n })
+      setTried(count)
+      setNonce(String(n))
       setTimeout(step, 0)
     }
     setTimeout(step, 0)
   }
-
   useEffect(
     () => () => {
       if (autoToken.current) autoToken.current.cancelled = true
+      if (celebrateTimer.current) clearTimeout(celebrateTimer.current)
     },
     [],
   )
 
-  function mineBlock() {
-    if (!canMine) return
-    stopAutoMine()
-    const next = [...blocks, candidate]
-    setBlocks(next)
-    setMiner('')
-    setNonce('')
-    setTxFrom('')
-    setTxTo('')
-    setTxAmount(0)
-    setReward(suggestedReward(next.length))
-    setImportedCount(null)
-    resetRound()
-  }
-
   /*
    * Reset is a two-step inline confirm, never window.confirm: the instructor
-   * embed runs in a sandboxed iframe where browser dialogs are silently
-   * blocked, which would make a dialog-gated reset a button that does nothing.
+   * embed runs in a sandboxed iframe where browser dialogs are silently blocked.
    */
-  const [confirmingReset, setConfirmingReset] = useState(false)
   useEffect(() => {
     if (!confirmingReset) return
     const t = setTimeout(() => setConfirmingReset(false), 6000)
     return () => clearTimeout(t)
   }, [confirmingReset])
-
   function resetChain() {
     setConfirmingReset(false)
     stopAutoMine()
     setBlocks([])
-    setEdits({})
+    setTamperEdits({})
     setTamperOn(false)
     setMiner('')
     setNonce('')
-    setTxFrom('')
-    setTxTo('')
-    setTxAmount(0)
-    setReward(suggestedReward(0))
-    setImportedCount(null)
-    resetRound()
+    setSender('')
+    setReceiver('')
+    setAmountStr('')
   }
 
-  /* The QR code encodes the chain itself in the page URL; no server involved. */
+  /* The QR encodes the chain itself in the page URL; no server involved. */
   const shareUrl = useMemo(() => {
     if (!blocks.length) return ''
     return `${window.location.href.split('#')[0]}#/teacher-training/bitcoin-mining?chain=${encodeChain(blocks)}`
@@ -272,459 +243,411 @@ function MiningStation() {
       return
     }
     let alive = true
-    QRCode.toDataURL(shareUrl, {
-      width: 440,
-      margin: 1,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#111111', light: '#ffffff' },
-    }).then((url) => {
-      if (alive) setQrDataUrl(url)
-    })
+    QRCode.toDataURL(shareUrl, { width: 240, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } }).then(
+      (url) => {
+        if (alive) setQrDataUrl(url)
+      },
+    )
     return () => {
       alive = false
     }
   }, [shareUrl])
-  const [copied, setCopied] = useState(false)
-  function copyLink() {
+  function copyChain() {
     navigator.clipboard.writeText(shareUrl).then(() => {
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setTimeout(() => setCopied(false), 1500)
     })
   }
 
-  const nextHalvingIn = HALVING_INTERVAL - (blocks.length % HALVING_INTERVAL)
+  const confetti = celebrateKey
+    ? Array.from({ length: 26 }, (_, i) => ({
+        left: `${3 + ((i * 37) % 94)}%`,
+        color: CONFETTI_COLORS[i % 4]!,
+        dur: `${(1.1 + (i % 5) * 0.22).toFixed(2)}s`,
+        delay: `${((i % 7) * 0.07).toFixed(2)}s`,
+      }))
+    : []
 
   return (
-    <div className={styles.stack}>
-      {importedCount != null && (
-        <Callout tone="note" label="Chain loaded">
-          This device scanned in a chain of {importedCount} {importedCount === 1 ? 'block' : 'blocks'} and re-verified every
-          hash. You are up to date with the room.
-        </Callout>
-      )}
+    <div className={styles.card}>
+      {/* 1 · Mine the next block */}
+      <div className={styles.sectionRow}>
+        <span className={styles.badge}>1</span>
+        <span className={styles.secTitle}>Mine the next block</span>
+        <span className={styles.secHint}>race to a nonce whose hash starts with {zeros}</span>
+      </div>
 
-      <section className={styles.section}>
-        <StepHeader
-          step={1}
-          title="Mine the next block"
-          hint="Everyone puts their own name as the miner and races to find a nonce that turns the hash green. The winner calls out their name and nonce; enter both here, watch the hash verify, and add the block."
-        />
-        <div className={styles.readout}>
-          <div className={styles.readoutLabel}>Previous hash</div>
-          <HashChip hash={prevHash} />
-          <span className={styles.mono}>{prevHash}</span>
+      <div className={styles.twoCol}>
+        <div className={styles.panel}>
+          <div className={styles.label}>PREVIOUS HASH</div>
+          <div className={styles.hashRow}>
+            <Swatch hash={tip} />
+            <span className={styles.hashRowText}>{tip === GENESIS_HASH ? '000000…0000' : shortHash(tip)}</span>
+          </div>
+          <div className={styles.dialsRow}>
+            <div>
+              <span className={styles.fieldLabel}>DIFFICULTY</span>
+              <div className={styles.diffPills}>
+                {Array.from({ length: MAX_DIFFICULTY }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={n === difficulty ? `${styles.diffPill} ${styles.diffPillActive}` : styles.diffPill}
+                    onClick={() => setDifficulty(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className={styles.fieldLabel}>PEOPLE MINING</span>
+              <input
+                className={`${styles.input} ${styles.peopleInput}`}
+                value={peopleDraft}
+                inputMode="numeric"
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '')
+                  setPeopleDraft(digits)
+                  const v = parseInt(digits, 10)
+                  if (Number.isFinite(v) && v >= 1 && v <= 100000) setPeople(v)
+                }}
+                onBlur={() => setPeopleDraft(String(people))}
+                aria-label="People mining"
+              />
+            </div>
+            <div className={styles.paceCopy}>
+              expect a winner after ~{expRoom.toLocaleString()} {expRoom === 1 ? 'guess' : 'guesses'} each
+            </div>
+          </div>
         </div>
-        <div className={styles.band}>
-          <SegmentedControl
-            label="Difficulty (leading zeros)"
-            options={Array.from({ length: MAX_DIFFICULTY }, (_, i) => ({
-              value: String(i + 1),
-              label: String(i + 1),
-            }))}
-            value={String(difficulty)}
-            onChange={(v) => setDifficulty(Number(v))}
-          />
-          <NumberField label="People mining" value={roomSize} onChange={setRoomSize} min={1} max={100000} precision={0} />
-          <div className={styles.field}>
-            <label className={styles.fieldLabel} htmlFor="btc-miner">
-              Miner
-            </label>
-            <input
-              id="btc-miner"
-              className={styles.textInput}
-              value={miner}
-              onChange={(e) => setMiner(e.target.value)}
-              placeholder="Who mined it"
-              autoComplete="off"
-            />
+
+        <div className={styles.panel}>
+          <div className={styles.formGrid}>
+            <div className={styles.span2}>
+              <label className={styles.fieldLabel} htmlFor="btc-miner">
+                MINER
+              </label>
+              <input
+                id="btc-miner"
+                className={styles.input}
+                style={{ width: '100%' }}
+                value={miner}
+                onChange={(e) => setMiner(e.target.value)}
+                placeholder="Who mined it?"
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <span className={styles.fieldLabel}>REWARD</span>
+              <div className={styles.rewardValue}>{fmtBtc(reward)} BTC</div>
+            </div>
+            <div>
+              <label className={styles.fieldLabel} htmlFor="btc-sender">
+                SENDER
+              </label>
+              <input
+                id="btc-sender"
+                className={`${styles.input} ${styles.inputSm}`}
+                style={{ width: '100%' }}
+                value={sender}
+                onChange={(e) => setSender(e.target.value)}
+                placeholder="optional"
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label className={styles.fieldLabel} htmlFor="btc-receiver">
+                RECEIVER
+              </label>
+              <input
+                id="btc-receiver"
+                className={`${styles.input} ${styles.inputSm}`}
+                style={{ width: '100%' }}
+                value={receiver}
+                onChange={(e) => setReceiver(e.target.value)}
+                placeholder="gets paid"
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label className={styles.fieldLabel} htmlFor="btc-amount">
+                AMOUNT
+              </label>
+              <input
+                id="btc-amount"
+                className={`${styles.input} ${styles.inputSm}`}
+                style={{ width: '100%' }}
+                value={amountStr}
+                inputMode="decimal"
+                onChange={(e) => setAmountStr(e.target.value.replace(/[^0-9.]/g, ''))}
+                placeholder="0 BTC"
+                autoComplete="off"
+              />
+            </div>
           </div>
-          <NumberField label="Block reward" value={reward} onChange={setReward} min={0} suffix=" BTC" precision={2} />
-          <div className={styles.field}>
-            <label className={styles.fieldLabel} htmlFor="btc-from">
-              Sender (optional)
-            </label>
+        </div>
+      </div>
+
+      {/* Live hash bar */}
+      <div className={liveValid ? `${styles.hashBar} ${styles.hashBarValid}` : styles.hashBar}>
+        <div className={styles.hashBarRow}>
+          <div>
+            <div className={styles.label}>NONCE</div>
             <input
-              id="btc-from"
-              className={styles.textInput}
-              value={txFrom}
-              onChange={(e) => setTxFrom(e.target.value)}
-              placeholder="Pays from balance"
-              autoComplete="off"
-            />
-          </div>
-          <div className={styles.field}>
-            <label className={styles.fieldLabel} htmlFor="btc-to">
-              Receiver
-            </label>
-            <input
-              id="btc-to"
-              className={styles.textInput}
-              value={txTo}
-              onChange={(e) => setTxTo(e.target.value)}
-              placeholder="Gets paid"
-              autoComplete="off"
-            />
-          </div>
-          <NumberField label="Amount sent" value={txAmount} onChange={setTxAmount} min={0} suffix=" BTC" precision={2} />
-          <div className={styles.field}>
-            <label className={styles.fieldLabel} htmlFor="btc-nonce">
-              Nonce
-            </label>
-            <input
-              id="btc-nonce"
-              className={`${styles.textInput} ${styles.mono}`}
+              className={styles.nonceInput}
               value={nonce}
               inputMode="numeric"
               onChange={(e) => {
                 const digits = e.target.value.replace(/\D/g, '')
-                // Past the 32-bit ceiling the field simply stops accepting digits.
                 if (digits && Number(digits) > NONCE_MAX) return
                 setNonce(digits)
               }}
               placeholder="0 to 4,294,967,295"
               autoComplete="off"
+              aria-label="Nonce"
             />
           </div>
-        </div>
-        <p className={styles.footnote}>
-          Pace of this round: alone, a miner needs about {fmtCount(16 ** difficulty)} guesses at difficulty {difficulty}.
-          With {fmtCount(roomSize)} people racing, expect a winner after about{' '}
-          {fmtCount(Math.max(1, Math.round(16 ** difficulty / roomSize)))} guesses each. Raise the difficulty as the room
-          grows, exactly as the real network does.
-        </p>
-        <div className={styles.readouts}>
-          <div className={styles.readout}>
-            <div className={styles.readoutLabel}>Block data (what gets hashed)</div>
-            <span className={styles.mono}>{data}</span>
-          </div>
-          <div>
-            <div className={styles.readoutLabel}>
-              Calculated hash (must start with {'0'.repeat(difficulty)})
+          <div className={styles.liveHashCol}>
+            <div className={styles.label}>SHA-256 OF THIS BLOCK · MUST START WITH {zeros}</div>
+            <div className={styles.liveHash}>
+              <span className={liveHash.startsWith('0'.repeat(difficulty)) ? `${styles.prefix} ${styles.prefixOk}` : styles.prefix}>
+                {liveHash.slice(0, difficulty)}
+              </span>
+              <span className={styles.hashRest}>{liveHash.slice(difficulty)}</span>
             </div>
-            <HashReadout hash={hash} difficulty={difficulty} />
+          </div>
+          <div className={styles.buttonCol}>
+            <button
+              type="button"
+              className={liveValid ? `${styles.addBtn} ${styles.addBtnValid}` : styles.addBtn}
+              disabled={!liveValid}
+              onClick={addBlock}
+            >
+              {liveValid ? '✓ Add block to the chain' : 'Add block to the chain'}
+            </button>
+            {blocks.length >= AUTOMINE_UNLOCK && (
+              <button type="button" className={styles.autoBtn} disabled={!mining && !candidate.miner} onClick={autoMine}>
+                {mining ? 'Stop' : 'Auto-mine'}
+              </button>
+            )}
           </div>
         </div>
-        {prevGuess && trimmedNonce && prevGuess.nonce !== trimmedNonce && (
-          <div className={styles.avalanche}>
-            <span className={styles.hint}>
-              Your last guess, nonce {prevGuess.nonce}, gave a completely different hash: changing the nonce rewrote{' '}
-              {countChanged(prevGuess.hash, hash)} of 64 characters. That unpredictability is why guessing is the only
-              way to mine.
-            </span>
-            <span className={`${styles.mono} ${styles.avalancheHash}`}>
-              {prevGuess.hash.split('').map((ch, i) => (
-                <span key={i} className={ch !== hash[i] ? styles.avalancheChanged : undefined}>
-                  {ch}
-                </span>
-              ))}
-            </span>
-          </div>
-        )}
-        {guessCount > 0 && (
-          <p className={styles.footnote}>
-            Your guesses this round: {fmtCount(guessCount)} · your best hash so far started with {bestZeros} leading{' '}
-            {bestZeros === 1 ? 'zero' : 'zeros'}.
-          </p>
-        )}
-        <div className={styles.actions}>
-          {/* Quiet while unmineable (a disabled cardinal button washes its label out), flipping to solid cardinal the moment the hash verifies. */}
-          <Button onClick={mineBlock} disabled={!canMine} variant={canMine ? 'primary' : 'quiet'}>
-            Add block to the chain
-          </Button>
-          {autoUnlocked &&
-            (autoState?.running ? (
-              <Button variant="quiet" onClick={stopAutoMine}>
-                Stop ({fmtCount(autoState.attempts)} guesses so far)
-              </Button>
-            ) : (
-              <Button variant="quiet" onClick={startAutoMine} disabled={!candidate.miner || Boolean(txProblem)}>
-                Auto-mine
-              </Button>
+        {mining && <div className={styles.miningLine}>⛏ trying nonces… {tried.toLocaleString()} guesses so far</div>}
+        {celebrateKey !== 0 && (
+          <div className={styles.confettiLayer}>
+            {confetti.map((c, i) => (
+              <span
+                key={i}
+                className={styles.confetto}
+                style={{ left: c.left, background: c.color, animationDuration: c.dur, animationDelay: c.delay }}
+              />
             ))}
-          {autoState && !autoState.running && (
-            <span className={styles.hint}>
-              Found after {fmtCount(autoState.attempts)} guesses
-              {autoState.attempts >= 100
-                ? `, about $${(autoState.attempts * COST_PER_GUESS).toFixed(2)} of electricity at $${COST_PER_GUESS} a guess. The reward has to beat that cost, or nobody mines.`
-                : '.'}
-            </span>
-          )}
-          {txProblem && tx && (
-            <span className={styles.warn}>
-              {tx.from} has only {fmtBtc(senderBalance)} to send. The network rejects a payment its ledger cannot cover.
-            </span>
-          )}
-          {!txProblem && !canMine && (
-            <span className={styles.hint}>
-              {!candidate.miner
-                ? 'Enter a miner name to start.'
-                : !candidate.nonce
-                  ? 'Guess a nonce, or hand the room the race.'
-                  : `The hash must start with ${difficulty} ${difficulty === 1 ? 'zero' : 'zeros'}. Keep guessing.`}
-            </span>
-          )}
-          {!autoUnlocked && (
-            <span className={styles.hint}>
-              Auto-mine unlocks after {AUTOMINE_UNLOCK} hand-mined blocks ({blocks.length} so far).
-            </span>
-          )}
-        </div>
-        <p className={styles.footnote}>
-          The reward field follows Bitcoin's supply schedule: it halves every {HALVING_INTERVAL} blocks here (every 210,000
-          on the real network), next halving in {nextHalvingIn} {nextHalvingIn === 1 ? 'block' : 'blocks'}. You can
-          override it for your class.
-        </p>
-      </section>
+          </div>
+        )}
+      </div>
+      <div className={styles.halvingCopy}>
+        Reward halves every {HALVING_INTERVAL} blocks (every 210,000 on the real network); next halving in {toHalving}{' '}
+        {toHalving === 1 ? 'block' : 'blocks'}.
+      </div>
 
-      {blocks.length > 0 && (
-        <section className={styles.section}>
-          <StepHeader
-            step={2}
-            title="The blockchain"
-            hint="Each block's hash is computed from the previous block's hash, so the blocks form a chain. The color swatch is a hash's fingerprint: follow it from one block's hash into the next block's previous-hash slot. Nothing below is stored, every hash is re-derived from the typed entries."
-          />
-          <div className={styles.stats}>
-            <Stat label="Blocks mined" value={blocks.length} format={fmtCount} animate={false} />
-            <Stat
-              label="Circulating supply"
-              value={supply}
-              format={fmtBtc}
-              note={`of the ${MAX_SUPPLY} BTC the halving schedule will ever allow`}
-              emphasis
-              animate={false}
-            />
-            <Stat label="Participants on the ledger" value={ledger.length} format={fmtCount} animate={false} />
-          </div>
-          <div className={styles.actions}>
-            <Toggle
-              label="Tamper with a mined block"
-              checked={tamperOn}
-              onChange={(v: boolean) => {
-                setTamperOn(v)
-                if (!v) setEdits({})
-              }}
-            />
-            {confirmingReset ? (
-              <>
-                <Button size="sm" onClick={resetChain}>
-                  Yes, clear all {blocks.length} blocks
-                </Button>
-                <Button variant="quiet" size="sm" onClick={() => setConfirmingReset(false)}>
-                  Keep the chain
-                </Button>
-              </>
-            ) : (
-              <Button variant="quiet" size="sm" onClick={() => setConfirmingReset(true)}>
-                Start a new chain
-              </Button>
-            )}
-          </div>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Previous hash</th>
-                  <th>Nonce</th>
-                  <th>Block contents</th>
-                  <th>Hash</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shownChain.map((m, i) => (
-                  <tr key={i} className={m.valid ? '' : styles.invalidRow}>
-                    <td className={styles.numCell}>{i + 1}</td>
-                    <td className={styles.hashCell} title={m.prevHash}>
-                      <HashChip hash={m.prevHash} />
-                      {shortHash(m.prevHash)}
-                    </td>
-                    <td className={styles.hashCell}>{m.block.nonce}</td>
-                    <td>
-                      {m.block.miner} mined{' '}
-                      {tamperOn ? (
-                        <input
-                          type="number"
-                          className={styles.tamperInput}
-                          value={m.block.reward}
-                          onChange={(e) =>
-                            setEdits((prev) => ({ ...prev, [i]: { ...prev[i], reward: Number(e.target.value) || 0 } }))
-                          }
-                        />
-                      ) : (
-                        fmtBtc(m.block.reward)
-                      )}
-                      {m.block.tx && (
-                        <>
-                          <br />
-                          {m.block.tx.from} paid {m.block.tx.to}{' '}
-                          {tamperOn ? (
-                            <input
-                              type="number"
-                              className={styles.tamperInput}
-                              value={m.block.tx.amount}
-                              onChange={(e) =>
-                                setEdits((prev) => ({ ...prev, [i]: { ...prev[i], amount: Number(e.target.value) || 0 } }))
-                              }
-                            />
-                          ) : (
-                            fmtBtc(m.block.tx.amount)
-                          )}
-                        </>
-                      )}
-                    </td>
-                    <td className={styles.hashCell} title={m.hash}>
-                      <HashChip hash={m.hash} />
-                      {shortHash(m.hash)}
-                    </td>
-                    <td>
-                      {m.valid ? (
-                        <span className={styles.statusOk}>verified</span>
-                      ) : (
-                        <span className={styles.statusBad}>broken</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {tamperOn && (
-            <Callout tone="mark" label={tampered ? 'The chain caught it' : 'Try to rewrite history'}>
-              {tampered && brokenFrom >= 0 ? (
-                <>
-                  Changing block {brokenFrom + 1} changed its data, so its hash no longer starts with the required zeros,
-                  and every block after it fails too because each one contains the hash of the one before. To sneak this
-                  edit past the class, you would have to re-mine block {brokenFrom + 1} and every later block before
-                  anyone noticed. Turn tamper mode off to restore the chain.
-                </>
-              ) : (
-                <>
-                  Edit any reward or payment amount in the table. The chain recomputes instantly, and you will see why an
-                  edit to an old block cannot survive.
-                </>
-              )}
-            </Callout>
-          )}
-        </section>
-      )}
+      {/* 2 · The blockchain */}
+      <div className={`${styles.sectionRow} ${styles.sectionGap}`}>
+        <span className={styles.badge}>2</span>
+        <span className={styles.secTitle}>The blockchain</span>
+        <span className={styles.secHint}>follow a hash's color into the next block's previous-hash slot</span>
+        <span className={styles.spacer} />
+        <label className={styles.tamperLabel}>
+          <input
+            type="checkbox"
+            checked={tamperOn}
+            onChange={(e) => {
+              setTamperOn(e.target.checked)
+              if (!e.target.checked) setTamperEdits({})
+            }}
+          />{' '}
+          Tamper mode
+        </label>
+        {confirmingReset ? (
+          <>
+            <button type="button" className={`${styles.ghostBtn} ${styles.ghostBtnDanger}`} onClick={resetChain}>
+              Yes, clear {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
+            </button>
+            <button type="button" className={styles.ghostBtn} onClick={() => setConfirmingReset(false)}>
+              Keep the chain
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className={styles.ghostBtn}
+            onClick={() => {
+              if (blocks.length) setConfirmingReset(true)
+            }}
+          >
+            Start a new chain
+          </button>
+        )}
+      </div>
 
-      {blocks.length > 0 && (
-        <section className={styles.section}>
-          <StepHeader
-            step={3}
-            title="The Bitcoin ledger"
-            hint="The spreadsheet the room used to keep by hand, read off the chain: one column per block, each cell a participant's balance in BTC after that round, with the round's change marked. A blank cell means they had not joined yet."
-          />
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th className={styles.stickyCol}>Participant</th>
-                  {grid.rewards.map((_, r) => (
-                    <th key={r}>Block {r + 1}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {grid.names.map((name, i) => (
-                  <tr key={name}>
-                    <td className={`${styles.rowHead} ${styles.stickyCol}`}>{name}</td>
-                    {grid.balances.map((round, r) => {
-                      const bal = round[i]
-                      const prev = r > 0 ? grid.balances[r - 1]![i] : undefined
-                      const delta = bal == null ? 0 : bal - (prev ?? 0)
-                      const cls = [
-                        styles.numCell,
-                        r === grid.balances.length - 1 ? styles.cellNow : '',
-                        delta > 0 ? styles.cellUp : delta < 0 ? styles.cellDown : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')
-                      return (
-                        <td key={r} className={cls}>
-                          {bal == null ? '' : Number(bal.toFixed(2))}
-                          {bal != null && delta !== 0 && (
-                            <span className={delta > 0 ? styles.deltaUp : styles.deltaDown}>
-                              {delta > 0 ? `+${Number(delta.toFixed(2))}` : `−${Number(Math.abs(delta).toFixed(2))}`}
-                            </span>
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-                <tr className={styles.gridRule}>
-                  <td className={`${styles.rowHead} ${styles.stickyCol}`}>Block reward</td>
-                  {grid.rewards.map((rw, r) => (
-                    <td key={r} className={styles.numCell}>
-                      {Number(rw.toFixed(2))}
-                    </td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className={`${styles.rowHead} ${styles.stickyCol}`}>Circulating supply</td>
-                  {grid.supply.map((s, r) => (
-                    <td key={r} className={`${styles.numCell} ${styles.supplyCell}`}>
-                      {Number(s.toFixed(2))}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+      <div className={styles.rail}>
+        <div className={styles.railInner}>
+          <div className={styles.genesisCard}>
+            <div className={styles.cardLabel}>GENESIS</div>
+            <div className={styles.genesisHash}>
+              <Swatch hash={GENESIS_HASH} small />
+              <span>000000…0000</span>
+            </div>
+            <div className={styles.genesisNote}>the chain starts from all zeros</div>
           </div>
-        </section>
-      )}
-
-      {blocks.length > 0 && (
-        <section className={styles.section}>
-          <StepHeader
-            step={4}
-            title="Sync the room"
-            hint="After each round, project this code. Anyone who scans it opens this page with the full chain loaded, and their phone re-computes and verifies every hash on arrival."
-          />
-          <div className={styles.qrRow}>
-            {qrDataUrl && (
-              <div className={styles.qrBox}>
-                <img src={qrDataUrl} alt={`QR code carrying the current ${blocks.length}-block chain`} />
+          {chain.map((v, i) => (
+            <div key={i} className={styles.blockWrap}>
+              <div
+                className={styles.connector}
+                style={{ backgroundImage: `repeating-linear-gradient(90deg, ${swatch(v.prevHash)} 0 10px, transparent 10px 16px)` }}
+              />
+              <div className={v.valid ? styles.blockCard : `${styles.blockCard} ${styles.blockCardInvalid}`}>
+                <div className={styles.blockTitleRow}>
+                  <span className={styles.blockTitle}>Block {i + 1}</span>
+                  <span className={styles.spacer} />
+                  <span className={v.valid ? styles.statusOk : styles.statusBad}>{v.valid ? '✓ verified' : '✗ invalid'}</span>
+                </div>
+                <div>
+                  <div className={styles.cardLabel}>PREVIOUS HASH</div>
+                  <div className={styles.cardHashRow}>
+                    <Swatch hash={v.prevHash} small />
+                    <span>{v.prevHash === GENESIS_HASH ? '000000…0000' : shortHash(v.prevHash)}</span>
+                  </div>
+                </div>
+                {tamperOn ? (
+                  <div className={styles.tamperBox}>
+                    <div className={styles.cardLabelDanger}>CONTENTS · EDIT ME</div>
+                    <input
+                      className={styles.tamperInput}
+                      value={v.contents}
+                      onChange={(e) => setTamperEdits((prev) => ({ ...prev, [i]: e.target.value }))}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <div className={styles.cardLabel}>CONTENTS</div>
+                    <div className={styles.cardContents}>{v.contents}</div>
+                  </div>
+                )}
+                <div className={styles.nonceLine}>
+                  nonce <span className={styles.nonceValue}>{v.block.nonce}</span>
+                </div>
+                <div>
+                  <div className={styles.cardLabel}>HASH</div>
+                  <div className={styles.cardHashRow}>
+                    <Swatch hash={v.hash} small />
+                    <span className={v.valid ? styles.hashOkText : styles.hashBadText}>{shortHash(v.hash)}</span>
+                  </div>
+                </div>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {broken && blocks.length > 0 && (
+        <div className={styles.brokenNote}>
+          The chain is broken: a tampered block's hash no longer matches what the next block recorded. Every block after it
+          is now invalid, and that is why history on a blockchain is hard to rewrite.
+        </div>
+      )}
+
+      {/* Stats strip */}
+      <div className={styles.statsRow}>
+        <div>
+          <div className={styles.label}>BLOCKS MINED</div>
+          <div className={styles.statBig}>{blocks.length}</div>
+        </div>
+        <div className={styles.supplyCol}>
+          <div className={styles.label}>CIRCULATING SUPPLY</div>
+          <div className={styles.statBig}>
+            {fmtBtc(supply)} <span className={styles.statUnit}>of {MAX_SUPPLY} BTC ever</span>
+          </div>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: `${Math.min(100, (supply / MAX_SUPPLY) * 100)}%` }} />
+          </div>
+        </div>
+        <div>
+          <div className={styles.label}>NEXT HALVING</div>
+          <div className={styles.statBig}>
+            {toHalving} {toHalving === 1 ? 'block' : 'blocks'}
+          </div>
+        </div>
+      </div>
+
+      {/* 3 · The ledger */}
+      <div className={`${styles.sectionRow} ${styles.sectionGap}`}>
+        <span className={styles.badge}>3</span>
+        <span className={styles.secTitle}>The ledger</span>
+        <span className={styles.secHint}>nothing here is stored: every balance is re-read off the chain</span>
+      </div>
+      <div className={styles.ledgerTable}>
+        <div className={styles.ledgerHead}>
+          <span>PARTICIPANT</span>
+          <span>BLOCKS WON</span>
+          <span>LAST BLOCK</span>
+          <span style={{ textAlign: 'right' }}>BALANCE</span>
+        </div>
+        {ledger.map((r) => (
+          <div
+            key={r.touchedLast && celebrateKey ? `${r.name}:${celebrateKey}` : r.name}
+            className={r.touchedLast && celebrateKey ? `${styles.ledgerRow} ${styles.ledgerFlash}` : styles.ledgerRow}
+          >
+            <span className={styles.ledgerName}>{r.name}</span>
+            <span className={styles.ledgerWon}>
+              {r.blocksWon} {r.blocksWon === 1 ? 'block' : 'blocks'}
+            </span>
+            <span className={r.touchedLast && r.delta !== 0 ? (r.delta > 0 ? styles.deltaUp : styles.deltaDown) : styles.deltaNone}>
+              {r.touchedLast && r.delta !== 0 ? `${r.delta > 0 ? '+' : '−'}${fmtBtc(Math.abs(r.delta))}` : '—'}
+            </span>
+            <span className={styles.ledgerBalance}>{fmtBtc(r.balance)} BTC</span>
+          </div>
+        ))}
+        {ledger.length === 0 && <div className={styles.ledgerEmpty}>No blocks yet: mine one and the first balance appears here.</div>}
+      </div>
+
+      {/* 4 · Sync the room + See the math */}
+      <div className={styles.footGrid}>
+        <div className={styles.footPanel}>
+          <div className={styles.sectionRow}>
+            <span className={styles.badge}>4</span>
+            <span className={styles.footTitle}>Sync the room</span>
+          </div>
+          <div className={styles.syncRow}>
+            {qrDataUrl ? (
+              <img src={qrDataUrl} className={styles.qrImg} alt={`QR code carrying the current ${blocks.length}-block chain`} />
+            ) : (
+              <div className={styles.qrImg} />
             )}
-            <div className={styles.qrCol}>
-              <p className={styles.lede}>
-                There is no server and no database behind this code. It encodes the chain itself: every miner, reward,
-                payment, and nonce, small enough to fit because the hashes do not need to travel. Each phone re-derives
-                them, which is the same reason a forged code cannot pass: its chain arrives broken.
-              </p>
-              <div className={styles.actions}>
-                <Button variant="quiet" size="sm" onClick={copyLink}>
-                  {copied ? 'Copied' : 'Copy link instead'}
-                </Button>
+            <div className={styles.syncCopy}>
+              The QR encodes the chain itself: every miner, nonce, and payment. Each phone re-derives the hashes on arrival,
+              so a forged chain arrives broken. No server involved.
+              <div style={{ marginTop: 8 }}>
+                <button type="button" className={styles.ghostBtn} onClick={copyChain} disabled={!shareUrl}>
+                  {copied ? 'Copied!' : 'Copy chain code'}
+                </button>
               </div>
             </div>
           </div>
-        </section>
-      )}
-
-      <MathSection
-        hint="Why finding a block is hard, checking one is instant, and a bigger room needs a higher difficulty."
-        rows={[
-          {
-            tex: 'P(\\text{a guess is valid}) = 16^{-d}',
-            caption: `Each character of the hash is one of 16 hex values. Requiring d leading zeros means the first d characters must all land on 0.`,
-          },
-          {
-            tex: `d = ${difficulty}: \\quad P = 16^{-${difficulty}} = \\tfrac{1}{${16 ** difficulty}}, \\qquad E[\\text{guesses, one miner}] = 16^{${difficulty}} = \\boxed{${16 ** difficulty}}`,
-            muted: true,
-          },
-          {
-            tex: `\\text{a room of } ${roomSize} \\text{ mining together: } \\; E[\\text{guesses each}] = \\tfrac{16^{${difficulty}}}{${roomSize}} \\approx \\boxed{${Math.max(1, Math.round(16 ** difficulty / roomSize))}}`,
-            caption:
-              'Guessing in parallel splits the work: the more miners join, the faster blocks fall. That is why the real network raises the difficulty as miners join, to hold one block every ten minutes no matter how big the room gets.',
-            muted: true,
-          },
-        ]}
-        note={`Finding a block at difficulty ${difficulty} costs about ${(16 ** difficulty).toLocaleString()} guesses, but checking a claimed winner takes exactly one hash. That asymmetry is proof of work: expensive to produce, instant for the whole room to verify, which is also what the QR code relies on.`}
-      />
+        </div>
+        <div className={styles.footPanel}>
+          <div className={styles.footTitle}>See the math</div>
+          <div className={styles.mathCopy}>
+            Each hex character is one of 16 values, so{' '}
+            <span className={styles.codeChip}>
+              P(valid) = 16<sup>−d</sup>
+            </span>
+            . At your settings that's about <b>{expGuesses.toLocaleString()}</b> {expGuesses === 1 ? 'guess' : 'guesses'} for
+            one miner, but with <b>{people.toLocaleString()}</b> people racing, someone wins after about{' '}
+            <b>{expRoom.toLocaleString()}</b> each. Producing a block is expensive; checking a claimed winner takes exactly
+            one hash. That asymmetry is proof of work.
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -735,19 +658,15 @@ export function BitcoinMiningPage({ intro = true }: { intro?: boolean } = {}) {
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
-          <p className={styles.eyebrow}>Lesson · Investing</p>
+          <p className={styles.eyebrow}>Teaching Toolkit · Unit 8: Financial Markets</p>
           <h1 className={styles.h1}>Bitcoin Mining</h1>
           <p className={styles.lead}>
-            The class becomes the network. Each round, everyone races to find a nonce whose hash clears the difficulty
-            target; the winner earns the block reward, the block joins the chain, and the ledger of who owns what falls
-            out of the chain itself. A QR code after each round carries the whole chain to every phone in the room.
+            The class becomes the network: race to find a nonce, watch the block snap onto the chain, and read the ledger
+            straight off it.
           </p>
         </header>
       )}
-
-      <Card tone="raised" className={styles.panel}>
-        <MiningStation />
-      </Card>
+      <MiningCard />
     </div>
   )
 }
