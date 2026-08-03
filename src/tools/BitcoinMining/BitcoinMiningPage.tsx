@@ -257,7 +257,7 @@ function MiningCard() {
       return
     }
     let alive = true
-    QRCode.toDataURL(shareUrl, { width: 240, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } })
+    QRCode.toDataURL(shareUrl, { width: 640, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } })
       .then((url) => {
         if (alive) setQrDataUrl(url)
       })
