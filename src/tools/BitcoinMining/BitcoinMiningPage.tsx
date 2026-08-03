@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
+import * as XLSX from 'xlsx'
 import '@fontsource/source-serif-4/700.css'
 import '@fontsource/source-sans-3/400.css'
 import '@fontsource/source-sans-3/600.css'
@@ -20,6 +21,7 @@ import {
   blockData,
   buildBalanceGrid,
   buildLedger,
+  buildWorkbookData,
   circulatingSupply,
   decodeChain,
   deriveChain,
@@ -272,6 +274,26 @@ function MiningCard() {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     })
+  }
+
+  /* The whole game as a workbook: blockchain with full hashes, ledger, and the movement grid. */
+  function downloadExcel() {
+    if (!blocks.length) return
+    const data = buildWorkbookData(blocks)
+    const wb = XLSX.utils.book_new()
+    const wsChain = XLSX.utils.aoa_to_sheet(data.blockchain)
+    wsChain['!cols'] = [
+      { wch: 6 }, { wch: 66 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 14 },
+      { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 66 }, { wch: 9 },
+    ]
+    XLSX.utils.book_append_sheet(wb, wsChain, 'Blockchain')
+    const wsLedger = XLSX.utils.aoa_to_sheet(data.ledger)
+    wsLedger['!cols'] = [{ wch: 18 }, { wch: 11 }, { wch: 13 }]
+    XLSX.utils.book_append_sheet(wb, wsLedger, 'Ledger')
+    const wsMove = XLSX.utils.aoa_to_sheet(data.movement)
+    wsMove['!cols'] = [{ wch: 18 }, ...data.movement[0]!.slice(1).map(() => ({ wch: 10 }))]
+    XLSX.utils.book_append_sheet(wb, wsMove, 'Movement')
+    XLSX.writeFile(wb, `ifdm-bitcoin-mining-${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
   return (
@@ -588,6 +610,10 @@ function MiningCard() {
         <span className={styles.badge}>3</span>
         <span className={styles.secTitle}>The ledger</span>
         <span className={styles.secHint}>nothing here is stored: every balance is re-read off the chain</span>
+        <span className={styles.spacer} />
+        <button type="button" className={styles.ghostBtn} onClick={downloadExcel} disabled={!blocks.length}>
+          Download Excel
+        </button>
       </div>
       <div className={styles.ledgerTable}>
         <div className={styles.ledgerHead}>

@@ -294,6 +294,48 @@ export function circulatingSupply(blocks: Block[]): number {
   return blocks.reduce((sum, b) => sum + b.reward, 0)
 }
 
+/* ---------------------------- Excel export ---------------------------- */
+
+export type SheetRows = (string | number)[][]
+
+/**
+ * The whole game as spreadsheet rows, one array per sheet: the blockchain
+ * with full hashes, the ledger, and the movement grid in the shape of the
+ * hand-kept classroom Excel this tool replaced. Values stay numbers so
+ * Excel can keep computing with them.
+ */
+export function buildWorkbookData(blocks: Block[]): { blockchain: SheetRows; ledger: SheetRows; movement: SheetRows } {
+  const chain = deriveChain(blocks)
+  const blockchain: SheetRows = [
+    ['Block', 'Previous hash', 'Miner', 'Reward (BTC)', 'Sender', 'Receiver', 'Amount (BTC)', 'Nonce', 'Difficulty (leading zeros)', 'Hash', 'Status'],
+    ...chain.map((v, i) => [
+      i + 1,
+      v.prevHash,
+      v.block.miner,
+      v.block.reward,
+      v.block.sender,
+      v.block.receiver,
+      v.block.amount,
+      v.block.nonce,
+      v.block.difficulty,
+      v.hash,
+      v.valid ? 'verified' : 'invalid',
+    ]),
+  ]
+  const ledger: SheetRows = [
+    ['Participant', 'Blocks won', 'Balance (BTC)'],
+    ...buildLedger(blocks).map((r) => [r.name, r.blocksWon, r.balance]),
+  ]
+  const grid = buildBalanceGrid(blocks)
+  const movement: SheetRows = [
+    ['Participant', ...grid.rewards.map((_, r) => `Block ${r + 1}`)],
+    ...grid.names.map((name, i) => [name, ...grid.balances.map((round) => round[i] ?? '')]),
+    ['Block reward', ...grid.rewards],
+    ['Circulating supply', ...grid.supply],
+  ]
+  return { blockchain, ledger, movement }
+}
+
 /* ---------------------- QR / URL serialization ---------------------- */
 
 /*
@@ -353,21 +395,41 @@ export function decodeChain(code: string): Block[] | null {
   }
 }
 
-/** Shape check for chain state restored from localStorage. */
+/**
+ * Check for chain state restored from localStorage: the same rules a
+ * scanned QR faces, including that every reward follows the halving
+ * schedule. The supply cap is only real if no door lets a 5,000 BTC block
+ * in, so a stale or hand-edited saved chain falls back to a fresh start.
+ */
 export function isBlockArray(v: unknown): boolean {
   return (
     Array.isArray(v) &&
-    v.every(
-      (b: unknown) =>
-        typeof b === 'object' &&
-        b !== null &&
-        typeof (b as Block).miner === 'string' &&
-        typeof (b as Block).reward === 'number' &&
-        typeof (b as Block).difficulty === 'number' &&
-        typeof (b as Block).nonce === 'string' &&
-        typeof (b as Block).sender === 'string' &&
-        typeof (b as Block).receiver === 'string' &&
-        typeof (b as Block).amount === 'number',
-    )
+    v.length <= 500 &&
+    v.every((b: unknown, i) => {
+      if (typeof b !== 'object' || b === null) return false
+      const blk = b as Block
+      return (
+        typeof blk.miner === 'string' &&
+        blk.miner.trim() !== '' &&
+        blk.miner.length <= NAME_MAX &&
+        !blk.miner.includes('|') &&
+        blk.reward === rewardAt(i) &&
+        Number.isInteger(blk.difficulty) &&
+        blk.difficulty >= 1 &&
+        blk.difficulty <= MAX_DIFFICULTY &&
+        typeof blk.nonce === 'string' &&
+        /^\d+$/.test(blk.nonce) &&
+        Number(blk.nonce) <= NONCE_MAX &&
+        typeof blk.sender === 'string' &&
+        blk.sender.length <= NAME_MAX &&
+        !blk.sender.includes('|') &&
+        typeof blk.receiver === 'string' &&
+        blk.receiver.length <= NAME_MAX &&
+        !blk.receiver.includes('|') &&
+        typeof blk.amount === 'number' &&
+        Number.isFinite(blk.amount) &&
+        blk.amount >= 0
+      )
+    })
   )
 }
