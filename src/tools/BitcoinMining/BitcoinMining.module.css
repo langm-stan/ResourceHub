@@ -1,0 +1,290 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.intro {
+  margin-bottom: var(--space-6);
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+}
+
+.panel {
+  padding: var(--space-5);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lede {
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 70ch;
+  margin: 0;
+}
+
+/* The parameter band: one compact full-width grid above the results. */
+.band {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3) var(--space-4);
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.fieldLabel {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+.textInput {
+  font-family: var(--ff-ui);
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+  background: var(--surface);
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+  width: 100%;
+}
+.textInput:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 1px;
+}
+
+/* Hash and data readouts: long hex strings that must wrap, never overflow. */
+.mono {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.readout {
+  background: var(--surface-sunken);
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-ui);
+  line-height: 1.5;
+}
+.readoutLabel {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: var(--space-1);
+}
+.readouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+.hashOk {
+  border-color: var(--c-series-1);
+  box-shadow: 0 0 0 1px var(--c-series-1) inset;
+}
+.zeroHit {
+  color: var(--c-series-1);
+  font-weight: var(--fw-semibold);
+}
+.zeroMiss {
+  color: var(--c-accent);
+  font-weight: var(--fw-semibold);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.hint {
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+}
+.warn {
+  font-size: var(--fs-caption);
+  color: var(--c-accent);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+}
+
+/* Chain and ledger tables scroll inside their own container on small screens. */
+.tableWrap {
+  overflow-x: auto;
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-ui);
+}
+.table th {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  background: var(--surface-sunken);
+  white-space: nowrap;
+}
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  vertical-align: top;
+}
+.table tr:last-child td {
+  border-bottom: none;
+}
+.hashCell {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+  max-width: 200px;
+  overflow-wrap: anywhere;
+}
+.numCell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.invalidRow td {
+  background: color-mix(in srgb, var(--c-accent) 8%, var(--surface));
+}
+.statusOk {
+  color: var(--c-series-1);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.statusBad {
+  color: var(--c-accent);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+/* The Excel-style balance grid: participants down, blocks across. */
+.stickyCol {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.table thead .stickyCol {
+  background: var(--surface-sunken);
+}
+.rowHead {
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.cellUp {
+  background: color-mix(in srgb, var(--c-series-1) 10%, var(--surface));
+}
+.cellDown {
+  background: color-mix(in srgb, var(--c-accent) 10%, var(--surface));
+}
+.cellNow {
+  font-weight: var(--fw-semibold);
+}
+.deltaUp,
+.deltaDown {
+  display: block;
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+}
+.deltaUp {
+  color: var(--c-series-1);
+}
+.deltaDown {
+  color: var(--c-accent);
+}
+.gridRule td {
+  border-top: 2px solid var(--border-hairline);
+}
+.supplyCell {
+  font-weight: var(--fw-semibold);
+}
+
+.tamperInput {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  width: 5.5em;
+  font-size: var(--fs-ui);
+  color: var(--text-primary);
+  background: var(--surface);
+  border: var(--hairline) solid var(--c-accent);
+  border-radius: var(--radius);
+  padding: 2px var(--space-2);
+}
+
+/* The sync panel: QR on one side, the plain-language explanation beside it. */
+.qrRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+.qrBox {
+  background: #ffffff;
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  line-height: 0;
+}
+.qrBox img {
+  width: 220px;
+  height: 220px;
+  display: block;
+}
+.qrCol {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  margin: 0;
+}

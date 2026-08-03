@@ -22,6 +22,7 @@ import { HousingPage } from '../tools/Housing/HousingPage'
 import { GamblingSimPage } from '../tools/ChanceOwnership/GamblingSimPage'
 import { StockPickerPage } from '../tools/ChanceOwnership/StockPickerPage'
 import { IndexFundFeesPage } from '../tools/ChanceOwnership/IndexFundFeesPage'
+import { BitcoinMiningPage } from '../tools/BitcoinMining/BitcoinMiningPage'
 import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
 import { BondPricingPage } from '../tools/Bonds/BondPricingPage'
 import { BondRatesPage } from '../tools/Bonds/BondRatesPage'
@@ -118,6 +119,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Stock Diversifier', path: 'teacher-training/stock-picker' },
     content: <StockPickerPage intro={false} />,
+  },
+  'bitcoin-mining': {
+    title: 'Bitcoin Mining',
+    toolkit: true,
+    instructor: { label: 'Bitcoin Mining', path: 'teacher-training/bitcoin-mining' },
+    content: <BitcoinMiningPage intro={false} />,
   },
   'index-fund-fees': {
     title: 'Index Fund Fees',

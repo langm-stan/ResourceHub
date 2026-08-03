@@ -44,6 +44,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'credit-score',
   'gambling-sim',
   'stock-picker',
+  'bitcoin-mining',
   'index-fund-fees',
   'stocks-bonds',
   'bond-pricing',

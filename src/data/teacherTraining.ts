@@ -224,6 +224,13 @@ export const COURSE_UNITS: CourseUnit[] = [
         keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'stock picker', 'market cap', 'basket'],
       },
       {
+        slug: 'bitcoin-mining',
+        label: 'Bitcoin Mining',
+        description:
+          'The class becomes the network: race to find a nonce, add the block, and read the ledger off the chain. A QR code after each round syncs every phone, no server involved.',
+        keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
+      },
+      {
         slug: 'index-fund-fees',
         label: 'Index Fund Fees',
         description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
