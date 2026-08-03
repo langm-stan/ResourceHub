@@ -9,6 +9,7 @@ import '@fontsource/source-sans-3/700.css'
 import '@fontsource/ibm-plex-mono/400.css'
 import '@fontsource/ibm-plex-mono/500.css'
 import '@fontsource/ibm-plex-mono/600.css'
+import { FormulaBlock } from '../../design-system'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import {
   type Block,
@@ -753,16 +754,25 @@ function MiningCard() {
         </div>
         <div className={styles.footPanel}>
           <div className={styles.footTitle}>See the math</div>
-          <div className={styles.mathCopy}>
-            Each hex character is one of 16 values, so{' '}
-            <span className={styles.codeChip}>
-              P(valid) = 16<sup>−d</sup>
-            </span>
-            . At your settings that's about <b>{expGuesses.toLocaleString()}</b> {expGuesses === 1 ? 'guess' : 'guesses'} for
-            one miner, but with <b>{people.toLocaleString()}</b> people racing, someone wins after about{' '}
-            <b>{expRoom.toLocaleString()}</b> each. Producing a block is expensive; checking a claimed winner takes exactly
-            one hash. That asymmetry is proof of work.
+          <div className={styles.mathRows}>
+            <FormulaBlock
+              tex={'P(\\text{a guess is valid}) = 16^{-d}'}
+              caption="Each hex character of the hash is one of 16 values, so d leading zeros means the first d characters must all land on 0."
+            />
+            <FormulaBlock
+              tex={`d = ${difficulty}: \\quad P = 16^{-${difficulty}} = \\tfrac{1}{${expGuesses}}, \\qquad E[\\text{guesses, one miner}] = \\boxed{${expGuesses}}`}
+              muted
+            />
+            <FormulaBlock
+              tex={`\\text{a room of } ${people}: \\quad E[\\text{guesses each}] = \\tfrac{16^{${difficulty}}}{${people}} \\approx \\boxed{${expRoom}}`}
+              caption="Guessing in parallel splits the work across the room, which is why the real network raises the difficulty as miners join."
+              muted
+            />
           </div>
+          <p className={styles.mathNote}>
+            Producing a block costs thousands of guesses; checking a claimed winner takes exactly one hash. That asymmetry
+            is proof of work, and it is what lets every scanned phone verify the whole chain instantly.
+          </p>
         </div>
       </div>
     </div>

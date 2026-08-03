@@ -781,17 +781,19 @@
   line-height: 1.6;
   max-width: 60ch;
 }
-.mathCopy {
-  font-size: 14.5px;
-  color: #555;
-  line-height: 1.65;
-  margin-top: 10px;
+.mathRows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
   max-width: 78ch;
 }
-.codeChip {
-  font-family: 'IBM Plex Mono', monospace;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 3px;
-  padding: 1px 5px;
+.mathNote {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  color: #555;
+  line-height: 1.6;
+  max-width: 78ch;
 }
