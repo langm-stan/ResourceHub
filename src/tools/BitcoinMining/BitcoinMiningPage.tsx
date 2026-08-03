@@ -15,7 +15,10 @@ import {
   HALVING_INTERVAL,
   MAX_DIFFICULTY,
   MAX_SUPPLY,
+  NAME_MAX,
+  NONCE_MAX,
   blockData,
+  buildBalanceGrid,
   buildLedger,
   circulatingSupply,
   decodeChain,
@@ -24,6 +27,7 @@ import {
   fmtBtc,
   isBlockArray,
   meetsDifficulty,
+  nameKey,
   rewardAt,
   sha256Hex,
   shortHash,
@@ -39,34 +43,13 @@ import styles from './BitcoinMining.module.css'
  * there is no server, each device re-derives the hashes on arrival.
  */
 
-/** Real Bitcoin's nonce is a 32-bit integer, so the classroom one honors the same range. */
-const NONCE_MAX = 4294967295
 /** Auto-mine appears once the room has felt the work by hand. */
 const AUTOMINE_UNLOCK = 2
 const CHUNK = 600
-const CONFETTI_COLORS = ['#8C1515', '#e0b64a', '#1a7f37', '#3b5b92']
 
-/** The block-found chime: four rising triangle notes, 90ms apart. */
-let audioCtx: AudioContext | null = null
-function chime() {
-  try {
-    audioCtx ||= new (window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext!)()
-    const ctx = audioCtx
-    ;[523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.frequency.value = freq
-      osc.type = 'triangle'
-      gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.09)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.35)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(ctx.currentTime + i * 0.09)
-      osc.stop(ctx.currentTime + i * 0.09 + 0.4)
-    })
-  } catch {
-    /* no audio available: the confetti still lands */
-  }
+/** Names feed the hashed data string, which is |-delimited, so | can never enter a name. */
+function cleanName(raw: string): string {
+  return raw.replace(/\|/g, '').slice(0, NAME_MAX)
 }
 
 function Swatch({ hash, small }: { hash: string; small?: boolean }) {
@@ -91,7 +74,8 @@ function MiningCard() {
   const [tamperEdits, setTamperEdits] = useState<Record<number, string>>({})
   const [mining, setMining] = useState(false)
   const [tried, setTried] = useState(0)
-  const [celebrateKey, setCelebrateKey] = useState(0)
+  /** Timestamp of the newest commit; retriggers the green movement flash on ledger rows. */
+  const [flashKey, setFlashKey] = useState(0)
   const [copied, setCopied] = useState(false)
   const [confirmingReset, setConfirmingReset] = useState(false)
 
@@ -105,8 +89,17 @@ function MiningCard() {
     next.delete('chain')
     setSearchParams(next, { replace: true })
     if (decoded) {
+      /* A scan mid-race replaces the round: stop any auto-mine and clear the half-typed block. */
+      if (autoToken.current) autoToken.current.cancelled = true
+      setMining(false)
       setBlocks(decoded)
       setTamperEdits({})
+      setMiner('')
+      setNonce('')
+      setSender('')
+      setReceiver('')
+      setAmountStr('')
+      setConfirmingReset(false)
       const last = decoded[decoded.length - 1]
       if (last) setDifficulty(last.difficulty)
     }
@@ -121,6 +114,7 @@ function MiningCard() {
   }, [blocks, chain, tamperOn, tamperEdits])
 
   const ledger = useMemo(() => buildLedger(blocks), [blocks])
+  const grid = useMemo(() => buildBalanceGrid(blocks), [blocks])
   const supply = useMemo(() => circulatingSupply(blocks), [blocks])
   const reward = rewardAt(blocks.length)
   const toHalving = HALVING_INTERVAL - (blocks.length % HALVING_INTERVAL)
@@ -128,22 +122,36 @@ function MiningCard() {
   /* The candidate block, hashed live on every keystroke. */
   const amount = parseFloat(amountStr) || 0
   const candidate = { miner: miner.trim(), reward, sender: sender.trim(), receiver: receiver.trim(), amount, nonce: nonce.trim() }
-  const liveHash = sha256Hex(blockData(tip, candidate))
-  const liveValid = meetsDifficulty(liveHash, difficulty) && Boolean(candidate.miner) && candidate.nonce !== ''
+  const liveData = blockData(tip, candidate)
+  const liveHash = sha256Hex(liveData)
+
+  /*
+   * Payment safeguards: a payment must be complete (sender, receiver, and a
+   * positive amount, or none of the three), can't pay yourself, and can't
+   * spend coins the ledger doesn't show. The pre-block balance is what
+   * counts: like real coinbase rules, this block's own reward can't fund it.
+   */
+  const txStarted = Boolean(candidate.sender || candidate.receiver || amount > 0)
+  const txComplete = Boolean(candidate.sender && candidate.receiver && amount > 0)
+  const txPartial = txStarted && !txComplete
+  const txSelf = txComplete && nameKey(candidate.sender) === nameKey(candidate.receiver)
+  const senderBalance = txComplete ? (ledger.find((r) => nameKey(r.name) === nameKey(candidate.sender))?.balance ?? 0) : 0
+  const txOverdraft = txComplete && !txSelf && senderBalance < amount
+  const txProblem = txPartial
+    ? 'A payment needs a sender, a receiver, and an amount. Finish it or clear it.'
+    : txSelf
+      ? `${candidate.sender} can't pay themselves; pick a different receiver or clear the payment.`
+      : txOverdraft
+        ? `${candidate.sender} has only ${fmtBtc(senderBalance)} BTC to send. The network rejects a payment the ledger can't cover.`
+        : null
+
+  const liveValid = meetsDifficulty(liveHash, difficulty) && Boolean(candidate.miner) && candidate.nonce !== '' && !txProblem
 
   const expGuesses = 16 ** difficulty
   const expRoom = Math.max(1, Math.round(expGuesses / people))
   const zeros = `${difficulty} ${difficulty === 1 ? 'zero' : 'zeros'}`
 
-  const celebrateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  function celebrate() {
-    chime()
-    const key = Date.now()
-    setCelebrateKey(key)
-    if (celebrateTimer.current) clearTimeout(celebrateTimer.current)
-    celebrateTimer.current = setTimeout(() => setCelebrateKey(0), 2400)
-  }
-
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   function commitBlock(block: Block) {
     setBlocks((prev) => [...prev, block])
     setMiner('')
@@ -153,7 +161,10 @@ function MiningCard() {
     setAmountStr('')
     setMining(false)
     setTried(0)
-    celebrate()
+    const key = Date.now()
+    setFlashKey(key)
+    if (flashTimer.current) clearTimeout(flashTimer.current)
+    flashTimer.current = setTimeout(() => setFlashKey(0), 2000)
   }
 
   function addBlock() {
@@ -173,7 +184,8 @@ function MiningCard() {
       stopAutoMine()
       return
     }
-    if (!candidate.miner) return
+    /* Auto-mine would commit on the hit, so the contents must already pass every guard. */
+    if (!candidate.miner || txProblem) return
     const token = { cancelled: false }
     autoToken.current = token
     setMining(true)
@@ -204,7 +216,7 @@ function MiningCard() {
   useEffect(
     () => () => {
       if (autoToken.current) autoToken.current.cancelled = true
-      if (celebrateTimer.current) clearTimeout(celebrateTimer.current)
+      if (flashTimer.current) clearTimeout(flashTimer.current)
     },
     [],
   )
@@ -243,11 +255,14 @@ function MiningCard() {
       return
     }
     let alive = true
-    QRCode.toDataURL(shareUrl, { width: 240, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } }).then(
-      (url) => {
+    QRCode.toDataURL(shareUrl, { width: 240, margin: 1, errorCorrectionLevel: 'M', color: { dark: '#111111', light: '#ffffff' } })
+      .then((url) => {
         if (alive) setQrDataUrl(url)
-      },
-    )
+      })
+      .catch(() => {
+        /* A very long chain can exceed QR capacity; the copy button still works. */
+        if (alive) setQrDataUrl('')
+      })
     return () => {
       alive = false
     }
@@ -258,15 +273,6 @@ function MiningCard() {
       setTimeout(() => setCopied(false), 1500)
     })
   }
-
-  const confetti = celebrateKey
-    ? Array.from({ length: 26 }, (_, i) => ({
-        left: `${3 + ((i * 37) % 94)}%`,
-        color: CONFETTI_COLORS[i % 4]!,
-        dur: `${(1.1 + (i % 5) * 0.22).toFixed(2)}s`,
-        delay: `${((i % 7) * 0.07).toFixed(2)}s`,
-      }))
-    : []
 
   return (
     <div className={styles.card}>
@@ -333,7 +339,7 @@ function MiningCard() {
                 className={styles.input}
                 style={{ width: '100%' }}
                 value={miner}
-                onChange={(e) => setMiner(e.target.value)}
+                onChange={(e) => setMiner(cleanName(e.target.value))}
                 placeholder="Who mined it?"
                 autoComplete="off"
               />
@@ -351,7 +357,7 @@ function MiningCard() {
                 className={`${styles.input} ${styles.inputSm}`}
                 style={{ width: '100%' }}
                 value={sender}
-                onChange={(e) => setSender(e.target.value)}
+                onChange={(e) => setSender(cleanName(e.target.value))}
                 placeholder="optional"
                 autoComplete="off"
               />
@@ -365,7 +371,7 @@ function MiningCard() {
                 className={`${styles.input} ${styles.inputSm}`}
                 style={{ width: '100%' }}
                 value={receiver}
-                onChange={(e) => setReceiver(e.target.value)}
+                onChange={(e) => setReceiver(cleanName(e.target.value))}
                 placeholder="gets paid"
                 autoComplete="off"
               />
@@ -380,7 +386,11 @@ function MiningCard() {
                 style={{ width: '100%' }}
                 value={amountStr}
                 inputMode="decimal"
-                onChange={(e) => setAmountStr(e.target.value.replace(/[^0-9.]/g, ''))}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^0-9.]/g, '')
+                  const [head, ...rest] = cleaned.split('.')
+                  setAmountStr(rest.length ? `${head}.${rest.join('')}` : cleaned)
+                }}
                 placeholder="0 BTC"
                 autoComplete="off"
               />
@@ -391,6 +401,10 @@ function MiningCard() {
 
       {/* Live hash bar */}
       <div className={liveValid ? `${styles.hashBar} ${styles.hashBarValid}` : styles.hashBar}>
+        <div className={styles.dataRow}>
+          <div className={styles.label}>BLOCK DATA · PREV HASH | MINER | REWARD | SENDER | RECEIVER | AMOUNT | NONCE</div>
+          <div className={styles.dataText}>{liveData}</div>
+        </div>
         <div className={styles.hashBarRow}>
           <div>
             <div className={styles.label}>NONCE</div>
@@ -434,17 +448,7 @@ function MiningCard() {
           </div>
         </div>
         {mining && <div className={styles.miningLine}>⛏ trying nonces… {tried.toLocaleString()} guesses so far</div>}
-        {celebrateKey !== 0 && (
-          <div className={styles.confettiLayer}>
-            {confetti.map((c, i) => (
-              <span
-                key={i}
-                className={styles.confetto}
-                style={{ left: c.left, background: c.color, animationDuration: c.dur, animationDelay: c.delay }}
-              />
-            ))}
-          </div>
-        )}
+        {txProblem && <div className={styles.warnLine}>{txProblem}</div>}
       </div>
       <div className={styles.halvingCopy}>
         Reward halves every {HALVING_INTERVAL} blocks (every 210,000 on the real network); next halving in {toHalving}{' '}
@@ -594,8 +598,8 @@ function MiningCard() {
         </div>
         {ledger.map((r) => (
           <div
-            key={r.touchedLast && celebrateKey ? `${r.name}:${celebrateKey}` : r.name}
-            className={r.touchedLast && celebrateKey ? `${styles.ledgerRow} ${styles.ledgerFlash}` : styles.ledgerRow}
+            key={r.touchedLast && flashKey ? `${r.name}:${flashKey}` : r.name}
+            className={r.touchedLast && flashKey ? `${styles.ledgerRow} ${styles.ledgerFlash}` : styles.ledgerRow}
           >
             <span className={styles.ledgerName}>{r.name}</span>
             <span className={styles.ledgerWon}>
@@ -609,6 +613,71 @@ function MiningCard() {
         ))}
         {ledger.length === 0 && <div className={styles.ledgerEmpty}>No blocks yet: mine one and the first balance appears here.</div>}
       </div>
+
+      {/* The movement sheet: the hand-kept classroom spreadsheet, derived. */}
+      {blocks.length > 0 && (
+        <>
+          <div className={styles.sheetHead}>
+            <span className={styles.label}>MOVEMENT BY BLOCK</span>
+            <span className={styles.secHint}>each cell is a balance after that block; the round's change is marked</span>
+          </div>
+          <div className={styles.sheetWrap}>
+            <table className={styles.sheet}>
+              <thead>
+                <tr>
+                  <th className={styles.sheetSticky}>PARTICIPANT</th>
+                  {grid.rewards.map((_, r) => (
+                    <th key={r} className={styles.sheetNum}>
+                      BLOCK {r + 1}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {grid.names.map((name, i) => (
+                  <tr key={name}>
+                    <td className={`${styles.sheetName} ${styles.sheetSticky}`}>{name}</td>
+                    {grid.balances.map((round, r) => {
+                      const bal = round[i]
+                      const prev = r > 0 ? grid.balances[r - 1]![i] : undefined
+                      const delta = bal == null ? 0 : bal - (prev ?? 0)
+                      const cls = [styles.sheetNum, delta > 0 ? styles.cellUp : delta < 0 ? styles.cellDown : '']
+                        .filter(Boolean)
+                        .join(' ')
+                      return (
+                        <td key={r} className={cls}>
+                          {bal == null ? '' : fmtBtc(bal)}
+                          {bal != null && delta !== 0 && (
+                            <span className={delta > 0 ? styles.cellDeltaUp : styles.cellDeltaDown}>
+                              {delta > 0 ? `+${fmtBtc(delta)}` : `−${fmtBtc(Math.abs(delta))}`}
+                            </span>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+                <tr className={styles.sheetRule}>
+                  <td className={`${styles.sheetName} ${styles.sheetSticky}`}>Block reward</td>
+                  {grid.rewards.map((rw, r) => (
+                    <td key={r} className={styles.sheetNum}>
+                      {fmtBtc(rw)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={`${styles.sheetName} ${styles.sheetSticky}`}>Circulating supply</td>
+                  {grid.supply.map((s, r) => (
+                    <td key={r} className={`${styles.sheetNum} ${styles.sheetStrong}`}>
+                      {fmtBtc(s)}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* 4 · Sync the room + See the math */}
       <div className={styles.footGrid}>

@@ -20,6 +20,10 @@ export interface Block {
 
 export const GENESIS_HASH = '0'.repeat(64)
 export const MAX_DIFFICULTY = 4
+/** Real Bitcoin's nonce is a 32-bit integer, so the classroom one honors the same range. */
+export const NONCE_MAX = 4294967295
+/** Longest participant name a block accepts; keeps QR payloads small and forged codes boring. */
+export const NAME_MAX = 40
 export const INITIAL_REWARD = 50
 /** Blocks between reward halvings. Real Bitcoin waits 210,000 blocks; a class period gets two. */
 export const HALVING_INTERVAL = 2
@@ -170,6 +174,15 @@ export function fmtBtc(n: number): string {
 
 /* ------------------------------ the ledger ------------------------------ */
 
+/**
+ * Participants are matched case-insensitively ("Maya" and "maya" are one
+ * person; the first-seen spelling is displayed), so a typo in the winner's
+ * capitalization cannot split a balance in two.
+ */
+export function nameKey(name: string): string {
+  return name.trim().toLowerCase()
+}
+
 export interface LedgerRow {
   name: string
   balance: number
@@ -181,12 +194,13 @@ export interface LedgerRow {
 
 /** Every balance follows from the chain: rewards in, payments across. Sorted by balance, richest first. */
 export function buildLedger(blocks: Block[]): LedgerRow[] {
-  const accounts = new Map<string, { balance: number; blocksWon: number; delta: number; touchedLast: boolean }>()
+  const accounts = new Map<string, { name: string; balance: number; blocksWon: number; delta: number; touchedLast: boolean }>()
   const touch = (name: string) => {
-    let acc = accounts.get(name)
+    const key = nameKey(name)
+    let acc = accounts.get(key)
     if (!acc) {
-      acc = { balance: 0, blocksWon: 0, delta: 0, touchedLast: false }
-      accounts.set(name, acc)
+      acc = { name: name.trim(), balance: 0, blocksWon: 0, delta: 0, touchedLast: false }
+      accounts.set(key, acc)
     }
     return acc
   }
@@ -213,9 +227,60 @@ export function buildLedger(blocks: Block[]): LedgerRow[] {
       }
     }
   })
-  return [...accounts.entries()]
-    .map(([name, acc]) => ({ name, ...acc }))
-    .sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name))
+  return [...accounts.values()].sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name))
+}
+
+/** A participant's current balance, matched case-insensitively; 0 when they have never appeared. */
+export function balanceOf(blocks: Block[], name: string): number {
+  const key = nameKey(name)
+  return buildLedger(blocks).find((r) => nameKey(r.name) === key)?.balance ?? 0
+}
+
+/**
+ * The classroom spreadsheet, derived: one column per block, one row per
+ * participant, each cell the participant's balance after that block (blank
+ * before they first appear), so every movement is visible round by round.
+ */
+export interface BalanceGrid {
+  /** Participants in order of first appearance on the chain. */
+  names: string[]
+  /** balances[round][i] = names[i]'s balance after that block, undefined before they appear. */
+  balances: (number | undefined)[][]
+  rewards: number[]
+  supply: number[]
+}
+
+export function buildBalanceGrid(blocks: Block[]): BalanceGrid {
+  const display = new Map<string, string>()
+  const current = new Map<string, number>()
+  const order: string[] = []
+  const rounds: Map<string, number>[] = []
+  const touch = (name: string) => {
+    const key = nameKey(name)
+    if (!display.has(key)) {
+      display.set(key, name.trim())
+      order.push(key)
+      current.set(key, 0)
+    }
+    return key
+  }
+  for (const b of blocks) {
+    const miner = touch(b.miner)
+    current.set(miner, current.get(miner)! + b.reward)
+    if (b.amount && b.sender && b.receiver) {
+      const from = touch(b.sender)
+      const to = touch(b.receiver)
+      current.set(from, current.get(from)! - b.amount)
+      current.set(to, current.get(to)! + b.amount)
+    }
+    rounds.push(new Map(current))
+  }
+  return {
+    names: order.map((k) => display.get(k)!),
+    balances: rounds.map((snap) => order.map((k) => snap.get(k))),
+    rewards: blocks.map((b) => b.reward),
+    supply: rounds.map((snap) => [...snap.values()].reduce((a, v) => a + v, 0)),
+  }
 }
 
 export function circulatingSupply(blocks: Block[]): number {
@@ -239,15 +304,23 @@ export function encodeChain(blocks: Block[]): string {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+/*
+ * A scanned code is untrusted input. Beyond shape, every field is validated
+ * against the game's own rules: the reward must follow the halving schedule
+ * (a forged chain cannot just claim 1,000 BTC), the difficulty and nonce
+ * must be in range, names must be delimiter-free and short. The hashes are
+ * then re-derived by the caller, which catches everything else.
+ */
 export function decodeChain(code: string): Block[] | null {
   try {
     const b64 = code.replace(/-/g, '+').replace(/_/g, '/')
     const bin = atob(b64)
     const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0))
     const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes))
-    if (!Array.isArray(parsed)) return null
+    if (!Array.isArray(parsed) || parsed.length > 500) return null
+    const nameOk = (s: string) => s.length <= NAME_MAX && !s.includes('|')
     const blocks: Block[] = []
-    for (const entry of parsed) {
+    for (const [i, entry] of parsed.entries()) {
       if (!Array.isArray(entry) || entry.length !== 7) return null
       const [miner, reward, difficulty, nonce, sender, receiver, amount] = entry as unknown[]
       if (
@@ -260,6 +333,11 @@ export function decodeChain(code: string): Block[] | null {
         typeof amount !== 'number'
       )
         return null
+      if (!miner.trim() || !nameOk(miner) || !nameOk(sender) || !nameOk(receiver)) return null
+      if (reward !== rewardAt(i)) return null
+      if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > MAX_DIFFICULTY) return null
+      if (!/^\d+$/.test(nonce) || Number(nonce) > NONCE_MAX) return null
+      if (!Number.isFinite(amount) || amount < 0) return null
       blocks.push({ miner, reward, difficulty, nonce, sender, receiver, amount })
     }
     return blocks
