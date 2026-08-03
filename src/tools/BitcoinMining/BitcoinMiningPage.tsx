@@ -605,14 +605,31 @@ function MiningCard() {
             <span className={styles.ledgerWon}>
               {r.blocksWon} {r.blocksWon === 1 ? 'block' : 'blocks'}
             </span>
-            <span className={r.touchedLast && r.delta !== 0 ? (r.delta > 0 ? styles.deltaUp : styles.deltaDown) : styles.deltaNone}>
-              {r.touchedLast && r.delta !== 0 ? `${r.delta > 0 ? '+' : '−'}${fmtBtc(Math.abs(r.delta))}` : '—'}
-            </span>
+            {r.minedLast > 0 || r.txLast !== 0 ? (
+              <span className={styles.deltaCell}>
+                {r.minedLast > 0 && <span className={styles.deltaMine}>⛏ +{fmtBtc(r.minedLast)}</span>}
+                {r.txLast !== 0 && (
+                  <span className={r.txLast > 0 ? styles.deltaUp : styles.deltaDown}>
+                    {r.txLast > 0 ? '+' : '−'}
+                    {fmtBtc(Math.abs(r.txLast))}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className={styles.deltaNone}>—</span>
+            )}
             <span className={styles.ledgerBalance}>{fmtBtc(r.balance)} BTC</span>
           </div>
         ))}
         {ledger.length === 0 && <div className={styles.ledgerEmpty}>No blocks yet: mine one and the first balance appears here.</div>}
       </div>
+      {ledger.length > 0 && (
+        <div className={styles.colorLegend}>
+          <span className={styles.deltaMine}>⛏ mined reward</span>
+          <span className={styles.deltaUp}>+ received</span>
+          <span className={styles.deltaDown}>− sent</span>
+        </div>
+      )}
 
       {/* The movement sheet: the hand-kept classroom spreadsheet, derived. */}
       {blocks.length > 0 && (
@@ -641,14 +658,19 @@ function MiningCard() {
                       const bal = round[i]
                       const prev = r > 0 ? grid.balances[r - 1]![i] : undefined
                       const delta = bal == null ? 0 : bal - (prev ?? 0)
-                      const cls = [styles.sheetNum, delta > 0 ? styles.cellUp : delta < 0 ? styles.cellDown : '']
+                      const mined = grid.minedBy[r] === i
+                      const cls = [
+                        styles.sheetNum,
+                        mined ? styles.cellMine : delta > 0 ? styles.cellUp : delta < 0 ? styles.cellDown : '',
+                      ]
                         .filter(Boolean)
                         .join(' ')
                       return (
                         <td key={r} className={cls}>
                           {bal == null ? '' : fmtBtc(bal)}
                           {bal != null && delta !== 0 && (
-                            <span className={delta > 0 ? styles.cellDeltaUp : styles.cellDeltaDown}>
+                            <span className={mined ? styles.cellDeltaMine : delta > 0 ? styles.cellDeltaUp : styles.cellDeltaDown}>
+                              {mined && '⛏ '}
                               {delta > 0 ? `+${fmtBtc(delta)}` : `−${fmtBtc(Math.abs(delta))}`}
                             </span>
                           )}

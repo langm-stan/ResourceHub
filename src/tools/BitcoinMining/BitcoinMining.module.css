@@ -621,6 +621,22 @@
   font: 600 13px 'Source Sans 3', sans-serif;
   color: #bbb;
 }
+/* Mined rewards get their own color, so the ledger reads mine / receive / send at a glance. */
+.deltaMine {
+  font: 600 13px 'Source Sans 3', sans-serif;
+  color: #b06a00;
+}
+.deltaCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.colorLegend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+}
 .ledgerBalance {
   text-align: right;
   font: 600 16px 'IBM Plex Mono', monospace;
@@ -699,8 +715,12 @@
 .cellDown {
   background: #fdf3f3;
 }
+.cellMine {
+  background: #fdf6e7;
+}
 .cellDeltaUp,
-.cellDeltaDown {
+.cellDeltaDown,
+.cellDeltaMine {
   display: block;
   font: 600 10px 'Source Sans 3', sans-serif;
   line-height: 1.4;
@@ -710,6 +730,9 @@
 }
 .cellDeltaDown {
   color: #c0392b;
+}
+.cellDeltaMine {
+  color: #b06a00;
 }
 .sheetRule td {
   border-top: 2px solid #eee;

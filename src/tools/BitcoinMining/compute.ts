@@ -187,19 +187,21 @@ export interface LedgerRow {
   name: string
   balance: number
   blocksWon: number
-  /** Net change from the newest block, 0 when this participant sat it out. */
-  delta: number
+  /** Reward earned by mining the newest block, 0 otherwise. Kept separate from payments so the ledger can color mining, receiving, and sending differently. */
+  minedLast: number
+  /** Net payment change in the newest block: positive received, negative sent. */
+  txLast: number
   touchedLast: boolean
 }
 
 /** Every balance follows from the chain: rewards in, payments across. Sorted by balance, richest first. */
 export function buildLedger(blocks: Block[]): LedgerRow[] {
-  const accounts = new Map<string, { name: string; balance: number; blocksWon: number; delta: number; touchedLast: boolean }>()
+  const accounts = new Map<string, { name: string; balance: number; blocksWon: number; minedLast: number; txLast: number; touchedLast: boolean }>()
   const touch = (name: string) => {
     const key = nameKey(name)
     let acc = accounts.get(key)
     if (!acc) {
-      acc = { name: name.trim(), balance: 0, blocksWon: 0, delta: 0, touchedLast: false }
+      acc = { name: name.trim(), balance: 0, blocksWon: 0, minedLast: 0, txLast: 0, touchedLast: false }
       accounts.set(key, acc)
     }
     return acc
@@ -211,7 +213,7 @@ export function buildLedger(blocks: Block[]): LedgerRow[] {
     acc.balance += b.reward
     acc.blocksWon++
     if (isLast) {
-      acc.delta += b.reward
+      acc.minedLast = b.reward
       acc.touchedLast = true
     }
     if (b.amount && b.sender && b.receiver) {
@@ -220,9 +222,9 @@ export function buildLedger(blocks: Block[]): LedgerRow[] {
       from.balance -= b.amount
       to.balance += b.amount
       if (isLast) {
-        from.delta -= b.amount
+        from.txLast -= b.amount
         from.touchedLast = true
-        to.delta += b.amount
+        to.txLast += b.amount
         to.touchedLast = true
       }
     }
@@ -246,6 +248,8 @@ export interface BalanceGrid {
   names: string[]
   /** balances[round][i] = names[i]'s balance after that block, undefined before they appear. */
   balances: (number | undefined)[][]
+  /** minedBy[round] = index into names of that block's miner, for the gold mined-cell tint. */
+  minedBy: number[]
   rewards: number[]
   supply: number[]
 }
@@ -264,8 +268,10 @@ export function buildBalanceGrid(blocks: Block[]): BalanceGrid {
     }
     return key
   }
+  const minedBy: number[] = []
   for (const b of blocks) {
     const miner = touch(b.miner)
+    minedBy.push(order.indexOf(miner))
     current.set(miner, current.get(miner)! + b.reward)
     if (b.amount && b.sender && b.receiver) {
       const from = touch(b.sender)
@@ -278,6 +284,7 @@ export function buildBalanceGrid(blocks: Block[]): BalanceGrid {
   return {
     names: order.map((k) => display.get(k)!),
     balances: rounds.map((snap) => order.map((k) => snap.get(k))),
+    minedBy,
     rewards: blocks.map((b) => b.reward),
     supply: rounds.map((snap) => [...snap.values()].reduce((a, v) => a + v, 0)),
   }
