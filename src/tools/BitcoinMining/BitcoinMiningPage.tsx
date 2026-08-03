@@ -8,14 +8,18 @@ import {
   MAX_DIFFICULTY,
   HALVING_INTERVAL,
   GENESIS_HASH,
+  MAX_SUPPLY,
   blockData,
   buildBalanceGrid,
   buildLedger,
   circulatingSupply,
   computeChain,
+  countChanged,
   decodeChain,
   encodeChain,
+  hashHue,
   isBlockArray,
+  leadingZeros,
   meetsDifficulty,
   sha256Hex,
   suggestedReward,
@@ -33,11 +37,24 @@ import styles from './BitcoinMining.module.css'
 const fmtBtc = (v: number) => `${Number(v.toFixed(2))} BTC`
 const fmtCount = (v: number) => v.toLocaleString()
 
-const AUTOMINE_UNLOCK = 3
+const AUTOMINE_UNLOCK = 2
 const CHUNK = 2000
+/** A playful electricity price per guess; only shown once auto-mine has burned real guess counts. */
+const COST_PER_GUESS = 0.0001
+/** Real Bitcoin's nonce is a 32-bit integer, so the classroom one honors the same range. */
+const NONCE_MAX = 4294967295
 
 function shortHash(hash: string): string {
   return hash === GENESIS_HASH ? hash : `${hash.slice(0, 12)}…${hash.slice(-6)}`
+}
+
+/**
+ * A color swatch derived from the hash itself, so a hash and the next
+ * block's "previous hash" visibly match: the chain drawn as touching colors.
+ */
+function HashChip({ hash }: { hash: string }) {
+  const bg = hash === GENESIS_HASH ? 'var(--text-faint)' : `hsl(${hashHue(hash).toFixed(0)}, 62%, 48%)`
+  return <span className={styles.chip} style={{ background: bg }} aria-hidden />
 }
 
 /** The calculated hash with the first `difficulty` characters graded: green zeros hit the target, red characters miss it. */
@@ -71,6 +88,7 @@ function MiningStation() {
   const [txTo, setTxTo] = useState('')
   const [txAmount, setTxAmount] = useState(0)
   const [nonce, setNonce] = useState('')
+  const [roomSize, setRoomSize] = usePersistentState<number>('ifdm-bitcoin-room', 30, (v) => v >= 1 && v <= 100000)
   const [importedCount, setImportedCount] = useState<number | null>(null)
 
   /* A scanned QR code lands here as ?chain=...; the URL wins, then is cleared so local progress takes over. */
@@ -88,6 +106,7 @@ function MiningStation() {
       const last = decoded[decoded.length - 1]
       if (last) setDifficulty(last.difficulty)
       setImportedCount(decoded.length)
+      resetRound()
     }
   }, [searchParams, setSearchParams, setBlocks, setDifficulty])
 
@@ -129,6 +148,33 @@ function MiningStation() {
   const txProblem = tx && senderBalance < tx.amount
   const canMine = Boolean(candidate.miner) && Boolean(candidate.nonce) && meets && !txProblem
 
+  /*
+   * Personal race stats: every distinct nonce this device tries is a guess,
+   * and the best run of leading zeros so far is the student's trophy even
+   * when someone else wins the round. The previous guess's hash is kept to
+   * show the avalanche effect: one nonce change rewrites the whole hash.
+   */
+  const lastTried = useRef<{ nonce: string; hash: string } | null>(null)
+  const [prevGuess, setPrevGuess] = useState<{ nonce: string; hash: string } | null>(null)
+  const [guessCount, setGuessCount] = useState(0)
+  const [bestZeros, setBestZeros] = useState(0)
+  const trimmedNonce = candidate.nonce
+  useEffect(() => {
+    if (!trimmedNonce) return
+    if (lastTried.current?.nonce === trimmedNonce) return
+    if (lastTried.current) setPrevGuess(lastTried.current)
+    lastTried.current = { nonce: trimmedNonce, hash }
+    setGuessCount((c) => c + 1)
+    setBestZeros((b) => Math.max(b, leadingZeros(hash)))
+  }, [trimmedNonce, hash])
+
+  function resetRound() {
+    lastTried.current = null
+    setPrevGuess(null)
+    setGuessCount(0)
+    setBestZeros(0)
+  }
+
   /* Auto-mine: churn nonces in small chunks so the guess counter stays live. */
   const autoToken = useRef<{ cancelled: boolean } | null>(null)
   const [autoState, setAutoState] = useState<{ running: boolean; attempts: number } | null>(null)
@@ -153,6 +199,7 @@ function MiningStation() {
         if (meetsDifficulty(h, difficulty)) {
           setNonce(String(n))
           setAutoState({ running: false, attempts: n + 1 })
+          setGuessCount((c) => c + n)
           return
         }
         n++
@@ -182,6 +229,7 @@ function MiningStation() {
     setTxAmount(0)
     setReward(suggestedReward(next.length))
     setImportedCount(null)
+    resetRound()
   }
 
   /*
@@ -209,6 +257,7 @@ function MiningStation() {
     setTxAmount(0)
     setReward(suggestedReward(0))
     setImportedCount(null)
+    resetRound()
   }
 
   /* The QR code encodes the chain itself in the page URL; no server involved. */
@@ -262,6 +311,7 @@ function MiningStation() {
         />
         <div className={styles.readout}>
           <div className={styles.readoutLabel}>Previous hash</div>
+          <HashChip hash={prevHash} />
           <span className={styles.mono}>{prevHash}</span>
         </div>
         <div className={styles.band}>
@@ -274,6 +324,7 @@ function MiningStation() {
             value={String(difficulty)}
             onChange={(v) => setDifficulty(Number(v))}
           />
+          <NumberField label="People mining" value={roomSize} onChange={setRoomSize} min={1} max={100000} precision={0} />
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="btc-miner">
               Miner
@@ -323,12 +374,24 @@ function MiningStation() {
               id="btc-nonce"
               className={`${styles.textInput} ${styles.mono}`}
               value={nonce}
-              onChange={(e) => setNonce(e.target.value)}
-              placeholder="Guess any number"
+              inputMode="numeric"
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, '')
+                // Past the 32-bit ceiling the field simply stops accepting digits.
+                if (digits && Number(digits) > NONCE_MAX) return
+                setNonce(digits)
+              }}
+              placeholder="0 to 4,294,967,295"
               autoComplete="off"
             />
           </div>
         </div>
+        <p className={styles.footnote}>
+          Pace of this round: alone, a miner needs about {fmtCount(16 ** difficulty)} guesses at difficulty {difficulty}.
+          With {fmtCount(roomSize)} people racing, expect a winner after about{' '}
+          {fmtCount(Math.max(1, Math.round(16 ** difficulty / roomSize)))} guesses each. Raise the difficulty as the room
+          grows, exactly as the real network does.
+        </p>
         <div className={styles.readouts}>
           <div className={styles.readout}>
             <div className={styles.readoutLabel}>Block data (what gets hashed)</div>
@@ -341,8 +404,31 @@ function MiningStation() {
             <HashReadout hash={hash} difficulty={difficulty} />
           </div>
         </div>
+        {prevGuess && trimmedNonce && prevGuess.nonce !== trimmedNonce && (
+          <div className={styles.avalanche}>
+            <span className={styles.hint}>
+              Your last guess, nonce {prevGuess.nonce}, gave a completely different hash: changing the nonce rewrote{' '}
+              {countChanged(prevGuess.hash, hash)} of 64 characters. That unpredictability is why guessing is the only
+              way to mine.
+            </span>
+            <span className={`${styles.mono} ${styles.avalancheHash}`}>
+              {prevGuess.hash.split('').map((ch, i) => (
+                <span key={i} className={ch !== hash[i] ? styles.avalancheChanged : undefined}>
+                  {ch}
+                </span>
+              ))}
+            </span>
+          </div>
+        )}
+        {guessCount > 0 && (
+          <p className={styles.footnote}>
+            Your guesses this round: {fmtCount(guessCount)} · your best hash so far started with {bestZeros} leading{' '}
+            {bestZeros === 1 ? 'zero' : 'zeros'}.
+          </p>
+        )}
         <div className={styles.actions}>
-          <Button onClick={mineBlock} disabled={!canMine}>
+          {/* Quiet while unmineable (a disabled cardinal button washes its label out), flipping to solid cardinal the moment the hash verifies. */}
+          <Button onClick={mineBlock} disabled={!canMine} variant={canMine ? 'primary' : 'quiet'}>
             Add block to the chain
           </Button>
           {autoUnlocked &&
@@ -356,7 +442,12 @@ function MiningStation() {
               </Button>
             ))}
           {autoState && !autoState.running && (
-            <span className={styles.hint}>Found after {fmtCount(autoState.attempts)} guesses.</span>
+            <span className={styles.hint}>
+              Found after {fmtCount(autoState.attempts)} guesses
+              {autoState.attempts >= 100
+                ? `, about $${(autoState.attempts * COST_PER_GUESS).toFixed(2)} of electricity at $${COST_PER_GUESS} a guess. The reward has to beat that cost, or nobody mines.`
+                : '.'}
+            </span>
           )}
           {txProblem && tx && (
             <span className={styles.warn}>
@@ -390,11 +481,18 @@ function MiningStation() {
           <StepHeader
             step={2}
             title="The blockchain"
-            hint="Each block's hash is computed from the previous block's hash, so the blocks form a chain. Nothing below is stored: every hash on this table is re-derived from the typed entries."
+            hint="Each block's hash is computed from the previous block's hash, so the blocks form a chain. The color swatch is a hash's fingerprint: follow it from one block's hash into the next block's previous-hash slot. Nothing below is stored, every hash is re-derived from the typed entries."
           />
           <div className={styles.stats}>
             <Stat label="Blocks mined" value={blocks.length} format={fmtCount} animate={false} />
-            <Stat label="Circulating supply" value={supply} format={fmtBtc} emphasis animate={false} />
+            <Stat
+              label="Circulating supply"
+              value={supply}
+              format={fmtBtc}
+              note={`of the ${MAX_SUPPLY} BTC the halving schedule will ever allow`}
+              emphasis
+              animate={false}
+            />
             <Stat label="Participants on the ledger" value={ledger.length} format={fmtCount} animate={false} />
           </div>
           <div className={styles.actions}>
@@ -438,6 +536,7 @@ function MiningStation() {
                   <tr key={i} className={m.valid ? '' : styles.invalidRow}>
                     <td className={styles.numCell}>{i + 1}</td>
                     <td className={styles.hashCell} title={m.prevHash}>
+                      <HashChip hash={m.prevHash} />
                       {shortHash(m.prevHash)}
                     </td>
                     <td className={styles.hashCell}>{m.block.nonce}</td>
@@ -475,6 +574,7 @@ function MiningStation() {
                       )}
                     </td>
                     <td className={styles.hashCell} title={m.hash}>
+                      <HashChip hash={m.hash} />
                       {shortHash(m.hash)}
                     </td>
                     <td>
@@ -606,22 +706,24 @@ function MiningStation() {
       )}
 
       <MathSection
-        hint="Why finding a block is hard but checking one is instant."
+        hint="Why finding a block is hard, checking one is instant, and a bigger room needs a higher difficulty."
         rows={[
           {
             tex: 'P(\\text{a guess is valid}) = 16^{-d}',
             caption: `Each character of the hash is one of 16 hex values. Requiring d leading zeros means the first d characters must all land on 0.`,
           },
           {
-            tex: `d = ${difficulty}: \\quad P = 16^{-${difficulty}} = \\tfrac{1}{${16 ** difficulty}}`,
+            tex: `d = ${difficulty}: \\quad P = 16^{-${difficulty}} = \\tfrac{1}{${16 ** difficulty}}, \\qquad E[\\text{guesses, one miner}] = 16^{${difficulty}} = \\boxed{${16 ** difficulty}}`,
             muted: true,
           },
           {
-            tex: `E[\\text{guesses}] = 16^{d} = \\boxed{${16 ** difficulty}}`,
+            tex: `\\text{a room of } ${roomSize} \\text{ mining together: } \\; E[\\text{guesses each}] = \\tfrac{16^{${difficulty}}}{${roomSize}} \\approx \\boxed{${Math.max(1, Math.round(16 ** difficulty / roomSize))}}`,
+            caption:
+              'Guessing in parallel splits the work: the more miners join, the faster blocks fall. That is why the real network raises the difficulty as miners join, to hold one block every ten minutes no matter how big the room gets.',
             muted: true,
           },
         ]}
-        note={`At difficulty ${difficulty}, a miner needs about ${(16 ** difficulty).toLocaleString()} guesses on average, but checking a claimed winner takes exactly one hash. That asymmetry is proof of work: expensive to produce, instant for the whole room to verify, which is also what the QR code relies on.`}
+        note={`Finding a block at difficulty ${difficulty} costs about ${(16 ** difficulty).toLocaleString()} guesses, but checking a claimed winner takes exactly one hash. That asymmetry is proof of work: expensive to produce, instant for the whole room to verify, which is also what the QR code relies on.`}
       />
     </div>
   )

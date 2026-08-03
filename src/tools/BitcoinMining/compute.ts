@@ -36,6 +36,35 @@ export const MAX_DIFFICULTY = 4
 export const INITIAL_REWARD = 50
 /** Blocks between reward halvings. Real Bitcoin waits 210,000 blocks; a class period gets two. */
 export const HALVING_INTERVAL = 2
+/**
+ * The most BTC the classroom coin can ever have: the halving schedule is a
+ * geometric series that sums to interval x initial x 2, the same arithmetic
+ * that caps real Bitcoin at 21 million.
+ */
+export const MAX_SUPPLY = INITIAL_REWARD * HALVING_INTERVAL * 2
+
+export function leadingZeros(hash: string): number {
+  let n = 0
+  while (n < hash.length && hash[n] === '0') n++
+  return n
+}
+
+/** How many of the 64 hash characters differ between two hashes (the avalanche effect made countable). */
+export function countChanged(a: string, b: string): number {
+  let n = 0
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++
+  return n
+}
+
+/**
+ * A stable identity color for a hash, so the eye can follow one hash into the
+ * next block's "previous hash" slot. Derived from the LAST six characters:
+ * the leading ones are all zeros on any mined hash, which would give every
+ * block the same color.
+ */
+export function hashHue(hash: string): number {
+  return (parseInt(hash.slice(-6), 16) / 0xffffff) * 360
+}
 
 /* ------------------------------ SHA-256 ------------------------------ */
 

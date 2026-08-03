@@ -126,6 +126,32 @@
   font-weight: var(--fw-semibold);
 }
 
+/* Hash identity swatch: the same hash always gets the same color, so the
+   chain reads as touching colors between a hash and the next prev-hash. */
+.chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: var(--space-2);
+  vertical-align: baseline;
+  flex-shrink: 0;
+}
+
+/* The avalanche readout: last guess's hash, changed characters lit up. */
+.avalanche {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.avalancheHash {
+  font-size: var(--fs-caption);
+  color: var(--text-faint);
+}
+.avalancheChanged {
+  color: var(--c-accent);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
