@@ -212,16 +212,22 @@ export const COURSE_UNITS: CourseUnit[] = [
         keywords: ['bonds', 'interest rate risk', 'duration', 'maturity', 'rate shock', 'Silicon Valley Bank', 'SVB', 'treasury', 'losses'],
       },
       {
-        slug: 'gambling-sim',
-        label: 'Gambling Simulation',
-        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets, and the law of large numbers grinds the group down.',
-        keywords: ['gambling', 'betting', 'sports betting', 'casino', 'blackjack', 'parlays', 'prediction markets', 'house edge', 'odds', 'lottery'],
-      },
-      {
         slug: 'stock-picker',
         label: 'Stock Diversifier',
         description: 'Commit $1,000 to one of the 100 largest US companies of a real January and see its decade against the index, then spread the same $1,000 across more tickets until the basket tracks the market.',
         keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'stock picker', 'market cap', 'basket'],
+      },
+      {
+        slug: 'index-fund-fees',
+        label: 'Index Fund Fees',
+        description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
+        keywords: ['index funds', 'fees', 'expense ratio', 'mutual funds', 'ETF', 'costs', 'compounding'],
+      },
+      {
+        slug: 'gambling-sim',
+        label: 'Gambling Simulation',
+        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets, and the law of large numbers grinds the group down.',
+        keywords: ['gambling', 'betting', 'sports betting', 'casino', 'blackjack', 'parlays', 'prediction markets', 'house edge', 'odds', 'lottery'],
       },
       {
         slug: 'bitcoin-mining',
@@ -229,12 +235,6 @@ export const COURSE_UNITS: CourseUnit[] = [
         description:
           'The class becomes the network: race to find a nonce, add the block, and read the ledger off the chain. A QR code after each round syncs every phone, no server involved.',
         keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
-      },
-      {
-        slug: 'index-fund-fees',
-        label: 'Index Fund Fees',
-        description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
-        keywords: ['index funds', 'fees', 'expense ratio', 'mutual funds', 'ETF', 'costs', 'compounding'],
       },
     ],
   },
