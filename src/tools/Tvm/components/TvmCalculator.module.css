@@ -9,6 +9,14 @@
   container-type: inline-size;
 }
 
+.topRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

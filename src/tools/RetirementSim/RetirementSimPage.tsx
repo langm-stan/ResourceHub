@@ -255,17 +255,17 @@ function TakeHomePay() {
       </p>
       <div className={styles.controlsRow}>
         <div className={styles.controlStack}>
-          <div>
-            <Slider
-              label="Salary (wages, $/yr)"
-              value={salary}
-              onChange={setSalary}
-              min={20000}
-              max={250000}
-              step={1000}
-            />
-            <NumberField value={salary} onChange={setSalary} min={0} max={2_000_000} prefix="$" precision={0} />
-          </div>
+          <Slider
+            label="Salary (wages, $/yr)"
+            value={salary}
+            onChange={setSalary}
+            min={20000}
+            max={250000}
+            step={1000}
+            editable
+            prefix="$"
+            inputMax={2_000_000}
+          />
           <div>
             <Button onClick={() => setRaiseOn(!raiseOn)}>
               {raiseOn ? 'Remove the $2,000 raise' : 'Give a $2,000 raise'}
@@ -583,12 +583,15 @@ function AccountTaxation() {
           min={500}
           max={15000}
           step={100}
-          readout={`${formatUSDWhole(earn)}/yr`}
+          editable
+          prefix="$"
+          suffix="/yr"
+          inputMax={50_000}
         />
-        <Slider label="Years invested" value={years} onChange={setYears} min={5} max={45} step={1} readout={`${years} yrs`} />
-        <Slider label="Annual return" value={ret} onChange={setRet} min={2} max={10} step={0.5} readout={`${ret}%`} />
-        <Slider label="Tax rate today" value={taxNow} onChange={setTaxNow} min={0} max={50} step={1} readout={`${taxNow}%`} />
-        <Slider label="Tax rate in retirement" value={taxLater} onChange={setTaxLater} min={0} max={50} step={1} readout={`${taxLater}%`} />
+        <Slider label="Years invested" value={years} onChange={setYears} min={5} max={45} step={1} editable suffix="yrs" plain />
+        <Slider label="Annual return" value={ret} onChange={setRet} min={2} max={10} step={0.5} editable suffix="%" precision={1} />
+        <Slider label="Tax rate today" value={taxNow} onChange={setTaxNow} min={0} max={50} step={1} editable suffix="%" />
+        <Slider label="Tax rate in retirement" value={taxLater} onChange={setTaxLater} min={0} max={50} step={1} editable suffix="%" />
       </div>
       <div className={styles.stats}>
         <Stat label="Taxable (taxed twice)" value={last.taxable} format={formatUSDWhole} accentColor={SLATE} animate={false} />
@@ -765,7 +768,7 @@ function EmployerMatching() {
         {pct(MATCH_CAP)} of salary.
       </p>
       <div className={styles.controlsRow}>
-        <Slider label="Salary" value={salary} onChange={setSalary} min={25000} max={150000} step={1000} readout={formatUSDWhole(salary)} />
+        <Slider label="Salary" value={salary} onChange={setSalary} min={25000} max={150000} step={1000} editable prefix="$" inputMax={500_000} />
         <Slider
           label="Your contribution"
           value={contribPct}
@@ -773,10 +776,13 @@ function EmployerMatching() {
           min={1}
           max={15}
           step={0.5}
-          readout={`${contribPct}% (${formatUSDWhole(contrib)}/yr)`}
+          editable
+          suffix="%"
+          precision={1}
+          note={`${formatUSDWhole(contrib)}/yr`}
         />
-        <Slider label="Years invested" value={years} onChange={setYears} min={10} max={45} step={1} readout={`${years} yrs`} />
-        <Slider label="Annual return" value={retPct} onChange={setRetPct} min={2} max={10} step={0.5} readout={`${retPct}%`} />
+        <Slider label="Years invested" value={years} onChange={setYears} min={10} max={45} step={1} editable suffix="yrs" plain />
+        <Slider label="Annual return" value={retPct} onChange={setRetPct} min={2} max={10} step={0.5} editable suffix="%" precision={1} />
       </div>
       {capped && (
         <p className={styles.note}>
@@ -921,7 +927,10 @@ function RetirementTiming() {
           min={40000}
           max={150000}
           step={5000}
-          readout={`${formatUSDWhole(income)}/yr`}
+          editable
+          prefix="$"
+          suffix="/yr"
+          inputMax={500_000}
         />
         <Slider
           label="Years of retirement"
@@ -930,7 +939,9 @@ function RetirementTiming() {
           min={20}
           max={40}
           step={1}
-          readout={`${retYears} yrs`}
+          editable
+          suffix="yrs"
+          plain
         />
         <Slider
           label="Return while withdrawing"
@@ -939,7 +950,9 @@ function RetirementTiming() {
           min={2}
           max={5}
           step={0.5}
-          readout={`${retiredPct}%`}
+          editable
+          suffix="%"
+          precision={1}
         />
       </div>
       <div className={styles.stats}>
@@ -962,7 +975,9 @@ function RetirementTiming() {
           min={25}
           max={45}
           step={1}
-          readout={`age ${startAge}`}
+          editable
+          prefix="age"
+          plain
         />
         <Slider
           label="Return while saving"
@@ -971,7 +986,9 @@ function RetirementTiming() {
           min={4}
           max={10}
           step={0.5}
-          readout={`${savePct}%`}
+          editable
+          suffix="%"
+          precision={1}
         />
       </div>
       <div className={styles.stats}>
@@ -1025,7 +1042,9 @@ function RetirementTiming() {
           min={4}
           max={8}
           step={0.5}
-          readout={`${actualPct}%`}
+          editable
+          suffix="%"
+          precision={1}
         />
       </div>
       <div className={styles.stats}>
@@ -1096,9 +1115,11 @@ function RetirementTiming() {
           min={40000}
           max={200000}
           step={5000}
-          readout={formatUSDWhole(curveIncome)}
+          editable
+          prefix="$"
+          inputMax={1_000_000}
         />
-        <Slider label="Savings rate" value={saveRate} onChange={setSaveRate} min={5} max={70} step={1} readout={`${saveRate}%`} />
+        <Slider label="Savings rate" value={saveRate} onChange={setSaveRate} min={5} max={70} step={1} editable suffix="%" />
       </div>
       <div className={styles.stats}>
         <Stat label="Saving per year" value={(curveIncome * saveRate) / 100} format={formatUSDWhole} animate={false} />
