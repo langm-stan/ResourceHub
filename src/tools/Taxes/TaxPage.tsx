@@ -17,8 +17,10 @@ import {
   CONTRIBUTION_LIMITS,
   FICA,
   FILING_LABELS,
+  MAX_DEFERRAL_PER_WORKER,
   STANDARD_DEDUCTION,
   TAX_YEAR,
+  type Earners,
   type FilingStatus,
 } from './data2026'
 import { STATE_OPTIONS } from './stateData2026'
@@ -66,10 +68,19 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('brackets')
   const [gross, setGross] = useState(80_000)
   const [status, setStatus] = useState<FilingStatus>('single')
+  const [dualEarner, setDualEarner] = useState(true)
   const [stateCode, setStateCode] = useState('CA')
   const [k401, setK401] = useState(5_000)
   const [deductionMode, setDeductionMode] = useState<DeductionMode>('standard')
   const [itemized, setItemized] = useState(25_000)
+
+  const earners: Earners = status === 'mfj' && dualEarner ? 2 : 1
+  // Each worker can defer into a 401(k)/403(b) and, where offered, a 457(b)
+  // with its own separate limit, so the ceiling scales with the earner count.
+  const maxContribution = MAX_DEFERRAL_PER_WORKER * earners
+  // Clamp rather than reset when a status switch shrinks the ceiling, so the
+  // stored value survives toggling back.
+  const contribution = Math.min(k401, maxContribution)
 
   const federalDeduction =
     deductionMode === 'standard'
@@ -79,8 +90,8 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
         : 0
 
   const paycheck = useMemo(
-    () => computePaycheck(gross, status, k401, stateCode, federalDeduction),
-    [gross, status, k401, stateCode, federalDeduction]
+    () => computePaycheck(gross, status, contribution, stateCode, federalDeduction, earners),
+    [gross, status, contribution, stateCode, federalDeduction, earners]
   )
 
   return (
@@ -111,13 +122,24 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
             value={status}
             onChange={setStatus}
           />
+          {status === 'mfj' && (
+            <SegmentedControl
+              label="Earners in the household"
+              options={[
+                { value: 'one', label: 'One' },
+                { value: 'two', label: 'Two' },
+              ]}
+              value={dualEarner ? 'two' : 'one'}
+              onChange={(v) => setDualEarner(v === 'two')}
+            />
+          )}
           <SelectField label="State" value={stateCode} onChange={setStateCode} options={STATE_OPTIONS} />
           <NumberField
-            label="401(k) contribution ($/yr)"
-            value={k401}
+            label="401(k)/403(b)/457(b) contribution ($/yr)"
+            value={contribution}
             onChange={setK401}
             min={0}
-            max={CONTRIBUTION_LIMITS.k401}
+            max={maxContribution}
             prefix="$"
             precision={0}
           />
@@ -156,7 +178,14 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
               ? `, after its own ${formatUSDWhole(paycheck.state.deduction)} deduction`
               : ''
             : ', which taxes no wages'}
-          . The 401(k) cap is the {TAX_YEAR} limit of {formatUSDWhole(CONTRIBUTION_LIMITS.k401)}.
+          . The contribution cap here is {formatUSDWhole(maxContribution)}: the {TAX_YEAR} limit
+          is {formatUSDWhole(CONTRIBUTION_LIMITS.k401)} per worker for a 401(k) or 403(b), and a
+          worker whose employer also offers a 457(b) can put another{' '}
+          {formatUSDWhole(CONTRIBUTION_LIMITS.k401)} there, since that plan carries its own
+          separate limit{earners === 2 ? ', and each spouse gets both limits' : ''}.
+          {earners === 2
+            ? ' With two incomes, the tool splits wages evenly between spouses, which matters only for the per-worker Social Security wage cap.'
+            : ''}
           {paycheck.state.note ? ` ${paycheck.state.note}` : ''}
           {deductionMode === 'itemized' && itemized < STANDARD_DEDUCTION[status]
             ? ` Note: filers take whichever deduction is larger, and ${formatUSDWhole(itemized)} of itemized deductions is below the ${formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction, so a real filer would take the standard instead. The tool applies your choice so you can compare.`
@@ -386,8 +415,8 @@ function PaycheckView({
   deductionMode: DeductionMode
 }) {
   const noContrib = useMemo(
-    () => computePaycheck(p.gross, status, 0, p.state.code, p.federalDeduction),
-    [p.gross, status, p.state.code, p.federalDeduction]
+    () => computePaycheck(p.gross, status, 0, p.state.code, p.federalDeduction, p.earners),
+    [p.gross, status, p.state.code, p.federalDeduction, p.earners]
   )
   const rows = [
     {
@@ -415,7 +444,10 @@ function PaycheckView({
     },
     {
       label: 'Social Security (6.2%)',
-      note: `on wages up to ${formatUSDWhole(FICA.ssWageBase)}`,
+      note:
+        p.earners === 2
+          ? `on each spouse's wages up to ${formatUSDWhole(FICA.ssWageBase)}`
+          : `on wages up to ${formatUSDWhole(FICA.ssWageBase)}`,
       value: p.socialSecurity,
       color: AMBER,
     },
@@ -515,6 +547,13 @@ function RatesView({
   deductionMode: DeductionMode
 }) {
   const keepOfNext100 = 100 * (1 - p.marginalAllInRate)
+  // The Social Security wage base caps each worker separately, so a couple
+  // with two even incomes reaches it at twice the household wages.
+  const capPoint = FICA.ssWageBase * p.earners
+  const capPhrase =
+    p.earners === 2
+      ? `the ${formatUSDWhole(capPoint)} of joint wages where each spouse's half passes the ${formatUSDWhole(FICA.ssWageBase)} per-worker Social Security cap`
+      : `the ${formatUSDWhole(capPoint)} Social Security cap`
   const taxableLabel =
     p.federalDeduction > 0
       ? p.contribution401k > 0
@@ -556,6 +595,7 @@ function RatesView({
         stateCode={p.state.code}
         stateName={p.state.name}
         federalDeduction={p.federalDeduction}
+        earners={p.earners}
         exportStats={[
           { label: 'Gross income (wages)', value: formatUSDWhole(p.gross) },
           { label: taxableLabel, value: formatUSDWhole(p.taxable) },
@@ -563,7 +603,7 @@ function RatesView({
           { label: 'Effective rate (taxes ÷ gross)', value: formatPercent(p.totalTaxRate, 1), color: GREEN },
           { label: 'Marginal rate (next dollar of wages)', value: formatPercent(p.marginalAllInRate, 1), color: CARDINAL },
         ]}
-        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, so neither line starts at zero; ${p.federalDeduction > 0 ? 'the income tax joins in only once income clears any deduction' : 'with no federal deduction, the income tax also starts near the first dollar'}. The marginal rate (red) climbs in steps as brackets fill and drops at the ${formatUSDWhole(FICA.ssWageBase)} Social Security cap. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
+        caption={`Both rates by gross income for a ${FILING_LABELS[status].toLowerCase()} filer in ${p.state.name}, all taxes included; the effective rate divides total tax by gross wages, before any deduction. Social Security (6.2%) and Medicare (1.45%) tax the first dollar of wages, so neither line starts at zero; ${p.federalDeduction > 0 ? 'the income tax joins in only once income clears any deduction' : 'with no federal deduction, the income tax also starts near the first dollar'}. The marginal rate (red) climbs in steps as brackets fill and drops at ${capPhrase}. The effective rate (green) at your income is ${formatPercent(p.totalTaxRate, 1)}, well below your ${formatPercent(p.marginalAllInRate, 1)} marginal rate.`}
       />
 
       <Callout tone="note" label="Why the effective rate is always the lower one">
@@ -586,11 +626,22 @@ function RatesView({
         dollars below them.
       </Callout>
       <Callout tone="mark" label="The dip in the red line">
-        The marginal rate does not only go up. At <strong>{formatUSDWhole(FICA.ssWageBase)}</strong>{' '}
-        wages stop owing the 6.2% Social Security tax, so the all-in marginal rate{' '}
-        <strong>falls</strong> even though the income-tax brackets keep climbing. Above{' '}
-        {formatUSDWhole(FICA.additionalMedicareThreshold[status])} the 0.9% Medicare surtax adds a
-        little back.
+        The marginal rate does not only go up. The 6.2% Social Security tax stops at{' '}
+        <strong>{formatUSDWhole(FICA.ssWageBase)}</strong> of each worker&rsquo;s own wages
+        {p.earners === 2 ? (
+          <>
+            {' '}
+            (the cap is per worker, not per couple, so with two even incomes the household reaches
+            it at <strong>{formatUSDWhole(capPoint)}</strong> of joint wages)
+          </>
+        ) : (
+          ''
+        )}
+        , so the all-in marginal rate <strong>falls</strong> there even though the income-tax
+        brackets keep climbing. Above{' '}
+        {formatUSDWhole(FICA.additionalMedicareThreshold[status])} of{' '}
+        {status === 'mfj' ? 'combined wages (that threshold is per couple)' : 'wages'} the 0.9%
+        Medicare surtax adds a little back.
       </Callout>
     </>
   )
@@ -660,8 +711,16 @@ function TaxMathView({
         muted
       />
       <FormulaBlock
-        tex={`\\text{Social Security} = 6.2\\% \\times \\min(${texUSD(p.gross)},\\; ${texUSD(FICA.ssWageBase)}) = ${texUSD(p.socialSecurity)}`}
-        caption={`Step 4. Payroll tax applies to gross wages, including 401(k) contributions. Wages above the ${formatUSDWhole(FICA.ssWageBase)} cap owe no additional Social Security tax.`}
+        tex={
+          p.earners === 2
+            ? `\\text{Social Security} = 2 \\times 6.2\\% \\times \\min(${texUSD(p.gross / 2)},\\; ${texUSD(FICA.ssWageBase)}) = ${texUSD(p.socialSecurity)}`
+            : `\\text{Social Security} = 6.2\\% \\times \\min(${texUSD(p.gross)},\\; ${texUSD(FICA.ssWageBase)}) = ${texUSD(p.socialSecurity)}`
+        }
+        caption={
+          p.earners === 2
+            ? `Step 4. Payroll tax applies to gross wages, including retirement contributions, and the ${formatUSDWhole(FICA.ssWageBase)} wage cap applies to each worker separately. The tool splits the couple's wages evenly, so each spouse's ${formatUSDWhole(p.gross / 2)} is capped on its own.`
+            : `Step 4. Payroll tax applies to gross wages, including retirement contributions. Wages above the ${formatUSDWhole(FICA.ssWageBase)} cap owe no additional Social Security tax.`
+        }
         muted
       />
       <FormulaBlock
@@ -736,7 +795,7 @@ function RothView({ marginalPct }: { marginalPct: number }) {
         hint="The sacrifice from your paycheck is the same either way. A Traditional account taxes withdrawals in retirement; a Roth taxes the money before it goes in."
       />
       <div className={styles.rothControls}>
-        <NumberField label="Set aside ($/yr, pre-tax)" value={contribution} onChange={setContribution} min={0} max={CONTRIBUTION_LIMITS.k401} prefix="$" precision={0} />
+        <NumberField label="Set aside ($/yr, pre-tax)" value={contribution} onChange={setContribution} min={0} max={MAX_DEFERRAL_PER_WORKER} prefix="$" precision={0} />
         <Slider label="For how long" value={years} onChange={setYears} min={5} max={45} step={1} readout={`${years} years`} />
         <NumberField label="Annual return" value={returnPct} onChange={setReturnPct} min={0} max={12} suffix="%" precision={1} />
         <div />

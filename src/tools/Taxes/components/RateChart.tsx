@@ -14,7 +14,7 @@ import {
   type ExportStat,
 } from '../../../design-system/chart'
 import { formatPercent, formatUSDCompact } from '../../../lib/format'
-import { FICA, type FilingStatus } from '../data2026'
+import { FICA, type Earners, type FilingStatus } from '../data2026'
 import { totalTaxAt } from '../compute'
 
 interface RatePoint {
@@ -38,6 +38,7 @@ export function RateChart({
   federalDeduction,
   includeState = true,
   includePayroll = true,
+  earners = 1,
   caption,
   exportStats,
 }: {
@@ -51,12 +52,20 @@ export function RateChart({
   /** Leave state or payroll tax out of both lines (Tax Advantages toggles). */
   includeState?: boolean
   includePayroll?: boolean
+  /** Workers earning the wages; two earners split them evenly, so the
+   *  per-worker Social Security cap bites at twice the household income. */
+  earners?: Earners
   caption: string
   exportStats?: ExportStat[]
 }) {
-  // Sweep far enough to always show the Social Security cap, and past the
+  // Sweep far enough to always show the Social Security cap (per worker, so
+  // a two-earner household reaches it at twice the income), and past the
   // reader's own income so their marker never sits on the edge.
-  const xMax = Math.max(300_000, gross * 1.5)
+  const xMax = Math.max(
+    300_000,
+    gross * 1.5,
+    includePayroll ? FICA.ssWageBase * earners * 1.3 : 0
+  )
   const include = useMemo(
     () => ({ state: includeState, payroll: includePayroll }),
     [includeState, includePayroll]
@@ -65,7 +74,7 @@ export function RateChart({
     const N = 280
     const step = xMax / N
     const taxAt = (g: number) =>
-      totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include)
+      totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include, earners)
     const pts: RatePoint[] = []
     for (let i = 0; i <= N; i++) {
       const g = i * step
@@ -81,7 +90,7 @@ export function RateChart({
       })
     }
     return pts
-  }, [xMax, status, contribution401k, stateCode, federalDeduction, include])
+  }, [xMax, status, contribution401k, stateCode, federalDeduction, include, earners])
 
   return (
     <ChartFrame
@@ -92,7 +101,7 @@ export function RateChart({
       exportStats={exportStats}
       ariaLabel={`Marginal and effective tax rates across incomes for a ${status === 'mfj' ? 'married' : 'single'} filer${stateName ? ` in ${stateName}` : ''}`}
     >
-      <Inner points={points} gross={gross} status={status} contribution401k={contribution401k} stateCode={stateCode} federalDeduction={federalDeduction} include={include} xMax={xMax} />
+      <Inner points={points} gross={gross} status={status} contribution401k={contribution401k} stateCode={stateCode} federalDeduction={federalDeduction} include={include} earners={earners} xMax={xMax} />
     </ChartFrame>
   )
 }
@@ -105,6 +114,7 @@ function Inner({
   stateCode,
   federalDeduction,
   include,
+  earners,
   xMax,
 }: {
   points: RatePoint[]
@@ -114,6 +124,7 @@ function Inner({
   stateCode: string
   federalDeduction: number
   include: { state: boolean; payroll: boolean }
+  earners: Earners
   xMax: number
 }) {
   const { innerWidth, innerHeight } = useChart()
@@ -128,14 +139,15 @@ function Inner({
   // The reader's own two rates, computed exactly (not read off the samples).
   // The marginal rate is the tax on literally the next dollar of wages.
   const taxAt = (g: number) =>
-    totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include)
+    totalTaxAt(g, status, contribution401k, stateCode, federalDeduction, include, earners)
   const ownTax = taxAt(gross)
   const ownEffective = gross > 0 ? ownTax / gross : 0
   const ownMarginal = taxAt(gross + 1) - ownTax
 
   // Where the Social Security cap bites: mark the marginal rate just past it.
-  // Without payroll tax in the lines there is no dip to annotate.
-  const cap = FICA.ssWageBase
+  // The cap is per worker, so two even earners reach it at twice the
+  // household income. Without payroll tax in the lines there is no dip.
+  const cap = FICA.ssWageBase * earners
   const pastCap = taxAt(cap + 1_001) - taxAt(cap + 1_000)
   const preCap = taxAt(cap - 1_000) - taxAt(cap - 1_001)
   const showCap = include.payroll && cap < xMax * 0.92 && Math.abs(x(cap) - x(gross)) > innerWidth * 0.12

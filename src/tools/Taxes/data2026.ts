@@ -73,6 +73,16 @@ export const CONTRIBUTION_LIMITS = {
   ira: 7_500,
 }
 
+/**
+ * The 457(b) limit is separate from the shared 401(k)/403(b) limit (IRC
+ * §457(c) vs. §402(g)), so a worker offered both plans (common for teachers
+ * and other public employees) can defer up to twice the base limit.
+ */
+export const MAX_DEFERRAL_PER_WORKER = CONTRIBUTION_LIMITS.k401 * 2
+
+/** Workers earning the household's wages: 1, or 2 modeled as an even split. */
+export type Earners = 1 | 2
+
 /** Account restrictions beyond the base limits (IRS Notice 2025-67). */
 export const ACCOUNT_RULES = {
   /** Additional IRA contribution allowed from age 50, 2026. */

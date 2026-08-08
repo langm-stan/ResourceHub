@@ -4,10 +4,17 @@
  * come from the vetted Taxes tool data (single source for annual updates).
  * Pure functions, no React.
  */
-import { BRACKETS, FICA, STANDARD_DEDUCTION, type FilingStatus } from '../Taxes/data2026'
+import { BRACKETS, FICA, STANDARD_DEDUCTION, type Earners, type FilingStatus } from '../Taxes/data2026'
+import { computePayrollTax } from '../Taxes/compute'
 
-export { ACCOUNT_RULES, CONTRIBUTION_LIMITS, STANDARD_DEDUCTION, TAX_YEAR } from '../Taxes/data2026'
-export type { FilingStatus } from '../Taxes/data2026'
+export {
+  ACCOUNT_RULES,
+  CONTRIBUTION_LIMITS,
+  MAX_DEFERRAL_PER_WORKER,
+  STANDARD_DEDUCTION,
+  TAX_YEAR,
+} from '../Taxes/data2026'
+export type { Earners, FilingStatus } from '../Taxes/data2026'
 export const SS_WAGE_BASE = FICA.ssWageBase
 
 /* ------------------------ part 1: paycheck ------------------------ */
@@ -52,13 +59,13 @@ export function federalTax(
   return { taxable, tax, marginal, slices }
 }
 
-/** Employee-side FICA (Social Security to the wage base, Medicare on all wages). */
-export function fica(gross: number, status: FilingStatus = 'single'): number {
-  const ss = FICA.ssRate * Math.min(gross, FICA.ssWageBase)
-  const extra = gross > FICA.additionalMedicareThreshold[status]
-    ? FICA.additionalMedicareRate * (gross - FICA.additionalMedicareThreshold[status])
-    : 0
-  return ss + FICA.medicareRate * gross + extra
+/**
+ * Employee-side FICA (Social Security to the per-worker wage base, Medicare
+ * on all wages). Delegates to the Taxes tool so both lessons share one model:
+ * a two-earner household splits wages evenly, capping each worker separately.
+ */
+export function fica(gross: number, status: FilingStatus = 'single', earners: Earners = 1): number {
+  return computePayrollTax(gross, status, earners).total
 }
 
 /* ---------------------- part 2: three jars ------------------------ */

@@ -14,6 +14,7 @@ import {
   FICA,
   STANDARD_DEDUCTION,
   type Bracket,
+  type Earners,
   type FilingStatus,
 } from './data2026'
 import { STATE_TAXES } from './stateData2026'
@@ -141,6 +142,38 @@ export function computeStateTax(
   return { ...base, hasTax: true, deduction, taxable, credit, tax, marginalRate, segments }
 }
 
+export interface PayrollTax {
+  socialSecurity: number
+  medicare: number
+  additionalMedicare: number
+  total: number
+}
+
+/**
+ * Employee-side payroll tax on the household's wages. The Social Security
+ * wage base caps each WORKER's wages separately, so a two-earner couple
+ * (modeled as an even split) reaches it at twice the household income a
+ * one-earner household does. The Additional Medicare threshold is the
+ * opposite: on the return it applies to the couple's combined wages.
+ */
+export function computePayrollTax(
+  gross: number,
+  status: FilingStatus,
+  earners: Earners
+): PayrollTax {
+  const g = Math.max(0, gross)
+  const socialSecurity = FICA.ssRate * earners * Math.min(g / earners, FICA.ssWageBase)
+  const medicare = FICA.medicareRate * g
+  const additionalMedicare =
+    FICA.additionalMedicareRate * Math.max(0, g - FICA.additionalMedicareThreshold[status])
+  return {
+    socialSecurity,
+    medicare,
+    additionalMedicare,
+    total: socialSecurity + medicare + additionalMedicare,
+  }
+}
+
 /**
  * The whole year's bill — federal income tax + state income tax + payroll —
  * as a single number. Exported for the rate chart, which sweeps it across
@@ -154,7 +187,8 @@ export function totalTaxAt(
   federalDeduction: number = STANDARD_DEDUCTION[status],
   // The Tax Advantages tool builds the bill piece by piece, so the sweep can
   // leave state or payroll tax out; the Taxes tool always includes both.
-  include: { state?: boolean; payroll?: boolean } = {}
+  include: { state?: boolean; payroll?: boolean } = {},
+  earners: Earners = 1
 ): number {
   const { state: withState = true, payroll: withPayroll = true } = include
   const g = Math.max(0, gross)
@@ -162,16 +196,14 @@ export function totalTaxAt(
   const taxable = Math.max(0, g - k - Math.max(0, federalDeduction))
   const federal = computeBracketTax(taxable, BRACKETS[status]).tax
   const state = withState ? computeStateTax(g, k, status, stateCode).tax : 0
-  const socialSecurity = FICA.ssRate * Math.min(g, FICA.ssWageBase)
-  const medicare = FICA.medicareRate * g
-  const additionalMedicare =
-    FICA.additionalMedicareRate * Math.max(0, g - FICA.additionalMedicareThreshold[status])
-  const payroll = withPayroll ? socialSecurity + medicare + additionalMedicare : 0
+  const payroll = withPayroll ? computePayrollTax(g, status, earners).total : 0
   return federal + state + payroll
 }
 
 export interface PaycheckResult {
   gross: number
+  /** Workers earning the wages (a two-earner couple splits them evenly). */
+  earners: Earners
   contribution401k: number
   /** The federal deduction actually applied (standard, itemized, or zero). */
   federalDeduction: number
@@ -204,15 +236,16 @@ export function computePaycheck(
   status: FilingStatus,
   contribution401k: number,
   stateCode: string,
-  federalDeduction: number = STANDARD_DEDUCTION[status]
+  federalDeduction: number = STANDARD_DEDUCTION[status],
+  earners: Earners = 1
 ): PaycheckResult {
   const g = Math.max(0, gross)
 
-  const socialSecurity = FICA.ssRate * Math.min(g, FICA.ssWageBase)
-  const medicare = FICA.medicareRate * g
-  const additionalMedicare =
-    FICA.additionalMedicareRate * Math.max(0, g - FICA.additionalMedicareThreshold[status])
-  const payrollTax = socialSecurity + medicare + additionalMedicare
+  const { socialSecurity, medicare, additionalMedicare, total: payrollTax } = computePayrollTax(
+    g,
+    status,
+    earners
+  )
 
   // 401(k) deferrals reduce income tax but NOT payroll (FICA) tax — FICA is
   // computed on gross wages. Nearly every taxing state follows the federal
@@ -250,7 +283,8 @@ export function computePaycheck(
   // of wages, so bracket edges, the SS wage cap, and the Medicare surtax
   // threshold all land exactly. A wider step would blend two brackets right
   // below an edge: at taxable $12,399 the next dollar pays 10%, not 12%.
-  const marginalAllInRate = totalTaxAt(g + 1, status, k, stateCode, deduction) - totalTax
+  const marginalAllInRate =
+    totalTaxAt(g + 1, status, k, stateCode, deduction, {}, earners) - totalTax
 
   // The income-tax-only marginal rate (federal + state, payroll excluded),
   // also taken numerically. The bracket-schedule rates overstate this at low
@@ -263,6 +297,7 @@ export function computePaycheck(
 
   return {
     gross: g,
+    earners,
     contribution401k: k,
     federalDeduction: deduction,
     taxable,

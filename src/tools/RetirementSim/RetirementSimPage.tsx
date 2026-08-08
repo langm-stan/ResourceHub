@@ -11,6 +11,7 @@ import { STATE_OPTIONS, STATE_TAXES } from '../Taxes/stateData2026'
 import {
   ACCOUNT_RULES,
   CONTRIBUTION_LIMITS,
+  MAX_DEFERRAL_PER_WORKER,
   MATCH_CAP,
   MATCH_RETURN,
   MATCH_TAX,
@@ -22,6 +23,7 @@ import {
   SS_WAGE_BASE,
   STANDARD_DEDUCTION,
   TAX_YEAR,
+  type Earners,
   type FilingStatus,
   federalTax,
   fica,
@@ -123,10 +125,15 @@ function TakeHomePay() {
   const [with401k, setWith401k] = useState(false)
   const [k401, setK401] = useState(5000)
   const [status, setStatus] = useState<FilingStatus>('single')
+  const [dualEarner, setDualEarner] = useState(true)
   const [deductionMode, setDeductionMode] = useState<DeductionMode>('standard')
   const [itemized, setItemized] = useState(25000)
 
   const gross = raiseOn ? salary + 2000 : salary
+  const earners: Earners = status === 'mfj' && dualEarner ? 2 : 1
+  // Each worker can defer into a 401(k)/403(b) and, where offered, a 457(b)
+  // with its own separate limit, so the ceiling scales with the earner count.
+  const maxContribution = MAX_DEFERRAL_PER_WORKER * earners
   const deduction =
     deductionMode === 'standard'
       ? STANDARD_DEDUCTION[status]
@@ -139,14 +146,16 @@ function TakeHomePay() {
       // Payroll tax is owed on gross wages even when every remaining dollar
       // is deferred, so cap the contribution at what is left after it; the
       // take-home figure can then never go negative.
-      const payroll = withPayroll ? fica(g, status) : 0
-      const k = with401k ? Math.min(Math.max(0, k401), Math.max(0, g - payroll)) : 0
+      const payroll = withPayroll ? fica(g, status, earners) : 0
+      const k = with401k
+        ? Math.min(Math.max(0, k401), maxContribution, Math.max(0, g - payroll))
+        : 0
       const fed = federalTax(Math.max(0, g - k), status, deduction)
       const state = withState ? computeStateTax(g, k, status, stateCode) : null
       const total = fed.tax + (state?.tax ?? 0) + payroll
       return { k, fed, state, payroll, total, takeHome: g - k - total }
     }
-  }, [with401k, k401, withState, stateCode, withPayroll, status, deduction])
+  }, [with401k, k401, maxContribution, withState, stateCode, withPayroll, status, earners, deduction])
 
   const cur = useMemo(() => taxesAt(gross), [taxesAt, gross])
   const raiseDelta = cur.takeHome - taxesAt(salary).takeHome
@@ -228,10 +237,11 @@ function TakeHomePay() {
       })
     }
     if (withPayroll) {
-      const ss = 0.062 * Math.min(gross, SS_WAGE_BASE)
+      const ss = 0.062 * earners * Math.min(gross / earners, SS_WAGE_BASE)
+      const surtaxThreshold = status === 'mfj' ? 250_000 : 200_000
       rows.push({
         tex: `\\text{payroll} = \\underbrace{${texUSD(ss)}}_{\\text{Social Security}} + \\underbrace{${texUSD(cur.payroll - ss)}}_{\\text{Medicare}} = \\boxed{${texUSD(cur.payroll)}}`,
-        caption: `Step ${withState && cur.state?.hasTax ? 4 : 3}. Social Security is 6.2% of wages up to ${formatUSDWhole(SS_WAGE_BASE)}; Medicare is 1.45% of every wage dollar${gross > 200_000 ? ', plus the 0.9% surtax above the threshold' : ''}. Both apply to gross wages, 401(k) contributions included.`,
+        caption: `Step ${withState && cur.state?.hasTax ? 4 : 3}. Social Security is 6.2% of each worker's wages up to ${formatUSDWhole(SS_WAGE_BASE)}${earners === 2 ? ' (two even earners here, so each half is capped on its own)' : ''}; Medicare is 1.45% of every wage dollar${gross > surtaxThreshold ? ', plus the 0.9% surtax above the threshold' : ''}. Both apply to gross wages, 401(k) contributions included.`,
         muted: true,
       })
     }
@@ -240,7 +250,7 @@ function TakeHomePay() {
       caption: `Last step. Wages minus ${cur.k > 0 ? 'the 401(k) contribution (still yours) and ' : ''}every tax switched on.`,
     })
     return rows
-  }, [gross, cur, deduction, withState, withPayroll])
+  }, [gross, cur, deduction, withState, withPayroll, earners, status])
   const taxableBase = Math.max(0, gross - cur.k)
   const payrollRate = withPayroll && gross > 0 ? cur.payroll / gross : 0
   const stateRate = withState && cur.state && taxableBase > 0 ? cur.state.tax / taxableBase : 0
@@ -291,11 +301,11 @@ function TakeHomePay() {
           <Toggle label="401(k) contribution (pre-tax)" checked={with401k} onChange={setWith401k} />
           {with401k && (
             <NumberField
-              label="401(k) contribution ($/yr)"
-              value={k401}
+              label="401(k)/403(b)/457(b) contribution ($/yr)"
+              value={Math.min(k401, maxContribution)}
               onChange={setK401}
               min={0}
-              max={CONTRIBUTION_LIMITS.k401}
+              max={maxContribution}
               prefix="$"
               precision={0}
             />
@@ -309,6 +319,17 @@ function TakeHomePay() {
             value={status}
             onChange={setStatus}
           />
+          {status === 'mfj' && (
+            <SegmentedControl
+              label="Earners in the household"
+              options={[
+                { value: 'one', label: 'One' },
+                { value: 'two', label: 'Two' },
+              ]}
+              value={dualEarner ? 'two' : 'one'}
+              onChange={(v) => setDualEarner(v === 'two')}
+            />
+          )}
           <SegmentedControl
             label="Federal deduction"
             options={[
@@ -493,6 +514,7 @@ function TakeHomePay() {
           federalDeduction={deduction}
           includeState={withState}
           includePayroll={withPayroll}
+          earners={earners}
           exportStats={[
             { label: 'Salary (gross wages)', value: formatUSDWhole(gross) },
             { label: 'Total tax counted', value: formatUSDWhole(cur.total) },
@@ -505,7 +527,7 @@ function TakeHomePay() {
           ]}
           caption={`Both rates by gross income for a ${status === 'mfj' ? 'married' : 'single'} filer, counting the pieces switched on above: federal income tax${withState && cur.state ? ` plus ${cur.state.name} state income tax` : ''}${withPayroll ? ' plus payroll taxes' : ''}. ${
             withPayroll
-              ? `Payroll taxes start at the first dollar of wages, so neither line starts at zero, and the marginal rate (red) drops at the ${formatUSDWhole(SS_WAGE_BASE)} Social Security cap.`
+              ? `Payroll taxes start at the first dollar of wages, so neither line starts at zero, and the marginal rate (red) drops at ${earners === 2 ? `the ${formatUSDWhole(SS_WAGE_BASE * earners)} of joint wages where each spouse's half passes the ${formatUSDWhole(SS_WAGE_BASE)} per-worker Social Security cap` : `the ${formatUSDWhole(SS_WAGE_BASE)} Social Security cap`}.`
               : deduction > 0
                 ? `The first ${formatUSDWhole(deduction)} of income is covered by the deduction, so both lines start at zero.`
                 : 'With no deduction, the brackets start at the first dollar.'
@@ -1260,7 +1282,9 @@ export function TaxAdvantagesPage({ intro = true }: { intro?: boolean } = {}) {
         default), with its standard deduction ({formatUSDWhole(STANDARD_DEDUCTION.single)} single,{' '}
         {formatUSDWhole(STANDARD_DEDUCTION.mfj)} married filing jointly) unless switched to an
         itemized total or none (IRS Rev. Proc. 2025-32); FICA with the{' '}
-        {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base; optional state income tax from
+        {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base, applied to each worker (a married
+        couple can be set to one earner or two even earners in Part 1); optional state income tax
+        from
         the Tax Foundation&rsquo;s {TAX_YEAR} state tables. These three parts use simplified annual
         compounding for teaching; they are illustrations, not financial advice.
       </p>
