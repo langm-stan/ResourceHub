@@ -249,7 +249,7 @@ function MiningCard() {
   /* The QR encodes the chain itself in the page URL; no server involved. */
   const shareUrl = useMemo(() => {
     if (!blocks.length) return ''
-    return `${window.location.href.split('#')[0]}#/teacher-training/bitcoin-mining?chain=${encodeChain(blocks)}`
+    return `${window.location.href.split('#')[0]}#/bitcoin-mining?chain=${encodeChain(blocks)}`
   }, [blocks])
   const [qrDataUrl, setQrDataUrl] = useState('')
   useEffect(() => {

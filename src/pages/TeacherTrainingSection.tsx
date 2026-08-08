@@ -32,7 +32,7 @@ import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/Ret
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
 
-const BASE = '/teacher-training'
+const BASE = ''
 
 interface SectionConfig {
   title: string
@@ -71,133 +71,133 @@ const SECTIONS: Record<string, SectionConfig> = {
   'tvm-calculator': {
     title: 'TVM Calculator',
     toolkit: true,
-    instructor: { label: 'TVM Calculator', path: 'teacher-training/tvm-calculator' },
+    instructor: { label: 'TVM Calculator', path: 'tvm-calculator' },
     content: <TvmCalculatorPage intro={false} />,
   },
   'compound-interest': {
     title: 'Compound Interest Scenario',
     toolkit: true,
-    instructor: { label: 'Compound Interest', path: 'teacher-training/compound-interest' },
+    instructor: { label: 'Compound Interest', path: 'compound-interest' },
     content: <CompoundInterestPage intro={false} />,
   },
   inflation: {
     title: 'The Effect of Inflation',
     toolkit: true,
-    instructor: { label: 'The Effect of Inflation', path: 'teacher-training/inflation' },
+    instructor: { label: 'The Effect of Inflation', path: 'inflation' },
     content: <InflationPage intro={false} />,
   },
   'borrow-save': {
     title: 'Borrow & Save',
     toolkit: true,
-    instructor: { label: 'Borrow & Save', path: 'teacher-training/borrow-save' },
+    instructor: { label: 'Borrow & Save', path: 'borrow-save' },
     content: <TvmPage intro={false} />,
   },
   lifecycle: {
     title: 'The Life-Cycle Model',
     toolkit: true,
-    instructor: { label: 'The Life-Cycle Model', path: 'teacher-training/lifecycle' },
+    instructor: { label: 'The Life-Cycle Model', path: 'lifecycle' },
     content: <LifeCyclePage intro={false} />,
   },
   'paying-off-debt': {
     title: 'Paying off Debt',
     toolkit: true,
-    instructor: { label: 'Paying off Debt', path: 'teacher-training/paying-off-debt' },
+    instructor: { label: 'Paying off Debt', path: 'paying-off-debt' },
     content: <PayingOffDebtPage intro={false} />,
   },
   'credit-score': {
     title: 'Your FICO Score',
     toolkit: true,
-    instructor: { label: 'Your FICO Score', path: 'teacher-training/credit-score' },
+    instructor: { label: 'Your FICO Score', path: 'credit-score' },
     content: <CreditScorePage intro={false} />,
   },
   'gambling-sim': {
     title: 'Gambling Simulation',
     toolkit: true,
-    instructor: { label: 'Gambling Simulation', path: 'teacher-training/gambling-sim' },
+    instructor: { label: 'Gambling Simulation', path: 'gambling-sim' },
     content: <GamblingSimPage intro={false} />,
   },
   'stock-picker': {
     title: 'Stock Diversifier',
     toolkit: true,
-    instructor: { label: 'Stock Diversifier', path: 'teacher-training/stock-picker' },
+    instructor: { label: 'Stock Diversifier', path: 'stock-picker' },
     content: <StockPickerPage intro={false} />,
   },
   'bitcoin-mining': {
     title: 'Bitcoin Mining',
     toolkit: true,
-    instructor: { label: 'Bitcoin Mining', path: 'teacher-training/bitcoin-mining' },
+    instructor: { label: 'Bitcoin Mining', path: 'bitcoin-mining' },
     content: <BitcoinMiningPage intro={false} />,
   },
   'single-stock': {
     title: 'One Stock or the Fund',
     toolkit: true,
-    instructor: { label: 'One Stock or the Fund', path: 'teacher-training/single-stock' },
+    instructor: { label: 'One Stock or the Fund', path: 'single-stock' },
     content: <SingleStockPage intro={false} />,
   },
   'gambling-investing': {
     title: 'Gambling vs. Investing',
     toolkit: true,
-    instructor: { label: 'Gambling vs. Investing', path: 'teacher-training/gambling-investing' },
+    instructor: { label: 'Gambling vs. Investing', path: 'gambling-investing' },
     content: <GamblingPage intro={false} />,
   },
   'index-fund-fees': {
     title: 'Index Fund Fees',
     toolkit: true,
-    instructor: { label: 'Index Fund Fees', path: 'teacher-training/index-fund-fees' },
+    instructor: { label: 'Index Fund Fees', path: 'index-fund-fees' },
     content: <IndexFundFeesPage intro={false} />,
   },
   'stocks-bonds': {
     title: 'Stocks vs. Bonds',
     toolkit: true,
-    instructor: { label: 'Stocks vs. Bonds', path: 'teacher-training/stocks-bonds' },
+    instructor: { label: 'Stocks vs. Bonds', path: 'stocks-bonds' },
     content: <StocksBondsPage intro={false} />,
   },
   'bond-pricing': {
     title: 'Pricing a Bond',
     toolkit: true,
-    instructor: { label: 'Pricing a Bond', path: 'teacher-training/bond-pricing' },
+    instructor: { label: 'Pricing a Bond', path: 'bond-pricing' },
     content: <BondPricingPage intro={false} />,
   },
   'bond-rates': {
     title: 'Bonds and Interest Rates',
     toolkit: true,
-    instructor: { label: 'Bonds and Interest Rates', path: 'teacher-training/bond-rates' },
+    instructor: { label: 'Bonds and Interest Rates', path: 'bond-rates' },
     content: <BondRatesPage intro={false} />,
   },
   'tax-advantages': {
     title: 'Tax Advantages',
     toolkit: true,
-    instructor: { label: 'Tax Advantages', path: 'teacher-training/tax-advantages' },
+    instructor: { label: 'Tax Advantages', path: 'tax-advantages' },
     content: <TaxAdvantagesPage intro={false} />,
   },
   'retirement-simulator': {
     title: 'Retirement Planning Simulator',
     toolkit: true,
-    instructor: { label: 'Retirement Planning Simulator', path: 'teacher-training/retirement-simulator' },
+    instructor: { label: 'Retirement Planning Simulator', path: 'retirement-simulator' },
     content: <RetirementSimPage intro={false} />,
   },
   taxes: {
     title: 'Understanding Taxes',
     toolkit: true,
-    instructor: { label: 'Understanding Taxes', path: 'teacher-training/taxes' },
+    instructor: { label: 'Understanding Taxes', path: 'taxes' },
     content: <TaxPage intro={false} />,
   },
   housing: {
     title: 'Buying a Home',
     toolkit: true,
-    instructor: { label: 'Buying a Home', path: 'teacher-training/housing' },
+    instructor: { label: 'Buying a Home', path: 'housing' },
     content: <HousingPage intro={false} />,
   },
   'used-vs-new': {
     title: 'Used vs. New',
     toolkit: true,
-    instructor: { label: 'Used vs. New', path: 'teacher-training/used-vs-new' },
+    instructor: { label: 'Used vs. New', path: 'used-vs-new' },
     content: <UsedVsNewPage intro={false} />,
   },
   'rent-or-own': {
     title: 'Rent or Own',
     toolkit: true,
-    instructor: { label: 'Rent or Own', path: 'teacher-training/rent-or-own' },
+    instructor: { label: 'Rent or Own', path: 'rent-or-own' },
     content: <RentOrOwnPage intro={false} />,
   },
 }

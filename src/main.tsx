@@ -1,6 +1,6 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { HashRouter, Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import '@fontsource-variable/inter'
 import 'katex/dist/katex.min.css'
 import './styles/tokens.css'
@@ -49,15 +49,25 @@ const TEACHER_TRAINING_SECTIONS = [
 
 /*
  * The Resource Hub was retired in August 2026: the Personal Finance Teaching
- * Toolkit (the teacher training site) is now the whole app. Old hub URLs
- * live on in shared slides, worksheets, and QR codes, so each one forwards
- * to its toolkit twin, carrying the query string (notably embed=1) along.
+ * Toolkit (the teacher training site) is now the whole app, and each tool
+ * lives at its bare slug (/taxes, /budget) so the URLs read cleanly wherever
+ * the site is hosted. Two generations of older URLs live on in shared
+ * slides, worksheets, and QR codes, so both forward here, carrying the query
+ * string (notably embed=1) along: /teacher-training/<slug> from the toolkit
+ * era, and the hub-era ?tool= shells below.
  */
 
-/** Forward a retired path to its toolkit twin, keeping the query string. */
+/** Forward a retired path to its current home, keeping the query string. */
 function LegacyRedirect({ to }: { to: string }) {
   const { search } = useLocation()
   return <Navigate to={{ pathname: to, search }} replace />
+}
+
+/** Forward /teacher-training/<anything> to /<anything>, keeping the query. */
+function TeacherTrainingRedirect() {
+  const { search } = useLocation()
+  const rest = useParams()['*'] ?? ''
+  return <Navigate to={{ pathname: `/${rest}`, search }} replace />
 }
 
 /**
@@ -72,7 +82,7 @@ function LegacyToolRedirect({ map, fallback }: { map: Record<string, string>; fa
   const rest = new URLSearchParams(params)
   rest.delete('tool')
   const search = rest.toString()
-  return <Navigate to={{ pathname: `/teacher-training/${slug}`, search: search ? `?${search}` : '' }} replace />
+  return <Navigate to={{ pathname: `/${slug}`, search: search ? `?${search}` : '' }} replace />
 }
 
 /*
@@ -95,24 +105,18 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route element={<App />}>
           <Route index element={<TeacherTraining />} />
-          <Route path="teacher-training" element={<TeacherTraining />} />
           {TEACHER_TRAINING_SECTIONS.map((slug) => (
-            <Route
-              key={slug}
-              path={`teacher-training/${slug}`}
-              element={<TeacherTrainingSection slug={slug} />}
-            />
+            <Route key={slug} path={slug} element={<TeacherTrainingSection slug={slug} />} />
           ))}
 
-          {/* Retired Resource Hub URLs, forwarded to their toolkit twins. */}
-          <Route path="big-three" element={<LegacyRedirect to="/teacher-training/big-three" />} />
-          <Route path="big-three/quiz" element={<LegacyRedirect to="/teacher-training/big-three/quiz" />} />
-          <Route path="big-three/explained" element={<LegacyRedirect to="/teacher-training/big-three/explained" />} />
-          <Route path="big-three/stories" element={<LegacyRedirect to="/teacher-training/big-three/stories" />} />
-          <Route path="literacy-data" element={<LegacyRedirect to="/teacher-training/literacy-data" />} />
-          <Route path="checklist" element={<LegacyRedirect to="/teacher-training/checklist" />} />
-          <Route path="budget" element={<LegacyRedirect to="/teacher-training/budget" />} />
-          <Route path="checkup" element={<LegacyRedirect to="/teacher-training/budget" />} />
+          {/* Toolkit-era URLs: everything under /teacher-training forwards to
+              the bare slug. */}
+          <Route path="teacher-training" element={<LegacyRedirect to="/" />} />
+          <Route path="teacher-training/*" element={<TeacherTrainingRedirect />} />
+
+          {/* Hub-era shells and renames. The bare content URLs (/big-three,
+              /checklist, /budget, /literacy-data) are live routes again. */}
+          <Route path="checkup" element={<LegacyRedirect to="/budget" />} />
           <Route
             path="calculators"
             element={
@@ -152,6 +156,9 @@ createRoot(document.getElementById('root')!).render(
               </div>
             }
           />
+
+          {/* Anything unrecognized lands on the course overview. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </HashRouter>

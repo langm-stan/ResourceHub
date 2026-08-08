@@ -36,7 +36,7 @@ export default function TeacherTrainingShell({
   wide?: boolean
 }) {
   const location = useLocation()
-  const slug = location.pathname.replace(/^\/teacher-training\/?/, '')
+  const slug = location.pathname.replace(/^\/(teacher-training\/?)?/, '')
   const activeUnit = unitForSlug(slug)
   const [openId, setOpenId] = useState<string | null>(activeUnit?.id ?? null)
   const { prev, next } = adjacentTools(slug)
@@ -67,7 +67,7 @@ export default function TeacherTrainingShell({
           <aside className="md:w-56 shrink-0">
             <nav className="flex flex-row md:flex-col gap-1 flex-wrap sticky top-6">
               <Link
-                to="/teacher-training"
+                to="/"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold text-cardinal hover:bg-cardinal/5 transition-colors"
               >
                 <ArrowLeft size={15} />
@@ -78,7 +78,7 @@ export default function TeacherTrainingShell({
                 Foundations
               </p>
               {FOUNDATION_TOOLS.map((t) => (
-                <NavLink key={t.slug} to={`/teacher-training/${t.slug}`} className={navLinkClass}>
+                <NavLink key={t.slug} to={`/${t.slug}`} className={navLinkClass}>
                   {t.label}
                 </NavLink>
               ))}
@@ -117,7 +117,7 @@ export default function TeacherTrainingShell({
                       u.tools.map((t) => (
                         <NavLink
                           key={t.slug}
-                          to={`/teacher-training/${t.slug}`}
+                          to={`/${t.slug}`}
                           className={(state) => `md:ml-6 ${navLinkClass(state)}`}
                         >
                           {t.label}
@@ -136,7 +136,7 @@ export default function TeacherTrainingShell({
               <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {prev ? (
                   <Link
-                    to={`/teacher-training/${prev.tool.slug}`}
+                    to={`/${prev.tool.slug}`}
                     className="group flex items-center gap-3 rounded-xl border border-stone-200 bg-white shadow-card px-5 py-4 hover:border-stone-300 hover:bg-stone-50 transition-all"
                   >
                     <ArrowLeft
@@ -157,7 +157,7 @@ export default function TeacherTrainingShell({
                 )}
                 {next && (
                   <Link
-                    to={`/teacher-training/${next.tool.slug}`}
+                    to={`/${next.tool.slug}`}
                     className="group flex items-center justify-end gap-3 rounded-xl border border-stone-200 bg-white shadow-card px-5 py-4 text-right hover:border-stone-300 hover:bg-stone-50 transition-all"
                   >
                     <span className="min-w-0">

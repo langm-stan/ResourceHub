@@ -14,11 +14,11 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
       <>
         <p>
           Learn the basic concepts (compound interest, inflation, and risk diversification), which are the pulse of
-          your financial health: <Link to="/teacher-training/big-three/explained" className="text-cardinal font-semibold underline">The Big Three Explained</Link>.
+          your financial health: <Link to="/big-three/explained" className="text-cardinal font-semibold underline">The Big Three Explained</Link>.
         </p>
         <p>
           You can test your knowledge of these concepts by taking the test:{' '}
-          <Link to="/teacher-training/big-three/quiz" className="text-cardinal font-semibold underline">The Big Three Quiz</Link>.
+          <Link to="/big-three/quiz" className="text-cardinal font-semibold underline">The Big Three Quiz</Link>.
         </p>
         <p>
           Explore the glossary of financial terms if you want to familiarize yourself with other useful concepts. Or

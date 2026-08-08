@@ -118,7 +118,7 @@ function runSearch(query: string): SearchHit[] {
 function ToolCard({ tool, badge }: { tool: TrainingTool; badge?: string }) {
   return (
     <Link
-      to={`/teacher-training/${tool.slug}`}
+      to={`/${tool.slug}`}
       className="group flex flex-col gap-1.5 rounded-2xl border border-stone-200 bg-white shadow-card p-5 hover:border-stone-300 hover:bg-stone-50 transition-all"
     >
       <p className="font-serif text-lg font-semibold text-stone-900 leading-snug flex items-center gap-2">
