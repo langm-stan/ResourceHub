@@ -206,11 +206,16 @@ export default function Header() {
             Stanford
           </a>
           <span className="h-9 w-px bg-stone-400" aria-hidden="true" />
-          <Link to="/" className="text-stone-800 text-[0.95rem] font-semibold leading-tight">
+          {/* The lockup mirrors the live site's, so it leads to the initiative's
+              own homepage; the Toolkit nav tab is the way back into the app. */}
+          <a
+            href={`${SITE}/home`}
+            className="text-stone-800 text-[0.95rem] font-semibold leading-tight"
+          >
             Initiative for Financial
             <br />
             Decision-Making
-          </Link>
+          </a>
         </div>
 
         {/* The site search on ifdm.stanford.edu: GET /search?key=... */}
