@@ -44,7 +44,8 @@ const CARDINAL = 'var(--c-accent)'
 
 const DEFAULTS = { weekly: 20, startYear: 2006, game: 'lottery' as GameKey }
 
-export function GamblingPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('overview')
   const [weekly, setWeekly] = useState(DEFAULTS.weekly)
   const [startYear, setStartYear] = useState(DEFAULTS.startYear)
@@ -58,17 +59,19 @@ export function GamblingPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
-        <h1 className={styles.h1}>The same dollar, two different games</h1>
-        <p className={styles.lead}>
-          A lottery ticket, a parlay, and an index fund all put money at risk. The difference is
-          the direction of the odds. A gamble has a negative expected value: the longer you play,
-          the more certainly you lose. A diversified investment has a positive expected value: the
-          longer you hold, the more certainly you gain. This lesson makes both halves of that
-          sentence precise.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
+          <h1 className={styles.h1}>The same dollar, two different games</h1>
+          <p className={styles.lead}>
+            A lottery ticket, a parlay, and an index fund all put money at risk. The difference is
+            the direction of the odds. A gamble has a negative expected value: the longer you
+            play, the more certainly you lose. A diversified investment has a positive expected
+            value: the longer you hold, the more certainly you gain. This lesson makes both halves
+            of that sentence precise.
+          </p>
+        </header>
+      )}
 
       <Card tone="raised" className={styles.controls}>
         <div className={styles.controlsHeader}>

@@ -14,7 +14,9 @@
 
   --c-ink: #221f1e; /* warm near-black */
   --c-ink-muted: #5f5b58;
-  --c-ink-faint: #98928d;
+  /* Darkest "faint" that still clears WCAG AA 4.5:1 on every surface,
+     including the sunken wells (#efedec). */
+  --c-ink-faint: #6b6662;
 
   --c-rule: #e9e6e3; /* hairline borders / gridlines */
   --c-rule-strong: #d6d2ce;
@@ -29,8 +31,8 @@
   --c-cardinal-wash: #f7e6e4;
 
   /* Data series — friendly and clear inside charts. */
-  --c-series-1: #1aa35a; /* green (growth / interest-on-interest) */
-  --c-series-2: #ef9f27; /* amber (simple interest) */
+  --c-series-1: #127a43; /* green (growth / interest-on-interest) — AA as text on white */
+  --c-series-2: #b45309; /* amber (simple interest) — dark enough for AA text on white */
   --c-series-3: #8a94a6; /* slate (principal contributed) */
   --c-series-4: #8c1515; /* cardinal (highlight / extreme) */
   --c-series-5: #7c5cd6; /* violet */
@@ -143,7 +145,8 @@
 
   --c-ink: #f1ede6;
   --c-ink-muted: #b4aea4;
-  --c-ink-faint: #847e73;
+  /* Lightest "faint" that clears 4.5:1 on the raised card surface (#272521). */
+  --c-ink-faint: #948e82;
 
   --c-rule: #35322c;
   --c-rule-strong: #4b473e;

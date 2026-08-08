@@ -26,7 +26,9 @@ export function FormulaBlock({ tex, inline, caption, muted }: FormulaBlockProps)
   }
 
   return (
-    <figure className={muted ? `${styles.block} ${styles.muted}` : styles.block}>
+    // Wide equations scroll horizontally, so the region must be reachable by
+    // keyboard (WCAG 2.1.1 / axe scrollable-region-focusable).
+    <figure className={muted ? `${styles.block} ${styles.muted}` : styles.block} tabIndex={0}>
       <div className={styles.math} dangerouslySetInnerHTML={{ __html: html }} />
       {caption && <figcaption className={styles.caption}>{caption}</figcaption>}
     </figure>

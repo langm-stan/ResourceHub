@@ -219,7 +219,13 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
         </div>
 
         <div>
-          <div className={styles.timeline} role="img" aria-label="The bond's cash flows: the price paid today and each payment received">
+          {/* Long maturities overflow horizontally, so keyboard users need a tab stop to scroll. */}
+          <div
+            className={styles.timeline}
+            role="img"
+            aria-label="The bond's cash flows: the price paid today and each payment received"
+            tabIndex={0}
+          >
             {nodes.map((node, idx) => (
               <div key={idx} className={styles.node}>
                 <span

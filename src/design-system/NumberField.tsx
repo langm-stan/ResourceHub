@@ -3,6 +3,8 @@ import styles from './NumberField.module.css'
 
 interface NumberFieldProps {
   label?: string
+  /** Accessible name when the visible label lives outside this component. */
+  ariaLabel?: string
   value: number
   onChange: (value: number) => void
   min?: number
@@ -19,6 +21,7 @@ interface NumberFieldProps {
  */
 export function NumberField({
   label,
+  ariaLabel,
   value,
   onChange,
   min,
@@ -68,6 +71,7 @@ export function NumberField({
           id={id}
           className={`${styles.input} tnum`}
           inputMode="decimal"
+          aria-label={label ? undefined : ariaLabel}
           value={draft}
           step={step}
           onFocus={() => setEditing(true)}

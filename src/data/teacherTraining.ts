@@ -218,10 +218,22 @@ export const COURSE_UNITS: CourseUnit[] = [
         keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'stock picker', 'market cap', 'basket'],
       },
       {
+        slug: 'single-stock',
+        label: 'One Stock or the Fund',
+        description: 'The real record of the most loved stocks of 2000, 2010, and 2021 next to a broad index fund: the same promise, and what happens when you are wrong.',
+        keywords: ['stocks', 'single stock', 'index fund', 'diversification', 'famous stocks', 'concentration', 'S&P 500'],
+      },
+      {
         slug: 'index-fund-fees',
         label: 'Index Fund Fees',
         description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
         keywords: ['index funds', 'fees', 'expense ratio', 'mutual funds', 'ETF', 'costs', 'compounding'],
+      },
+      {
+        slug: 'gambling-investing',
+        label: 'Gambling vs. Investing',
+        description: 'The same weekly dollars gambled at real house odds or put into SPY on actual market history: one habit has a negative expected value, the other a positive one.',
+        keywords: ['gambling', 'investing', 'expected value', 'SPY', 'lottery', 'parlay', 'index fund', 'weekly habit'],
       },
       {
         slug: 'gambling-sim',

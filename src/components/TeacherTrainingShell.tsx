@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
 import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
@@ -40,6 +40,15 @@ export default function TeacherTrainingShell({
   const activeUnit = unitForSlug(slug)
   const [openId, setOpenId] = useState<string | null>(activeUnit?.id ?? null)
   const { prev, next } = adjacentTools(slug)
+
+  // Each page gets its own distinct document title (WCAG 2.4.2).
+  useEffect(() => {
+    const prior = document.title
+    document.title = `${title} | Teacher Training | Stanford Initiative for Financial Decision-Making`
+    return () => {
+      document.title = prior
+    }
+  }, [title])
 
   return (
     <div>

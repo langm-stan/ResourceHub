@@ -15,7 +15,7 @@ const CARDS = [
   {
     to: '/big-three/explained',
     icon: BookOpen,
-    accent: '#279989',
+    accent: '#1E756A',
     title: 'The Big Three Explained',
     description:
       'Gain understanding of the three fundamental financial concepts by exploring the answers and explanations to each of the Big Three questions.',
@@ -24,7 +24,7 @@ const CARDS = [
   {
     to: '/big-three/stories',
     icon: Library,
-    accent: '#8F993E',
+    accent: '#6E7630',
     title: 'The Big Three Stories',
     description:
       'Three stories in which characters apply fundamental financial concepts from the Big Three to make better decisions.',

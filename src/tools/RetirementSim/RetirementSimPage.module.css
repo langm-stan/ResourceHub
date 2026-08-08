@@ -159,8 +159,14 @@
   text-align: center;
   font-size: var(--fs-micro);
   font-weight: var(--fw-semibold);
-  color: var(--text-primary);
+  /* The rate sits on the gold "kept" slice: white on the light theme's dark
+     amber, ink on the dark theme's light amber — both clear AA. */
+  color: #fff;
   pointer-events: none;
+}
+
+:global([data-theme='dark']) .bracketRate {
+  color: #1c1b19;
 }
 
 /* Floating readout for the hovered segment, styled like the chart HoverTip. */

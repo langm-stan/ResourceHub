@@ -20,6 +20,8 @@ import { PayingOffDebtPage } from '../tools/PayingOffDebt/PayingOffDebtPage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
 import { HousingPage } from '../tools/Housing/HousingPage'
 import { GamblingSimPage } from '../tools/ChanceOwnership/GamblingSimPage'
+import { SingleStockPage } from '../tools/SingleStock/SingleStockPage'
+import { GamblingPage } from '../tools/Gambling/GamblingPage'
 import { StockPickerPage } from '../tools/ChanceOwnership/StockPickerPage'
 import { IndexFundFeesPage } from '../tools/ChanceOwnership/IndexFundFeesPage'
 import { BitcoinMiningPage } from '../tools/BitcoinMining/BitcoinMiningPage'
@@ -69,13 +71,13 @@ const SECTIONS: Record<string, SectionConfig> = {
   'tvm-calculator': {
     title: 'TVM Calculator',
     toolkit: true,
-    instructor: { label: 'TVM Calculator', route: 'calculators', toolKey: 'tvm-calc' },
+    instructor: { label: 'TVM Calculator', path: 'teacher-training/tvm-calculator' },
     content: <TvmCalculatorPage intro={false} />,
   },
   'compound-interest': {
     title: 'Compound Interest Scenario',
     toolkit: true,
-    instructor: { label: 'Compound Interest', route: 'calculators', toolKey: 'compound' },
+    instructor: { label: 'Compound Interest', path: 'teacher-training/compound-interest' },
     content: <CompoundInterestPage intro={false} />,
   },
   inflation: {
@@ -87,13 +89,13 @@ const SECTIONS: Record<string, SectionConfig> = {
   'borrow-save': {
     title: 'Borrow & Save',
     toolkit: true,
-    instructor: { label: 'Borrow & Save', route: 'calculators', toolKey: 'tvm' },
+    instructor: { label: 'Borrow & Save', path: 'teacher-training/borrow-save' },
     content: <TvmPage intro={false} />,
   },
   lifecycle: {
     title: 'The Life-Cycle Model',
     toolkit: true,
-    instructor: { label: 'The Life-Cycle Model', route: 'lessons', toolKey: 'lifecycle' },
+    instructor: { label: 'The Life-Cycle Model', path: 'teacher-training/lifecycle' },
     content: <LifeCyclePage intro={false} />,
   },
   'paying-off-debt': {
@@ -125,6 +127,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Bitcoin Mining', path: 'teacher-training/bitcoin-mining' },
     content: <BitcoinMiningPage intro={false} />,
+  },
+  'single-stock': {
+    title: 'One Stock or the Fund',
+    toolkit: true,
+    instructor: { label: 'One Stock or the Fund', path: 'teacher-training/single-stock' },
+    content: <SingleStockPage intro={false} />,
+  },
+  'gambling-investing': {
+    title: 'Gambling vs. Investing',
+    toolkit: true,
+    instructor: { label: 'Gambling vs. Investing', path: 'teacher-training/gambling-investing' },
+    content: <GamblingPage intro={false} />,
   },
   'index-fund-fees': {
     title: 'Index Fund Fees',
@@ -165,13 +179,13 @@ const SECTIONS: Record<string, SectionConfig> = {
   taxes: {
     title: 'Understanding Taxes',
     toolkit: true,
-    instructor: { label: 'Understanding Taxes', route: 'lessons', toolKey: 'taxes' },
+    instructor: { label: 'Understanding Taxes', path: 'teacher-training/taxes' },
     content: <TaxPage intro={false} />,
   },
   housing: {
     title: 'Buying a Home',
     toolkit: true,
-    instructor: { label: 'Buying a Home', route: 'lessons', toolKey: 'housing' },
+    instructor: { label: 'Buying a Home', path: 'teacher-training/housing' },
     content: <HousingPage intro={false} />,
   },
   'used-vs-new': {

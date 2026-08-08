@@ -167,6 +167,7 @@ export function TvmCalculator() {
               <NumberField
                 value={valueFor(k.var)}
                 onChange={setterFor(k.var)}
+                ariaLabel={`${k.label} — ${k.help}`}
                 prefix={k.var === 'pv' || k.var === 'pmt' || k.var === 'fv' ? '$' : undefined}
                 suffix={k.var === 'iy' ? '%' : undefined}
                 precision={k.var === 'n' ? 0 : k.var === 'iy' ? 3 : 2}

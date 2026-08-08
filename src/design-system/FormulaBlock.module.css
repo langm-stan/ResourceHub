@@ -7,9 +7,10 @@
   overflow-x: auto;
 }
 
+/* De-emphasis comes from the smaller size, muted ink, and hairline border —
+   an opacity layer on top would push the math below WCAG AA contrast. */
 .muted {
   border-left-color: var(--border-hairline);
-  opacity: 0.78;
 }
 
 .math {

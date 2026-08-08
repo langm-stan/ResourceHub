@@ -22,7 +22,7 @@ const STORIES = [
     concept: 'Inflation',
     title: 'Inflation and the Plaid Shirt',
     icon: Shirt,
-    accent: '#E5A00D',
+    accent: '#946803',
     summary: 'A $50 price tag jogs Lisa\'s memory of $30 shirts in the 90s and teaches her about inflation.',
     body: [
       "Lisa was shopping with her friend Beth when Beth spotted a cute plaid shirt. Seeing it gave Lisa a flashback to the 1990s, when plaid shirts were last trendy and she paid around $30 for one. This new shirt cost $50.",
@@ -35,7 +35,7 @@ const STORIES = [
     concept: 'Risk Diversification',
     title: "Don't Put All Your Eggs in One Basket",
     icon: Egg,
-    accent: '#279989',
+    accent: '#1E756A',
     summary: 'Kate helps her husband Sam see why spreading money across companies protects their investments.',
     body: [
       "Sam didn't understand why putting money somewhere safe wasn't good enough. Kate reminded him that investing for the long term means taking on some risk. There is no way to grow money without it, and riskier investments tend to earn higher average returns than safer ones.",

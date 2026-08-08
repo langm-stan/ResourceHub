@@ -33,21 +33,24 @@ const TABS: TabItem<Surface>[] = [
 const GREEN = 'var(--c-series-1)'
 const CARDINAL = 'var(--c-accent)'
 
-export function SingleStockPage() {
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function SingleStockPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('classes')
 
   return (
     <div className={styles.page}>
-      <header className={styles.intro}>
-        <p className={styles.eyebrow}>Lesson · One stock or the fund</p>
-        <h1 className={styles.h1}>A single stock vs. owning them all</h1>
-        <p className={styles.lead}>
-          Every famous stock and a broad index fund promise the same thing: a share of corporate
-          America&rsquo;s growth. The difference is what happens when you are wrong. This lesson
-          starts with the real record of the most loved stocks of 2000, 2010, and 2021, then shows
-          why the same pattern keeps coming back.
-        </p>
-      </header>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · One stock or the fund</p>
+          <h1 className={styles.h1}>A single stock vs. owning them all</h1>
+          <p className={styles.lead}>
+            Every famous stock and a broad index fund promise the same thing: a share of corporate
+            America&rsquo;s growth. The difference is what happens when you are wrong. This lesson
+            starts with the real record of the most loved stocks of 2000, 2010, and 2021, then
+            shows why the same pattern keeps coming back.
+          </p>
+        </header>
+      )}
 
       <div className={styles.main}>
         <div className={styles.tabBar}>

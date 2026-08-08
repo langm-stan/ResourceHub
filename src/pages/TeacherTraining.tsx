@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { COURSE_UNITS, FOUNDATION_TOOLS, type TrainingTool } from '../data/teacherTraining'
@@ -142,6 +142,16 @@ export default function TeacherTraining() {
   const [selectedId, setSelectedId] = useState('foundations')
   const [query, setQuery] = useState('')
 
+  // A distinct document title for the course overview (WCAG 2.4.2).
+  useEffect(() => {
+    const prior = document.title
+    document.title =
+      'Teacher Training | Stanford Initiative for Financial Decision-Making'
+    return () => {
+      document.title = prior
+    }
+  }, [])
+
   const q = normalize(query)
   const hits = useMemo<SearchHit[] | null>(() => (q ? runSearch(q) : null), [q])
 
@@ -179,9 +189,6 @@ export default function TeacherTraining() {
     <div>
       <div className="bg-cardinal">
         <div className="max-w-7xl mx-auto px-6 pt-12 pb-14 text-center">
-          <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-3">
-            Stanford · Initiative for Financial Decision-Making
-          </p>
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto">
             The Personal Finance Teaching Toolkit
           </h1>

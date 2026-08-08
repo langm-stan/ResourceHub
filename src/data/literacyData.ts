@@ -28,9 +28,9 @@ export const NATIONAL = {
 export const AREAS: { key: AreaKey; label: string; national: number; color: string }[] = [
   { key: 'earning', label: 'Earning', national: 56, color: '#8C1515' },
   { key: 'investing', label: 'Investing', national: 54, color: '#B1040E' },
-  { key: 'consuming', label: 'Consuming / Budgeting', national: 49, color: '#E5A00D' },
-  { key: 'saving', label: 'Saving', national: 48, color: '#8F993E' },
-  { key: 'risk', label: 'Comprehending Risk', national: 46, color: '#279989' },
+  { key: 'consuming', label: 'Consuming / Budgeting', national: 49, color: '#946803' },
+  { key: 'saving', label: 'Saving', national: 48, color: '#6E7630' },
+  { key: 'risk', label: 'Comprehending Risk', national: 46, color: '#1E756A' },
   { key: 'goto', label: 'Go-To Information Sources', national: 46, color: '#5A4FCF' },
   { key: 'borrowing', label: 'Borrowing & Managing Debt', national: 40, color: '#008566' },
   { key: 'insuring', label: 'Insuring', national: 27, color: '#6D1010' },

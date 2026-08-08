@@ -7,9 +7,9 @@ export default {
     extend: {
       colors: {
         cardinal: {
-          DEFAULT: '#8C1515', // --c-accent
-          dark: '#6D1010',
-          light: '#B1040E',
+          DEFAULT: '#8C1515', // --c-accent · Stanford Cardinal Red
+          dark: '#820000', // Stanford Cardinal Red Dark (official digital palette)
+          light: '#B1040E', // Stanford Cardinal Red Light
           wash: '#F7E6E4', // --c-accent-wash
         },
         stone: {
@@ -17,7 +17,7 @@ export default {
           100: '#EFEDEC', // --c-paper-sunken
           200: '#E9E6E3', // --c-rule
           300: '#D6D2CE', // --c-rule-strong
-          400: '#98928D', // --c-ink-faint
+          400: '#6B6662', // --c-ink-faint (darkened to clear WCAG AA on all surfaces)
           500: '#736E6A',
           600: '#5F5B58', // --c-ink-muted
           700: '#474441',
@@ -27,7 +27,7 @@ export default {
         sand: '#D2C295',
         palo: {
           teal: '#008566',
-          green: '#1AA35A', // --c-series-1
+          green: '#127A43', // --c-series-1
         },
         olive: '#8F993E',
       },

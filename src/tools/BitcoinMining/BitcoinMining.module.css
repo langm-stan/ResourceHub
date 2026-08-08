@@ -71,7 +71,7 @@
 }
 .secHint {
   font-size: 13px;
-  color: #777;
+  color: #666666;
 }
 .spacer {
   flex: 1;
@@ -81,7 +81,7 @@
   font: 600 10px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #999;
+  color: #6e6e6e;
 }
 
 .mono {
@@ -163,7 +163,7 @@
 }
 .paceCopy {
   font-size: 12px;
-  color: #888;
+  color: #666666;
   padding-bottom: 7px;
 }
 
@@ -177,7 +177,7 @@
   background: #fff;
 }
 .input::placeholder {
-  color: #aaa;
+  color: #6e6e6e;
 }
 .input:focus-visible {
   outline: 2px solid #8c1515;
@@ -296,7 +296,7 @@
 }
 .autoBtn:disabled {
   border-color: #ddd;
-  color: #aaa;
+  color: #6e6e6e;
   cursor: default;
 }
 
@@ -336,7 +336,7 @@
 .halvingCopy {
   margin-top: 8px;
   font-size: 12px;
-  color: #999;
+  color: #6e6e6e;
 }
 
 /* ------------------------------- the rail ------------------------------- */
@@ -390,11 +390,11 @@
   align-items: center;
   gap: 6px;
   font: 500 11px 'IBM Plex Mono', monospace;
-  color: #888;
+  color: #666666;
 }
 .genesisNote {
   font-size: 11px;
-  color: #aaa;
+  color: #6e6e6e;
 }
 
 .blockWrap {
@@ -468,7 +468,7 @@
   font: 600 9px 'Source Sans 3', sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #999;
+  color: #6e6e6e;
 }
 .cardLabelDanger {
   composes: cardLabel;
@@ -495,7 +495,7 @@
 }
 .nonceLine {
   font-size: 11px;
-  color: #888;
+  color: #666666;
 }
 .nonceValue {
   font-family: 'IBM Plex Mono', monospace;
@@ -543,7 +543,7 @@
 }
 .statUnit {
   font: 600 14px 'Source Sans 3', sans-serif;
-  color: #888;
+  color: #666666;
 }
 .supplyCol {
   flex: 1;
@@ -584,7 +584,7 @@
   font: 600 10px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #999;
+  color: #6e6e6e;
 }
 .ledgerRow {
   padding: 12px 16px;
@@ -624,7 +624,7 @@
 /* Mined rewards get their own color, so the ledger reads mine / receive / send at a glance. */
 .deltaMine {
   font: 600 13px 'Source Sans 3', sans-serif;
-  color: #b06a00;
+  color: #9a5d00;
 }
 .deltaCell {
   display: flex;
@@ -645,7 +645,7 @@
 .ledgerEmpty {
   padding: 20px 16px;
   font-size: 13px;
-  color: #999;
+  color: #6e6e6e;
 }
 
 /* --------------------------- movement sheet --------------------------- */
@@ -670,7 +670,7 @@
 .sheet th {
   font: 600 10px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
-  color: #999;
+  color: #6e6e6e;
   text-align: right;
   background: #faf9f7;
   padding: 10px 16px;
@@ -732,7 +732,7 @@
   color: #c0392b;
 }
 .cellDeltaMine {
-  color: #b06a00;
+  color: #9a5d00;
 }
 .sheetRule td {
   border-top: 2px solid #eee;

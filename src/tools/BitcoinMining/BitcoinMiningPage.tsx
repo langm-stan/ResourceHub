@@ -517,7 +517,8 @@ function MiningCard() {
         )}
       </div>
 
-      <div className={styles.rail}>
+      {/* The block rail scrolls horizontally; the tab stop lets keyboard users reach it. */}
+      <div className={styles.rail} tabIndex={0} aria-label="Chain of mined blocks">
         <div className={styles.railInner}>
           <div className={styles.genesisCard}>
             <div className={styles.cardLabel}>GENESIS</div>
@@ -665,7 +666,7 @@ function MiningCard() {
             <span className={styles.label}>MOVEMENT BY BLOCK</span>
             <span className={styles.secHint}>each cell is a balance after that block; the round's change is marked</span>
           </div>
-          <div className={styles.sheetWrap}>
+          <div className={styles.sheetWrap} tabIndex={0} aria-label="Balances by block">
             <table className={styles.sheet}>
               <thead>
                 <tr>
