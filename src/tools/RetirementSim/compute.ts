@@ -44,18 +44,20 @@ export function federalTax(
   const taxable = Math.max(0, gross - Math.max(0, deduction))
   let tax = 0
   let prev = 0
-  let marginal = 0
   const slices: BracketSlice[] = []
   for (const b of BRACKETS[status]) {
     if (taxable > prev) {
       const amount = Math.min(taxable, b.upTo) - prev
       tax += amount * b.rate
-      marginal = b.rate
       slices.push({ rate: b.rate, amount, tax: amount * b.rate })
     }
     prev = b.upTo
     if (taxable <= b.upTo) break
   }
+  // Rate on the NEXT dollar, matching the Taxes tool's convention: an income
+  // sitting exactly on a bracket line reports the higher rate.
+  const marginal =
+    BRACKETS[status].find((b) => taxable < b.upTo)?.rate ?? BRACKETS[status][0]?.rate ?? 0
   return { taxable, tax, marginal, slices }
 }
 

@@ -50,6 +50,10 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
   const [face, setFace] = useState(1000)
   const [coupon, setCoupon] = useState(6)
   const [perYear, setPerYear] = useState(1)
+  // Coupon bonds price whole coupon periods, so the maturity control snaps
+  // to one; the zero-coupon bill discounts exact fractional years instead.
+  const snapYears = (y: number, c: number, per: number) =>
+    c === 0 ? y : Math.max(1 / per, Math.round(y * per) / per)
   const [years, setYears] = useState(5)
   const [market, setMarket] = useState(7)
 
@@ -148,7 +152,10 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           <Slider
             label="Coupon rate"
             value={coupon}
-            onChange={setCoupon}
+            onChange={(c) => {
+              setCoupon(c)
+              setYears((y) => snapYears(y, c, perYear))
+            }}
             min={0}
             max={12}
             step={0.25}
@@ -159,12 +166,12 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           <Slider
             label="Years to maturity"
             value={years}
-            onChange={setYears}
-            min={0.5}
+            onChange={(y) => setYears(snapYears(y, coupon, perYear))}
+            min={coupon === 0 ? 0.5 : 1 / perYear}
             max={30}
-            step={0.5}
+            step={coupon === 0 ? 0.5 : 1 / perYear}
             editable
-            precision={1}
+            precision={coupon === 0 || perYear === 4 ? 2 : 1}
             suffix={years === 1 ? 'yr' : 'yrs'}
           />
           <Slider
@@ -187,7 +194,11 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
             { value: '4', label: 'Quarterly' },
           ]}
           value={String(perYear)}
-          onChange={(v) => setPerYear(Number(v))}
+          onChange={(v) => {
+            const per = Number(v)
+            setPerYear(per)
+            setYears((y) => snapYears(y, coupon, per))
+          }}
         />
 
         <div className={styles.stats}>
@@ -343,9 +354,13 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           })()}
         >
           <Callout tone="note" label="The same five keys">
-            On the TVM calculator: N = {quote.zero ? years : quote.n}, I/Y ={' '}
-            {(quote.perPeriodRate * 100).toFixed(2)}, PMT = {quote.zero ? 0 : Math.round(quote.pmt)},
-            FV = {face.toLocaleString()}; solve for PV. The price is what you give up today.
+            On the TVM calculator, with P/Y set to 1 so each period is one coupon period: N ={' '}
+            {quote.zero ? years : quote.n}, I/Y = {(quote.perPeriodRate * 100).toFixed(2)}
+            {perYear > 1 && !quote.zero
+              ? ` (the ${market}% market rate divided by ${perYear} payments a year)`
+              : ''}
+            , PMT = {quote.zero ? 0 : Math.round(quote.pmt)}, FV = {face.toLocaleString()}; solve
+            for PV. The price is what you give up today.
           </Callout>
         </MathSection>
       </Card>

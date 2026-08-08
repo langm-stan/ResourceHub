@@ -23,5 +23,6 @@ export function loanCost(loan: number, apr: number, months: number): LoanCost {
 /** Future value of investing `amount` at the end of each month for `months`. */
 export function fvOfMonthly(amount: number, annualRate: number, months: number): number {
   const i = annualRate / 12
+  if (i === 0) return amount * months
   return amount * (((1 + i) ** months - 1) / i)
 }

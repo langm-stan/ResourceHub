@@ -133,7 +133,7 @@ function solveIY(r: TvmRegisters): number {
   }
   assert(
     !Number.isNaN(bracketLo),
-    'No interest rate solves these values. Check the signs: the amounts must mix positive and negative.',
+    'No interest rate between -99.99% and 1,000% per period solves these values. Check the signs (the amounts must mix positive and negative), or bring the amounts closer together.',
   )
 
   let lo = bracketLo

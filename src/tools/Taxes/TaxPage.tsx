@@ -437,7 +437,7 @@ function PaycheckView({
     {
       label: `${p.state.name} income tax`,
       note: p.state.hasTax
-        ? `${formatPercent(p.state.marginalRate, 1)} marginal state rate`
+        ? `${formatPercent(p.marginalStateTaxRate, 1)} marginal state rate`
         : 'no state income tax on wages',
       value: p.state.tax,
       color: VIOLET,
@@ -706,8 +706,8 @@ function TaxMathView({
         muted
       />
       <FormulaBlock
-        tex={`\\text{average rate on taxable income} = \\frac{${texUSD(t.tax)}}{${texUSD(t.taxable)}} = ${formatPercent(t.effectiveRateOnTaxable, 1).replace('%', '\\%')} \\qquad \\text{marginal rate} = ${formatPercent(t.marginalRate, 0).replace('%', '\\%')}`}
-        caption="Step 3. This average divides the federal income tax by taxable income; the effective rate in Step 9 divides the whole bill by gross wages instead, so the two are not the same number. The marginal rate is what the next dollar pays, and it is the rate to use when weighing extra income or a deduction."
+        tex={`\\text{average rate on taxable income} = \\frac{${texUSD(t.tax)}}{${texUSD(t.taxable)}} = ${formatPercent(t.effectiveRateOnTaxable, 1).replace('%', '\\%')} \\qquad \\text{marginal rate} = ${formatPercent(fedMarginal, 0).replace('%', '\\%')}`}
+        caption={`Step 3. This average divides the federal income tax by taxable income; the effective rate in Step 9 divides the whole bill by gross wages instead, so the two are not the same number. The marginal rate is what the next dollar of wages pays in federal income tax${fedMarginal === 0 && t.taxable === 0 ? ' (zero here, because the deduction still absorbs it)' : ''}, and it is the rate to use when weighing extra income or a deduction.`}
         muted
       />
       <FormulaBlock
@@ -735,7 +735,7 @@ function TaxMathView({
       {p.state.hasTax ? (
         <FormulaBlock
           tex={`\\text{state taxable} = ${texUSD(p.gross)} - ${texUSD(p.contribution401k)}${p.state.deduction > 0 ? ` - ${texUSD(p.state.deduction)}` : ''} = ${texUSD(p.state.taxable)} \\;\\Rightarrow\\; \\text{${p.state.name.replace(/ /g, '\\ ')} tax} = ${texUSD(p.state.tax)}`}
-          caption={`Step 6. ${p.state.name} starts from the same wages, ${p.state.deduction > 0 ? `subtracts its own ${formatUSDWhole(p.state.deduction)} deduction` : 'allows no deduction'}, and applies its own rate schedule${p.state.credit > 0 ? `, minus a ${formatUSDWhole(p.state.credit)} exemption credit` : ''}. Your marginal state rate is ${formatPercent(p.state.marginalRate, 1)}.`}
+          caption={`Step 6. ${p.state.name} starts from the same wages, ${p.state.deduction > 0 ? `subtracts its own ${formatUSDWhole(p.state.deduction)} deduction` : 'allows no deduction'}, and applies its own rate schedule${p.state.credit > 0 ? `, minus a ${formatUSDWhole(p.state.credit)} exemption credit` : ''}. Your marginal state rate is ${formatPercent(p.marginalStateTaxRate, 1)}${p.state.credit > 0 && p.marginalStateTaxRate === 0 && p.state.marginalRate > 0 ? ', since the exemption credit still absorbs the next dollar' : ''}.`}
           muted
         />
       ) : (

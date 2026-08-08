@@ -227,6 +227,12 @@ export interface PaycheckResult {
    * as 0%, where the bracket-schedule rates would overstate it.
    */
   marginalIncomeTaxRate: number
+  /**
+   * State income tax alone on the NEXT dollar of wages, derived numerically.
+   * The schedule rate overstates this where an exemption credit still absorbs
+   * the whole bracket tax; here that correctly reads 0%.
+   */
+  marginalStateTaxRate: number
   incomeTax: IncomeTaxResult
   state: StateTaxResult
 }
@@ -294,6 +300,7 @@ export function computePaycheck(
     computeIncomeTax(Math.max(0, gg - k - deduction), status).tax +
     computeStateTax(gg, k, status, stateCode).tax
   const marginalIncomeTaxRate = incomeTaxOnlyAt(g + 1) - (incomeTax.tax + state.tax)
+  const marginalStateTaxRate = computeStateTax(g + 1, k, status, stateCode).tax - state.tax
 
   return {
     gross: g,
@@ -311,6 +318,7 @@ export function computePaycheck(
     totalTaxRate: g > 0 ? totalTax / g : 0,
     marginalAllInRate,
     marginalIncomeTaxRate,
+    marginalStateTaxRate,
     incomeTax,
     state,
   }
