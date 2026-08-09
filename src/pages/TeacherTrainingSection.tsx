@@ -226,10 +226,10 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
       intro={section.intro ?? (section.toolkit ? toolDescription(slug) : undefined)}
       eyebrow={
         unit
-          ? `Teaching Toolkit · Unit ${COURSE_UNITS.indexOf(unit) + 1}: ${unit.short}`
+          ? `Personal Finance Toolkit · Unit ${COURSE_UNITS.indexOf(unit) + 1}: ${unit.short}`
           : isFoundationSlug(slug)
-            ? 'Teaching Toolkit · Foundations'
-            : 'Teaching Toolkit'
+            ? 'Personal Finance Toolkit · Foundations'
+            : 'Personal Finance Toolkit'
       }
       wide={section.toolkit}
     >

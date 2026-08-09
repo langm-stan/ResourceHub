@@ -146,7 +146,7 @@ export default function TeacherTraining() {
   useEffect(() => {
     const prior = document.title
     document.title =
-      'Teacher Training | Stanford Initiative for Financial Decision-Making'
+      'Personal Finance Toolkit | Stanford Initiative for Financial Decision-Making'
     return () => {
       document.title = prior
     }
@@ -190,12 +190,12 @@ export default function TeacherTraining() {
       <div className="bg-cardinal">
         <div className="max-w-7xl mx-auto px-6 pt-12 pb-14 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto">
-            The Personal Finance Teaching Toolkit
+            The Personal Finance Toolkit
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
-            Interactive tools for teaching personal finance, arranged as a course. Start with the
-            foundations at the base, then take the units in the order you would teach them. Every
-            tool runs in the browser, and each tool page shows how to embed it in your own slides.
+            Interactive tools for learning and teaching personal finance, arranged as a course.
+            Start with the foundations at the base, then take the units in order. Every tool runs
+            in the browser, and each tool page shows how to embed it in your own slides.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
             <Search

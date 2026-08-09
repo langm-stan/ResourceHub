@@ -786,7 +786,7 @@ export function BitcoinMiningPage({ intro = true }: { intro?: boolean } = {}) {
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
-          <p className={styles.eyebrow}>Teaching Toolkit · Unit 8: Financial Markets</p>
+          <p className={styles.eyebrow}>Personal Finance Toolkit · Unit 8: Financial Markets</p>
           <h1 className={styles.h1}>Bitcoin Mining</h1>
           <p className={styles.lead}>
             The class becomes the network: race to find a nonce, watch the block snap onto the chain, and read the ledger

@@ -40,31 +40,6 @@
   }
 }
 
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  margin-bottom: var(--space-6);
-}
-
-/* Controls flow horizontally across the band and wrap as needed. */
-.controlsRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-4) var(--space-6);
-}
-.premiumNote {
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-  margin-top: calc(-1 * var(--space-3));
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-4);
-}
-
 .tabBar {
   margin-bottom: var(--space-4);
 }
@@ -74,33 +49,35 @@
   gap: var(--space-5);
 }
 
-/* ---- the two pools ---------------------------------------------------- */
-.pools {
+.controlsRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4) var(--space-6);
 }
-.poolTitle {
-  font-size: var(--fs-ui);
-  font-weight: var(--fw-semibold);
-  margin-bottom: var(--space-2);
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
 }
-.poolGrid {
+
+/* ---- the game ---------------------------------------------------------- */
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.gameChart {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: var(--radius-md);
 }
-.poolStats {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: var(--space-3);
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
-.poolStats strong {
-  color: var(--text-strong);
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 2px;
 }
 .legendRow {
   display: flex;
@@ -110,7 +87,46 @@
   color: var(--text-muted);
 }
 .runAgain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   align-self: flex-start;
+}
+
+/* The two-household ledger. */
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+.ledger th {
+  text-align: left;
+  font-size: var(--fs-tiny);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: var(--fw-semibold);
+  padding: var(--space-1) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.ledger td {
+  padding: var(--space-1) var(--space-3);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.ledger tr:last-child td {
+  border-bottom: none;
+}
+.ledgerHit td {
+  color: var(--c-accent);
+  font-weight: var(--fw-semibold);
+}
+
+/* The thousand-lives grid. */
+.outcomeGrid {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-md);
 }
 
 /* ---- the decision table ----------------------------------------------- */
@@ -168,32 +184,4 @@
 }
 .tableWrap {
   overflow-x: auto;
-}
-
-/* ---- the solo game ----------------------------------------------------- */
-.choiceRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-.gameChart {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.yearLog {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-  max-height: 190px;
-  overflow-y: auto;
-}
-.logHit {
-  color: var(--c-accent);
-  font-weight: var(--fw-semibold);
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
 
 /*
@@ -24,7 +24,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 export default function TeacherTrainingShell({
   children,
   title,
-  eyebrow = 'Teaching Toolkit',
+  eyebrow = 'Personal Finance Toolkit',
   intro,
   wide = false,
 }: {
@@ -44,7 +44,7 @@ export default function TeacherTrainingShell({
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
     const prior = document.title
-    document.title = `${title} | Teacher Training | Stanford Initiative for Financial Decision-Making`
+    document.title = `${title} | Personal Finance Toolkit`
     return () => {
       document.title = prior
     }
@@ -54,9 +54,18 @@ export default function TeacherTrainingShell({
     <div>
       <div className="bg-cardinal">
         <div className="max-w-[1680px] mx-auto px-6 py-8">
-          <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-2">
-            {eyebrow}
-          </p>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">
+              {eyebrow}
+            </p>
+            <Link
+              to="/"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
+            >
+              <Home size={14} />
+              Toolkit Home
+            </Link>
+          </div>
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
           {intro && <p className="mt-3 max-w-3xl text-white/85 leading-relaxed">{intro}</p>}
         </div>
@@ -71,7 +80,7 @@ export default function TeacherTrainingShell({
                 className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold text-cardinal hover:bg-cardinal/5 transition-colors"
               >
                 <ArrowLeft size={15} />
-                Course Overview
+                Toolkit Home
               </Link>
 
               <p className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400 w-full md:w-auto">
