@@ -112,10 +112,10 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
                   onChange({ contribution: { ...scenario.contribution!, amount } })
                 }
                 min={0}
-                max={2_000}
-                step={25}
+                max={10_000}
+                step={100}
                 editable
-                inputMax={10_000}
+                inputMax={1_000_000}
                 prefix="$"
               />
               <SegmentedControl

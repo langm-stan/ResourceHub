@@ -113,9 +113,9 @@ export function parseScenario(params: URLSearchParams): Scenario {
     freqCode && CODE_FREQ[freqCode] ? CODE_FREQ[freqCode] : DEFAULT_SCENARIO.frequency
   const mode: Mode = params.get('mode') === 'pv' ? 'pv' : 'fv'
 
-  // Contribution amounts get the same clamp as the tool's input (0..10,000);
-  // anything that clamps to zero means no contribution.
-  const cAmount = num(params, 'c', 0, 0, 10_000)
+  // Contribution amounts get the same clamp as the tool's input
+  // (0..1,000,000); anything that clamps to zero means no contribution.
+  const cAmount = num(params, 'c', 0, 0, 1_000_000)
   const contribution =
     cAmount > 0
       ? {
