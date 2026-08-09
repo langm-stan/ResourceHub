@@ -194,8 +194,8 @@ export default function TeacherTraining() {
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
             Interactive tools for learning and teaching personal finance, arranged as a course.
-            Start with the foundations at the base, then take the units in order. Every tool runs
-            in the browser, and each tool page shows how to embed it in your own slides.
+            Every tool runs in the browser, and each tool page shows how to embed it in your own
+            slides.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
             <Search
