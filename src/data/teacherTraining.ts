@@ -281,7 +281,7 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'insurance',
         label: 'Why Insurance Works',
-        description: 'A thousand households live one risky year twice, uninsured and insured: the premium above chance × loss is the load, and what it buys is a floor, not a better average.',
+        description: 'A thousand households live one risky year twice, uninsured and insured: the premium above chance × loss is the load, and what it buys is protection from the worst outcome.',
         keywords: ['insurance', 'premium', 'risk pooling', 'deductible', 'expected value', 'load', 'warranty', 'renters insurance', 'term life', 'self-insure'],
       },
       {

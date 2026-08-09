@@ -19,7 +19,7 @@ import styles from './InsurancePage.module.css'
 type Surface = 'pool' | 'math' | 'decide'
 
 const TABS: TabItem<Surface>[] = [
-  { value: 'pool', label: 'A thousand households' },
+  { value: 'pool', label: 'The pool' },
   { value: 'math', label: 'The math' },
   { value: 'decide', label: 'Should you insure it?' },
 ]
@@ -57,20 +57,19 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
-          <p className={styles.eyebrow}>Lesson · Why insurance works</p>
-          <h1 className={styles.h1}>A bet you should sometimes take</h1>
+          <p className={styles.eyebrow}>Lesson · Insurance</p>
+          <h1 className={styles.h1}>Why insurance works</h1>
           <p className={styles.lead}>
-            An insurance premium is a negative-expected-value bet, just like the games in the
-            gambling lesson, and people are right to buy it anyway. This lesson runs a thousand
-            households through one risky year to show what the premium actually purchases: not
-            dollars, but a floor.
+            An insurance premium is a bet with a negative expected value, like the games in the
+            gambling lesson, and it is often rational to buy anyway. This lesson runs a thousand
+            households through one risky year to show what the premium purchases.
           </p>
         </header>
       )}
 
       <Card tone="raised" className={styles.stack}>
         <StepHeader
-          title="One risky year"
+          title="The risk and the premium"
           hint="Each of 1,000 households faces the same small chance of the same large loss. Set the risk, what the insurer charges, and what a household has saved."
         />
         <div className={styles.controlsRow}>
@@ -261,8 +260,8 @@ function PoolView({
   return (
     <>
       <StepHeader
-        title="The same year, lived twice"
-        hint="Left: nobody bought the policy. Right: everybody did. The dice land the same way in both worlds; only who carries the loss changes."
+        title="The pool with and without insurance"
+        hint="The left grid shows the year with no insurance. The right grid shows the same draw with every household insured: the losses land on the same households, but the pool carries them."
       />
       <div className={styles.pools}>
         <div>
@@ -278,7 +277,7 @@ function PoolView({
             </span>
             <span>
               Worst outcome: <strong>{formatUSDWhole(uninsuredFloor)}</strong>
-              {ruined ? ' — wiped out' : ''}
+              {ruined ? ' (the loss is larger than the savings)' : ''}
             </span>
           </div>
         </div>
@@ -294,8 +293,8 @@ function PoolView({
               Average end-of-year savings: <strong>{formatUSDWhole(result.endInsured)}</strong>
             </span>
             <span>
-              Worst outcome: <strong>{formatUSDWhole(result.endInsured)}</strong> — the same as
-              the best
+              Worst outcome: <strong>{formatUSDWhole(result.endInsured)}</strong>, the same for
+              every household
             </span>
           </div>
         </div>
@@ -311,11 +310,10 @@ function PoolView({
       <Callout tone="note" label="What the premium buys">
         The insured pool ends the year{' '}
         <strong>{formatUSDWhole(Math.max(0, result.load))}</strong> per household poorer on
-        average than going without: that is the load, and it is the price of the policy&rsquo;s
-        real product. Without insurance the worst outcome is{' '}
-        <strong>{formatUSDWhole(uninsuredFloor)}</strong>; with it, no household ends below{' '}
-        <strong>{formatUSDWhole(result.endInsured)}</strong>. The premium does not raise the
-        average. It raises the floor.
+        average than the uninsured pool: that is the load. In exchange, the worst outcome moves
+        from <strong>{formatUSDWhole(uninsuredFloor)}</strong> to{' '}
+        <strong>{formatUSDWhole(result.endInsured)}</strong>. The premium lowers the average
+        outcome slightly and removes the worst one entirely.
       </Callout>
     </>
   )
@@ -349,22 +347,22 @@ function MathView({
       />
       <FormulaBlock
         tex={`\\text{load} = ${texUSD(premium)} - ${texUSD(result.fairPremium)} = ${texUSD(result.load)}`}
-        caption={`Step 2. The insurer charges ${formatPercent(Math.max(0, result.loadShare), 0)} above fair to pay its staff, its capital, and its shareholders. The load is the house edge, out in the open.`}
+        caption={`Step 2. The insurer charges ${formatPercent(Math.max(0, result.loadShare), 0)} above fair to pay its staff, its capital, and its shareholders. The load plays the same role as the house edge in the gambling lesson.`}
         muted
       />
       <FormulaBlock
         tex={`\\underbrace{${texUSD(savings)} - ${p} \\times ${texUSD(lossSize)} = ${texUSD(savings - p * lossSize)}}_{\\text{expected, uninsured}} \\qquad \\underbrace{${texUSD(savings)} - ${texUSD(premium)} = ${texUSD(result.endInsured)}}_{\\text{certain, insured}}`}
-        caption="Step 3. On expected value alone, going without insurance wins by exactly the load. Every extended warranty pitch and every casino relies on people reading only this line."
+        caption="Step 3. On expected value alone, going without insurance comes out ahead by exactly the load. This line is why insurance can never be judged on expected value by itself."
         muted
       />
       <FormulaBlock
         tex={`\\text{worst case, uninsured} = ${texUSD(savings)} - ${texUSD(lossSize)} = ${texUSD(savings - lossSize)} \\qquad \\text{worst case, insured} = ${texUSD(result.endInsured)}`}
-        caption="Step 4. But no household lives the average; each one lives a single draw. The uninsured worst case falls with the size of the loss without limit. The insured worst case never moves."
+        caption="Step 4. A single household experiences one draw, not the average. The uninsured worst case grows with the size of the loss; the insured worst case does not change."
       />
-      <Callout tone="note" label="Gambling in reverse">
-        A lottery ticket pays the load for a small chance of a jackpot that changes nothing you
-        need. An insurance premium pays the load to remove a small chance of a loss that changes
-        everything. Same arithmetic, opposite purpose: one buys variance, the other sells it.
+      <Callout tone="note" label="Compared with the gambling lesson">
+        A lottery ticket pays a load for a small chance of a large gain. An insurance premium
+        pays a load to remove a small chance of a large loss. The arithmetic is the same; the
+        difference is which side of the risk the buyer is on.
       </Callout>
     </>
   )
@@ -381,8 +379,8 @@ function DecideView() {
   return (
     <>
       <StepHeader
-        title="The rule, applied"
-        hint="Insure losses you could not absorb, even at a load. Skip cover for losses you could, and pocket the load yourself. Set your own cushion, then judge each offer."
+        title="Deciding what to insure"
+        hint="Insure losses you could not absorb, even at a load. Skip cover for losses you could absorb. Set your own cushion, then judge each offer."
       />
       <div className={styles.controlsRow}>
         <Slider
@@ -447,23 +445,23 @@ function DecideView() {
           <>
             The {scenario.label.toLowerCase()} covers a loss bigger than your{' '}
             {formatUSDWhole(cushion)} cushion, so the {formatPercent(Math.max(0, verdict.loadShare), 0)}{' '}
-            load is the price of a floor you cannot build yourself. Shop the load across insurers,
-            but buy the floor.
+            load is the price of protection you cannot provide yourself. Compare quotes across
+            insurers, but this is the kind of risk insurance exists for.
           </>
         ) : (
           <>
             The {scenario.label.toLowerCase()} covers a loss your {formatUSDWhole(cushion)} cushion
-            could absorb, so the load is a fee for protection you do not need. Decline it every
-            time, and the saved premiums become the repair fund. Self-insuring the small stuff is
-            how households keep the load for themselves.
+            could absorb, so the load is a fee for protection you do not need. Declining offers
+            like this one and keeping the premiums is called self-insuring, and over time the
+            saved premiums become the repair fund.
           </>
         )}
       </Callout>
       <Callout tone="plain" label="Classroom assumptions, not quotes">
         The chances and prices above are stated round-number assumptions, chosen so the structure
         of each decision is easy to see; real quotes vary by person, place, and policy. The rule
-        is what transfers: insure the ruinous, self-insure the rest, and always compare the quoted
-        premium to chance × loss before signing.
+        is what transfers: insure losses you could not absorb, self-insure the ones you could,
+        and compare the quoted premium to chance × loss before signing.
       </Callout>
     </>
   )
