@@ -77,6 +77,55 @@ export function simulatePool(p: PoolParams, seed: number): PoolOutcome {
   }
 }
 
+/* ---------------- the solo game: fifteen years, one household ----------- */
+
+/*
+ * Fixed teaching scenario, sized so a fifteen-year game usually contains a
+ * hit or two: the 1%-a-year default of the pool would let most players sail
+ * through untouched and learn the wrong lesson. Stated in the UI.
+ */
+export const SOLO = {
+  startSavings: 15_000,
+  /** What the household puts away each year before any loss or premium. */
+  yearlySaving: 5_000,
+  lossChance: 0.1,
+  /** Larger than the early-game buffer, so ruin is genuinely possible. */
+  lossSize: 25_000,
+  premium: 3_000,
+  years: 15,
+} as const
+
+/** Fair premium and load for the solo scenario. */
+export const SOLO_FAIR = SOLO.lossChance * SOLO.lossSize
+export const SOLO_LOAD = SOLO.premium - SOLO_FAIR
+
+/**
+ * The game's dice, all rolled when the game begins: whether year k brings
+ * the loss does not depend on whether the player insured. That is what
+ * makes the end-of-game comparison honest.
+ */
+export function drawHits(seed: number, years: number, chance: number): boolean[] {
+  const rand = mulberry32(seed)
+  return Array.from({ length: years }, () => rand() < chance)
+}
+
+/** One year of the solo game: add the saving, then pay the premium or eat the loss. */
+export function applyYear(balance: number, insured: boolean, hit: boolean): number {
+  const afterSaving = balance + SOLO.yearlySaving
+  return insured ? afterSaving - SOLO.premium : afterSaving - (hit ? SOLO.lossSize : 0)
+}
+
+/** The balance path a fixed strategy walks over the same dice. */
+export function strategyPath(hits: boolean[], insureAll: boolean): number[] {
+  const path = [SOLO.startSavings as number]
+  for (const hit of hits) {
+    const prev = path[path.length - 1]!
+    path.push(applyYear(prev, insureAll, hit))
+    if (path[path.length - 1]! < 0 && !insureAll) break
+  }
+  return path
+}
+
 /* ---------------- the "should you insure it?" scenarios ---------------- */
 
 export interface Scenario {

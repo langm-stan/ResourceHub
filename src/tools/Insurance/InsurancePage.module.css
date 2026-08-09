@@ -169,3 +169,31 @@
 .tableWrap {
   overflow-x: auto;
 }
+
+/* ---- the solo game ----------------------------------------------------- */
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.gameChart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.yearLog {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  max-height: 190px;
+  overflow-y: auto;
+}
+.logHit {
+  color: var(--c-accent);
+  font-weight: var(--fw-semibold);
+}

@@ -13,12 +13,13 @@ import {
 } from '../../design-system'
 import { formatPercent, formatUSDWhole, texUSD } from '../../lib/format'
 import { usePersistentState } from '../../hooks/usePersistentState'
-import { SCENARIOS, judgeScenario, simulatePool } from './compute'
+import { SCENARIOS, SOLO, SOLO_FAIR, SOLO_LOAD, applyYear, drawHits, judgeScenario, simulatePool, strategyPath } from './compute'
 import styles from './InsurancePage.module.css'
 
-type Surface = 'pool' | 'math' | 'decide'
+type Surface = 'play' | 'pool' | 'math' | 'decide'
 
 const TABS: TabItem<Surface>[] = [
+  { value: 'play', label: 'Try it yourself' },
   { value: 'pool', label: 'The pool' },
   { value: 'math', label: 'The math' },
   { value: 'decide', label: 'Should you insure it?' },
@@ -31,7 +32,7 @@ const CARDINAL = 'var(--c-accent)'
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
-  const [surface, setSurface] = useState<Surface>('pool')
+  const [surface, setSurface] = useState<Surface>('play')
   const [lossChancePct, setLossChancePct] = usePersistentState('ifdm-insurance-chance', 1)
   const [lossSize, setLossSize] = usePersistentState('ifdm-insurance-loss', 40_000)
   const [premium, setPremium] = usePersistentState('ifdm-insurance-premium', 500)
@@ -67,6 +68,8 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
         </header>
       )}
 
+      {surface !== 'play' && (
+        <>
       <Card tone="raised" className={styles.stack}>
         <StepHeader
           title="The risk and the premium"
@@ -167,11 +170,14 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
           />
         </div>
       </Card>
+        </>
+      )}
 
       <div className={styles.tabBar}>
         <Tabs items={TABS} value={surface} onChange={setSurface} />
       </div>
       <Card tone="raised" className={styles.panel}>
+        {surface === 'play' && <PlayView />}
         {surface === 'pool' && (
           <PoolView
             result={result}
@@ -464,5 +470,187 @@ function DecideView() {
         and compare the quoted premium to chance × loss before signing.
       </Callout>
     </>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * The solo game: one household, fifteen years, one decision a year made
+ * before that year's dice resolve. The dice are drawn when the game begins,
+ * so the end-of-game comparison between strategies is over the same years.
+ */
+function PlayView() {
+  const [gameId, setGameId] = useState(1)
+  const [choices, setChoices] = useState<boolean[]>([])
+  const hits = useMemo(() => drawHits(gameId * 7919 + 3, SOLO.years, SOLO.lossChance), [gameId])
+
+  const balances = useMemo(() => {
+    const path: number[] = [SOLO.startSavings]
+    for (let i = 0; i < choices.length; i++) path.push(applyYear(path[i]!, choices[i]!, hits[i]!))
+    return path
+  }, [choices, hits])
+
+  const yearsPlayed = choices.length
+  const balance = balances[balances.length - 1]!
+  const wipedOut = balance < 0
+  const over = wipedOut || yearsPlayed >= SOLO.years
+  const premiumsPaid = choices.filter(Boolean).length * SOLO.premium
+  const hitsTaken = choices.filter((c, i) => !c && hits[i]).length
+  const hitsCovered = choices.filter((c, i) => c && hits[i]).length
+
+  const alwaysPath = useMemo(() => strategyPath(hits, true), [hits])
+  const neverPath = useMemo(() => strategyPath(hits, false), [hits])
+
+  const choose = (insured: boolean) => {
+    if (!over) setChoices((c) => [...c, insured])
+  }
+  const restart = () => {
+    setGameId((g) => g + 1)
+    setChoices([])
+  }
+
+  return (
+    <>
+      <StepHeader
+        title="Fifteen years, one household"
+        hint={`You are the household. You put away ${formatUSDWhole(SOLO.yearlySaving)} a year, starting from ${formatUSDWhole(SOLO.startSavings)}. Each year carries a ${formatPercent(SOLO.lossChance, 0)} chance of a ${formatUSDWhole(SOLO.lossSize)} loss. A policy costs ${formatUSDWhole(SOLO.premium)} a year; the fair price is ${formatUSDWhole(SOLO_FAIR)}, so the load is ${formatUSDWhole(SOLO_LOAD)}. Decide before each year whether to buy.`}
+      />
+      <div className={styles.stats}>
+        <Stat
+          label={over ? 'Final balance' : `Balance entering year ${yearsPlayed + 1}`}
+          value={balance}
+          format={formatUSDWhole}
+          emphasis
+          accentColor={wipedOut ? CARDINAL : GREEN}
+          animate={false}
+        />
+        <Stat
+          label="Years played"
+          value={yearsPlayed}
+          format={(v) => `${v} of ${SOLO.years}`}
+          animate={false}
+        />
+        <Stat label="Premiums paid" value={premiumsPaid} format={formatUSDWhole} animate={false} />
+        <Stat
+          label="Losses taken"
+          value={hitsTaken * SOLO.lossSize}
+          format={formatUSDWhole}
+          accentColor={hitsTaken > 0 ? CARDINAL : undefined}
+          animate={false}
+          note={hitsCovered > 0 ? `${hitsCovered} more ${hitsCovered === 1 ? 'loss' : 'losses'} covered by the policy` : undefined}
+        />
+      </div>
+
+      {!over && (
+        <div className={styles.choiceRow}>
+          <Button onClick={() => choose(true)}>
+            Buy the policy ({formatUSDWhole(SOLO.premium)})
+          </Button>
+          <Button onClick={() => choose(false)}>Go without</Button>
+        </div>
+      )}
+
+      <GameChart balances={balances} alwaysPath={over ? alwaysPath : null} neverPath={over ? neverPath : null} />
+
+      {yearsPlayed > 0 && (
+        <ol className={styles.yearLog} aria-label="Year by year results">
+          {choices.map((insured, i) => {
+            const hit = hits[i]!
+            return (
+              <li key={i} className={!insured && hit ? styles.logHit : undefined}>
+                Year {i + 1}: {insured ? 'insured' : 'uninsured'},{' '}
+                {hit
+                  ? insured
+                    ? 'the loss came and the policy covered it'
+                    : `the loss came: -${formatUSDWhole(SOLO.lossSize)}`
+                  : 'no loss'}
+                . Balance {formatUSDWhole(balances[i + 1]!)}.
+              </li>
+            )
+          })}
+        </ol>
+      )}
+
+      {over && (
+        <>
+          <div className={styles.stats}>
+            <Stat
+              label="Your strategy"
+              value={balance}
+              format={formatUSDWhole}
+              emphasis
+              accentColor={wipedOut ? CARDINAL : GREEN}
+              animate={false}
+              note={wipedOut ? `wiped out in year ${yearsPlayed}` : undefined}
+            />
+            <Stat
+              label="Insuring every year"
+              value={alwaysPath[alwaysPath.length - 1]!}
+              format={formatUSDWhole}
+              animate={false}
+              note="same fifteen years"
+            />
+            <Stat
+              label="Never insuring"
+              value={neverPath[neverPath.length - 1]!}
+              format={formatUSDWhole}
+              animate={false}
+              note={
+                neverPath[neverPath.length - 1]! < 0
+                  ? `wiped out in year ${neverPath.length - 1}`
+                  : 'same fifteen years'
+              }
+            />
+          </div>
+          <Callout tone="note" label="The same dice either way">
+            The years that brought the loss were drawn when the game began, so your choices never
+            changed which years went bad, only who paid for them. Play a few games: never insuring
+            finishes ahead slightly more often than not, because the premium carries a load, but
+            in roughly one game in five it ends in ruin. The insured game never does. That is the
+            trade every premium prices.
+          </Callout>
+          <div className={styles.runAgain}>
+            <Button onClick={restart}>Start a new game</Button>
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+
+/** The balance path, with both fixed strategies overlaid once the game ends. */
+function GameChart({
+  balances,
+  alwaysPath,
+  neverPath,
+}: {
+  balances: number[]
+  alwaysPath: number[] | null
+  neverPath: number[] | null
+}) {
+  const w = 640
+  const h = 180
+  const pad = 6
+  const all = [...balances, ...(alwaysPath ?? []), ...(neverPath ?? []), 0]
+  const lo = Math.min(...all)
+  const hi = Math.max(...all, SOLO.startSavings + 1)
+  const x = (i: number) => pad + (i / SOLO.years) * (w - 2 * pad)
+  const y = (v: number) => pad + ((hi - v) / (hi - lo || 1)) * (h - 2 * pad)
+  const line = (path: number[]) => path.map((v, i) => `${x(i)},${y(v)}`).join(' ')
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className={styles.gameChart} role="img" aria-label="Balance by year">
+      <line x1={pad} y1={y(0)} x2={w - pad} y2={y(0)} stroke="var(--border-hairline)" strokeWidth="1" />
+      {alwaysPath && (
+        <polyline points={line(alwaysPath)} fill="none" stroke="var(--c-series-2)" strokeWidth="2" strokeDasharray="5 4" />
+      )}
+      {neverPath && (
+        <polyline points={line(neverPath)} fill="none" stroke="var(--c-series-3)" strokeWidth="2" strokeDasharray="2 4" />
+      )}
+      <polyline points={line(balances)} fill="none" stroke="var(--c-accent)" strokeWidth="2.5" />
+      {balances.map((v, i) => (
+        <circle key={i} cx={x(i)} cy={y(v)} r="3.5" fill="var(--c-accent)" />
+      ))}
+    </svg>
   )
 }
