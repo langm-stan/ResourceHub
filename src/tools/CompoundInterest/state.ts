@@ -125,7 +125,7 @@ export function parseScenario(params: URLSearchParams): Scenario {
       : null
 
   return {
-    principal: num(params, 'p', DEFAULT_SCENARIO.principal, 0, 1_000_000),
+    principal: num(params, 'p', DEFAULT_SCENARIO.principal, 0, Number.MAX_SAFE_INTEGER),
     ratePct: num(params, 'r', DEFAULT_SCENARIO.ratePct, 0, 40),
     years: num(params, 't', DEFAULT_SCENARIO.years, 1, 100),
     frequency,

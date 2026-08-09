@@ -52,7 +52,7 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
         max={100_000}
         step={500}
         editable
-        inputMax={1_000_000}
+        inputMax={Number.MAX_SAFE_INTEGER}
         prefix="$"
       />
       <Slider
