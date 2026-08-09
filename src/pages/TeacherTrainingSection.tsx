@@ -29,7 +29,6 @@ import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
 import { BondPricingPage } from '../tools/Bonds/BondPricingPage'
 import { BondRatesPage } from '../tools/Bonds/BondRatesPage'
 import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/RetirementSimPage'
-import { InsurancePage } from '../tools/Insurance/InsurancePage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
 
@@ -170,12 +169,6 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Tax Advantages', path: 'tax-advantages' },
     content: <TaxAdvantagesPage intro={false} />,
-  },
-  insurance: {
-    title: 'Why Insurance Works',
-    toolkit: true,
-    instructor: { label: 'Why Insurance Works', path: 'insurance' },
-    content: <InsurancePage intro={false} />,
   },
   'retirement-simulator': {
     title: 'Retirement Planning Simulator',
