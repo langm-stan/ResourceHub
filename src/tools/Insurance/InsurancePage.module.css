@@ -1,0 +1,223 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.intro {
+  margin-bottom: var(--space-5);
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+/* Controls flow horizontally across the band and wrap as needed. */
+.controlsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+.premiumNote {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  max-width: 78ch;
+  margin-top: 0;
+}
+
+/* ---- the walkthrough: read the year before living it ------------------- */
+.whatIfWrap {
+  display: grid;
+  grid-template-columns: minmax(300px, 5fr) minmax(260px, 4fr);
+  gap: var(--space-4) var(--space-7);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .whatIfWrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.whatIf {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-ui);
+}
+.whatIfCaption {
+  caption-side: top;
+  text-align: left;
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  padding-bottom: var(--space-2);
+}
+.whatIf th {
+  text-align: left;
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: var(--fw-semibold);
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.whatIf td {
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+  font-variant-numeric: tabular-nums;
+}
+.whatIf tr:last-child td {
+  border-bottom: none;
+}
+.whatIfNote {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* The button that opens the next step of the walkthrough. */
+.advanceRow {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: var(--space-1);
+}
+
+/* The decision and the run button sit on one line where room allows. */
+.decisionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4) var(--space-6);
+}
+.decisionRow > :first-child {
+  flex: 1 1 320px;
+}
+.runButtons {
+  display: flex;
+  gap: var(--space-3);
+  padding-bottom: 2px;
+}
+
+/* ---- the two worlds, side by side -------------------------------------- */
+.pools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-4) var(--space-6);
+  align-items: start;
+}
+.poolTitle {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  margin: 0 0 var(--space-2);
+}
+.poolStats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-3);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.poolStats strong {
+  color: var(--text-primary);
+}
+.yearCounter {
+  align-self: center;
+  font-size: var(--fs-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.chartEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  height: 100%;
+  border: var(--hairline) dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+.chartEmpty p {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  max-width: 40ch;
+  text-align: center;
+  margin: 0;
+}
+
+.poolGrid {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+  margin-top: var(--space-2);
+}
+/* The distribution figure leads at full width; the table reads beside it. */
+.distWrap {
+  display: grid;
+  grid-template-columns: minmax(340px, 6fr) minmax(250px, 4fr);
+  gap: var(--space-4) var(--space-7);
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .distWrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.distBars {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: var(--space-2);
+}
+.legendRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.poolSummary {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  max-width: 78ch;
+}
+.poolSummary strong {
+  color: var(--text-primary);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.footnote {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  max-width: 80ch;
+}

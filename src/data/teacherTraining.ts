@@ -276,8 +276,15 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Insurance and Retirement Planning',
     short: 'Insurance & Retirement',
     description:
-      'Working backward from a retirement income to the yearly saving that funds it.',
+      'Why insurance is worth its price for the right risks, and working backward from a retirement income to the yearly saving that funds it.',
     tools: [
+      {
+        slug: 'insurance',
+        label: 'Why Insurance Works',
+        description:
+          'Price a risk, then run the same twenty years for a thousand households with and without the policy: what each group pays each year, who the losses find, and where every household ends up.',
+        keywords: ['insurance', 'premium', 'risk pooling', 'expected value', 'load', 'shock', 'renters insurance', 'self-insure', 'deductible', 'claim'],
+      },
       {
         slug: 'retirement-simulator',
         label: 'Retirement Planning Simulator',
