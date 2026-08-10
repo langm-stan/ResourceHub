@@ -25,9 +25,9 @@ export function mulberry32(seed: number): () => number {
 }
 
 /**
- * Premium dollars charged per expected dollar paid out. U.S. insurers return
- * roughly 65 to 75 cents of each premium dollar as claims; the rest runs the
- * company. The visitor never sets the price: the insurer does.
+ * Default premium dollars charged per expected dollar paid out. U.S. insurers
+ * return roughly 65 to 75 cents of each premium dollar as claims; the rest
+ * runs the company. Adjustable on the page: high-risk markets run higher.
  */
 export const LOAD = 1.4
 
@@ -41,9 +41,9 @@ export interface Quote {
 }
 
 /** The price the insurer imposes for this risk, rounded to whole dollars. */
-export function quoteFor(lossChance: number, lossSize: number): Quote {
+export function quoteFor(lossChance: number, lossSize: number, loadFactor = LOAD): Quote {
   const fairPremium = Math.round(lossChance * lossSize)
-  const premium = Math.round(lossChance * lossSize * LOAD)
+  const premium = Math.round(lossChance * lossSize * loadFactor)
   return { fairPremium, premium, load: premium - fairPremium }
 }
 
@@ -99,9 +99,14 @@ export interface SimRun {
  * in the lesson (nobody insured, everybody insured) read from this one draw,
  * so the comparison is never about different luck.
  */
-export function simulateYears(lossChance: number, lossSize: number, seed: number): SimRun {
+export function simulateYears(
+  lossChance: number,
+  lossSize: number,
+  seed: number,
+  loadFactor = LOAD,
+): SimRun {
   const rand = mulberry32(seed)
-  const premium = quoteFor(lossChance, lossSize).premium
+  const premium = quoteFor(lossChance, lossSize, loadFactor).premium
   const hitsByYear: boolean[][] = []
   const totalHits = new Array<number>(HOUSEHOLDS).fill(0)
   const avgBare: number[] = [0]

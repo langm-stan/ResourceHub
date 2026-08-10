@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Card, MathSection, Slider, Stat, StepHeader, type MathRow } from '../../design-system'
+import {
+  Button,
+  Card,
+  MathSection,
+  ScenarioChip,
+  Slider,
+  Stat,
+  StepHeader,
+  type MathRow,
+} from '../../design-system'
 import { formatPercent, formatUSDCompact, formatUSDWhole, texUSD } from '../../lib/format'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
@@ -18,7 +27,6 @@ import {
 import {
   FINANCE_YEARS,
   HOUSEHOLDS,
-  LOAD,
   SIM_YEARS,
   financedBill,
   quoteFor,
@@ -39,6 +47,17 @@ const GOLD = 'var(--c-series-2)'
 const CARDINAL = 'var(--c-accent)'
 const SLATE = 'var(--c-series-3)'
 
+/*
+ * Ready-made risks, in round classroom numbers: severe house damage runs
+ * about 1-in-200 a year; a totaled car about 1-in-50; a burgled or burned
+ * apartment's contents about 1-in-100.
+ */
+const SCENARIOS = [
+  { key: 'house', label: 'A $500K house', chancePct: 0.5, loss: 500_000 },
+  { key: 'car', label: 'A $30K car', chancePct: 2, loss: 30_000 },
+  { key: 'renters', label: '$20K of belongings', chancePct: 1, loss: 20_000 },
+]
+
 const bucketLabel = (k: number, capped: boolean) =>
   k === 0
     ? 'Never hit'
@@ -54,6 +73,7 @@ const bucketLabel = (k: number, capped: boolean) =>
 export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
   const [lossChancePct, setLossChancePct] = usePersistentState('ifdm-insurance-chance', 2)
   const [lossSize, setLossSize] = usePersistentState('ifdm-insurance-loss', 30_000)
+  const [loadPct, setLoadPct] = usePersistentState('ifdm-insurance-load', 40)
 
   const [reached, setReached] = useState(1)
   // Random starting seed so each classroom gets its own draw; a new run
@@ -66,9 +86,13 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
   const reduced = useReducedMotion()
 
   const p = lossChancePct / 100
-  const quote = quoteFor(p, lossSize)
+  const loadFactor = 1 + loadPct / 100
+  const quote = quoteFor(p, lossSize, loadFactor)
   const fin = financedBill(lossSize)
-  const run = useMemo(() => simulateYears(p, lossSize, seed), [p, lossSize, seed])
+  const run = useMemo(
+    () => simulateYears(p, lossSize, seed, loadFactor),
+    [p, lossSize, seed, loadFactor],
+  )
 
   // Reveal the run one year at a time; reduced motion sees it all at once.
   useEffect(() => {
@@ -140,8 +164,8 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
       caption: 'The fair premium covers the pool’s claims: chance × loss.',
     },
     {
-      tex: `\\text{quote} = 1.4 \\times ${texUSD(quote.fairPremium)} = ${texUSD(quote.premium)}`,
-      caption: 'The insurer adds 40% to run the company: the load.',
+      tex: `\\text{quote} = ${loadFactor.toFixed(2)} \\times ${texUSD(quote.fairPremium)} = ${texUSD(quote.premium)}`,
+      caption: `The insurer adds ${loadPct}% to run the company: the load.`,
       muted: true,
     },
     {
@@ -175,6 +199,21 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
           title="The risk and the price"
           hint="One bad event: how likely this year, and how big? The insurer prices it for you."
         />
+        <div className={styles.chipsRow}>
+          {SCENARIOS.map((s) => (
+            <ScenarioChip
+              key={s.key}
+              label={s.label}
+              active={lossChancePct === s.chancePct && lossSize === s.loss}
+              onClick={() => {
+                setRunId(0)
+                setRevealYear(0)
+                setLossChancePct(s.chancePct)
+                setLossSize(s.loss)
+              }}
+            />
+          ))}
+        </div>
         <div className={styles.controlsRow}>
           <Slider
             label="Chance of the loss this year"
@@ -192,11 +231,22 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             value={lossSize}
             onChange={changeScenario(setLossSize)}
             min={1_000}
-            max={200_000}
+            max={500_000}
             step={1_000}
             editable
             inputMax={10_000_000}
             prefix="$"
+          />
+          <Slider
+            label="Insurer's markup over fair"
+            value={loadPct}
+            onChange={changeScenario(setLoadPct)}
+            min={10}
+            max={100}
+            step={5}
+            editable
+            suffix="%"
+            note="40% is typical; high-risk areas run higher."
           />
         </div>
         <div className={styles.stats}>
@@ -212,7 +262,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             value={quote.premium}
             format={formatUSDWhole}
             accentColor={CARDINAL}
-            note={`fair plus ${formatPercent(LOAD - 1, 0)}`}
+            note={`fair plus ${loadPct}%`}
             emphasis
             animate={false}
           />
@@ -392,8 +442,8 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
 
       <p className={styles.footnote}>
         Simplified for classroom use, not financial advice. Every household faces the same odds
-        each year; the 40% markup matches what U.S. insurers keep of each premium dollar;
-        financed losses assume a 12%, five-year loan.
+        each year; the default 40% markup matches what U.S. insurers keep of each premium dollar,
+        and runs higher in high-risk markets; financed losses assume a 12%, five-year loan.
       </p>
     </div>
   )
