@@ -58,16 +58,8 @@ const SCENARIOS = [
   { key: 'renters', label: '$20K of belongings', chancePct: 1, loss: 20_000 },
 ]
 
-const bucketLabel = (k: number, capped: boolean) =>
-  k === 0
-    ? 'Never hit'
-    : k === 1
-      ? 'Hit once'
-      : k === 2
-        ? 'Hit twice'
-        : capped
-          ? `Hit ${k}+ times`
-          : `Hit ${k} times`
+const bucketLabel = (k: number) =>
+  k === 0 ? 'Never hit' : k === 1 ? 'Hit once' : k === 2 ? 'Hit twice' : `Hit ${k} times`
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
@@ -140,10 +132,10 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
     [run],
   )
 
-  // The distribution, in buckets that stretch only as far as the worst
-  // household of this draw (never past 10+, at least through "twice").
-  const bucketCount = Math.min(11, Math.max(3, run.maxHits + 1))
-  const capped = run.maxHits + 1 > bucketCount
+  // The distribution, in exact buckets as far as the worst household of
+  // this draw (at least through "twice"; hits cannot exceed SIM_YEARS).
+  // Empty buckets past "twice" stay out of the table and the bars.
+  const bucketCount = Math.max(3, run.maxHits + 1)
   const countsNow = useMemo(() => {
     const per = new Array<number>(HOUSEHOLDS).fill(0)
     for (let y = 0; y < revealYear; y++) {
@@ -152,9 +144,13 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
       })
     }
     const c = new Array<number>(bucketCount).fill(0)
-    per.forEach((h) => c[Math.min(h, bucketCount - 1)]!++)
+    per.forEach((h) => c[h]!++)
     return c
   }, [run, revealYear, bucketCount])
+  const buckets = useMemo(
+    () => countsNow.map((count, k) => ({ k, count })).filter((b) => b.k <= 2 || b.count > 0),
+    [countsNow],
+  )
   const buyersPaidSoFar = revealYear * quote.premium
   const worseNow = Math.round(run.worseShare[revealYear]! * HOUSEHOLDS)
 
@@ -174,7 +170,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
       muted: true,
     },
     {
-      tex: `P(\\text{hit within ${SIM_YEARS} years}) = 1 - (1 - ${p})^{${SIM_YEARS}} = ${formatPercent(pAtLeastOnce, 0)}`,
+      tex: `P(\\text{hit within ${SIM_YEARS} years}) = 1 - (1 - ${p})^{${SIM_YEARS}} = ${Math.round(pAtLeastOnce * 100)}\\%`,
       caption: 'But nobody lives the average: this many non-buyers draw the loss.',
     },
   ]
@@ -220,7 +216,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             value={lossChancePct}
             onChange={changeScenario(setLossChancePct)}
             min={0.5}
-            max={10}
+            max={100}
             step={0.5}
             editable
             precision={1}
@@ -378,12 +374,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                   <span style={{ color: SLATE }}>■ non-buyers, never hit</span>
                   <span style={{ color: CARDINAL }}>■ non-buyers, hit</span>
                 </div>
-                <OutcomeBars
-                  countsNow={countsNow}
-                  buyersPaid={buyersPaidSoFar}
-                  lossSize={lossSize}
-                  capped={capped}
-                />
+                <OutcomeBars buckets={buckets} buyersPaid={buyersPaidSoFar} lossSize={lossSize} />
               </div>
               <div>
                 <table className={styles.whatIf}>
@@ -398,13 +389,11 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                     </tr>
                   </thead>
                   <tbody>
-                    {countsNow.map((count, k) => {
-                      const paid = k * lossSize
-                      const diff = buyersPaidSoFar - paid
-                      const open = capped && k === bucketCount - 1
+                    {buckets.map(({ k, count }) => {
+                      const diff = buyersPaidSoFar - k * lossSize
                       return (
                         <tr key={k}>
-                          <td>{bucketLabel(k, open)}</td>
+                          <td>{bucketLabel(k)}</td>
                           <td
                             className="tnum"
                             style={count === 0 ? { color: 'var(--text-faint)' } : undefined}
@@ -421,7 +410,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                           >
                             {diff >= 0
                               ? `${formatUSDCompact(diff)} ahead`
-                              : `${formatUSDCompact(-diff)}${open ? '+' : ''} behind`}
+                              : `${formatUSDCompact(-diff)} behind`}
                           </td>
                         </tr>
                       )
@@ -591,27 +580,21 @@ function BillsAndHits({
  * advance.
  */
 function OutcomeBars({
-  countsNow,
+  buckets,
   buyersPaid,
   lossSize,
-  capped,
 }: {
-  countsNow: number[]
+  buckets: { k: number; count: number }[]
   buyersPaid: number
   lossSize: number
-  capped: boolean
 }) {
-  const last = countsNow.length - 1
   const bars = [
     { cost: buyersPaid, count: HOUSEHOLDS, color: GOLD, tag: formatUSDCompact(buyersPaid) },
-    ...countsNow.map((count, k) => ({
+    ...buckets.map(({ k, count }) => ({
       cost: k * lossSize,
       count,
       color: k === 0 ? SLATE : CARDINAL,
-      tag:
-        capped && k === last
-          ? `${formatUSDCompact(k * lossSize)}+`
-          : formatUSDCompact(k * lossSize),
+      tag: formatUSDCompact(k * lossSize),
     })),
   ].sort((a, b) => a.cost - b.cost)
 
