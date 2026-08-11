@@ -134,7 +134,7 @@
 }
 .controlsGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-5) var(--space-7);
   align-items: start;
   margin-top: var(--space-4);

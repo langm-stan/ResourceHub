@@ -1,13 +1,20 @@
 /*
  * Monthly S&P 500 composite price (average of daily closes) and trailing
- * 12-month dividends per share, January 1985 through June 2026.
+ * 12-month dividends per share, January 1985 through July 2026.
  *
  * Sources: Robert Shiller's public dataset (ie_data.xls, econ.yale.edu)
  * through June 2023; multpl.com monthly values after that, with dividends
- * spliced onto Shiller's level (Shiller 68.71 vs multpl 75.47 at the
- * June 2023 join) and the first half of 2026 extrapolated at the recent
- * ~0.2%/month dividend growth rate. Downloaded and verified July 2026.
- * Annual update: refresh the tail from the same sources.
+ * spliced onto Shiller's level (Shiller 68.71 at the June 2023 join,
+ * divided by multpl's value for that month at the current CPI rebase,
+ * 75.21 as of August 2026). multpl's dividend series ran through June
+ * 2026 at the last refresh, so July's dividend is held at June's value.
+ * Refreshed August 2026.
+ *
+ * Update every six months (February and August): refresh the tail from
+ * the same sources, re-derive the splice ratio from the June 2023 join,
+ * and true up the last few provisional months. Every "through <month>"
+ * label in the Timing, Game, and Gambling tools derives from this
+ * array's last row, so no label needs editing by hand.
  */
 
 export interface SpxMonth {
@@ -514,10 +521,11 @@ export const SPX: SpxMonth[] = [
   { y: 2025, m: 10, p: 6735.69, d: 73.94 },
   { y: 2025, m: 11, p: 6740.89, d: 74.15 },
   { y: 2025, m: 12, p: 6853.03, d: 74.31 },
-  { y: 2026, m: 1, p: 6929.12, d: 74.46 },
-  { y: 2026, m: 2, p: 6893.81, d: 74.61 },
-  { y: 2026, m: 3, p: 6654.42, d: 74.76 },
-  { y: 2026, m: 4, p: 6957.01, d: 74.91 },
-  { y: 2026, m: 5, p: 7412.55, d: 75.06 },
-  { y: 2026, m: 6, p: 7473.85, d: 75.21 },
+  { y: 2026, m: 1, p: 6929.12, d: 74.86 },
+  { y: 2026, m: 2, p: 6893.81, d: 74.77 },
+  { y: 2026, m: 3, p: 6654.42, d: 74.26 },
+  { y: 2026, m: 4, p: 6957.01, d: 73.83 },
+  { y: 2026, m: 5, p: 7412.55, d: 73.57 },
+  { y: 2026, m: 6, p: 7450.03, d: 74.03 },
+  { y: 2026, m: 7, p: 7513.50, d: 74.03 },
 ]

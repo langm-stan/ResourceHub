@@ -18,8 +18,10 @@ import {
   SPY_END_LABEL,
   SPY_FIRST_YEAR,
   SPY_LAST_START,
+  SPY_LAST_YEAR,
   computeAhead,
   computeRealPaths,
+  endLabelFor,
   type GameKey,
 } from './compute'
 import { AheadChart } from './components/AheadChart'
@@ -42,18 +44,26 @@ const GREEN = 'var(--c-series-1)'
 const SLATE = 'var(--c-series-3)'
 const CARDINAL = 'var(--c-accent)'
 
-const DEFAULTS = { weekly: 20, startYear: 2006, game: 'lottery' as GameKey }
+const DEFAULTS = { weekly: 20, startYear: 2006, endYear: SPY_LAST_YEAR, game: 'lottery' as GameKey }
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
   const [surface, setSurface] = useState<Surface>('overview')
   const [weekly, setWeekly] = useState(DEFAULTS.weekly)
   const [startYear, setStartYear] = useState(DEFAULTS.startYear)
+  const [endYear, setEndYear] = useState(DEFAULTS.endYear)
   const [game, setGame] = useState<GameKey>(DEFAULTS.game)
+
+  /* Keep at least one full year between the start and the end. */
+  const pickStart = (y: number) => {
+    setStartYear(y)
+    if (endYear <= y) setEndYear(y + 1)
+  }
 
   const reset = () => {
     setWeekly(DEFAULTS.weekly)
     setStartYear(DEFAULTS.startYear)
+    setEndYear(DEFAULTS.endYear)
     setGame(DEFAULTS.game)
   }
 
@@ -93,12 +103,22 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
           <Slider
             label="Start the habit in"
             value={startYear}
-            onChange={setStartYear}
+            onChange={pickStart}
             min={SPY_FIRST_YEAR}
             max={SPY_LAST_START}
             step={1}
             readout={`January ${startYear}`}
-            note={`Runs on actual market history through ${SPY_END_LABEL}.`}
+            note="SPY's first full year is 1993."
+          />
+          <Slider
+            label="End the habit in"
+            value={endYear}
+            onChange={setEndYear}
+            min={startYear + 1}
+            max={SPY_LAST_YEAR}
+            step={1}
+            readout={endLabelFor(endYear)}
+            note={`Market data through ${SPY_END_LABEL}, refreshed every six months.`}
           />
           <SegmentedControl
             label="The game"
@@ -125,7 +145,9 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
           <Tabs items={TABS} value={surface} onChange={setSurface} />
         </div>
         <Card tone="raised" className={styles.panel}>
-          {surface === 'overview' && <Overview weekly={weekly} startYear={startYear} game={game} />}
+          {surface === 'overview' && (
+            <Overview weekly={weekly} startYear={startYear} endYear={endYear} game={game} />
+          )}
           {surface === 'odds' && <KnowTheOdds />}
           {surface === 'history' && <StocksBondsContent figure="Figure 4." />}
           {surface === 'research' && <ResearchView />}
@@ -138,10 +160,20 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
 
 /* ------------------------------------------------------------------ */
 
-function Overview({ weekly, startYear, game }: { weekly: number; startYear: number; game: GameKey }) {
+function Overview({
+  weekly,
+  startYear,
+  endYear,
+  game,
+}: {
+  weekly: number
+  startYear: number
+  endYear: number
+  game: GameKey
+}) {
   const { points: paths, years } = useMemo(
-    () => computeRealPaths(weekly, startYear, game),
-    [weekly, startYear, game]
+    () => computeRealPaths(weekly, startYear, endYear, game),
+    [weekly, startYear, endYear, game]
   )
   const ahead = useMemo(() => computeAhead(years), [years])
 
@@ -150,8 +182,10 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
   const endAhead = ahead[ahead.length - 1]!
   const gameLabel = GAMES[game].label
   const gameShort = GAMES[game].short
+  const endText = endLabelFor(endYear)
+  const behind = end.invested < end.staked
 
-  const crashYears = [2008, 2020, 2022].filter((y) => y >= startYear)
+  const crashYears = [2008, 2020, 2022].filter((y) => y >= startYear && y <= endYear)
   const crashNote =
     crashYears.length === 0
       ? ''
@@ -184,7 +218,7 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
           format={formatUSDWhole}
           emphasis
           accentColor={GREEN}
-          note={`actual returns, ${startYear} to today, dividends reinvested`}
+          note={`actual returns, January ${startYear} to ${endText}, dividends reinvested`}
         />
       </div>
 
@@ -196,7 +230,7 @@ function Overview({ weekly, startYear, game }: { weekly: number; startYear: numb
           { label: `Expected pocket, ${gameLabel.toLowerCase()}`, value: formatUSDWhole(end.pocket), color: CARDINAL },
           { label: 'SPY balance', value: formatUSDWhole(end.invested), color: GREEN },
         ]}
-        caption={`${formatUSDWhole(weekly)} a week since January ${startYear} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value melts to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually grew to ${formatUSDWhole(end.invested)} (green)${crashNote}.`}
+        caption={`${formatUSDWhole(weekly)} a week from January ${startYear} to ${endText} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value melts to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually ${behind ? `shrank to ${formatUSDWhole(end.invested)}` : `grew to ${formatUSDWhole(end.invested)}`} (green)${crashNote}.${behind ? ' This window ends inside a downturn, the real risk investing carries; the next chart shows how that chance shrinks as the years add up.' : ''}`}
       />
 
       <StepHeader

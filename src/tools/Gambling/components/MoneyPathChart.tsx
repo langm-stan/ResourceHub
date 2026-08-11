@@ -47,7 +47,8 @@ function Inner({ points, gameLabel }: { points: PathPoint[]; gameLabel: string }
   const { innerWidth, innerHeight } = useChart()
   const t0 = points[0]!.year
   const t1 = points[points.length - 1]!.year
-  const top = Math.max(...points.map((p) => p.invested)) * 1.08
+  /* The grey staked line can sit above SPY when the window ends in a downturn. */
+  const top = Math.max(...points.map((p) => Math.max(p.invested, p.staked))) * 1.08
 
   const x = useMemo(
     () => scaleLinear().domain([t0, t1]).range([0, innerWidth]),

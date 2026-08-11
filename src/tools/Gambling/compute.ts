@@ -25,6 +25,7 @@
  * (0.18 log-SD; see INDEX_SD_LOG below).
  */
 
+import { monthName } from '../Timing/compute'
 import { SPX } from '../Timing/spxData'
 import { HISTORY } from './historyData'
 
@@ -57,8 +58,23 @@ export interface PathPoint {
 
 /** SPY, the first S&P 500 ETF, began trading in January 1993. */
 export const SPY_FIRST_YEAR = 1993
-export const SPY_LAST_START = 2024
-export const SPY_END_LABEL = 'June 2026'
+
+/*
+ * Everything below derives from the data tail (see spxData.ts, refreshed
+ * every six months), so a data update moves the slider bounds and every
+ * "through <month>" label with no edits here.
+ */
+const LAST = SPX[SPX.length - 1]!
+/** Latest year in the data; the end-date control's upper bound. */
+export const SPY_LAST_YEAR = LAST.y
+/** Latest start year offered, keeping at least two years of history. */
+export const SPY_LAST_START = LAST.y - 2
+export const SPY_END_LABEL = `${monthName(LAST.m)} ${LAST.y}`
+
+/** Where a path ending in `endYear` actually stops: the data tail's month for the latest year, December otherwise. */
+export function endLabelFor(endYear: number): string {
+  return endYear >= LAST.y ? SPY_END_LABEL : `December ${endYear}`
+}
 
 /*
  * The literal comparison: the same weekly dollars into a game vs. into
@@ -70,6 +86,7 @@ export const SPY_END_LABEL = 'June 2026'
 export function computeRealPaths(
   weekly: number,
   startYear: number,
+  endYear: number,
   game: GameKey
 ): { points: PathPoint[]; years: number } {
   const payback = GAMES[game].payback
@@ -78,7 +95,7 @@ export function computeRealPaths(
   const points: PathPoint[] = []
   let staked = 0
   let spy = 0
-  for (let i = start; i < SPX.length; i++) {
+  for (let i = start; i < SPX.length && SPX[i]!.y <= endYear; i++) {
     if (i > start) {
       const cur = SPX[i]!
       const prev = SPX[i - 1]!
@@ -94,7 +111,7 @@ export function computeRealPaths(
       invested: spy,
     })
   }
-  return { points, years: Math.max(1, Math.floor((SPX.length - start) / 12)) }
+  return { points, years: Math.max(1, Math.floor(points.length / 12)) }
 }
 
 export interface AheadPoint {

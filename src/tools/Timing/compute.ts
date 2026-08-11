@@ -12,8 +12,9 @@
  *
  * Invested balances earn the index total return, computed as
  * r_t = (P_t + D_t/12) / P_{t-1} - 1. Cash earns a flat user-set rate.
- * Verified July 2026: the one-month-late buyer ends behind the monthly
- * buyer for 28 of 31 start years 1985-2015 (cash at 0%); only 1997,
+ * Verified August 2026 (data through July 2026): the one-month-late
+ * buyer ends behind the monthly buyer for 28 of 31 start years
+ * 1985-2015 (cash at 0%); only 1997,
  * 1998, and 1999 starts win, and even the perfect bottom buyer trails
  * for most starts. Starting near the dot-com bubble peak is the
  * exception, which the page discusses honestly.
@@ -161,11 +162,12 @@ export function runStrategies(
   }
 }
 
-export const FIRST_YEAR = 1985
-export const LAST_LABEL = 'June 2026'
-
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 export function monthName(m: number): string {
   return MONTHS[m - 1]!
 }
+
+/* Both bounds derive from the data so a refresh updates every label. */
+export const FIRST_YEAR = SPX[0]!.y
+export const LAST_LABEL = `${monthName(SPX[SPX.length - 1]!.m)} ${SPX[SPX.length - 1]!.y}`
