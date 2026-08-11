@@ -30,11 +30,8 @@ import {
   jarSeries,
   matchScenarios,
   planOutcome,
-  retirementCurve,
-  retirementTarget,
   savingFor,
   waitingCurve,
-  yearsToFree,
 } from './compute'
 import styles from './RetirementSimPage.module.css'
 
@@ -890,9 +887,6 @@ function RetirementTiming() {
   const [startAge, setStartAge] = useState(PLAN_START_AGE)
   const [savePct, setSavePct] = useState(Math.round(R_SAVE * 1000) / 10)
   const [actualPct, setActualPct] = useState(5)
-  // The savings-rate curve stands on its own income.
-  const [curveIncome, setCurveIncome] = useState(80000)
-  const [saveRate, setSaveRate] = useState(10)
 
   const planYears = RETIRE_AGE - startAge
   const plan = useMemo(
@@ -900,16 +894,6 @@ function RetirementTiming() {
     [income, actualPct, retYears, retiredPct, savePct, startAge]
   )
   const waiting = useMemo(() => waitingCurve(plan.target, savePct / 100), [plan.target, savePct])
-
-  const curve = useMemo(
-    () => retirementCurve(curveIncome, savePct / 100, retiredPct / 100, retYears),
-    [curveIncome, savePct, retiredPct, retYears]
-  )
-  const myYears = yearsToFree(curveIncome, saveRate / 100, savePct / 100, retiredPct / 100, retYears)
-  const myAge = myYears === null ? null : startAge + myYears
-  // Step 1 for the flipped case: the savings that replace the spending left after saving.
-  const curveSpend = curveIncome * (1 - saveRate / 100)
-  const curveTarget = retirementTarget(curveSpend, retYears, retiredPct / 100)
 
   const waitX = waiting.map((r) => r.age)
   const waitY = waiting.map((r) => r.saving)
@@ -921,10 +905,6 @@ function RetirementTiming() {
   const planX = plan.rows.map((r) => r.age)
   const planEnd = plan.rows[plan.rows.length - 1]!
   const planYMax = Math.max(plan.target, planEnd.plan, planEnd.actual) * 1.15
-
-  const curveX = curve.map((r) => r.rate)
-  const curveAges = curve.map((r) => startAge + r.years)
-  const curveYMax = Math.max(...curveAges) + 4
 
   return (
     <div className={styles.section}>
@@ -1038,7 +1018,7 @@ function RetirementTiming() {
           lines={[{ ys: waitY, color: GOLD, width: 3, label: 'Annual saving needed' }]}
           xTickFormat={(v) => `age ${Math.round(v)}`}
           xHoverLabel={(v) => `Start at ${Math.round(v)}`}
-          figure="Figure 3."
+          figure="Figure 1."
           caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${RETIRE_AGE} at a ${plannedPct} return, by starting age. Waiting from 25 to 40 multiplies the annual price by ${waitRatio.toFixed(1)}, and each further year of waiting costs more than the last.`}
           ariaLabel="Annual saving needed to reach the target by 65, as a function of starting age"
           exportStats={[
@@ -1106,7 +1086,7 @@ function RetirementTiming() {
           ]}
           xTickFormat={(v) => `age ${Math.round(v)}`}
           xHoverLabel={(v) => `Age ${Math.round(v)}`}
-          figure="Figure 4."
+          figure="Figure 2."
           caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${RETIRE_AGE}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
           ariaLabel="Accumulation under the planned return versus the actual return"
           exportStats={[
@@ -1119,77 +1099,6 @@ function RetirementTiming() {
       <Callout tone="mark" label="A retirement plan is adjusted over time">
         Save more than the minimum so the plan carries a buffer, recheck the balance every few
         years, and adjust the contribution.
-      </Callout>
-
-      <div>
-        <p className={styles.rulesTitle}>Retirement is a savings rate, not an age</p>
-        <p className={styles.sectionLede}>
-          Save {saveRate}% of {formatUSDWhole(curveIncome)}, live on{' '}
-          {formatUSDWhole(curveSpend)}. The goal becomes {formatUSDWhole(curveTarget)}, reached{' '}
-          {myAge ? `at age ${myAge}` : 'at no working age'}.
-        </p>
-      </div>
-      <div className={styles.controlsRow}>
-        <Slider
-          label="After-tax income"
-          value={curveIncome}
-          onChange={setCurveIncome}
-          min={40000}
-          max={200000}
-          step={5000}
-          editable
-          prefix="$"
-          inputMax={1_000_000}
-        />
-        <Slider label="Savings rate" value={saveRate} onChange={setSaveRate} min={5} max={70} step={1} editable suffix="%" />
-      </div>
-      <div className={styles.stats}>
-        <Stat label="Saving per year" value={(curveIncome * saveRate) / 100} format={formatUSDWhole} animate={false} />
-        <Stat label="Living on" value={curveSpend} format={formatUSDWhole} animate={false} />
-        <Stat label="Savings needed (the goal)" value={curveTarget} format={formatUSDWhole} accentColor={GOLD} animate={false} />
-        <Stat
-          label="Work becomes optional at"
-          value={myAge ?? 0}
-          format={(v) => (myAge ? `age ${Math.round(v)}` : 'never')}
-          accentColor={GREEN}
-          emphasis
-          animate={false}
-        />
-      </div>
-      <p className={styles.note}>
-        The chart does not change when income moves: the date depends on the savings rate, not the
-        paycheck.
-      </p>
-      <div>
-        <div className={styles.legend}>
-          <span style={{ color: GOLD }}>&#9632; retirement age by savings rate</span>
-          <span style={{ color: RED }}>&#9476; your savings rate</span>
-        </div>
-        <StationChart
-          x={curveX}
-          yMin={startAge}
-          yMax={curveYMax}
-          ratio={CHART_RATIO}
-          maxHeight={CHART_MAX_HEIGHT}
-          xRef={saveRate}
-          xRefLabel="you"
-          lines={[{ ys: curveAges, color: GOLD, width: 3, label: 'Retirement age' }]}
-          xTickFormat={(v) => `${Math.round(v)}%`}
-          yTickFormat={(v) => `${Math.round(v)}`}
-          xHoverLabel={(v) => `${Math.round(v)}% savings rate`}
-          hoverValueFormat={(v) => `age ${Math.round(v)}`}
-          figure="Figure 5."
-          caption={`Savings grow at ${plannedPct} while working and ${pct(retiredPct / 100, 1)} in retirement, starting at ${startAge}; the target funds ${retYears} years of current spending. The curve bends: early points of savings rate buy the most years.`}
-          ariaLabel="Retirement age as a function of savings rate"
-          exportStats={[
-            { label: 'Savings rate', value: `${saveRate}%` },
-            { label: 'Work optional at', value: myAge ? `age ${myAge}` : 'never', color: GREEN },
-          ]}
-        />
-      </div>
-      <Callout tone="mark" label="Why the curve bends">
-        A higher savings rate adds more each year and shrinks the spending the account must
-        replace, so the first ten points of savings rate move the age more than the last ten.
       </Callout>
 
       <MathSection
@@ -1214,15 +1123,14 @@ function RetirementTiming() {
             muted: true,
           },
           {
-            tex: '\\text{Figure 3: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{65 - a} - 1}',
-            caption: 'Figure 3 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars.',
+            tex: '\\text{Figure 1: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{65 - a} - 1}',
+            caption: 'Figure 1 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars.',
           },
           {
-            tex: `\\text{Figure 4: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
+            tex: `\\text{Figure 2: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
             caption: `Future value of the same saving at the actual return. At the slider's ${actualPct}%: ${formatUSDWhole(plan.saving)} grows to ${formatUSDWhole(planEnd.actual)}, and dividing by the step 1 factor at the shifted withdrawal return of ${pct(plan.retiredR, 1)} gives the ${formatUSDWhole(plan.actualIncome)} it funds.`,
           },
         ]}
-        note={`Figure 5 iterates the same two steps at every savings rate: each year the balance grows at ${plannedPct} and receives the year's saving, and work becomes optional once the balance covers the step 1 target for current spending.`}
       />
     </div>
   )

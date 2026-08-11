@@ -288,8 +288,14 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'retirement-simulator',
         label: 'Retirement Planning Simulator',
-        description: 'The two-step method: the savings that fund a retirement income, then the yearly saving that builds it, and how starting age and savings rate move the date.',
-        keywords: ['retirement planning', '401k', 'savings rate', 'nest egg', 'withdrawal', 'starting age', 'annuity'],
+        description: 'The two-step method: the savings that fund a retirement income, then the yearly saving that builds it, and what waiting or a weak market does to the plan.',
+        keywords: ['retirement planning', '401k', 'nest egg', 'withdrawal', 'starting age', 'annuity', 'price of waiting'],
+      },
+      {
+        slug: 'savings-rate',
+        label: 'Savings Rate and Retirement Date',
+        description: 'The two-step method flipped around: fix the share of income saved, and solve for the age when work becomes optional.',
+        keywords: ['savings rate', 'retirement age', 'financial independence', 'work optional', 'saving share', 'retirement date'],
       },
     ],
   },

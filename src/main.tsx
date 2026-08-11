@@ -43,6 +43,7 @@ const TEACHER_TRAINING_SECTIONS = [
   'tax-advantages',
   'insurance',
   'retirement-simulator',
+  'savings-rate',
   'housing',
   'used-vs-new',
   'rent-or-own',

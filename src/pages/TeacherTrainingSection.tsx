@@ -29,6 +29,7 @@ import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
 import { BondPricingPage } from '../tools/Bonds/BondPricingPage'
 import { BondRatesPage } from '../tools/Bonds/BondRatesPage'
 import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/RetirementSimPage'
+import { SavingsRatePage } from '../tools/RetirementSim/SavingsRatePage'
 import { InsurancePage } from '../tools/Insurance/InsurancePage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
 import { RentOrOwnPage } from '../tools/RentOrOwn/RentOrOwnPage'
@@ -182,6 +183,12 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'Retirement Planning Simulator', path: 'retirement-simulator' },
     content: <RetirementSimPage intro={false} />,
+  },
+  'savings-rate': {
+    title: 'Savings Rate and Retirement Date',
+    toolkit: true,
+    instructor: { label: 'Savings Rate and Retirement Date', path: 'savings-rate' },
+    content: <SavingsRatePage intro={false} />,
   },
   taxes: {
     title: 'Understanding Taxes',
