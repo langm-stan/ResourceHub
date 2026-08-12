@@ -1,14 +1,12 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 import {
   Button,
   Callout,
   MathSection,
   NumberField,
-  SegmentedControl,
   SelectField,
   Toggle,
   type MathRow,
-  type Segment,
 } from '../../../design-system'
 import {
   FinanceInputError,
@@ -20,15 +18,16 @@ import { formatPercent, formatUSD, texNumber } from '../../../lib/format'
 import { usePersistentState } from '../../../hooks/usePersistentState'
 import styles from './TvmCalculator.module.css'
 
-const KEYS: { var: TvmVar; label: string; help: string }[] = [
-  { var: 'n', label: 'N', help: 'Number of periods' },
-  { var: 'iy', label: 'I / Y', help: 'Annual rate (%)' },
-  { var: 'pv', label: 'PV', help: 'Present value' },
-  { var: 'pmt', label: 'PMT', help: 'Payment / period' },
-  { var: 'fv', label: 'FV', help: 'Future value' },
+/** Row order follows the familiar EZ-calculator layout: cash flows first, then rate and periods. */
+const KEY_ROWS: { var: TvmVar; key: string; label: string; help: string }[] = [
+  { var: 'pv', key: 'PV', label: 'Present value', help: 'Value today' },
+  { var: 'pmt', key: 'PMT', label: 'Payment', help: 'Cash flow each period' },
+  { var: 'fv', key: 'FV', label: 'Future value', help: 'Value at the end' },
+  { var: 'iy', key: 'I/Y', label: 'Annual rate', help: 'Interest per year (%)' },
+  { var: 'n', key: 'N', label: 'Number of periods', help: 'Total number of payments' },
 ]
 
-const SOLVE_OPTIONS: Segment<TvmVar>[] = KEYS.map((k) => ({ value: k.var, label: k.label }))
+const MONEY_VARS: TvmVar[] = ['pv', 'pmt', 'fv']
 
 /** Common payment frequencies, daily through annually, plus free entry. */
 const FREQUENCY_OPTIONS: { value: string; label: string }[] = [
@@ -47,9 +46,42 @@ const FREQUENCY_VALUES = FREQUENCY_OPTIONS.map((o) => o.value)
 
 // Default: $100 a month at 8% for 30 years grows to about $149,000.
 // PMT is −100 because the deposits are paid out (sign convention).
-const DEFAULTS = { n: 360, iy: 8, pv: 0, pmt: -100, fv: 0, py: 12, due: false, solveFor: 'fv' as TvmVar }
+const DEFAULTS = { n: 360, iy: 8, pv: 0, pmt: -100, fv: 0, py: 12, due: false }
 
-/** The traditional five-key calculator: enter four, solve for the fifth. */
+/** One saved solve: the full register snapshot plus which key was computed. */
+interface SavedStep {
+  solveFor: TvmVar
+  value: number
+  n: number
+  iy: number
+  pv: number
+  pmt: number
+  fv: number
+  py: number
+  due: boolean
+}
+
+function isValidSaved(list: SavedStep[]): boolean {
+  return (
+    Array.isArray(list) &&
+    list.every(
+      (s) =>
+        s != null &&
+        typeof s === 'object' &&
+        KEY_ROWS.some((k) => k.var === s.solveFor) &&
+        typeof s.due === 'boolean' &&
+        (['value', 'n', 'iy', 'pv', 'pmt', 'fv', 'py'] as const).every((f) =>
+          Number.isFinite(s[f]),
+        ),
+    )
+  )
+}
+
+/**
+ * The traditional five-key calculator, laid out like the EZ financial
+ * calculator: one row per register with its own solve key. Fill in the four
+ * you know and press the key for the fifth; the answer drops into its box.
+ */
 export function TvmCalculator() {
   // Values persist in localStorage so navigating away and back keeps them.
   const [n, setN] = usePersistentState('ifdm-tvm-calc-n', DEFAULTS.n)
@@ -61,43 +93,14 @@ export function TvmCalculator() {
   // 'Custom…' keeps P/Y freely adjustable; the presets cover daily → annually.
   const [customPy, setCustomPy] = usePersistentState('ifdm-tvm-calc-custom-py', false)
   const [due, setDue] = usePersistentState('ifdm-tvm-calc-due', DEFAULTS.due)
-  const [solveFor, setSolveFor] = usePersistentState<TvmVar>('ifdm-tvm-calc-solve', DEFAULTS.solveFor, (v) =>
-    KEYS.some((k) => k.var === v),
-  )
+  const [saved, setSaved] = usePersistentState<SavedStep[]>('ifdm-tvm-calc-saved', [], isValidSaved)
 
-  function reset() {
-    setN(DEFAULTS.n)
-    setIy(DEFAULTS.iy)
-    setPv(DEFAULTS.pv)
-    setPmt(DEFAULTS.pmt)
-    setFv(DEFAULTS.fv)
-    setPy(DEFAULTS.py)
-    setCustomPy(false)
-    setDue(DEFAULTS.due)
-    setSolveFor(DEFAULTS.solveFor)
-  }
-
-  const frequencyValue = customPy || !FREQUENCY_VALUES.includes(String(py)) ? 'custom' : String(py)
-  const pickFrequency = (v: string) => {
-    if (v === 'custom') {
-      setCustomPy(true)
-    } else {
-      setCustomPy(false)
-      setPy(Number(v))
-    }
-  }
+  // Which key was pressed last, and the message if that solve failed. Editing
+  // any register clears both, so a stale answer never sits next to new inputs.
+  const [lastSolved, setLastSolved] = useState<TvmVar | null>(null)
+  const [solveError, setSolveError] = useState<string | null>(null)
 
   const registers: TvmRegisters = { n, iy, pv, pmt, fv, py, due }
-
-  const solved = useMemo(() => {
-    try {
-      return { value: solveTvm(registers, solveFor), error: null as string | null }
-    } catch (e) {
-      const msg = e instanceof FinanceInputError ? e.message : 'These values have no solution.'
-      return { value: NaN, error: msg }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [n, iy, pv, pmt, fv, py, due, solveFor])
 
   function valueFor(v: TvmVar): number {
     switch (v) {
@@ -128,6 +131,81 @@ export function TvmCalculator() {
     }
   }
 
+  function clearAnswer() {
+    setLastSolved(null)
+    setSolveError(null)
+  }
+
+  function editRegister(v: TvmVar): (x: number) => void {
+    const set = setterFor(v)
+    return (x) => {
+      set(x)
+      clearAnswer()
+    }
+  }
+
+  function solve(v: TvmVar) {
+    try {
+      const value = solveTvm(registers, v)
+      setterFor(v)(value)
+      setLastSolved(v)
+      setSolveError(null)
+    } catch (e) {
+      const msg = e instanceof FinanceInputError ? e.message : 'These values have no solution.'
+      setLastSolved(null)
+      setSolveError(msg)
+    }
+  }
+
+  function reset() {
+    setN(DEFAULTS.n)
+    setIy(DEFAULTS.iy)
+    setPv(DEFAULTS.pv)
+    setPmt(DEFAULTS.pmt)
+    setFv(DEFAULTS.fv)
+    setPy(DEFAULTS.py)
+    setCustomPy(false)
+    setDue(DEFAULTS.due)
+    clearAnswer()
+  }
+
+  function saveResult() {
+    if (lastSolved == null) return
+    setSaved((prev) => [
+      ...prev,
+      { solveFor: lastSolved, value: valueFor(lastSolved), n, iy, pv, pmt, fv, py, due },
+    ])
+  }
+
+  function insertValue(target: TvmVar, value: number) {
+    setterFor(target)(value)
+    clearAnswer()
+  }
+
+  function restoreStep(s: SavedStep) {
+    setN(s.n)
+    setIy(s.iy)
+    setPv(s.pv)
+    setPmt(s.pmt)
+    setFv(s.fv)
+    setPy(s.py)
+    setCustomPy(!FREQUENCY_VALUES.includes(String(s.py)))
+    setDue(s.due)
+    setLastSolved(s.solveFor)
+    setSolveError(null)
+  }
+
+  const frequencyValue = customPy || !FREQUENCY_VALUES.includes(String(py)) ? 'custom' : String(py)
+  const pickFrequency = (v: string) => {
+    if (v === 'custom') {
+      setCustomPy(true)
+    } else {
+      setCustomPy(false)
+      setPy(Number(v))
+    }
+    clearAnswer()
+  }
+
   function displayValue(v: TvmVar, x: number): string {
     if (!Number.isFinite(x)) return '—'
     if (v === 'iy') return formatPercent(x / 100, 3)
@@ -135,43 +213,43 @@ export function TvmCalculator() {
     return formatUSD(x)
   }
 
-  const answerKey = KEYS.find((k) => k.var === solveFor)!
+  const answerRow = lastSolved != null ? KEY_ROWS.find((k) => k.var === lastSolved)! : null
+
+  function stepSummary(s: SavedStep): string {
+    const givens = KEY_ROWS.filter((k) => k.var !== s.solveFor)
+      .map((k) => `${k.key} ${displayValue(k.var, s[k.var])}`)
+      .join(' · ')
+    return `${givens} · ${s.py}/yr${s.due ? ' · begin' : ''}`
+  }
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.topRow}>
-        <SegmentedControl label="Solve for" options={SOLVE_OPTIONS} value={solveFor} onChange={setSolveFor} />
-        <Button variant="quiet" size="sm" onClick={reset}>
-          Reset
-        </Button>
-      </div>
-
-      <div className={styles.grid}>
-        {KEYS.map((k) => {
-          const isAnswer = k.var === solveFor
-          if (isAnswer) {
-            return (
-              <div key={k.var} className={`${styles.cell} ${styles.answer}`}>
-                <span className={styles.key}>{k.label}</span>
-                <span className={styles.keyHelp}>{k.help}</span>
-                <span className={`${styles.answerValue} tnum`}>
-                  {displayValue(k.var, solved.value)}
-                </span>
-              </div>
-            )
-          }
+      <div className={styles.rows}>
+        {KEY_ROWS.map((k) => {
+          const isSolved = lastSolved === k.var
           return (
-            <div key={k.var} className={styles.cell}>
-              <span className={styles.key}>{k.label}</span>
-              <span className={styles.keyHelp}>{k.help}</span>
+            <div key={k.var} className={isSolved ? `${styles.row} ${styles.rowSolved}` : styles.row}>
+              <div className={styles.rowLabels}>
+                <span className={styles.key}>
+                  {k.label} <span className={styles.keyCode}>({k.key})</span>
+                </span>
+                <span className={styles.keyHelp}>{k.help}</span>
+              </div>
               <NumberField
                 value={valueFor(k.var)}
-                onChange={setterFor(k.var)}
-                ariaLabel={`${k.label} — ${k.help}`}
-                prefix={k.var === 'pv' || k.var === 'pmt' || k.var === 'fv' ? '$' : undefined}
+                onChange={editRegister(k.var)}
+                ariaLabel={`${k.label} (${k.key})`}
+                prefix={MONEY_VARS.includes(k.var) ? '$' : undefined}
                 suffix={k.var === 'iy' ? '%' : undefined}
-                precision={k.var === 'n' ? 0 : k.var === 'iy' ? 3 : 2}
+                precision={k.var === 'iy' ? 3 : 2}
               />
+              <Button
+                className={styles.keyBtn}
+                onClick={() => solve(k.var)}
+                aria-label={`Solve for ${k.label}`}
+              >
+                {k.key}
+              </Button>
             </div>
           )
         })}
@@ -188,7 +266,10 @@ export function TvmCalculator() {
           <NumberField
             label="Periods / year"
             value={py}
-            onChange={(v) => setPy(Math.max(1, Math.round(v)))}
+            onChange={(v) => {
+              setPy(Math.max(1, Math.round(v)))
+              clearAnswer()
+            }}
             min={1}
             max={365}
             precision={0}
@@ -198,27 +279,104 @@ export function TvmCalculator() {
           <Toggle
             label="Payments at the beginning (annuity due)"
             checked={due}
-            onChange={setDue}
+            onChange={(v) => {
+              setDue(v)
+              clearAnswer()
+            }}
           />
+        </div>
+        <div className={styles.resetSlot}>
+          <Button variant="quiet" size="sm" onClick={reset}>
+            Reset
+          </Button>
         </div>
       </div>
 
-      {solved.error ? (
+      {solveError != null && (
         <Callout tone="mark" label="No solution">
-          {solved.error}
+          {solveError}
         </Callout>
-      ) : (
-        <Callout tone="note" label="Answer">
-          Solving for <strong>{answerKey.label}</strong> gives{' '}
-          <strong>{displayValue(solveFor, solved.value)}</strong>. Amounts you receive are positive;
-          amounts you pay out are negative, so a loan payment or a deposit shows as a negative
-          number.
-        </Callout>
+      )}
+
+      {answerRow != null && (
+        <div className={styles.answerBar}>
+          <div className={styles.answerText}>
+            <span className={styles.answerLine}>
+              <span className={styles.answerKey}>{answerRow.key}</span> ={' '}
+              <span className={`${styles.answerValue} tnum`}>
+                {displayValue(answerRow.var, valueFor(answerRow.var))}
+              </span>
+            </span>
+            <span className={styles.answerNote}>
+              Money you receive is positive; money you pay out is negative.
+            </span>
+          </div>
+          <Button size="sm" onClick={saveResult}>
+            Save result
+          </Button>
+        </div>
+      )}
+
+      {saved.length > 0 && (
+        <div className={styles.saved}>
+          <div className={styles.savedHead}>
+            <span className={styles.savedTitle}>Saved results</span>
+            <span className={styles.savedHint}>
+              For a two- or three-step problem, save each answer and carry it into the next step.
+            </span>
+            <Button variant="link" size="sm" onClick={() => setSaved([])}>
+              Clear all
+            </Button>
+          </div>
+          <ol className={styles.savedList}>
+            {saved.map((s, i) => {
+              const keyRow = KEY_ROWS.find((k) => k.var === s.solveFor)!
+              return (
+                <li key={i} className={styles.savedRow}>
+                  <div className={styles.savedMain}>
+                    <span className={`${styles.savedAnswer} tnum`}>
+                      {keyRow.key} = {displayValue(s.solveFor, s.value)}
+                    </span>
+                    <span className={`${styles.savedRegs} tnum`}>{stepSummary(s)}</span>
+                  </div>
+                  <div className={styles.savedActions}>
+                    {MONEY_VARS.includes(s.solveFor) && (
+                      <>
+                        <Button variant="quiet" size="sm" onClick={() => insertValue('pv', s.value)}>
+                          Use as PV
+                        </Button>
+                        <Button variant="quiet" size="sm" onClick={() => insertValue('fv', s.value)}>
+                          Use as FV
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="quiet" size="sm" onClick={() => restoreStep(s)}>
+                      Restore
+                    </Button>
+                    <Button
+                      variant="quiet"
+                      size="sm"
+                      onClick={() => setSaved((prev) => prev.filter((_, j) => j !== i))}
+                      aria-label={`Remove saved result ${i + 1}`}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
       )}
 
       <MathSection
         hint="The one equation every financial calculator solves, with your registers substituted in."
-        rows={workedRows(registers, solveFor, solved.value, solved.error != null)}
+        rows={workedRows(
+          registers,
+          lastSolved ?? 'fv',
+          lastSolved != null ? valueFor(lastSolved) : NaN,
+          lastSolved == null,
+        )}
         note="One sign convention balances the three cash-flow keys: money you receive is positive, money you pay out is negative. The equation grows every cash flow to the same date and requires the total to come out to zero."
       />
     </div>

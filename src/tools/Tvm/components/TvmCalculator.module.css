@@ -2,61 +2,67 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  /* A container query (rather than a viewport media query) so the grid
-     responds to the space it's actually given — this tool gets nested inside
-     the Resource Hub's own sidebar + this page's parameter rail, so the
-     available width is often much narrower than the viewport suggests. */
+  /* A container query (rather than a viewport media query) so the rows
+     respond to the space they're actually given — this tool gets nested inside
+     the site's sidebar and cards, so the available width is often much
+     narrower than the viewport suggests. */
   container-type: inline-size;
 }
 
-.topRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
+/* The EZ-calculator ledger: one bordered stack, one row per register. */
+.rows {
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
 }
 
-.grid {
+.row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: minmax(160px, 1.3fr) minmax(140px, 1fr) auto;
+  align-items: center;
   gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
 }
 
-.cell {
+.row + .row {
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+
+.rowSolved {
+  background: var(--accent-wash);
+}
+
+.rowLabels {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-radius: var(--radius);
-  border: var(--hairline) solid var(--border-hairline);
-  background: var(--surface);
+  gap: 2px;
+  min-width: 0;
 }
 
 .key {
-  font-family: var(--ff-mono);
   font-size: var(--fs-ui);
   font-weight: var(--fw-semibold);
   color: var(--text-primary);
 }
 
+.keyCode {
+  font-family: var(--ff-mono);
+  font-weight: var(--fw-regular);
+  color: var(--text-faint);
+}
+
 .keyHelp {
   font-size: var(--fs-micro);
   color: var(--text-faint);
-  margin-bottom: var(--space-2);
 }
 
-.answer {
-  border-color: var(--accent);
-  background: var(--accent-wash);
-}
-
-.answerValue {
-  font-size: var(--fs-h4);
+/* The solve key: a chunky cardinal button labeled with the register mnemonic. */
+.keyBtn {
+  font-family: var(--ff-mono);
   font-weight: var(--fw-semibold);
-  color: var(--accent);
-  line-height: 1.2;
-  word-break: break-word;
+  min-width: 72px;
+  justify-self: end;
 }
 
 .settings {
@@ -64,8 +70,6 @@
   flex-wrap: wrap;
   gap: var(--space-5) var(--space-7);
   align-items: flex-end;
-  padding-top: var(--space-5);
-  border-top: var(--hairline) solid var(--border-hairline);
 }
 
 .timing {
@@ -74,11 +78,149 @@
   min-height: 40px;
 }
 
-@container (max-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
+.resetSlot {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+/* The answer strip under the keys, with the save action alongside. */
+.answerBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: var(--hairline) solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-wash);
+}
+
+.answerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.answerLine {
+  color: var(--accent);
+}
+
+.answerKey {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+}
+
+.answerValue {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.answerNote {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+}
+
+/* Saved results: the memory that lets a two- or three-step problem chain. */
+.saved {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+
+.savedHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.savedTitle {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+
+.savedHint {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+  flex: 1 1 200px;
+}
+
+.savedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  counter-reset: saved-step;
+}
+
+.savedRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  counter-increment: saved-step;
+}
+
+.savedMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.savedMain::before {
+  content: 'Step ' counter(saved-step);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.savedAnswer {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
+}
+
+.savedRegs {
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+}
+
+.savedActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+@container (max-width: 560px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
-  .answer {
+  .rowLabels {
     grid-column: 1 / -1;
+  }
+  .savedActions {
+    margin-left: 0;
   }
 }

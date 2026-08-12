@@ -15,9 +15,9 @@ export function TvmCalculatorPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Calculator · Time value of money</p>
           <h1 className={styles.h1}>The five-key calculator</h1>
           <p className={styles.lead}>
-            The same model a financial calculator uses: N, I/Y, PV, PMT, and FV. Enter any four and
-            solve for the fifth. Remember the sign rule: money you receive is positive, money you pay
-            out is negative.
+            The same model a financial calculator uses: PV, PMT, FV, I/Y, and N. Fill in the four
+            you know, then press the key for the fifth. Remember the sign rule: money you receive is
+            positive, money you pay out is negative.
           </p>
         </header>
       )}
@@ -25,7 +25,7 @@ export function TvmCalculatorPage({ intro = true }: { intro?: boolean } = {}) {
       <Card tone="raised" className={styles.panel}>
         <StepHeader
           title="Solve for any value"
-          hint="Pick the key to solve for, fill in the other four, and the answer appears with the formula it came from."
+          hint="Press the key you want to solve for and the answer drops into its box. Save a result to carry it into the next step of a multi-step problem."
         />
         <TvmCalculator />
       </Card>
