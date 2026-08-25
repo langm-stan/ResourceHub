@@ -40,7 +40,8 @@ const TEACHER_TRAINING_SECTIONS = [
   'bond-pricing',
   'bond-rates',
   'taxes',
-  'tax-advantages',
+  'account-taxation',
+  'employer-match',
   'insurance',
   'retirement-simulator',
   'savings-rate',
@@ -147,6 +148,11 @@ createRoot(document.getElementById('root')!).render(
             }
           />
           <Route path="faculty-insights" element={<Navigate to="/" replace />} />
+
+          {/* Tax Advantages (Aug 2026) split into Account Taxation and
+              Employer Matching; its paycheck part merged into Understanding
+              Taxes. Shared links land on the first of the new pages. */}
+          <Route path="tax-advantages" element={<LegacyRedirect to="/account-taxation" />} />
 
           {/* Preview of the standalone embed handed to Stanford IT (see
               stanford-embed/). The embed build renders this same component. */}

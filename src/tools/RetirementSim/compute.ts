@@ -185,11 +185,21 @@ export function savingFor(target: number, years: number, r = R_SAVE): number {
   return (target * r) / (Math.pow(1 + r, years) - 1)
 }
 
-/** Annual saving that reaches `target` by RETIRE_AGE, for each starting age. */
-export function waitingCurve(target: number, r = R_SAVE): { age: number; saving: number }[] {
+/**
+ * Annual saving that reaches `target` by `retireAge`, for each starting age.
+ * A balance already saved compounds from the starting age, so waiting also
+ * shrinks what it contributes; the curve prices only the remainder.
+ */
+export function waitingCurve(
+  target: number,
+  r = R_SAVE,
+  retireAge = RETIRE_AGE,
+  saved = 0
+): { age: number; saving: number }[] {
   const rows: { age: number; saving: number }[] = []
   for (let age = START_AGE; age <= 45; age++) {
-    rows.push({ age, saving: savingFor(target, RETIRE_AGE - age, r) })
+    const grown = saved * Math.pow(1 + r, retireAge - age)
+    rows.push({ age, saving: savingFor(Math.max(0, target - grown), retireAge - age, r) })
   }
   return rows
 }
@@ -212,14 +222,18 @@ export function planOutcome(
   retiredYears = RETIREMENT_YEARS,
   plannedRetiredR = R_RETIRED,
   plannedR = R_SAVE,
-  startAge = PLAN_START_AGE
+  startAge = PLAN_START_AGE,
+  retireAge = RETIRE_AGE,
+  saved = 0
 ) {
   const target = retirementTarget(income, retiredYears, plannedRetiredR)
-  const years = RETIRE_AGE - startAge
-  const saving = Math.round(savingFor(target, years, plannedR))
+  const years = retireAge - startAge
+  // What today's balance grows to by itself; the yearly saving covers the rest.
+  const grown = saved * Math.pow(1 + plannedR, years)
+  const saving = Math.round(savingFor(Math.max(0, target - grown), years, plannedR))
   const rows: PlanRow[] = []
-  let plan = 0
-  let actual = 0
+  let plan = saved
+  let actual = saved
   for (let y = 0; y <= years; y++) {
     if (y > 0) {
       plan = plan * (1 + plannedR) + saving
@@ -229,7 +243,7 @@ export function planOutcome(
   }
   const retiredR = Math.max(0.005, plannedRetiredR - (plannedR - actualR))
   const actualIncome = actual / annuityFactor(retiredR, retiredYears)
-  return { target, saving, rows, actualBalance: actual, retiredR, actualIncome }
+  return { target, grown, saving, rows, actualBalance: actual, retiredR, actualIncome }
 }
 
 /**

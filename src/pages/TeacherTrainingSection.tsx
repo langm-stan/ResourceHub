@@ -28,7 +28,7 @@ import { BitcoinMiningPage } from '../tools/BitcoinMining/BitcoinMiningPage'
 import { StocksBondsPage } from '../tools/Gambling/StocksBondsPage'
 import { BondPricingPage } from '../tools/Bonds/BondPricingPage'
 import { BondRatesPage } from '../tools/Bonds/BondRatesPage'
-import { RetirementSimPage, TaxAdvantagesPage } from '../tools/RetirementSim/RetirementSimPage'
+import { AccountTaxationPage, EmployerMatchingPage, RetirementSimPage } from '../tools/RetirementSim/RetirementSimPage'
 import { SavingsRatePage } from '../tools/RetirementSim/SavingsRatePage'
 import { InsurancePage } from '../tools/Insurance/InsurancePage'
 import { UsedVsNewPage } from '../tools/UsedVsNew/UsedVsNewPage'
@@ -166,11 +166,17 @@ const SECTIONS: Record<string, SectionConfig> = {
     instructor: { label: 'Bonds and Interest Rates', path: 'bond-rates' },
     content: <BondRatesPage intro={false} />,
   },
-  'tax-advantages': {
-    title: 'Tax Advantages',
+  'account-taxation': {
+    title: 'Account Taxation',
     toolkit: true,
-    instructor: { label: 'Tax Advantages', path: 'tax-advantages' },
-    content: <TaxAdvantagesPage intro={false} />,
+    instructor: { label: 'Account Taxation', path: 'account-taxation' },
+    content: <AccountTaxationPage intro={false} />,
+  },
+  'employer-match': {
+    title: 'Employer Matching',
+    toolkit: true,
+    instructor: { label: 'Employer Matching', path: 'employer-match' },
+    content: <EmployerMatchingPage intro={false} />,
   },
   insurance: {
     title: 'Why Insurance Works',

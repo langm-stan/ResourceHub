@@ -43,7 +43,14 @@ export default function NetWorthChart({ history }: { history: HistoryPoint[] }) 
           <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => formatUSDCompact(Number(v))} />
           <Tooltip formatter={(v) => fmtUSD(Number(v))} />
-          <Area type="monotone" dataKey="value" stroke="var(--accent)" fill="url(#netWorthFill)" strokeWidth={2.5} />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="var(--accent)"
+            fill="url(#netWorthFill)"
+            strokeWidth={2.5}
+            isAnimationActive={false}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>

@@ -440,7 +440,7 @@ function MiningCard() {
                 if (digits && Number(digits) > NONCE_MAX) return
                 setNonce(digits)
               }}
-              placeholder="0 to 4,294,967,295"
+              placeholder="any number"
               autoComplete="off"
               aria-label="Nonce"
             />
@@ -740,7 +740,9 @@ function MiningCard() {
             {qrDataUrl ? (
               <img src={qrDataUrl} className={styles.qrImg} alt={`QR code carrying the current ${blocks.length}-block chain`} />
             ) : (
-              <div className={styles.qrImg} />
+              <div className={`${styles.qrImg} ${styles.qrEmpty}`}>
+                Mine the first block and the QR code appears here.
+              </div>
             )}
             <div className={styles.syncCopy}>
               The QR encodes the chain itself: every miner, nonce, and payment. Each phone re-derives the hashes on arrival,

@@ -142,7 +142,9 @@ export function LiteracyDataContent() {
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v)}%`} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+              {/* Animation off so bars show fully in embeds, PNG downloads,
+                  and prints that capture the first frame. */}
+              <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive={false}>
                 {drillData.map((_, i) => (
                   <Cell key={i} fill={activeArea.color} fillOpacity={0.55 + (0.45 * i) / drillData.length} />
                 ))}
@@ -182,7 +184,7 @@ export function LiteracyDataContent() {
                   />
                   <YAxis type="category" dataKey="group" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={130} />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

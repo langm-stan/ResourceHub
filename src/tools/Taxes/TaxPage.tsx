@@ -6,7 +6,6 @@ import {
   NumberField,
   SegmentedControl,
   SelectField,
-  Slider,
   Stat,
   StepHeader,
   Tabs,
@@ -27,7 +26,6 @@ import { STATE_OPTIONS } from './stateData2026'
 import {
   computeIncomeTax,
   computePaycheck,
-  computeRothVsTraditional,
   computeStateTax,
   type BracketSegment,
   type PaycheckResult,
@@ -35,7 +33,7 @@ import {
 import { RateChart } from './components/RateChart'
 import styles from './TaxPage.module.css'
 
-type Surface = 'brackets' | 'paycheck' | 'rates' | 'roth' | 'math'
+type Surface = 'brackets' | 'paycheck' | 'rates' | 'math'
 
 type DeductionMode = 'standard' | 'itemized' | 'none'
 
@@ -53,7 +51,6 @@ const TABS: TabItem<Surface>[] = [
   { value: 'brackets', label: 'Your brackets' },
   { value: 'paycheck', label: 'Your paycheck' },
   { value: 'rates', label: 'Marginal vs. effective' },
-  { value: 'roth', label: 'Roth vs. Traditional' },
   { value: 'math', label: 'The math' },
 ]
 
@@ -247,9 +244,6 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
           )}
           {surface === 'rates' && (
             <RatesView paycheck={paycheck} status={status} deductionMode={deductionMode} />
-          )}
-          {surface === 'roth' && (
-            <RothView marginalPct={Math.round(paycheck.marginalIncomeTaxRate * 100)} />
           )}
           {surface === 'math' && (
             <TaxMathView paycheck={paycheck} status={status} deductionMode={deductionMode} />
@@ -767,89 +761,8 @@ function TaxMathView({
         <strong>{formatPercent(p.marginalIncomeTaxRate, 1)}</strong> here (
         {formatPercent(fedMarginal, 0)} federal
         {p.state.hasTax ? ` plus ${formatPercent(stateMarginal, 1)} state` : ', no state tax'}
-        ). The Roth tab uses the income-tax rate for that reason: payroll tax is paid either way.
-      </Callout>
-    </>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-
-function RothView({ marginalPct }: { marginalPct: number }) {
-  const [contribution, setContribution] = useState(6_000)
-  const [years, setYears] = useState(30)
-  const [returnPct, setReturnPct] = useState(7)
-  const [taxNow, setTaxNow] = useState(marginalPct)
-  const [taxRetire, setTaxRetire] = useState(12)
-
-  const r = useMemo(
-    () => computeRothVsTraditional(contribution, years, returnPct, taxNow, taxRetire),
-    [contribution, years, returnPct, taxNow, taxRetire]
-  )
-  const winner = Math.abs(r.roth - r.traditional) < 0.5 ? 'tie' : r.roth > r.traditional ? 'roth' : 'traditional'
-
-  return (
-    <>
-      <StepHeader
-        title="Pay tax now, or pay tax later?"
-        hint="The sacrifice from your paycheck is the same either way. A Traditional account taxes withdrawals in retirement; a Roth taxes the money before it goes in."
-      />
-      <div className={styles.rothControls}>
-        <NumberField label="Set aside ($/yr, pre-tax)" value={contribution} onChange={setContribution} min={0} max={MAX_DEFERRAL_PER_WORKER} prefix="$" precision={0} />
-        <Slider label="For how long" value={years} onChange={setYears} min={5} max={45} step={1} readout={`${years} years`} />
-        <NumberField label="Annual return" value={returnPct} onChange={setReturnPct} min={0} max={12} suffix="%" precision={1} />
-        <div />
-        <Slider label="Tax rate today" value={taxNow} onChange={setTaxNow} min={0} max={50} step={1} readout={`${taxNow}%`} note="Pre-filled with your federal plus state marginal income-tax rate. Payroll tax is paid either way, so it drops out of this comparison." />
-        <Slider label="Tax rate in retirement" value={taxRetire} onChange={setTaxRetire} min={0} max={50} step={1} readout={`${taxRetire}%`} note="Most retirees drop to a lower bracket." />
-      </div>
-
-      <div className={styles.stats}>
-        <Stat
-          label="Traditional, after tax"
-          value={r.traditional}
-          format={formatUSDWhole}
-          emphasis={winner === 'traditional'}
-          accentColor={winner === 'traditional' ? GREEN : undefined}
-          note={`${formatUSDWhole(r.traditionalPreTax)} balance, taxed ${taxRetire}% at withdrawal`}
-        />
-        <Stat
-          label="Roth, after tax"
-          value={r.roth}
-          format={formatUSDWhole}
-          emphasis={winner === 'roth'}
-          accentColor={winner === 'roth' ? GREEN : undefined}
-          note={`${formatUSDWhole(r.rothContribution)}/yr contributed after paying ${taxNow}% tax today`}
-        />
-      </div>
-
-      <FormulaBlock
-        tex={`\\underbrace{FV \\cdot (1 - t_{\\text{retirement}})}_{\\text{Traditional}} \\quad \\text{vs.} \\quad \\underbrace{FV \\cdot (1 - t_{\\text{now}})}_{\\text{Roth}}`}
-        caption="The growth factor FV is identical on both sides, so only the two tax rates matter."
-        muted
-      />
-
-      <Callout tone="note" label="The rule">
-        {winner === 'tie' ? (
-          <>
-            At equal tax rates the two are <strong>exactly equivalent</strong>, because the order of
-            multiplication does not matter. The choice matters only when the rates differ.
-          </>
-        ) : winner === 'traditional' ? (
-          <>
-            The rate in retirement ({taxRetire}%) is lower than the rate today ({taxNow}%), so{' '}
-            <strong>Traditional comes out ahead by {formatUSDWhole(r.traditional - r.roth)}</strong>.
-            The saver skips a high tax rate now and pays a lower one later.
-          </>
-        ) : (
-          <>
-            The rate today ({taxNow}%) is lower than the rate in retirement ({taxRetire}%), so{' '}
-            <strong>Roth comes out ahead by {formatUSDWhole(r.roth - r.traditional)}</strong>. The
-            saver pays a low tax rate now and never pays the higher one.
-          </>
-        )}{' '}
-        Real plans add employer matches (a full match is worth taking in either account type),
-        contribution limits, and required minimum distributions. The comparison above is the core
-        logic.
+        ). The Account Taxation lesson compares Roth and traditional accounts with the income-tax
+        rate for that reason: payroll tax is paid either way.
       </Callout>
     </>
   )

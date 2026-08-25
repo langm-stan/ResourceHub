@@ -774,6 +774,16 @@
   height: 320px;
   max-width: 100%;
 }
+.qrEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  color: var(--text-faint, #78716c);
+  border-style: dashed;
+}
 .syncCopy {
   flex: 1;
   min-width: 240px;

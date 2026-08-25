@@ -136,7 +136,15 @@ function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries
         strokeWidth={1.25}
         strokeDasharray="2 3"
       />
-      <text x={6} y={y(0) + 14} fontSize={11} fill="var(--text-faint)">
+      {/* Right-aligned: the left half of the chart is where the deep 1930s
+          dips cross the zero line and would run through the label. */}
+      <text
+        x={innerWidth - 6}
+        y={y(0) + 14}
+        fontSize={11}
+        fill="var(--text-faint)"
+        textAnchor="end"
+      >
         below this line, the {windowWord(stocks)} lost money
       </text>
 

@@ -1,17 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Button, Callout, Card, MathSection, NumberField, SegmentedControl, SelectField, Slider, Stat, Toggle, type MathRow } from '../../design-system'
+import { Callout, Card, MathSection, Slider, Stat } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
-// The vetted Taxes tool provides the state schedules; Part 1 reuses them.
-import { computeStateTax } from '../Taxes/compute'
-import { RateChart } from '../Taxes/components/RateChart'
-import { BRACKETS, type Bracket } from '../Taxes/data2026'
-import { STATE_OPTIONS, STATE_TAXES } from '../Taxes/stateData2026'
 import {
   ACCOUNT_RULES,
   CONTRIBUTION_LIMITS,
-  MAX_DEFERRAL_PER_WORKER,
   MATCH_CAP,
   MATCH_RETURN,
   MATCH_TAX,
@@ -20,13 +14,7 @@ import {
   R_SAVE,
   RETIRE_AGE,
   RETIREMENT_YEARS,
-  SS_WAGE_BASE,
-  STANDARD_DEDUCTION,
   TAX_YEAR,
-  type Earners,
-  type FilingStatus,
-  federalTax,
-  fica,
   jarSeries,
   matchScenarios,
   planOutcome,
@@ -36,8 +24,7 @@ import {
 import styles from './RetirementSimPage.module.css'
 
 /*
- * Retirement Planning Simulator: four parts for the tax efficiency,
- * employer benefits, and retirement session, ported from Matt's
+ * The tax-and-retirement lesson family, ported from Matt's
  * retirement-planning-simulator.jsx prototype onto the design system.
  */
 
@@ -45,7 +32,6 @@ const RED = 'var(--c-accent)'
 const GREEN = 'var(--c-series-1)'
 const GOLD = 'var(--c-series-2)'
 const SLATE = 'var(--c-series-3)'
-const VIOLET = 'var(--c-series-5)'
 
 /* Full-width figures: wider than the two-column original, so also taller. */
 const CHART_RATIO = 0.5
@@ -56,519 +42,6 @@ const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`
 /* KaTeX fragments for the worked math: whole dollars and decimal rates. */
 const texUSD = (v: number) => `\\$${Math.round(v).toLocaleString('en-US')}`
 const texRate = (p: number) => String(p / 100)
-
-/* ================= Part 1: Take-Home Pay ================= */
-
-type DeductionMode = 'standard' | 'itemized' | 'none'
-
-/**
- * One rate schedule as a reference table. The row holding the reader's last
- * taxed dollar is highlighted, tying the table to the marginal rate above.
- */
-function BracketScheduleTable({
-  title,
-  brackets,
-  taxable,
-  note,
-}: {
-  title: string
-  brackets: Bracket[]
-  taxable: number
-  note?: string
-}) {
-  let from = 0
-  const rows = brackets.map((b) => {
-    const row = { rate: b.rate, from, to: b.upTo, active: taxable > from && taxable <= b.upTo }
-    from = b.upTo
-    return row
-  })
-  return (
-    <div>
-      <p className={styles.rulesTitle}>{title}</p>
-      <table className={styles.bracketTable}>
-        <thead>
-          <tr>
-            <th>Rate</th>
-            <th>Taxable income</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.from} className={r.active ? styles.bracketRowActive : undefined}>
-              <td className="tnum">{+(r.rate * 100).toFixed(2)}%</td>
-              <td className="tnum">
-                {Number.isFinite(r.to)
-                  ? `${formatUSDWhole(r.from)} – ${formatUSDWhole(r.to)}`
-                  : `over ${formatUSDWhole(r.from)}`}
-                {r.active ? ' ← your top dollar' : ''}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {note && <p className={styles.bracketTableNote}>{note}</p>}
-    </div>
-  )
-}
-
-function TakeHomePay() {
-  const [salary, setSalary] = useState(60000)
-  const [raiseOn, setRaiseOn] = useState(false)
-  const [hover, setHover] = useState<number | null>(null)
-  // Optional pieces, all off by default: the base lesson is federal brackets.
-  const [withState, setWithState] = useState(false)
-  const [stateCode, setStateCode] = useState('CA')
-  const [withPayroll, setWithPayroll] = useState(false)
-  const [with401k, setWith401k] = useState(false)
-  const [k401, setK401] = useState(5000)
-  const [status, setStatus] = useState<FilingStatus>('single')
-  const [dualEarner, setDualEarner] = useState(true)
-  const [deductionMode, setDeductionMode] = useState<DeductionMode>('standard')
-  const [itemized, setItemized] = useState(25000)
-
-  const gross = raiseOn ? salary + 2000 : salary
-  const earners: Earners = status === 'mfj' && dualEarner ? 2 : 1
-  // Each worker can defer into a 401(k)/403(b) and, where offered, a 457(b)
-  // with its own separate limit, so the ceiling scales with the earner count.
-  const maxContribution = MAX_DEFERRAL_PER_WORKER * earners
-  const deduction =
-    deductionMode === 'standard'
-      ? STANDARD_DEDUCTION[status]
-      : deductionMode === 'itemized'
-        ? itemized
-        : 0
-
-  const taxesAt = useMemo(() => {
-    return (g: number) => {
-      // Payroll tax is owed on gross wages even when every remaining dollar
-      // is deferred, so cap the contribution at what is left after it; the
-      // take-home figure can then never go negative.
-      const payroll = withPayroll ? fica(g, status, earners) : 0
-      const k = with401k
-        ? Math.min(Math.max(0, k401), maxContribution, Math.max(0, g - payroll))
-        : 0
-      const fed = federalTax(Math.max(0, g - k), status, deduction)
-      const state = withState ? computeStateTax(g, k, status, stateCode) : null
-      const total = fed.tax + (state?.tax ?? 0) + payroll
-      return { k, fed, state, payroll, total, takeHome: g - k - total }
-    }
-  }, [with401k, k401, maxContribution, withState, stateCode, withPayroll, status, earners, deduction])
-
-  const cur = useMemo(() => taxesAt(gross), [taxesAt, gross])
-  const raiseDelta = cur.takeHome - taxesAt(salary).takeHome
-  // The rate on literally the next dollar: a wider step would blend two
-  // brackets right below an edge (at taxable $12,399 the next dollar pays
-  // 10%, not 12%).
-  const marginalAllIn = taxesAt(gross + 1).total - cur.total
-
-  const segments = useMemo(() => {
-    const raw = [
-      ...(cur.k > 0
-        ? [{ name: '401(k) contribution', total: cur.k, taken: 0, rate: 0, invested: true }]
-        : []),
-      ...(deduction > 0
-        ? [
-            {
-              name: deductionMode === 'itemized' ? 'itemized deductions' : 'standard deduction',
-              total: Math.min(Math.max(0, gross - cur.k), deduction),
-              taken: 0,
-              rate: 0,
-              invested: false,
-            },
-          ]
-        : []),
-      ...cur.fed.slices.map((s) => ({
-        name: `${pct(s.rate)} bracket`,
-        total: s.amount,
-        taken: s.tax,
-        rate: s.rate,
-        invested: false,
-      })),
-    ]
-    let acc = 0
-    return raw.map((g) => {
-      const w = gross > 0 ? (g.total / gross) * 100 : 0
-      const seg = { ...g, w, center: acc + w / 2 }
-      acc += w
-      return seg
-    })
-  }, [gross, cur, deduction, deductionMode])
-  const tip = hover != null ? segments[hover] : null
-
-  /*
-   * State and payroll taxes are drawn as flat bands: each is its own total
-   * (from the stats) spread evenly over the income it applies to, so the
-   * bands sum to the figures shown below. Federal stays genuinely
-   * progressive, band by bracket. State tax skips the 401(k) slice (the
-   * deferral is excluded from state taxable income here), but payroll (FICA)
-   * is owed on every wage dollar, deferred or not, so its band covers the
-   * 401(k) and deduction slices too.
-   */
-
-  // The worked-math report: only the pieces switched on appear as steps.
-  const mathRows: MathRow[] = useMemo(() => {
-    const rows: MathRow[] = [
-      {
-        tex: `\\text{taxable income} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''}${deduction > 0 ? ` - ${texUSD(deduction)}` : ''} = \\boxed{${texUSD(cur.fed.taxable)}}`,
-        caption: `Step 1. Wages${cur.k > 0 ? ' minus the 401(k) contribution' : ''}${deduction > 0 ? `${cur.k > 0 ? ' and' : ' minus'} the federal deduction` : ''}${cur.k === 0 && deduction === 0 ? ' with no deduction: every dollar is taxable' : '. The brackets apply to this number, not gross wages'}.`,
-      },
-    ]
-    const terms = cur.fed.slices.map((s) => `${s.rate.toFixed(2)} \\times ${texUSD(s.amount)}`)
-    const lines: string[] = []
-    for (let i = 0; i < terms.length; i += 2) lines.push(terms.slice(i, i + 2).join(' + '))
-    rows.push({
-      tex:
-        terms.length === 0
-          ? `\\text{federal income tax} = ${texUSD(0)}`
-          : `\\begin{aligned} \\text{federal tax} &= ${lines
-              .map((l, i) => (i === 0 ? l : `\\quad + ${l}`))
-              .join(' \\\\ &')} \\\\ &= \\boxed{${texUSD(cur.fed.tax)}} \\end{aligned}`,
-      caption: 'Step 2. Each rate multiplies only the income inside its own bracket, and the pieces are summed.',
-      muted: true,
-    })
-    if (withState && cur.state && cur.state.hasTax) {
-      rows.push({
-        tex: `\\text{state taxable} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''}${cur.state.deduction > 0 ? ` - ${texUSD(cur.state.deduction)}` : ''} = ${texUSD(cur.state.taxable)} \\;\\Rightarrow\\; \\text{state tax} = \\boxed{${texUSD(cur.state.tax)}}`,
-        caption: `Step 3. ${cur.state.name} runs the same machine on its own schedule${cur.state.deduction > 0 ? ` after its ${formatUSDWhole(cur.state.deduction)} deduction` : ''}${cur.state.credit > 0 ? `, minus a ${formatUSDWhole(cur.state.credit)} exemption credit off the tax` : ''}.`,
-        muted: true,
-      })
-    }
-    if (withPayroll) {
-      const ss = 0.062 * earners * Math.min(gross / earners, SS_WAGE_BASE)
-      const surtaxThreshold = status === 'mfj' ? 250_000 : 200_000
-      rows.push({
-        tex: `\\text{payroll} = \\underbrace{${texUSD(ss)}}_{\\text{Social Security}} + \\underbrace{${texUSD(cur.payroll - ss)}}_{\\text{Medicare}} = \\boxed{${texUSD(cur.payroll)}}`,
-        caption: `Step ${withState && cur.state?.hasTax ? 4 : 3}. Social Security is 6.2% of each worker's wages up to ${formatUSDWhole(SS_WAGE_BASE)}${earners === 2 ? ' (two even earners here, so each half is capped on its own)' : ''}; Medicare is 1.45% of every wage dollar${gross > surtaxThreshold ? ', plus the 0.9% surtax above the threshold' : ''}. Both apply to gross wages, 401(k) contributions included.`,
-        muted: true,
-      })
-    }
-    rows.push({
-      tex: `\\text{take-home} = ${texUSD(gross)}${cur.k > 0 ? ` - ${texUSD(cur.k)}` : ''} - ${texUSD(cur.fed.tax)}${withState && cur.state ? ` - ${texUSD(cur.state.tax)}` : ''}${withPayroll ? ` - ${texUSD(cur.payroll)}` : ''} = \\boxed{${texUSD(cur.takeHome)}}`,
-      caption: `Last step. Wages minus ${cur.k > 0 ? 'the 401(k) contribution (still yours) and ' : ''}every tax switched on.`,
-    })
-    return rows
-  }, [gross, cur, deduction, withState, withPayroll, earners, status])
-  const taxableBase = Math.max(0, gross - cur.k)
-  const payrollRate = withPayroll && gross > 0 ? cur.payroll / gross : 0
-  const stateRate = withState && cur.state && taxableBase > 0 ? cur.state.tax / taxableBase : 0
-  const tipState = tip && !tip.invested ? stateRate * tip.total : 0
-  const tipPayroll = tip ? payrollRate * tip.total : 0
-
-  return (
-    <div className={styles.section}>
-      <p className={styles.sectionLede}>
-        Set a salary and watch each dollar go through the federal brackets in order. The toggles
-        add the other pieces of a real paycheck, and the bar fills in their bite.
-      </p>
-      <div className={styles.controlsRow}>
-        <div className={styles.controlStack}>
-          <Slider
-            label="Salary (wages, $/yr)"
-            value={salary}
-            onChange={setSalary}
-            min={20000}
-            max={250000}
-            step={1000}
-            editable
-            prefix="$"
-            inputMax={2_000_000}
-          />
-          <div>
-            <Button onClick={() => setRaiseOn(!raiseOn)}>
-              {raiseOn ? 'Remove the $2,000 raise' : 'Give a $2,000 raise'}
-            </Button>
-            {raiseOn && (
-              <p className={styles.raiseResult}>
-                Take-home change: +{formatUSDWhole(raiseDelta)}. A raise never lowers take-home pay.
-              </p>
-            )}
-          </div>
-        </div>
-        <div className={styles.controlStack}>
-          <span className={styles.radioTitle}>Optional pieces</span>
-          <Toggle
-            label="Payroll taxes (Social Security &amp; Medicare)"
-            checked={withPayroll}
-            onChange={setWithPayroll}
-          />
-          <Toggle label="State income tax" checked={withState} onChange={setWithState} />
-          {withState && (
-            <SelectField label="State" value={stateCode} onChange={setStateCode} options={STATE_OPTIONS} />
-          )}
-          <Toggle label="401(k) contribution (pre-tax)" checked={with401k} onChange={setWith401k} />
-          {with401k && (
-            <NumberField
-              label="401(k)/403(b)/457(b) contribution ($/yr)"
-              value={Math.min(k401, maxContribution)}
-              onChange={setK401}
-              min={0}
-              max={maxContribution}
-              prefix="$"
-              precision={0}
-            />
-          )}
-          <SegmentedControl
-            label="Filing status"
-            options={[
-              { value: 'single', label: 'Single' },
-              { value: 'mfj', label: 'Married (joint)' },
-            ]}
-            value={status}
-            onChange={setStatus}
-          />
-          {status === 'mfj' && (
-            <SegmentedControl
-              label="Earners in the household"
-              options={[
-                { value: 'one', label: 'One' },
-                { value: 'two', label: 'Two' },
-              ]}
-              value={dualEarner ? 'two' : 'one'}
-              onChange={(v) => setDualEarner(v === 'two')}
-            />
-          )}
-          <SegmentedControl
-            label="Federal deduction"
-            options={[
-              { value: 'standard', label: 'Standard' },
-              { value: 'itemized', label: 'Itemized' },
-              { value: 'none', label: 'None' },
-            ]}
-            value={deductionMode}
-            onChange={setDeductionMode}
-          />
-          {deductionMode === 'itemized' && (
-            <NumberField
-              label="Itemized deductions ($/yr)"
-              value={itemized}
-              onChange={setItemized}
-              min={0}
-              max={200_000}
-              prefix="$"
-              precision={0}
-            />
-          )}
-        </div>
-      </div>
-      <div className={styles.stats}>
-        <Stat label="Take-home" value={cur.takeHome} format={formatUSDWhole} emphasis animate={false} />
-        {cur.k > 0 && (
-          <Stat label="Into the 401(k), still yours" value={cur.k} format={formatUSDWhole} accentColor={GREEN} animate={false} />
-        )}
-        <Stat
-          label="Marginal rate (next dollar)"
-          value={marginalAllIn}
-          format={(v) => pct(v, 1)}
-          accentColor={RED}
-          animate={false}
-        />
-        <Stat
-          label="Effective rate (taxes ÷ gross)"
-          value={gross > 0 ? cur.total / gross : 0}
-          format={(v) => pct(v, 1)}
-          animate={false}
-        />
-      </div>
-
-      <div>
-        <div className={styles.legend}>
-          <span style={{ color: GOLD }}>&#9632; kept</span>
-          <span style={{ color: RED }}>&#9632; federal income tax</span>
-          {withState && <span style={{ color: VIOLET }}>&#9632; state income tax</span>}
-          {withPayroll && <span style={{ color: SLATE }}>&#9632; payroll (SS &amp; Medicare)</span>}
-          {cur.k > 0 && <span style={{ color: GREEN }}>&#9632; 401(k), still yours</span>}
-        </div>
-        <div className={styles.bracketWrap}>
-          <div className={styles.bracketBar} onMouseLeave={() => setHover(null)}>
-            {segments.map((g, i) => {
-              const bands = g.invested
-                ? [{ h: payrollRate, c: SLATE }]
-                : [
-                    { h: g.total > 0 ? g.taken / g.total : 0, c: RED },
-                    { h: stateRate, c: VIOLET },
-                    { h: payrollRate, c: SLATE },
-                  ]
-              let top = 0
-              return (
-                <div
-                  key={i}
-                  className={styles.bracketSeg}
-                  style={{ width: `${g.w}%`, ...(g.invested ? { background: GREEN } : {}) }}
-                  onMouseEnter={() => setHover(i)}
-                >
-                  {bands.map((b, j) => {
-                    if (b.h <= 0) return null
-                    const style = { top: `${top * 100}%`, height: `${b.h * 100}%`, background: b.c }
-                    top += b.h
-                    return <div key={j} className={styles.bracketBand} style={style} />
-                  })}
-                  {g.w > 7 && !g.invested && <div className={styles.bracketRate}>{pct(g.rate)}</div>}
-                </div>
-              )
-            })}
-          </div>
-          {tip && (
-            <div className={styles.barTip} style={{ left: `${Math.min(86, Math.max(14, tip.center))}%` }}>
-              <div className={styles.barTipTitle}>{tip.name}</div>
-              <div className={styles.barTipRow}>
-                <span>Income in this slice</span>
-                <strong className="tnum">{formatUSDWhole(tip.total)}</strong>
-              </div>
-              <div className={styles.barTipRow}>
-                <span>Federal income tax</span>
-                <strong className="tnum">{formatUSDWhole(tip.taken)}</strong>
-              </div>
-              {tipState > 0 && (
-                <div className={styles.barTipRow}>
-                  <span>State income tax</span>
-                  <strong className="tnum">{formatUSDWhole(tipState)}</strong>
-                </div>
-              )}
-              {tipPayroll > 0 && (
-                <div className={styles.barTipRow}>
-                  <span>Payroll (SS &amp; Medicare)</span>
-                  <strong className="tnum">{formatUSDWhole(tipPayroll)}</strong>
-                </div>
-              )}
-              <div className={styles.barTipRow}>
-                <span>
-                  {tip.invested
-                    ? tipPayroll > 0
-                      ? 'Invested after payroll tax, still yours'
-                      : 'Invested, still yours'
-                    : 'Kept'}
-                </span>
-                <strong className="tnum">{formatUSDWhole(tip.total - tip.taken - tipState - tipPayroll)}</strong>
-              </div>
-            </div>
-          )}
-        </div>
-        <ul className={styles.sliceList}>
-          {cur.k > 0 && (
-            <li>
-              First {formatUSDWhole(cur.k)}: 401(k) contribution, invested before income tax and
-              still your money
-            </li>
-          )}
-          {deduction > 0 ? (
-            <li>
-              {cur.k > 0 ? 'Next' : 'First'}{' '}
-              {formatUSDWhole(Math.min(Math.max(0, gross - cur.k), deduction))}:{' '}
-              {deductionMode === 'itemized' ? 'itemized deductions' : 'standard deduction'}, no tax
-              {deductionMode === 'itemized' && itemized < STANDARD_DEDUCTION[status]
-                ? `. Filers take whichever deduction is larger, so a real filer would take the ${formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction instead`
-                : ''}
-            </li>
-          ) : (
-            <li>
-              No federal deduction (a what-if: real filers always get at least the{' '}
-              {formatUSDWhole(STANDARD_DEDUCTION[status])} standard deduction), so the brackets
-              start at the first {cur.k > 0 ? 'dollar after the 401(k)' : 'dollar'}
-            </li>
-          )}
-          {cur.fed.slices.map((s, i) => (
-            <li key={i}>
-              {pct(s.rate)} on {formatUSDWhole(s.amount)} &rarr; <strong>{formatUSDWhole(s.tax)}</strong>
-            </li>
-          ))}
-          {cur.state && (
-            <li>
-              {cur.state.name} income tax, on its own schedule &rarr;{' '}
-              <strong>{formatUSDWhole(cur.state.tax)}</strong>
-            </li>
-          )}
-          {withPayroll && (
-            <li>
-              Social Security + Medicare, on (nearly) every dollar of wages &rarr;{' '}
-              <strong>{formatUSDWhole(cur.payroll)}</strong>
-            </li>
-          )}
-          <li className={styles.sliceTotal}>
-            {withState || withPayroll
-              ? `All taxes together: ${formatUSDWhole(cur.total)}`
-              : `Federal income tax ${formatUSDWhole(cur.total)}; payroll and state taxes can be added above`}
-          </li>
-        </ul>
-      </div>
-      <Callout tone="mark" label="A raise cannot lower take-home pay">
-        The $2,000 sits on top of the existing income, so only the new dollars are taxed at the
-        marginal rate; the dollars below keep their old rates.
-      </Callout>
-
-      <div>
-        <p className={styles.sectionLede}>
-          The bar above shows one salary. Sweeping every salary through the same machine gives the
-          two rates worth knowing: the marginal rate on the next dollar, and the effective rate on
-          the year as a whole. The chart counts only the pieces switched on above, so toggling
-          payroll or state tax moves the lines.
-        </p>
-        <RateChart
-          gross={gross}
-          status={status}
-          contribution401k={cur.k}
-          stateCode={stateCode}
-          stateName={withState && cur.state ? cur.state.name : ''}
-          federalDeduction={deduction}
-          includeState={withState}
-          includePayroll={withPayroll}
-          earners={earners}
-          exportStats={[
-            { label: 'Salary (gross wages)', value: formatUSDWhole(gross) },
-            { label: 'Total tax counted', value: formatUSDWhole(cur.total) },
-            {
-              label: 'Effective rate (taxes ÷ gross)',
-              value: pct(gross > 0 ? cur.total / gross : 0, 1),
-              color: GREEN,
-            },
-            { label: 'Marginal rate (next dollar)', value: pct(marginalAllIn, 1), color: RED },
-          ]}
-          caption={`Both rates by gross income for a ${status === 'mfj' ? 'married' : 'single'} filer, counting the pieces switched on above: federal income tax${withState && cur.state ? ` plus ${cur.state.name} state income tax` : ''}${withPayroll ? ' plus payroll taxes' : ''}. ${
-            withPayroll
-              ? `Payroll taxes start at the first dollar of wages, so neither line starts at zero, and the marginal rate (red) drops at ${earners === 2 ? `the ${formatUSDWhole(SS_WAGE_BASE * earners)} of joint wages where each spouse's half passes the ${formatUSDWhole(SS_WAGE_BASE)} per-worker Social Security cap` : `the ${formatUSDWhole(SS_WAGE_BASE)} Social Security cap`}.`
-              : deduction > 0
-                ? `The first ${formatUSDWhole(deduction)} of income is covered by the deduction, so both lines start at zero.`
-                : 'With no deduction, the brackets start at the first dollar.'
-          } At your salary the effective rate is ${pct(gross > 0 ? cur.total / gross : 0, 1)} and the marginal rate is ${pct(marginalAllIn, 1)}: the average of every dollar always trails the rate on the next one.`}
-        />
-
-        <div className={styles.bracketTables}>
-          <BracketScheduleTable
-            title={`Federal brackets · ${status === 'mfj' ? 'Married filing jointly' : 'Single'} · ${TAX_YEAR}`}
-            brackets={BRACKETS[status]}
-            taxable={cur.fed.taxable}
-            note={
-              deduction > 0
-                ? `Applied to taxable income: wages minus ${cur.k > 0 ? 'the 401(k) contribution and ' : ''}the ${formatUSDWhole(deduction)} deduction.`
-                : `Applied to ${cur.k > 0 ? 'every dollar of wages after the 401(k) contribution' : 'every dollar of wages'}, since the deduction is switched off.`
-            }
-          />
-          {withState && cur.state && (
-            cur.state.hasTax && STATE_TAXES[stateCode].brackets ? (
-              <BracketScheduleTable
-                title={`${cur.state.name} brackets · ${status === 'mfj' ? 'Married filing jointly' : 'Single'} · ${TAX_YEAR}`}
-                brackets={STATE_TAXES[stateCode].brackets![status]}
-                taxable={cur.state.taxable}
-                note={`Applied to state taxable income: wages${cur.k > 0 ? ' minus the 401(k) contribution' : ''}${cur.state.deduction > 0 ? `${cur.k > 0 ? ' and' : ' minus'} the state's own ${formatUSDWhole(cur.state.deduction)} deduction` : ''}.${cur.state.credit > 0 ? ` A ${formatUSDWhole(cur.state.credit)} exemption credit then comes off the tax.` : ''}${cur.state.note ? ` ${cur.state.note}` : ''}`}
-              />
-            ) : (
-              <div>
-                <p className={styles.rulesTitle}>{cur.state.name} brackets</p>
-                <p className={styles.bracketTableNote}>
-                  {cur.state.name} levies no income tax on wages, so there is no schedule to show.
-                </p>
-              </div>
-            )
-          )}
-        </div>
-      </div>
-
-      <MathSection
-        hint="The calculations behind the numbers above, with your controls substituted in. Only the pieces switched on appear as steps."
-        rows={mathRows}
-      />
-    </div>
-  )
-}
 
 /* ================= Part 2: Account Taxation ================= */
 
@@ -835,7 +308,7 @@ function EmployerMatching() {
           ]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
-          figure="Figure 2."
+          figure="Figure 1."
           caption={`After-tax value of saving ${pct(contribPct / 100)} of a ${formatUSDWhole(salary)} salary each year at a ${pct(retPct / 100, retPct % 1 ? 1 : 0)} return, with a ${pct(MATCH_TAX)} tax rate today and at withdrawal. The taxable account's returns are taxed every year; the 401(k) scenarios are taxed once, at withdrawal.`}
           ariaLabel="After-tax value of a taxable account and a 401(k) with no match, a 50% match, and a 100% match over time"
           exportStats={[
@@ -885,20 +358,41 @@ function RetirementTiming() {
   const [retiredPct, setRetiredPct] = useState(Math.round(R_RETIRED * 1000) / 10)
   // Step 2: the working years that build it.
   const [startAge, setStartAge] = useState(PLAN_START_AGE)
+  const [retireAge, setRetireAge] = useState(RETIRE_AGE)
+  const [saved, setSaved] = useState(0)
   const [savePct, setSavePct] = useState(Math.round(R_SAVE * 1000) / 10)
   const [actualPct, setActualPct] = useState(5)
 
-  const planYears = RETIRE_AGE - startAge
+  const planYears = retireAge - startAge
   const plan = useMemo(
-    () => planOutcome(income, actualPct / 100, retYears, retiredPct / 100, savePct / 100, startAge),
-    [income, actualPct, retYears, retiredPct, savePct, startAge]
+    () =>
+      planOutcome(
+        income,
+        actualPct / 100,
+        retYears,
+        retiredPct / 100,
+        savePct / 100,
+        startAge,
+        retireAge,
+        saved
+      ),
+    [income, actualPct, retYears, retiredPct, savePct, startAge, retireAge, saved]
   )
-  const waiting = useMemo(() => waitingCurve(plan.target, savePct / 100), [plan.target, savePct])
+  const waiting = useMemo(
+    () => waitingCurve(plan.target, savePct / 100, retireAge, saved),
+    [plan.target, savePct, retireAge, saved]
+  )
+  // Today's savings already cover the whole target on their own.
+  const funded = plan.saving === 0 && plan.grown >= plan.target
 
   const waitX = waiting.map((r) => r.age)
   const waitY = waiting.map((r) => r.saving)
-  // Same whole-dollar rounding as the plan's own saving.
-  const priceAt = (age: number) => Math.round(savingFor(plan.target, RETIRE_AGE - age, savePct / 100))
+  // Same whole-dollar rounding and remaining-target logic as the plan's own saving.
+  const priceAt = (age: number) => {
+    const g = savePct / 100
+    const grownAt = saved * Math.pow(1 + g, retireAge - age)
+    return Math.round(savingFor(Math.max(0, plan.target - grownAt), retireAge - age, g))
+  }
   const waitRatio = priceAt(40) / priceAt(25)
   const plannedPct = pct(savePct / 100, savePct % 1 ? 1 : 0)
 
@@ -910,8 +404,8 @@ function RetirementTiming() {
     <div className={styles.section}>
       <p className={styles.sectionLede}>
         Retirement planning is two time-value calculations. Step 1: choose the retirement, and
-        compute the savings that fund it. Step 2: choose when the saving starts, and compute the
-        annual amount that gets there by {RETIRE_AGE}.
+        compute the savings that fund it. Step 2: choose when the saving starts and when it ends,
+        and compute the annual amount that gets there by {retireAge}.
       </p>
 
       <div>
@@ -958,15 +452,15 @@ function RetirementTiming() {
         />
       </div>
       <div className={styles.stats}>
-        <Stat label={`Savings needed at ${RETIRE_AGE}`} value={plan.target} format={formatUSDWhole} accentColor={GOLD} emphasis animate={false} />
+        <Stat label={`Savings needed at ${retireAge}`} value={plan.target} format={formatUSDWhole} accentColor={GOLD} emphasis animate={false} />
       </div>
 
       <div>
         <p className={styles.rulesTitle}>Step 2: the working years that build it</p>
         <p className={styles.sectionLede}>
-          Choose the starting age and the return while working; the long horizon supports planning
-          around {plannedPct}. The curve shows the annual price of the same target from every
-          starting age.
+          Choose the starting age, the retirement age, anything already saved, and the return while
+          working; the long horizon supports planning around {plannedPct}. The curve shows the
+          annual price of the same target from every starting age.
         </p>
       </div>
       <div className={styles.controlsRow}>
@@ -980,6 +474,28 @@ function RetirementTiming() {
           editable
           prefix="age"
           plain
+        />
+        <Slider
+          label="Retire at age"
+          value={retireAge}
+          onChange={setRetireAge}
+          min={55}
+          max={75}
+          step={1}
+          editable
+          prefix="age"
+          plain
+        />
+        <Slider
+          label="Already saved today"
+          value={saved}
+          onChange={setSaved}
+          min={0}
+          max={500000}
+          step={5000}
+          editable
+          prefix="$"
+          inputMax={5_000_000}
         />
         <Slider
           label="Return while saving"
@@ -1003,6 +519,13 @@ function RetirementTiming() {
           animate={false}
         />
       </div>
+      {funded && (
+        <p className={styles.note}>
+          At {plannedPct}, the {formatUSDWhole(saved)} already saved grows past the target on its
+          own, so the required yearly saving is zero. The plan still assumes that balance stays
+          invested until {retireAge}.
+        </p>
+      )}
       <div>
         <div className={styles.legend}>
           <span style={{ color: GOLD }}>&#9632; annual saving by starting age</span>
@@ -1010,7 +533,7 @@ function RetirementTiming() {
         </div>
         <StationChart
           x={waitX}
-          yMax={waitY[waitY.length - 1]! * 1.1}
+          yMax={Math.max(waitY[waitY.length - 1]!, 1000) * 1.1}
           ratio={CHART_RATIO}
           maxHeight={CHART_MAX_HEIGHT}
           xRef={startAge}
@@ -1019,8 +542,12 @@ function RetirementTiming() {
           xTickFormat={(v) => `age ${Math.round(v)}`}
           xHoverLabel={(v) => `Start at ${Math.round(v)}`}
           figure="Figure 1."
-          caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${RETIRE_AGE} at a ${plannedPct} return, by starting age. Waiting from 25 to 40 multiplies the annual price by ${waitRatio.toFixed(1)}, and each further year of waiting costs more than the last.`}
-          ariaLabel="Annual saving needed to reach the target by 65, as a function of starting age"
+          caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${retireAge} at a ${plannedPct} return, by starting age${saved > 0 ? `, after what the ${formatUSDWhole(saved)} already saved grows to from each age` : ''}. ${
+            priceAt(25) > 0
+              ? `Waiting from 25 to 40 multiplies the annual price by ${waitRatio.toFixed(1)}, and each further year of waiting costs more than the last.`
+              : 'From the earliest starting ages the existing balance covers the goal by itself; waiting is what brings back a yearly price.'
+          }`}
+          ariaLabel={`Annual saving needed to reach the target by ${retireAge}, as a function of starting age`}
           exportStats={[
             { label: 'Start at 25', value: `${formatUSDWhole(priceAt(25))}/yr`, color: GREEN },
             { label: 'Start at 30', value: `${formatUSDWhole(priceAt(30))}/yr`, color: GOLD },
@@ -1087,7 +614,7 @@ function RetirementTiming() {
           xTickFormat={(v) => `age ${Math.round(v)}`}
           xHoverLabel={(v) => `Age ${Math.round(v)}`}
           figure="Figure 2."
-          caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${RETIRE_AGE}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
+          caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${retireAge}${saved > 0 ? `, on top of the ${formatUSDWhole(saved)} starting balance` : ''}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
           ariaLabel="Accumulation under the planned return versus the actual return"
           exportStats={[
             { label: `Planned at ${plannedPct}`, value: formatUSDWhole(planEnd.plan), color: GOLD },
@@ -1114,17 +641,32 @@ function RetirementTiming() {
             muted: true,
           },
           {
-            tex: '\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}',
-            caption: `The level yearly saving whose future value reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`,
+            tex:
+              saved > 0
+                ? '\\text{Step 2: saving} = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{N}\\right) \\times \\frac{g}{(1 + g)^{N} - 1}'
+                : '\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}',
+            caption: `The level yearly saving whose future value${saved > 0 ? `, on top of what today's savings grow to,` : ''} reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`,
           },
+          funded
+            ? {
+                tex: `${texUSD(plan.grown)} \\ge ${texUSD(plan.target)} \\;\\Rightarrow\\; \\text{saving} = \\boxed{\\$0}`,
+                caption: `What the ${formatUSDWhole(saved)} already saved grows to by ${retireAge} exceeds the target on its own, so the plan needs no new yearly saving.`,
+                muted: true,
+              }
+            : {
+                tex:
+                  saved > 0
+                    ? `\\left(${texUSD(plan.target)} - ${texUSD(plan.grown)}\\right) \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`
+                    : `${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`,
+                caption: `On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = ${saved > 0 ? `-${Math.round(saved).toLocaleString('en-US')}` : 0}, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`,
+                muted: true,
+              },
           {
-            tex: `${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`,
-            caption: `On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = 0, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`,
-            muted: true,
-          },
-          {
-            tex: '\\text{Figure 1: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{65 - a} - 1}',
-            caption: 'Figure 1 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars.',
+            tex:
+              saved > 0
+                ? `\\text{Figure 1: saving}(a) = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{${retireAge} - a}\\right) \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`
+                : `\\text{Figure 1: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`,
+            caption: 'Figure 1 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars and clamp at zero once the existing balance covers the goal.',
           },
           {
             tex: `\\text{Figure 2: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
@@ -1139,62 +681,56 @@ function RetirementTiming() {
 /* ============================== pages ============================== */
 
 /*
- * The lesson family split into two tools that share the part components and
- * helpers above: Tax Advantages (parts 1-3, the tax side) and the Retirement
- * Planning Simulator (part 4, the timing side). Both are wired into the
- * Thursday-morning session.
+ * The lesson family split into three tools that share the helpers above:
+ * Account Taxation and Employer Matching (the tax side, formerly the Tax
+ * Advantages tabs; its Take-Home Pay part merged into Understanding Taxes)
+ * and the Retirement Planning Simulator (the timing side).
  */
 
-const TAX_SECTIONS = [
-  { name: 'Take-Home Pay', C: TakeHomePay },
-  { name: 'Account Taxation', C: AccountTaxation },
-  { name: 'Employer Matching', C: EmployerMatching },
-]
-
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
-export function TaxAdvantagesPage({ intro = true }: { intro?: boolean } = {}) {
-  const [active, setActive] = useState(0)
-  const S = TAX_SECTIONS[active]!
-
+export function AccountTaxationPage({ intro = true }: { intro?: boolean } = {}) {
   return (
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Taxes &amp; tax-advantaged saving</p>
-          <h1 className={styles.h1}>Tax Advantages</h1>
+          <h1 className={styles.h1}>Account Taxation</h1>
         </header>
       )}
 
-      <div className={styles.tabs} role="tablist" aria-label="Tax advantages sections">
-        {TAX_SECTIONS.map((s, i) => (
-          <button
-            key={s.name}
-            type="button"
-            role="tab"
-            aria-selected={active === i}
-            className={active === i ? `${styles.tab} ${styles.tabActive}` : styles.tab}
-            onClick={() => setActive(i)}
-          >
-            <div className={styles.tabKicker}>PART {i + 1}</div>
-            <div className={styles.tabName}>{s.name}</div>
-          </button>
-        ))}
-      </div>
-
       <Card tone="raised">
-        <S.C />
+        <AccountTaxation />
       </Card>
 
       <p className={styles.footnote}>
-        Tax math: {TAX_YEAR} federal brackets for the filing status chosen in Part 1 (single by
-        default), with its standard deduction ({formatUSDWhole(STANDARD_DEDUCTION.single)} single,{' '}
-        {formatUSDWhole(STANDARD_DEDUCTION.mfj)} married filing jointly) unless switched to an
-        itemized total or none (IRS Rev. Proc. 2025-32); FICA with the{' '}
-        {formatUSDWhole(SS_WAGE_BASE)} Social Security wage base, applied to each worker (a married
-        couple can be set to one earner or two even earners in Part 1); optional state income tax
-        from
-        the Tax Foundation&rsquo;s {TAX_YEAR} state tables. These three parts use simplified annual
-        compounding for teaching; they are illustrations, not financial advice.
+        Contribution limits and phase-outs are for {TAX_YEAR} (IRS Notice 2025-67). The three
+        accounts compound annually at the chosen rates, with the tax rates set above; the
+        Understanding Taxes lesson shows where a marginal rate comes from. An illustration, not
+        financial advice.
+      </p>
+    </div>
+  )
+}
+
+/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+export function EmployerMatchingPage({ intro = true }: { intro?: boolean } = {}) {
+  return (
+    <div className={styles.page}>
+      {intro && (
+        <header className={styles.intro}>
+          <p className={styles.eyebrow}>Lesson · Taxes &amp; tax-advantaged saving</p>
+          <h1 className={styles.h1}>Employer Matching</h1>
+        </header>
+      )}
+
+      <Card tone="raised">
+        <EmployerMatching />
+      </Card>
+
+      <p className={styles.footnote}>
+        The match adds 50 cents or a dollar per contributed dollar on the first {pct(MATCH_CAP)} of
+        salary, and every scenario is taxed once at withdrawal at {pct(MATCH_TAX)}. Simplified
+        annual compounding for teaching; an illustration, not financial advice.
       </p>
     </div>
   )

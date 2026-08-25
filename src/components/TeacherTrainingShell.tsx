@@ -100,7 +100,23 @@ export default function TeacherTrainingShell({
                 Units
               </p>
               {COURSE_UNITS.map((u, i) => {
-                if (u.tools.length === 0) return null
+                // A unit with no tools yet stays in the list as a muted row,
+                // so the course numbering reads 1–10 without a gap.
+                if (u.tools.length === 0)
+                  return (
+                    <div
+                      key={u.id}
+                      className="flex items-center gap-2.5 px-3 py-1.5"
+                      title="Tools for this unit are in the works"
+                    >
+                      <span className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center font-serif text-xs font-semibold bg-stone-100 text-stone-400">
+                        {i + 1}
+                      </span>
+                      <span className="flex-1 min-w-0 text-[13px] font-medium text-stone-400 leading-snug">
+                        {u.short}
+                      </span>
+                    </div>
+                  )
                 const open = openId === u.id
                 const current = activeUnit?.id === u.id
                 return (
