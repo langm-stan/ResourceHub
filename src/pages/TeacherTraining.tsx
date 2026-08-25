@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { COURSE_UNITS, FOUNDATION_TOOLS, type TrainingTool } from '../data/teacherTraining'
+import ResourceHubNav from '../components/ResourceHubNav'
 
 /*
  * The Personal Finance Teaching Toolkit landing page. The course's units run
@@ -215,6 +216,16 @@ export default function TeacherTraining() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex flex-col md:flex-row gap-x-10 gap-y-8">
+          {/* The hub's left rail stays alongside the toolkit, so arriving from
+              ifdm.stanford.edu/resourcehub keeps the section's shell. */}
+          <aside className="md:w-52 shrink-0">
+            <div className="md:sticky md:top-6">
+              <ResourceHubNav />
+            </div>
+          </aside>
+
+          <div className="flex-1 min-w-0">
         <div className="flex flex-col lg:flex-row gap-2">
           {COURSE_UNITS.map((u, i) => {
             const active = !hits && i === selectedIndex
@@ -234,7 +245,7 @@ export default function TeacherTraining() {
                   type="button"
                   onClick={() => setSelectedId(u.id)}
                   aria-pressed={active}
-                  className={`w-full lg:h-[112px] flex lg:flex-col items-center lg:justify-center gap-3 lg:gap-2 rounded-xl border px-3.5 py-3 text-left lg:text-center transition-all ${
+                  className={`w-full lg:min-h-[112px] flex lg:flex-col items-center lg:justify-center gap-3 lg:gap-2 rounded-xl border px-3.5 py-3 text-left lg:text-center transition-all ${
                     active
                       ? 'bg-cardinal border-cardinal text-white shadow-md'
                       : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
@@ -307,6 +318,8 @@ export default function TeacherTraining() {
               </p>
             )
           )}
+        </div>
+          </div>
         </div>
       </div>
     </div>

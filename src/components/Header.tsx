@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom'
  * (ifdm.stanford.edu, a Stanford Sites build) so the Resource Hub reads as
  * one of its pages rather than a separate app: the cardinal Stanford
  * University brand bar, the wordmark lockup with the site search, and the
- * red navigation row. Every item links to the live site except Resource
- * Hub, which is the page the visitor is already on: its label carries the
- * current-page underline and stays inside the app. Menu targets were taken
- * from the live site's navigation on August 8, 2026.
+ * red navigation row. Every item links to the live site except the Toolkit
+ * entry in the Resource Hub dropdown, which is this app: Resource Hub
+ * carries the current-section underline because the toolkit is one of its
+ * left-nav pages on the live site. Menu targets were taken from the live
+ * site's navigation on August 8, 2026.
  */
 
 const SITE = 'https://ifdm.stanford.edu'
@@ -54,11 +55,14 @@ const NAV: NavItem[] = [
   },
   { label: 'Teaching', href: `${SITE}/teaching` },
   { label: 'Policy & Programs', href: `${SITE}/policy-programs` },
-  // The Resource Hub remains its own section on the live site; the toolkit
-  // is a separate tab, and it is the page the visitor is on here.
+  // The toolkit lives inside the Resource Hub section on the live site (an
+  // item in its left secondary nav, not a top-level tab), so Resource Hub
+  // carries the current-section underline and Toolkit is the dropdown child
+  // that stays inside the app.
   {
     label: 'Resource Hub',
     href: `${SITE}/resourcehub`,
+    current: true,
     children: [
       { label: 'The Big Three', href: `${SITE}/the-big-three` },
       { label: 'Financial Literacy Data', href: `${SITE}/financial-literacy-data` },
@@ -66,9 +70,9 @@ const NAV: NavItem[] = [
       { label: 'Calculators', href: `${SITE}/resourcehub/calculators` },
       { label: 'Financial Statements', href: `${SITE}/resourcehub/financial-statements` },
       { label: 'Faculty Insights', href: `${SITE}/resourcehub/faculty-insights` },
+      { label: 'Toolkit', to: '/' },
     ],
   },
-  { label: 'Toolkit', to: '/', current: true },
   {
     label: 'Events',
     href: `${SITE}/events`,
@@ -144,7 +148,11 @@ function NavEntry({
           {item.label}
         </Link>
       ) : (
-        <a href={item.href} className={labelClass}>
+        <a
+          href={item.href}
+          aria-current={item.current ? 'location' : undefined}
+          className={labelClass}
+        >
           {item.label}
         </a>
       )}
@@ -207,7 +215,8 @@ export default function Header() {
           </a>
           <span className="h-9 w-px bg-stone-400" aria-hidden="true" />
           {/* The lockup mirrors the live site's, so it leads to the initiative's
-              own homepage; the Toolkit nav tab is the way back into the app. */}
+              own homepage; the Toolkit entry under Resource Hub is the way
+              back into the app. */}
           <a
             href={`${SITE}/home`}
             className="text-stone-800 text-[0.95rem] font-semibold leading-tight"

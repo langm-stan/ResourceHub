@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
+import ResourceHubNav from './ResourceHubNav'
 
 /*
  * The teaching toolkit counterpart to ResourceHubShell, styled to match the
@@ -74,15 +75,18 @@ export default function TeacherTrainingShell({
       <div className="max-w-[1680px] mx-auto px-6 py-8">
         <div className="flex flex-col md:flex-row gap-x-10 gap-y-6">
           <aside className="md:w-56 shrink-0">
-            <nav className="flex flex-row md:flex-col gap-1 flex-wrap sticky top-6">
-              <Link
-                to="/"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold text-cardinal hover:bg-cardinal/5 transition-colors"
-              >
-                <ArrowLeft size={15} />
-                Toolkit Home
-              </Link>
+            <div className="sticky top-6">
+              {/* The Resource Hub rail from the live site tops the sidebar so
+                  the hub's shell persists on every toolkit page; its Toolkit
+                  entry (the section's current item) is the way back home. */}
+              <div className="mb-4">
+                <ResourceHubNav />
+              </div>
 
+              <nav
+                aria-label="Toolkit navigation"
+                className="flex flex-row md:flex-col gap-1 flex-wrap"
+              >
               <p className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400 w-full md:w-auto">
                 Foundations
               </p>
@@ -135,7 +139,8 @@ export default function TeacherTrainingShell({
                   </div>
                 )
               })}
-            </nav>
+              </nav>
+            </div>
           </aside>
 
           <div className={`flex-1 min-w-0 ${wide ? '' : 'max-w-5xl'}`}>
