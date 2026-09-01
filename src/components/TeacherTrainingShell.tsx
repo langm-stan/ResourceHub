@@ -63,13 +63,17 @@ export default function TeacherTrainingShell({
   return (
     <div>
       <div className="bg-cardinal">
-        <div className="max-w-[1680px] mx-auto px-6 py-8">
-          <div className="flex items-start justify-between gap-4 mb-2">
-            <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">
+        {framed ? (
+          /* The frame view inside ifdm.stanford.edu: everything centered,
+             with the runner's toggle and Toolkit Home beneath the intro. */
+          <div className="max-w-[1680px] mx-auto px-6 py-8 text-center">
+            <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-2">
               {eyebrow}
             </p>
-            <div className="flex shrink-0 items-center gap-2">
-              {framed && <ToolkitRunnerToggle open={runnerOpen} onToggle={toggleRunner} />}
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
+            {intro && <p className="mt-3 max-w-3xl mx-auto text-white/85 leading-relaxed">{intro}</p>}
+            <div className="mt-5 flex flex-wrap justify-center items-center gap-2">
+              <ToolkitRunnerToggle open={runnerOpen} onToggle={toggleRunner} />
               <Link
                 to="/"
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
@@ -79,10 +83,25 @@ export default function TeacherTrainingShell({
               </Link>
             </div>
           </div>
-          <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
-          {intro && <p className="mt-3 max-w-3xl text-white/85 leading-relaxed">{intro}</p>}
-        </div>
-        {framed && runnerOpen && <ToolkitRunner slug={slug} />}
+        ) : (
+          <div className="max-w-[1680px] mx-auto px-6 py-8">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">
+                {eyebrow}
+              </p>
+              <Link
+                to="/"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
+              >
+                <Home size={14} />
+                Toolkit Home
+              </Link>
+            </div>
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
+            {intro && <p className="mt-3 max-w-3xl text-white/85 leading-relaxed">{intro}</p>}
+          </div>
+        )}
+        {framed && runnerOpen && <ToolkitRunner slug={slug} onHide={toggleRunner} />}
       </div>
 
       <div className="max-w-[1680px] mx-auto px-6 py-8">

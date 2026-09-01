@@ -2,26 +2,26 @@ import { useState } from 'react'
 
 /*
  * Whether the toolkit runner (the frame view's navigation strip, see
- * components/ToolkitRunner) is open. Remembered for the tab so a visitor
- * browsing tool to tool is not made to reopen it on every page.
+ * components/ToolkitRunner) is open. It starts open, so the course is in
+ * view the moment a tool page loads; a visitor who hides it stays hidden
+ * for the rest of the tab, and one who reopens it keeps it open.
  */
 
 const OPEN_KEY = 'ifdm-toolkit-runner'
 
 function storedOpen(): boolean {
   try {
-    return window.sessionStorage.getItem(OPEN_KEY) === '1'
+    return window.sessionStorage.getItem(OPEN_KEY) !== '0'
   } catch {
-    return false
+    return true
   }
 }
 
 function storeOpen(open: boolean) {
   try {
-    if (open) window.sessionStorage.setItem(OPEN_KEY, '1')
-    else window.sessionStorage.removeItem(OPEN_KEY)
+    window.sessionStorage.setItem(OPEN_KEY, open ? '1' : '0')
   } catch {
-    // Storage blocked: the runner simply starts closed on the next page.
+    // Storage blocked: the runner simply starts open on the next page.
   }
 }
 
