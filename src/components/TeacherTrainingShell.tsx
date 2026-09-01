@@ -193,7 +193,14 @@ export default function TeacherTrainingShell({
           </aside>
           )}
 
-          <div className={`flex-1 min-w-0 ${wide ? '' : 'max-w-5xl'}`}>
+          {/* With no sidebar, the content well is centered and the wide tool
+              pages are capped, so a parameter band does not stretch across
+              a large window. */}
+          <div
+            className={`flex-1 min-w-0 ${
+              framed ? `mx-auto w-full ${wide ? 'max-w-7xl' : 'max-w-5xl'}` : wide ? '' : 'max-w-5xl'
+            }`}
+          >
             {children}
 
             {(prev || next) && (
