@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
+import { useFramed } from '../hooks/useFramed'
 
 /*
  * The teaching toolkit counterpart to ResourceHubShell, styled to match the
@@ -41,6 +42,10 @@ export default function TeacherTrainingShell({
   const activeUnit = unitForSlug(slug)
   const [openId, setOpenId] = useState<string | null>(activeUnit?.id ?? null)
   const { prev, next } = adjacentTools(slug)
+  // Inside the IFDM site's iframe the host supplies the side navigation, so
+  // the page is the banner and the content well alone; the banner's Toolkit
+  // Home link and the prev/next cards carry the visitor between tools.
+  const framed = useFramed()
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
@@ -74,6 +79,7 @@ export default function TeacherTrainingShell({
 
       <div className="max-w-[1680px] mx-auto px-6 py-8">
         <div className="flex flex-col md:flex-row gap-x-10 gap-y-6">
+          {!framed && (
           <aside className="md:w-56 shrink-0">
             <div className="sticky top-6">
               {/* The Resource Hub rail from the live site tops the sidebar so
@@ -158,6 +164,7 @@ export default function TeacherTrainingShell({
               </nav>
             </div>
           </aside>
+          )}
 
           <div className={`flex-1 min-w-0 ${wide ? '' : 'max-w-5xl'}`}>
             {children}

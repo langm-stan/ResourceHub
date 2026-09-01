@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { COURSE_UNITS, FOUNDATION_TOOLS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
+import { useFramed } from '../hooks/useFramed'
 
 /*
  * The Personal Finance Teaching Toolkit landing page. The course's units run
@@ -142,6 +143,7 @@ function ToolCard({ tool, badge }: { tool: TrainingTool; badge?: string }) {
 export default function TeacherTraining() {
   const [selectedId, setSelectedId] = useState('foundations')
   const [query, setQuery] = useState('')
+  const framed = useFramed()
 
   // A distinct document title for the course overview (WCAG 2.4.2).
   useEffect(() => {
@@ -218,12 +220,16 @@ export default function TeacherTraining() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row gap-x-10 gap-y-8">
           {/* The hub's left rail stays alongside the toolkit, so arriving from
-              ifdm.stanford.edu/resourcehub keeps the section's shell. */}
-          <aside className="md:w-52 shrink-0">
-            <div className="md:sticky md:top-6">
-              <ResourceHubNav />
-            </div>
-          </aside>
+              ifdm.stanford.edu/resourcehub keeps the section's shell. Inside
+              the IFDM site's iframe (?frame=1) the host page shows the real
+              rail, so it is left out. */}
+          {!framed && (
+            <aside className="md:w-52 shrink-0">
+              <div className="md:sticky md:top-6">
+                <ResourceHubNav />
+              </div>
+            </aside>
+          )}
 
           <div className="flex-1 min-w-0">
         <div className="flex flex-col lg:flex-row gap-2">
