@@ -35,7 +35,7 @@ const OVERALL_CHARTS = [
 const pct = (v: number) => fmtPct(v, 0)
 
 export const LITERACY_DATA_INTRO =
-  'Survey results on how well U.S. adults understand personal finance in eight areas, by gender and generation.'
+  'How well U.S. adults understand personal finance, by topic, gender, and generation.'
 
 /** The data explorer body, shared by the Resource Hub page and the teacher training section. */
 export function LiteracyDataContent() {

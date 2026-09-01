@@ -15,7 +15,7 @@ import { useFramed } from '../hooks/useFramed'
  */
 
 const FOUNDATIONS_DESC =
-  'Four tools used throughout the course: the Big Three questions, the TVM calculator, the financial literacy data, and the financial checklist.'
+  'Four tools used throughout the course.'
 
 interface SearchHit {
   tool: TrainingTool
@@ -196,8 +196,7 @@ export default function TeacherTraining() {
             The Personal Finance Toolkit
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
-            Interactive tools for teaching personal finance, organized by course unit. Each tool
-            runs in the browser and can be embedded in a slide or a course page.
+            Interactive tools for teaching personal finance, organized by course unit.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
             <Search

@@ -6,7 +6,7 @@ import { CHECKLIST_ITEMS } from '../data/checklistItems'
 import { Card } from '../design-system'
 
 export const CHECKLIST_INTRO =
-  'A seven-question self-assessment based on the Seven Elements of Good Financial Health. Answer the questions, then use the Financial Budget to work on the areas you identify.'
+  'A seven-question self-assessment of financial health.'
 
 /**
  * The checklist body, shared by the Resource Hub page and the teacher training
