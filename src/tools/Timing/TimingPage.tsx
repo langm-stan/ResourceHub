@@ -53,13 +53,12 @@ export function TimingPage() {
     <div className={styles.page}>
       <header className={styles.intro}>
         <p className={styles.eyebrow}>Lesson · Timing the market</p>
-        <h1 className={styles.h1}>Time in the market, not timing the market</h1>
+        <h1 className={styles.h1}>Buying every month versus waiting for the bottom</h1>
         <p className={styles.lead}>
-          Everyone knows the winning move: hold your cash, wait for the crash, buy at the bottom.
-          This lesson runs that plan against real S&amp;P 500 data since 1985, gives the timer
-          perfect knowledge of every bear-market bottom, and still finds that the person who just
-          bought every month usually dies richer. Then it asks what happens if the timer is one
-          month late.
+          The plan sounds simple: hold your cash, wait for the crash, buy at the bottom. This
+          lesson runs that plan against real S&amp;P 500 data since 1985, gives the timer perfect
+          knowledge of every bear-market bottom, and still finds that the person who bought every
+          month usually ends up richer. Then it asks what happens if the timer is one month late.
         </p>
       </header>
 
@@ -142,13 +141,13 @@ function Overview({
     <>
       <StepHeader
         title="Three savers, the same paychecks"
-        hint="One buys every month. One holds cash and nails every bottom exactly. One is a month late."
+        hint="One buys every month. One holds cash and buys every bottom exactly. One is a month late."
       />
       <div className={styles.stats}>
         <Stat label="Put in by everyone" value={r.contributed} format={formatUSDWhole} accentColor={SLATE} />
         <Stat label="Buys every month" value={r.monthly} format={formatUSDWhole} emphasis accentColor={GREEN} />
         <Stat
-          label="Nails every bottom exactly"
+          label="Buys every bottom exactly"
           value={r.perfect}
           format={formatUSDWhole}
           note={perfectBehind ? 'with perfect foresight, and still behind' : 'perfect foresight pays here; read why below'}
@@ -168,21 +167,21 @@ function Overview({
         exportStats={[
           { label: 'Put in', value: formatUSDWhole(r.contributed), color: SLATE },
           { label: 'Buys every month', value: formatUSDWhole(r.monthly), color: GREEN },
-          { label: 'Nails every bottom', value: formatUSDWhole(r.perfect) },
+          { label: 'Buys every bottom', value: formatUSDWhole(r.perfect) },
           { label: 'One month late', value: formatUSDWhole(r.late), color: CARDINAL },
         ]}
         caption={`${formatUSDWhole(r.contributed)} saved from January ${startYear} through ${LAST_LABEL}, cash earning ${cashRate}% while it waits. Green: invested the day it arrives. Grey: deployed at the exact bottom of every bear market (dashed verticals). Red dashed: deployed one month after each bottom.`}
       />
 
-      <Callout tone="mark" label="Wait. How does buying every bottom lose?">
-        Check the receipts. The monthly buyer paid an average of{' '}
+      <Callout tone="mark" label="How buying every bottom can lose">
+        Compare the average prices paid. The monthly buyer paid an average of{' '}
         <strong>{formatUSDWhole(r.avgPriceMonthly)}</strong> per index share; the bottom buyer
         paid <strong>{formatUSDWhole(r.avgPricePerfect)}</strong>.{' '}
         {r.avgPricePerfect > r.avgPriceMonthly ? (
           <>
-            The sniper paid <em>more</em>: while the cash camped out waiting for a crash, the
+            The bottom buyer paid <em>more</em>: while the cash sat waiting for a crash, the
             market climbed so far that the next bottom cost more than the ordinary months the
-            monthly buyer had been quietly buying.
+            monthly buyer had been buying.
             {/* The worked example only fits windows that actually contain the 2003 bottom. */}
             {startYear <= 2003 && (
               <>
@@ -193,14 +192,14 @@ function Overview({
           </>
         ) : perfectBehind ? (
           <>
-            The sniper did pay less per share, and still lost, because the monthly buyer&rsquo;s
+            The bottom buyer did pay less per share, and still lost, because the monthly buyer&rsquo;s
             shares were bought years earlier: they spent that time growing and collecting
-            dividends while the sniper&rsquo;s cash sat still. Cheap shares later lost to ordinary
+            dividends while the bottom buyer&rsquo;s cash sat still. Cheap shares later lost to ordinary
             shares early.
           </>
         ) : (
           <>
-            Here the sniper&rsquo;s price advantage was big enough to win. Read the next note
+            Here the bottom buyer&rsquo;s price advantage was big enough to win. Read the next note
             before concluding the strategy works.
           </>
         )}{' '}
@@ -211,18 +210,18 @@ function Overview({
           </>
         )}
       </Callout>
-      <Callout tone="note" label="An honest exception">
+      <Callout tone="note" label="The exception near the dot-com peak">
         Slide the start to 1996 through 2000 and the timer wins: someone who began saving at the
         top of the dot-com bubble was paid, after the fact, for sitting in cash while the market
-        halved. That is the exception that teaches the rule. You only know a peak was a peak
-        afterward, the same way you only know a bottom afterward, and a plan that works for one
+        halved. That is the exception. You only know a peak was a peak afterward, the same
+        way you only know a bottom afterward, and a plan that works for one
         starting decade and fails for the rest is not a plan.
       </Callout>
       <Callout tone="plain" label="Why one month matters so much">
-        Rebounds off bear-market bottoms are violent. The month after the March 2009 bottom, the
+        Rebounds off bear-market bottoms are sharp. The month after the March 2009 bottom, the
         index jumped about 12%; after March 2020, about 4%. Even the smaller rebound is real
         money, and the deepest bottom produced the sharpest one. Wait one month to be sure the
-        bottom was real and part of the discount you camped in cash for years to capture is
+        bottom was real and part of the discount you waited years in cash to capture is
         already gone.
         Think you would have caught it live? The Beat the Market game in the sidebar deals you a
         mystery decade of this same data and one sell button. Bring a class and keep score.
@@ -263,7 +262,7 @@ function BottomsView() {
           />
         ))}
       </div>
-      <Callout tone="note" label="Nobody rang a bell">
+      <Callout tone="note" label="The bottoms were not obvious at the time">
         These dates are obvious only in hindsight. In March 2009 the news was bank failures and
         10% unemployment ahead; in March 2020 the world was locking down. The plan &ldquo;I will
         buy when things look worst&rdquo; asks you to act on the exact days it feels most wrong,

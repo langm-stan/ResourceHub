@@ -13,16 +13,16 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     body: (
       <>
         <p>
-          Learn the basic concepts (compound interest, inflation, and risk diversification), which are the pulse of
-          your financial health: <Link to="/big-three/explained" className="text-cardinal font-semibold underline">The Big Three Explained</Link>.
+          Learn the basic concepts (compound interest, inflation, and risk diversification), which are the
+          foundation of financial health: <Link to="/big-three/explained" className="text-cardinal font-semibold underline">The Big Three Explained</Link>.
         </p>
         <p>
           You can test your knowledge of these concepts by taking the test:{' '}
           <Link to="/big-three/quiz" className="text-cardinal font-semibold underline">The Big Three Quiz</Link>.
         </p>
         <p>
-          Explore the glossary of financial terms if you want to familiarize yourself with other useful concepts. Or
-          feel free to return to it as needed.
+          Read the glossary of financial terms if you want to learn other useful concepts, and return to it as
+          needed.
         </p>
       </>
     ),
@@ -79,7 +79,7 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     body: (
       <>
         <p>
-          Think of your credit score as a grade for your financial practices, particularly your debt management. If
+          Your credit score is a grade for your financial practices, particularly your debt management. If
           you have a high credit score, you will have better access to credit and receive more favorable loan
           terms. Alternatively, if you have a low credit score, you might be denied credit and face very high
           interest rates.
@@ -158,9 +158,8 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
         <p>Calculate how much you need to save to achieve your objectives, and make a plan for regular deposits.</p>
         <p>
           Prepare for the unexpected: An important part of a solid financial plan is to have the right amount of
-          insurance. Don't let your well-being be derailed by chance! Purchasing insurance will help shield you and
-          your loved ones from bad events such as health issues, fires, loss of life, and running out of money when
-          you stop working.
+          insurance. Insurance protects you and your family from bad events such as health problems, fires, loss
+          of life, and running out of money after you stop working.
         </p>
       </>
     ),

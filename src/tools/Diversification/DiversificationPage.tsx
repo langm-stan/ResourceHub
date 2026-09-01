@@ -52,12 +52,12 @@ export function DiversificationPage() {
     <div className={styles.page}>
       <header className={styles.intro}>
         <p className={styles.eyebrow}>Lesson · Risk diversification</p>
-        <h1 className={styles.h1}>Do not put all your eggs in one basket</h1>
+        <h1 className={styles.h1}>How diversification reduces risk</h1>
         <p className={styles.lead}>
           A typical large U.S. stock and the S&amp;P 500 index have earned about the same 8% average
           return. But the single stock swings about 40% in a typical year, and the index only about
-          20%. Half of the risk simply disappears, and nobody pays for it. This lesson shows where
-          it goes, starting with a coin.
+          20%. Half of the risk goes away at no cost. This lesson shows why, starting with a
+          coin.
         </p>
       </header>
 
@@ -85,8 +85,8 @@ function CoinGame() {
   return (
     <>
       <StepHeader
-        title="One dollar, more and more coins"
-        hint="You bet $1 on fair coin flips: heads you win, tails you lose. One flip risks the whole dollar. Split the same dollar across many flips and watch the extremes vanish."
+        title="One dollar split across more coins"
+        hint="You bet $1 on fair coin flips: heads you win, tails you lose. One flip risks the whole dollar. Split the same dollar across many flips and the extreme outcomes disappear."
       />
 
       <div className={styles.modeRow}>
@@ -150,8 +150,8 @@ function CoinGame() {
       </Callout>
       <Callout tone="plain" label="Same expected value, less risk">
         The average outcome of this game is $0 whether you flip once or a hundred times.
-        Diversification never changed what you expect to make. It changed how far from that
-        expectation you can land.
+        Diversification does not change the expected outcome. It narrows the range of outcomes
+        around it.
       </Callout>
     </>
   )
@@ -200,7 +200,7 @@ function StockPortfolio() {
           format={(v) => formatPercent(v, 0)}
           accentColor={CARDINAL}
           animate={false}
-          note="the floor no number of stocks gets under"
+          note="the floor that adding stocks cannot lower"
         />
         <Stat
           label="Removable risk removed"
@@ -221,16 +221,16 @@ function StockPortfolio() {
         caption={`Typical yearly swing (one standard deviation) as stocks are added, all with the same 8% expected return. Green: real stocks, which move together when the economy moves. Grey dashed: the same stocks if they were fully independent. The first ten stocks do most of the work; no number of stocks breaks the ${formatPercent(MARKET_SD, 0)} floor.`}
       />
 
-      <Callout tone="mark" label="The 20% that will not leave">
+      <Callout tone="mark" label="The 20% of risk that remains">
         Bad management at one company hurts one stock; a recession or a pandemic hits every stock
         at once. The first kind, idiosyncratic risk, diversifies away. The second kind, systematic
         risk, is the market itself and stays at about {formatPercent(MARKET_SD, 0)} no matter how
-        many stocks you hold. Carrying it is what the 8% average return pays for.
+        many stocks you hold. The 8% average return is the payment for carrying it.
       </Callout>
-      <Callout tone="note" label="This is what mutual funds and ETFs are for">
+      <Callout tone="note" label="What mutual funds and ETFs are for">
         Buying 60 stocks yourself is a chore. One share of a broad index fund or ETF buys hundreds
         of them at once, so a first paycheck can hold a fully diversified portfolio. The chart
-        explains why the boring fund is the safer bet than any single favorite company.
+        shows why a broad fund is safer than any single favorite company.
       </Callout>
     </>
   )
@@ -298,7 +298,7 @@ function SingleStock() {
         caption={`Sixty simulated stocks over ${years} years, each with the same 8% average return as the index and a 40% yearly swing, sharing one market. Log scale. A few huge winners hold the average up; the typical stock drifts sideways or down. Owning the index means owning the winners without having to name them in advance.`}
       />
 
-      <Callout tone="mark" label="The real-world version is worse">
+      <Callout tone="mark" label="The historical record">
         Bessembinder (Journal of Financial Economics, 2018) measured every U.S. common stock from
         1926 to 2016: <strong>57.4% underperformed one-month Treasury bills</strong> over their
         lifetimes, more than half delivered negative lifetime returns, and the single most common
@@ -307,7 +307,7 @@ function SingleStock() {
         His 2023 update through 2022 puts the share of stocks that reduced shareholder wealth at
         58.6%.
       </Callout>
-      <Callout tone="note" label="Why an average this good hides a median this bad">
+      <Callout tone="note" label="Why the average is high while the median is low">
         Volatility drag: a stock that falls 40% needs a 67% gain to get even, so big swings eat
         compound growth. With the same 8% average, the 40%-swing stock has a median growth rate
         near zero while the 20%-swing index compounds near 6%. The market&rsquo;s return is not
@@ -343,8 +343,8 @@ function MathView() {
       <Callout tone="note" label="Check it yourself">
         Set the portfolio to one stock and the two curves agree at{' '}
         {formatPercent(SINGLE_STOCK_SD, 0)}. By ten stocks the real curve has already given up most
-        of what it will ever give up: diversification is cheap at the start and stingy after that,
-        which is why owning three or four stocks is not close to owning the market.
+        of what it will ever give up. Most of the benefit comes from the first ten stocks, which
+        is why owning three or four stocks is not close to owning the market.
       </Callout>
     </>
   )

@@ -107,7 +107,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
         label: 'Total Liabilities / Total Assets',
         value: totalAssets ? (totalLiabilities / totalAssets) * 100 : 0,
         explain:
-          'The share of what you own that is financed by debt. Lower is sturdier; over 100% means you owe more than you own.',
+          'The share of what you own that is financed by debt. Lower is safer; over 100% means you owe more than you own.',
       },
       {
         label: 'Total Liabilities / Net Worth',
@@ -214,7 +214,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
 
           <StepHeader
             title="How healthy is this balance sheet?"
-            hint="Four ratios advisors actually use, computed live from your numbers."
+            hint="Four ratios financial planners use, computed from your numbers."
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
             {ratios.map((r) => (
@@ -260,7 +260,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 />
                 <LineItemsEditor
                   title="Saving"
-                  hint="Money out too, but out to yourself: it is kept, not spent, so it counts toward what you can invest each month."
+                  hint="Also money out, but paid to yourself. It is kept rather than spent, so it counts toward what you can invest each month."
                   items={snapshot.saving}
                   onChange={setSavingItems}
                   accent={GREEN}
@@ -352,13 +352,13 @@ export default function FinancialStatements({ standalone = true }: { standalone?
       {tab === 'goal' && (
         <Card tone="raised" className="flex flex-col gap-6">
           <StepHeader
-            title="Turn your saving into wealth"
+            title="Investing your monthly saving"
             hint="Everything you keep each month from the Budget tab: your budgeted saving plus the extra saving on top, invested every month."
           />
           {monthly <= 0 ? (
             <Callout tone="mark" label="Nothing to invest yet">
-              Right now nothing is left after expenses. Head back to the <em>Budget</em> tab and get
-              your saving above zero first.
+              Right now nothing is left after expenses. Go back to the <em>Budget</em> tab and cut an
+              expense or add income until something is left.
             </Callout>
           ) : (
             <>
@@ -412,7 +412,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                   muted
                 />
               )}
-              <Callout tone="note" label="The payoff">
+              <Callout tone="note" label="The result">
                 Setting aside <strong>{formatUSDWhole(monthly)}</strong> a month for {goalYears} years
                 could grow to <strong>{formatUSDWhole(goalFinal)}</strong>. You&rsquo;d put in{' '}
                 {formatUSDWhole(goalContributed)}; compounding adds the other{' '}

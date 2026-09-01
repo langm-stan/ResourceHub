@@ -16,7 +16,7 @@ export const PRESETS: Preset[] = [
     id: 'start-early',
     title: 'Start early vs. start late',
     caption:
-      'Forty years of an extra decade. Begin at 25 instead of 35 and compounding does the rest.',
+      '$400 a month at 8% for 40 years. Beginning at 25 instead of 35 adds a decade of compounding.',
     scenario: {
       principal: 0,
       ratePct: 8,
@@ -28,7 +28,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: 'discounting-shock',
-    title: 'The discounting shock',
+    title: 'Discounting a distant promise',
     caption: 'A promise of $100,000 in 50 years at 8% is worth only about $2,132 today.',
     scenario: {
       principal: 100_000,
@@ -55,7 +55,7 @@ export const PRESETS: Preset[] = [
   },
   {
     id: 'latte',
-    title: 'The small-habit fund',
+    title: 'A small daily habit',
     caption: 'About $5 a day ($150 a month) at 7% for 40 years grows to six figures.',
     scenario: {
       principal: 0,

@@ -185,7 +185,7 @@ function Inner({
           dx={0}
           // Clear the pre-cap plateau, which sits above the anchor point.
           dy={y(Math.max(preCap, pastCap)) - y(pastCap) - 18}
-          label="Social Security tax caps out"
+          label="Social Security tax stops here"
           align="middle"
           tone="ink"
         />

@@ -171,7 +171,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
     },
     {
       tex: `P(\\text{hit within ${SIM_YEARS} years}) = 1 - (1 - ${p})^{${SIM_YEARS}} = ${Math.round(pAtLeastOnce * 100)}\\%`,
-      caption: 'But nobody lives the average: this many non-buyers draw the loss.',
+      caption: 'No single household pays the average. This share of non-buyers draws the loss at least once.',
     },
   ]
 
@@ -305,7 +305,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             </table>
             <p className={styles.whatIfNote}>
               Buying costs {formatUSDWhole(SIM_YEARS * quote.load)} more over {SIM_YEARS} years,
-              on average; what it buys is deleting the red cell. Few households can pay{' '}
+              on average. What it removes is the red cell. Few households can pay{' '}
               {formatUSDWhole(lossSize)} in cash: financed, it runs {formatUSDWhole(fin.monthly)}{' '}
               a month for {FINANCE_YEARS} years.
             </p>
@@ -419,7 +419,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                 </table>
                 <p className={styles.whatIfNote}>
                   <strong>{worseNow}</strong> non-buyers are behind the buyers so far. That number
-                  only rises: nobody un-draws a loss.
+                  can only rise, since a loss that has happened does not reverse.
                 </p>
               </div>
             </div>

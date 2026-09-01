@@ -80,8 +80,8 @@ export function BigThreeQuizContent() {
             You scored {score} of {QUESTIONS.length}
           </h2>
           <p className="text-stone-600 mb-6 text-sm">
-            Head to <span className="font-semibold">The Big Three Explained</span> to see why, or{' '}
-            <span className="font-semibold">The Big Three Stories</span> to see these ideas in action.
+            Read <span className="font-semibold">The Big Three Explained</span> to see why, or{' '}
+            <span className="font-semibold">The Big Three Stories</span> to see the concepts applied.
           </p>
           <div className="flex flex-col gap-3 mb-6">
             {QUESTIONS.map((q, i) => (

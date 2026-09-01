@@ -276,13 +276,13 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
         </div>
 
         {quote.zero ? (
-          <Callout tone="mark" label="This is how T-bills work">
+          <Callout tone="mark" label="How T-bills work">
             Treasury bills make no coupon payments. They sell at a discount, and the interest is the
             gap between the price and the face value. Bidders at the Treasury&rsquo;s auction name the
             price that gives them the return they want.
           </Callout>
         ) : (
-          <Callout tone="mark" label="Two rates, two jobs">
+          <Callout tone="mark" label="The coupon rate and the market rate">
             The coupon rate sets the payments and never changes. The market rate prices them, and it
             changes all the time. A bond sells below par exactly when the market rate is above the
             coupon rate.

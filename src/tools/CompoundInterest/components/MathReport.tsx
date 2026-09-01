@@ -164,7 +164,7 @@ function fvNote(results: Results): string {
 
 function pvNote(results: Results): string {
   const pct = results.futureAmount > 0 ? (results.headline / results.futureAmount) * 100 : 0
-  return `Today's value is just ${pct.toFixed(1)}% of the promised future sum. Distance in time is expensive.`
+  return `Today's value is just ${pct.toFixed(1)}% of the promised future sum. The further away the payment, the less it is worth today.`
 }
 
 function MathRows({

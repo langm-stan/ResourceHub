@@ -31,7 +31,7 @@ export function StockPickPage() {
     <div className={styles.page}>
       <header className={styles.intro}>
         <p className={styles.eyebrow}>Game · One stock or the fund</p>
-        <h1 className={styles.h1}>Pick a stock. Any stock.</h1>
+        <h1 className={styles.h1}>Pick one stock or take the fund</h1>
         <p className={styles.lead}>
           These are real companies, described exactly the way they looked at the time, with no
           future information. Put your $1,000 on the one you would have picked, or take the boring
@@ -218,7 +218,7 @@ function WhatYouOwn() {
     <>
       <StepHeader
         title="One share of a stock vs. one share of a fund"
-        hint="A mutual fund or ETF is not a different bet on the same game. It is a different thing to own."
+        hint="A mutual fund or ETF differs from a stock in what you own, not only in how risky it is."
       />
       <div className={styles.ownTable}>
         <div className={styles.ownRow}>

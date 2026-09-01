@@ -166,7 +166,7 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
                   <strong>{it.label || 'an untitled row'}</strong> (+{formatUSDWhole(it.actual! - it.value)})
                 </span>
               ))}
-              . Start there: one real cut in a large category does more than trimming five small ones.
+              . Start there. One cut in a large category does more than five small ones.
             </>
           )}
           {savShortfall > 0 && (
@@ -180,7 +180,7 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
         <Callout tone="mark" label="Pay yourself first">
           Spending stayed on plan, but you set aside{' '}
           <strong>{formatUSDWhole(savShortfall)}</strong> less than you planned to save. Treat the
-          saving rows like any other bill: they get paid first, not with what happens to be left.
+          saving rows like any other bill and pay them first.
         </Callout>
       ) : (
         <Callout tone="note" label="On plan">

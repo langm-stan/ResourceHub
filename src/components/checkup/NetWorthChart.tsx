@@ -17,11 +17,11 @@ export default function NetWorthChart({ history }: { history: HistoryPoint[] }) 
       <div className="h-48 rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4 flex flex-col items-center justify-center gap-2 text-center">
         <TrendingUp className="text-stone-300" size={22} />
         <p className="text-sm font-medium text-stone-600">
-          {history.length === 0 ? 'Your trend will build here' : 'One point recorded so far'}
+          {history.length === 0 ? 'No trend yet' : 'One point recorded so far'}
         </p>
         <p className="text-xs text-stone-400 max-w-xs">
-          Each day you edit your numbers, that day's net worth is recorded in this browser. Check back
-          after your next update to see the line take shape.
+          Each day you edit your numbers, that day's net worth is recorded in this browser. The line
+          appears after your next update.
         </p>
       </div>
     )

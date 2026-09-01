@@ -100,9 +100,9 @@ export function CompareView({ scenario }: { scenario: Scenario }) {
   return (
     <div className={styles.wrap}>
       <p className={styles.intro}>
-        Change one thing at a time and watch the curves separate. Comparing scenarios side by side
-        is where the levers of compounding (rate, time, and starting amount) reveal their very
-        different power.
+        Change one thing at a time and watch the curves separate. The rate, the time horizon, and
+        the starting amount do not matter equally, and a side-by-side comparison shows which
+        matters most.
       </p>
 
       <div className={styles.chips}>
@@ -151,7 +151,7 @@ export function CompareView({ scenario }: { scenario: Scenario }) {
                 </td>
                 <td className={`${styles.numCol} tnum`}>{formatUSDWhole(c.finalBalance)}</td>
                 <td className={`${styles.numCol} tnum`}>
-                  {c.id === 'base' ? '—' : `${delta >= 0 ? '+' : '−'}${formatUSDWhole(Math.abs(delta))}`}
+                  {c.id === 'base' ? '' : `${delta >= 0 ? '+' : '−'}${formatUSDWhole(Math.abs(delta))}`}
                 </td>
               </tr>
             )

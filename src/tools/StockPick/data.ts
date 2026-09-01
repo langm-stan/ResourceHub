@@ -144,7 +144,7 @@ export const COHORTS: Cohort[] = [
     indexMultiple: 8.97,
     fundAt: { y1: 1.164, y5: 1.994, y10: 3.558 },
     note:
-      'Half this class beat the fund, the best a cohort of famous names ever did, and the reason these ten are remembered at all. The catch: in 2010 the sure thing was BlackBerry, the biggest company in America was Exxon, and Netflix was a DVD mailer trading for pocket change. The winners are only obvious now, and the fund held every one of them the whole time.',
+      'Half this class beat the fund, the best a cohort of famous names ever did, and the reason these ten are remembered at all. In January 2010, though, the sure thing was BlackBerry, the biggest company in America was Exxon, and Netflix was a DVD mailer trading for pocket change. The winners are only obvious now, and the fund held every one of them the whole time.',
     stocks: [
       {
         ticker: 'AAPL',

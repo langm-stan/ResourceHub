@@ -644,7 +644,7 @@ function MiningCard() {
                 )}
               </span>
             ) : (
-              <span className={styles.deltaNone}>—</span>
+              <span className={styles.deltaNone}>–</span>
             )}
             <span className={styles.ledgerBalance}>{fmtBtc(r.balance)} BTC</span>
           </div>
@@ -791,7 +791,7 @@ export function BitcoinMiningPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Personal Finance Toolkit · Unit 8: Financial Markets</p>
           <h1 className={styles.h1}>Bitcoin Mining</h1>
           <p className={styles.lead}>
-            The class becomes the network: race to find a nonce, watch the block snap onto the chain, and read the ledger
+            The class acts as the network: race to find a nonce, see the block added to the chain, and read the ledger
             straight off it.
           </p>
         </header>

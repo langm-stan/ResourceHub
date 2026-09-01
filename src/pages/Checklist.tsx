@@ -38,7 +38,7 @@ export function ChecklistContent({ base = '' }: { base?: string }) {
         <ChecklistItem key={item.id} item={item} answer={answers[item.id]} onAnswer={(v) => setAnswer(item.id, v)} />
       ))}
       <p className="text-sm text-stone-600">
-        Ready to put the answers to work? Build your balance sheet and budget in the{' '}
+        Next, build your balance sheet and budget in the{' '}
         <Link to={`${base}/budget`} className="font-semibold text-cardinal hover:underline">
           Financial Budget
         </Link>

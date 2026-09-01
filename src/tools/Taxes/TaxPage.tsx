@@ -195,7 +195,7 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader
-          title="The bottom line"
+          title="The year in four numbers"
           hint="These four numbers summarize the year. The tabs below show where each one comes from."
         />
         <div className={`${styles.stats} ${styles.bottomLineStats}`}>
@@ -287,7 +287,7 @@ function BracketContainers({ segments }: { segments: BracketSegment[] }) {
               </span>
             </div>
             <span className={`${styles.bracketTax} tnum`}>
-              {seg.amount > 0 ? <strong>{formatUSDWhole(seg.tax)}</strong> : '—'}
+              {seg.amount > 0 ? <strong>{formatUSDWhole(seg.tax)}</strong> : '–'}
             </span>
           </div>
         )
@@ -753,7 +753,7 @@ function TaxMathView({
         muted
       />
 
-      <Callout tone="note" label="Match the rate to the decision">
+      <Callout tone="note" label="Which marginal rate to use">
         When you weigh a change, use the marginal rate, and match it to the change. An extra dollar
         of wages pays income tax and payroll tax:{' '}
         <strong>{formatPercent(p.marginalAllInRate, 1)}</strong> here. A deduction or a 401(k)

@@ -86,7 +86,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           <h1 className={styles.h1}>Bonds and Interest Rates</h1>
           <p className={styles.lead}>
             Buy a bond at par, then let the market rate move. Prices go the other way, and the
-            longer the bond, the harder they swing.
+            longer the bond, the more they swing.
           </p>
         </header>
       )}
@@ -229,7 +229,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
               ? `With the market at ${rate}%, a ${coupon}% bond loses more the longer it has left to run. At ${years} years the price is ${fmtMoney(quote.price)} (${fmtPct(pct)}).`
               : rate === coupon
                 ? 'With the market rate equal to the coupon, every maturity sits exactly at par.'
-                : `With the market at ${rate}%, a ${coupon}% coupon is a prize, and it is a prize for longer on a long bond: at ${years} years the price is ${fmtMoney(quote.price)} (${fmtPct(pct)}).`
+                : `With the market at ${rate}%, a ${coupon}% coupon pays more than the market does, and a long bond pays it for longer: at ${years} years the price is ${fmtMoney(quote.price)} (${fmtPct(pct)}).`
           }
           ariaLabel="Price of the bond after the rate move, by years remaining to maturity"
           exportStats={[
@@ -239,8 +239,8 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
         />
 
-        <Callout tone="mark" label="Maturity is the multiplier">
-          A rising-rate environment punishes long bonds most, which is why skewing short limits
+        <Callout tone="mark" label="Longer maturity, larger price swing">
+          Rising rates hurt long bonds most, which is why holding shorter bonds limits
           losses. The trade is that short bonds pay less. Matching the bond&rsquo;s maturity to when
           you need the money back is the practical defense.
         </Callout>

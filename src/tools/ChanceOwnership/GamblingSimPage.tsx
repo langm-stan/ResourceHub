@@ -74,7 +74,7 @@ function BettingStation() {
       built to produce many trades.
     </Callout>
   ) : betType === 'blackjack' ? (
-    <Callout tone="mark" label="Skill changes the rate, not the direction">
+    <Callout tone="mark" label="Skill lowers the house edge but does not remove it">
       Basic strategy reduces the house edge to about 1%, the smallest of any common casino game. The
       expected value of each hand is still negative, so the median player still loses; the loss
       simply accumulates more slowly.
@@ -195,9 +195,9 @@ export function GamblingSimPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
           <h1 className={styles.h1}>Gambling Simulation</h1>
           <p className={styles.lead}>
-            A thousand people walk into the same game and keep playing. Any one of them might get
-            lucky, but the house keeps a cut of every bet, so as the bets pile up the group grinds
-            down. This is the losing side of the same law of large numbers that later works for the
+            A thousand people play the same game over and over. Any one of them might get
+            lucky, but the house keeps a cut of every bet, so as the bets add up the group falls
+            behind. This is the losing side of the same law of large numbers that later works for the
             patient investor.
           </p>
         </header>

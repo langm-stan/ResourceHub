@@ -90,7 +90,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
   const retiredRLabel = pct(retiredR, retiredPct % 1 ? 1 : 0)
   const goalClause =
     mode === 'returns'
-      ? `the returns on the pile must cover ${formatUSDWhole(spend)} a year, with the pile itself never touched`
+      ? `the returns on the savings must cover ${formatUSDWhole(spend)} a year, with the principal never touched`
       : `the savings must replace ${formatUSDWhole(spend)} a year for ${retYears} years`
 
   return (
@@ -148,7 +148,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
           </div>
           <div className={styles.controlsRow}>
             <SegmentedControl
-              label="The pile in retirement"
+              label="Savings in retirement"
               options={[
                 { value: 'drawdown', label: 'Spend it down' },
                 { value: 'returns', label: 'Live off returns' },
@@ -250,7 +250,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
                 ? [
                     {
                       tex: '\\text{the goal} = \\frac{\\text{spending}}{r}',
-                      caption: `Living off returns alone: the pile whose return at r = ${retiredRLabel} covers current spending every year, principal never touched.`,
+                      caption: `Living off returns alone: the savings whose return at r = ${retiredRLabel} covers current spending every year, principal never touched.`,
                     },
                     {
                       tex: `\\frac{${texUSD(spend)}}{${retiredR}} = \\boxed{${texUSD(target)}}`,
@@ -285,7 +285,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
       <p className={styles.footnote}>
         Defaults are the Retirement Planning Simulator&rsquo;s vetted figures: {pct(R_SAVE)} growth
         while working and {pct(R_RETIRED, 1)} while withdrawing over a {RETIREMENT_YEARS}-year
-        retirement, all adjustable here. Living off returns keeps the pile intact and makes the
+        retirement, all adjustable here. Living off returns keeps the principal intact and makes the
         goal spending divided by the withdrawal return. Income is after tax, and the savings rate
         is a share of it. Simplified annual compounding for teaching; an illustration, not
         financial advice.

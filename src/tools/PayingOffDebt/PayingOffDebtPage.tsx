@@ -141,7 +141,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised" className={styles.stack}>
         <StepHeader
-          title="Turn a debt into a stream of payments"
+          title="The loan and the payment"
           hint="Set the loan, then start from what you know: the payment your budget allows, or the term of the loan."
         />
 
@@ -228,13 +228,13 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           <Stat
             label="Total paid"
             value={main.totalPaid}
-            format={(v) => (main.neverEnds ? '—' : formatUSDWhole(v))}
+            format={(v) => (main.neverEnds ? '–' : formatUSDWhole(v))}
             animate={false}
           />
           <Stat
             label="Interest paid"
             value={main.totalInterest}
-            format={(v) => (main.neverEnds ? '—' : formatUSDWhole(v))}
+            format={(v) => (main.neverEnds ? '–' : formatUSDWhole(v))}
             accentColor={RED}
             note={main.neverEnds ? undefined : `on ${formatUSDWhole(pv)} borrowed`}
             animate={false}
@@ -258,13 +258,13 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
         </div>
 
         {main.paymentBelowInterest && (
-          <Callout tone="mark" label="This payment loses to the interest">
+          <Callout tone="mark" label="The payment is below the interest">
             Interest on {formatUSDWhole(pv)} at {apr}% runs {formatUSDWhole(monthlyInterest)} a
             month. A payment below that never reaches the principal, so the balance grows.
           </Callout>
         )}
         {main.neverEnds && !main.paymentBelowInterest && (
-          <Callout tone="mark" label="This payment barely beats the interest">
+          <Callout tone="mark" label="The payment barely covers the interest">
             Interest on {formatUSDWhole(pv)} at {apr}% runs {formatUSDWhole(monthlyInterest)} a
             month, so only {formatUSDWhole(payment - monthlyInterest)} of the first payment reaches
             the principal. The loan does shrink, but clearing it would take longer than the{' '}
@@ -316,8 +316,8 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             mode === 'payment'
               ? { label: 'Time to pay off', value: timeToPayOff, color: main.neverEnds ? RED : undefined }
               : { label: 'Monthly payment', value: `$${main.payment.toFixed(2)}` },
-            { label: 'Total paid', value: main.neverEnds ? '—' : formatUSDWhole(main.totalPaid) },
-            { label: 'Interest paid', value: main.neverEnds ? '—' : formatUSDWhole(main.totalInterest), color: RED },
+            { label: 'Total paid', value: main.neverEnds ? '–' : formatUSDWhole(main.totalPaid) },
+            { label: 'Interest paid', value: main.neverEnds ? '–' : formatUSDWhole(main.totalInterest), color: RED },
           ]}
         />
 
@@ -405,7 +405,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             return rows
           })()}
         >
-          <Callout tone="note" label="The same five keys">
+          <Callout tone="note" label="The same calculation on the TVM calculator">
             This is the TVM calculator with FV = 0: the amount borrowed is PV, the payment is PMT,
             the rate is I/Y, the horizon is N. Any number here can be reproduced on the TVM
             Calculator in Foundations.

@@ -18,7 +18,7 @@ const CARDS = [
     accent: '#1E756A',
     title: 'The Big Three Explained',
     description:
-      'Gain understanding of the three fundamental financial concepts by exploring the answers and explanations to each of the Big Three questions.',
+      'Learn the three fundamental financial concepts by reading the answer and explanation for each of the Big Three questions.',
     cta: 'The Big Three Explained',
   },
   {
@@ -49,13 +49,13 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
           effectively, and make smarter investment decisions.
         </p>
         <p>
-          At IFDM we believe that measuring financial literacy is crucial. It helps us identify the most vulnerable
-          populations and understand opportunities to narrow gaps in financial knowledge.
+          At IFDM we believe that measuring financial literacy is important. It helps us identify the most
+          vulnerable populations and find ways to narrow gaps in financial knowledge.
         </p>
         <p>
-          We invite you to explore resources designed to help you learn and apply key financial concepts, take the
-          Big Three quiz, and read stories that show how the concepts that underpin the Big Three can help you make
-          better financial decisions.
+          Use these resources to learn and apply the key financial concepts: take the Big Three quiz, read the
+          explanations, and read stories that show how the concepts behind the Big Three can help you make better
+          financial decisions.
         </p>
       </div>
 

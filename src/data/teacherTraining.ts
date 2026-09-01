@@ -42,13 +42,13 @@ export const FOUNDATION_TOOLS: TrainingTool[] = [
     slug: 'tvm-calculator',
     label: 'TVM Calculator',
     description:
-      'The five-key financial calculator behind every money question in the course: N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
+      'The five-key financial calculator used throughout the course: N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
     keywords: ['time value of money', 'present value', 'future value', 'payment', 'annuity', 'discounting'],
   },
   {
     slug: 'literacy-data',
     label: 'Financial Literacy Data',
-    description: 'How U.S. adults score across eight functional areas, drilled down by gender and generation.',
+    description: 'How U.S. adults score across eight functional areas, broken down by gender and generation.',
     keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
   },
   {
@@ -71,7 +71,7 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'compound-interest',
         label: 'Compound Interest Scenario',
-        description: 'Watch interest earn interest, with the math shown and charts ready for a deck.',
+        description: 'Interest earning interest over time, with the math shown and charts ready for a deck.',
         keywords: ['compounding', 'growth', 'savings', 'interest on interest', 'exponential', 'APY'],
       },
       {
@@ -84,7 +84,7 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'borrow-save',
         label: 'Borrow & Save',
-        description: 'Guided borrow-and-save scenarios on the time-value-of-money engine.',
+        description: 'Borrowing and saving scenarios built on the time value of money: the monthly payment on a loan, or the monthly saving that reaches a goal.',
         keywords: ['loan', 'saving', 'time value of money', 'scenarios', 'interest'],
       },
     ],
@@ -238,14 +238,14 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'gambling-sim',
         label: 'Gambling Simulation',
-        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets, and the law of large numbers grinds the group down.',
+        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets. The law of large numbers pulls the group total down.',
         keywords: ['gambling', 'betting', 'sports betting', 'casino', 'blackjack', 'parlays', 'prediction markets', 'house edge', 'odds', 'lottery'],
       },
       {
         slug: 'bitcoin-mining',
         label: 'Bitcoin Mining',
         description:
-          'The class becomes the network: race to find a nonce, watch the block snap onto the chain, and read the ledger straight off it. A QR code after each round syncs every phone, no server involved.',
+          'The class acts as the network: race to find a nonce, add the block to the chain, and read the ledger from it. A QR code after each round syncs every phone, no server involved.',
         keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
       },
     ],
@@ -288,7 +288,7 @@ export const COURSE_UNITS: CourseUnit[] = [
         slug: 'insurance',
         label: 'Why Insurance Works',
         description:
-          'Price a risk, then run the same twenty years for a thousand households with and without the policy: what each group pays each year, who the losses find, and where every household ends up.',
+          'Price a risk, then run the same twenty years for a thousand households with and without the policy: what each group pays each year, who suffers the losses, and where every household ends up.',
         keywords: ['insurance', 'premium', 'risk pooling', 'expected value', 'load', 'shock', 'renters insurance', 'self-insure', 'deductible', 'claim'],
       },
       {

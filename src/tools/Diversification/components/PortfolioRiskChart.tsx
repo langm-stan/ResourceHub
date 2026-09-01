@@ -90,7 +90,7 @@ function Inner({ points, n, noun }: { points: PortfolioPoint[]; n: number; noun:
         fontWeight={600}
         fill="var(--c-accent)"
       >
-        market risk · {formatPercent(MARKET_SD, 0)} stays no matter what
+        market risk · {formatPercent(MARKET_SD, 0)} remains at any portfolio size
       </text>
 
       <LineSeries

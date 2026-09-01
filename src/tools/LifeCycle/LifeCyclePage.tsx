@@ -77,7 +77,7 @@ export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · The life-cycle model</p>
-          <h1 className={styles.h1}>Smooth your spending, not your income</h1>
+          <h1 className={styles.h1}>Smoothing consumption over the life cycle</h1>
           <p className={styles.lead}>
             Income rises, peaks, and falls over a working life. Your standard of living does not have
             to follow it. The life-cycle model, the framework behind modern retirement planning, shows
@@ -89,7 +89,7 @@ export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised" className={styles.controls}>
         <div className={styles.controlsHeader}>
-          <StepHeader title="Sketch a lifetime" />
+          <StepHeader title="The lifetime to model" />
           <Button variant="quiet" size="sm" onClick={() => setState(DEFAULTS)}>
             Reset to defaults
           </Button>
@@ -466,7 +466,7 @@ function CaseStudy({ realRatePct }: { realRatePct: number }) {
   return (
     <>
       <StepHeader
-        title="A six-year career, a sixty-year life"
+        title="Case study: a six-year NFL career"
         hint="A professional football player earns most of a lifetime's income in a few years: the most extreme income hump there is."
       />
 
@@ -543,7 +543,7 @@ function CaseStudy({ realRatePct }: { realRatePct: number }) {
         quickly: <strong>1.9%</strong> of players filed within 2 years of retiring,{' '}
         <strong>15.7%</strong> by year 12. Longer, richer careers offered little protection.
       </Callout>
-      <Callout tone="note" label="The lesson">
+      <Callout tone="note" label="What the case shows">
         A saver on the green plan essentially never goes bankrupt in the study&rsquo;s simulations.
         Professor Lusardi&rsquo;s conclusion: <strong>consumption should not track income</strong>,
         for a football player or for anyone. Only the size of the income hump differs.

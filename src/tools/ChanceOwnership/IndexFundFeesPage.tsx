@@ -162,7 +162,7 @@ export function IndexFundFeesPage({ intro = true }: { intro?: boolean } = {}) {
             An index fund owns all 500 companies, so its return is the market's, no picking required.
             The one thing you still choose is what the fund charges to run it. That expense ratio
             looks like a rounding error each year, but it compounds against your balance exactly the
-            way returns compound for it, and over decades the gap is enormous.
+            way returns compound for it, and over decades the gap is large.
           </p>
         </header>
       )}

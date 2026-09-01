@@ -54,7 +54,7 @@ export const SCORE_FACTORS: ScoreFactor[] = [
     color: 'var(--c-series-3)',
     what: 'How long your accounts have been open: the age of your oldest account, your newest one, and the average across all of them.',
     tips: [
-      'Starting out? A secured credit card begins the record',
+      'If you have no credit history, a secured credit card starts the record',
       'A family member with good credit can join as a co-applicant',
       'Pay on time and keep balances low, so the long record is a good one',
     ],

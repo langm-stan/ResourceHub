@@ -164,7 +164,7 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
     <>
       <StepHeader
         title="Stocks and bonds by holding period"
-        hint={`Every rolling window of market history, drawn at the year it ends. The start year sets the chart's left edge; each window still looks back its full length. Lengthen the window and watch the stock line calm down.`}
+        hint={`Every rolling window of market history, drawn at the year it ends. The start year sets the chart's left edge; each window still looks back its full length. Lengthen the window and the stock line settles down.`}
       />
       <div className={styles.rollingControls}>
         <Slider
@@ -324,8 +324,8 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
         {HISTORY_FIRST_YEAR} <strong>no 20- or 30-year stretch of the U.S. stock market has ever
         finished with a loss</strong>. The worst 20-year run still returned{' '}
         {formatPercent(twenty.worst, 1)} a year, and stocks beat the 10-year Treasury in{' '}
-        {formatPercent(twenty.beat, 0)} of all 20-year windows. A gamble repeated gets more
-        certainly bad; this bet held gets more certainly good.
+        {formatPercent(twenty.beat, 0)} of all 20-year windows. A repeated gamble becomes a more
+        certain loss; a diversified investment held longer becomes a more certain gain.
       </Callout>
       <Callout tone="note" label="What bonds are for">
         Set the comparison to the 10-year Treasury and hold both windows at one year: the bond
@@ -333,8 +333,8 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
         {formatPercent(0.53, 0)}, which is exactly why money needed soon belongs in bonds or
         bills. But steadiness is not safety over decades: bonds can lose too (2022 was the worst
         10-year Treasury year in the whole series), and at 20- or 30-year windows the stock line
-        sits above every bond series in almost every window while inflation quietly eats the
-        T-bill line.
+        sits above every bond series in almost every window while inflation erodes the T-bill
+        line.
       </Callout>
       <p className={styles.footnote}>
         Source: Aswath Damodaran, NYU Stern, annual returns {HISTORY_FIRST_YEAR} to{' '}
@@ -357,9 +357,8 @@ export function StocksBondsPage({ intro = true }: { intro?: boolean } = {}) {
           <h1 className={styles.h1}>Stocks, bonds, and the holding period</h1>
           <p className={styles.lead}>
             A stock is a share of a business&rsquo;s profits; a bond is a loan with a promised
-            payment. The bond is the steadier year, the stock is the better decade, and 98 years
-            of market history show exactly how the holding period settles the contest between
-            them.
+            payment. Bonds are steadier over a year and stocks do better over a decade. Ninety-eight
+            years of market history show how the holding period decides between them.
           </p>
         </header>
       )}

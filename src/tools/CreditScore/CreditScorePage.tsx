@@ -52,8 +52,9 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Debt and credit scores</p>
           <h1 className={styles.h1}>Your FICO Score</h1>
           <p className={styles.lead}>
-            Lenders read your credit score the way colleges read a GPA: one number summarizing how you
-            have handled debt. Here is what goes into that number, and what it changes on a real loan.
+            A credit score is one number that summarizes how you have handled debt, much as a GPA
+            summarizes your coursework. This page shows what goes into that number and what it changes
+            on a car loan.
           </p>
         </header>
       )}
@@ -178,10 +179,9 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
           <div className={styles.chartCol}>
             <BandBars costs={costs} selectedKey={band.key} amount={amount} months={months} market={market} />
             {atBest ? (
-              <Callout tone="note" label="The best rate on the lot">
-                At {score} you are already in the top band, so the market&rsquo;s average rate is as
-                good as it gets on these settings. The chart shows what every step down would cost
-                on the same loan.
+              <Callout tone="note" label="Already in the top band">
+                At {score} you are in the top band, so you pay the lowest average rate on these
+                settings. The chart shows what each lower band would cost on the same loan.
               </Callout>
             ) : (
               <Callout tone="mark" label="What the score difference is worth">
@@ -191,7 +191,6 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
                 <strong>{formatUSDWhole(extraTotal)}</strong> over the {months} months. Invest that
                 monthly difference at {Math.round(INVEST_RATE * 100)}% instead and you would end the
                 loan with <strong style={{ color: GREEN }}>{formatUSDWhole(invested)}</strong>.
-                Lower payments add up.
               </Callout>
             )}
             <FormulaBlock

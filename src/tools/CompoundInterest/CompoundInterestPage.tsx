@@ -31,7 +31,7 @@ import styles from './CompoundInterestPage.module.css'
 type Surface = 'overview' | 'breakdown' | 'math' | 'experiment' | 'frequency'
 
 const FV_TABS: TabItem<Surface>[] = [
-  { value: 'overview', label: 'Watch it grow' },
+  { value: 'overview', label: 'Growth' },
   { value: 'breakdown', label: 'The breakdown' },
   { value: 'math', label: 'The math' },
   { value: 'experiment', label: 'Experiment' },
@@ -105,11 +105,11 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Compound interest</p>
-          <h1 className={styles.h1}>See how money grows over time</h1>
+          <h1 className={styles.h1}>How money grows over time</h1>
           <p className={styles.lead}>
             Money that earns interest doesn&rsquo;t grow in a straight line. It speeds up, because
             the interest starts earning interest of its own. Start from an example or set your own
-            numbers, then use the tabs to explore.
+            numbers, then work through the tabs.
           </p>
         </header>
       )}
@@ -162,7 +162,7 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
               <>
                 <StepHeader
                   title="Experiment"
-                  hint="What matters more: saving more, a higher rate, or waiting longer? Turn one knob at a time and compare."
+                  hint="Which matters more: a larger starting amount, a higher rate, or more time? Change one at a time and compare."
                 />
                 <CompareView scenario={scenario} />
               </>
@@ -171,7 +171,7 @@ export function CompoundInterestPage({ intro = true }: { intro?: boolean } = {})
               <>
                 <StepHeader
                   title="Does compounding more often matter?"
-                  hint="Daily instead of yearly? See how much it really changes."
+                  hint="Compare daily compounding to yearly and see how much it changes the balance."
                 />
                 <FrequencyExplorer scenario={scenario} />
               </>
@@ -217,7 +217,7 @@ function OverviewPanel({ scenario, results }: { scenario: Scenario; results: Res
         <p className={styles.takeaway}>
           {formatUSDWhole(results.futureAmount)} promised in {scenario.years} years is worth only{' '}
           <strong>{formatUSDWhole(results.headline)}</strong> today, about {pct} of the future
-          amount. Distance in time is expensive.
+          amount. The further away the payment, the less it is worth today.
         </p>
       </>
     )
@@ -244,8 +244,8 @@ function OverviewPanel({ scenario, results }: { scenario: Scenario; results: Res
   return (
     <>
       <StepHeader
-        title="Watch it grow"
-        hint="The line is your balance over time. Notice how it curves upward. That's the speeding-up."
+        title="Balance over time"
+        hint="The line is your balance over time. Notice that it curves upward: the growth speeds up."
       />
       {stats}
       <GrowthChart scenario={scenario} results={results} overlayHeader={stats} />
@@ -271,7 +271,7 @@ function BreakdownPanel({ results }: { results: Results }) {
     <>
       <StepHeader
         title="Where does the growth come from?"
-        hint="Your final balance is made of three parts. The third one is the surprising one."
+        hint="Your final balance is made of three parts. The third is the part most people underestimate."
       />
       <ul className={styles.parts}>
         <li>
@@ -295,10 +295,10 @@ function BreakdownPanel({ results }: { results: Results }) {
           </span>
         </li>
       </ul>
-      <Callout tone="note" label="The big idea">
+      <Callout tone="note" label="Interest on interest">
         About <strong>{ioiPct}%</strong> of all the interest here came from interest earning more
-        interest: money that only exists because earlier interest kept working. The longer you
-        wait, the more this part takes over.
+        interest: money that exists only because earlier interest earned interest of its own. The
+        longer the horizon, the larger this part becomes.
       </Callout>
     </>
   )

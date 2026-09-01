@@ -15,7 +15,7 @@ import { useFramed } from '../hooks/useFramed'
  */
 
 const FOUNDATIONS_DESC =
-  'Four tools used throughout the course: the questions that anchor it, the calculator behind it, and two ways to take stock.'
+  'Four tools used throughout the course: the Big Three questions, the TVM calculator, the financial literacy data, and the financial checklist.'
 
 interface SearchHit {
   tool: TrainingTool

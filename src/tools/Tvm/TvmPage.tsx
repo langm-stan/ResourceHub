@@ -66,7 +66,7 @@ export function TvmPage({ intro = true }: { intro?: boolean } = {}) {
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Time value of money</p>
-          <h1 className={styles.h1}>What does it cost, and what does it take?</h1>
+          <h1 className={styles.h1}>Borrow &amp; Save</h1>
           <p className={styles.lead}>
             A dollar today isn&rsquo;t the same as a dollar later. Work out the monthly payment on a
             loan, or how much to set aside each month to reach a savings goal. To solve for any value

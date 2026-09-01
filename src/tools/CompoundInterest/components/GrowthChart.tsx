@@ -199,7 +199,7 @@ function PvChart({ scenario, results, overlayHeader }: GrowthChartProps) {
   const caption = (
     <>
       The present value of {formatUSDWhole(results.futureAmount)} received in the future,
-      discounted at {scenario.ratePct}%. Value collapses as the payoff recedes in time.
+      discounted at {scenario.ratePct}%. The further away the payment, the less it is worth today.
     </>
   )
   const exportStats: ExportStat[] = [

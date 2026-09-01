@@ -43,7 +43,7 @@ export function IncomePie({ income, expenses, totalSaving, leftover }: IncomePie
     return (
       <Callout tone="mark" label="Add income first">
         Shares of income need an income. Fill in the <em>Money in</em> list above and this chart
-        draws itself.
+        fills in.
       </Callout>
     )
   }
@@ -73,8 +73,8 @@ export function IncomePie({ income, expenses, totalSaving, leftover }: IncomePie
           figure="Figure 1."
           caption={
             overBudget
-              ? 'The plan adds up to more than take-home income, so these are shares of the planned outflows instead. Trim until the budget fits back inside the pie.'
-              : 'Your planned budget as shares of take-home income. Warm colors are spent, green is kept on purpose, gray is the extra saving on top.'
+              ? 'The plan adds up to more than take-home income, so these are shares of the planned outflows instead. Cut expenses until the plan fits inside income.'
+              : 'Your planned budget as shares of take-home income. Warm colors are spending, green is planned saving, gray is the extra saving on top.'
           }
           ariaLabel="Where your take-home income goes"
           expandable={false}

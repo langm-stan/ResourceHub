@@ -35,7 +35,7 @@ const OVERALL_CHARTS = [
 const pct = (v: number) => fmtPct(v, 0)
 
 export const LITERACY_DATA_INTRO =
-  'Explore how well U.S. adults understand personal finance across eight functional areas, then drill down by gender or generation.'
+  'How well U.S. adults understand personal finance across eight functional areas, with the results broken down by gender or generation.'
 
 /** The data explorer body, shared by the Resource Hub page and the teacher training section. */
 export function LiteracyDataContent() {
@@ -95,7 +95,7 @@ export function LiteracyDataContent() {
 
       <StepHeader
         title="Financial literacy by functional area"
-        hint="% answering the 2026 P-Fin 8 proxy question correctly: one representative question for each of the eight areas U.S. adults routinely function in. Select an area to drill down."
+        hint="% answering the 2026 P-Fin 8 proxy question correctly: one representative question for each of the eight areas U.S. adults routinely function in. Select an area to see the breakdown."
       />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {AREAS.map((a) => {
@@ -122,7 +122,7 @@ export function LiteracyDataContent() {
       <Card tone="raised" className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-stone-900">{activeArea.label}: drill down</h3>
+            <h3 className="text-lg font-semibold text-stone-900">{activeArea.label}: breakdown</h3>
             <p className="text-xs text-stone-500">
               Full 28-question index, % correct in this area, {dim.label.toLowerCase()}
             </p>

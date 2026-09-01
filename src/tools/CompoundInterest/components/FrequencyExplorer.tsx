@@ -44,7 +44,7 @@ export function FrequencyExplorer({ scenario }: { scenario: Scenario }) {
       <p className={styles.intro}>
         Hold the principal, rate, and horizon fixed and compound more and more often. The balance
         climbs, but toward a ceiling rather than to infinity. That ceiling is{' '}
-        <em>continuous compounding</em>, the moment the formula stops needing a period at all.
+        <em>continuous compounding</em>, the limit as the number of periods goes to infinity.
       </p>
 
       <ChartFrame
@@ -86,11 +86,11 @@ export function FrequencyExplorer({ scenario }: { scenario: Scenario }) {
         </table>
       </div>
 
-      <Callout tone="note" label="The punchline">
+      <Callout tone="note" label="How much frequency matters">
         Going from annual to continuous compounding adds just{' '}
         <strong>{formatUSDWhole(gap)}</strong> here. Frequency matters, but far less than the rate
-        or the time horizon. The famous constant <em>e</em> is simply where{' '}
-        <span className="tnum">(1 + 1/m)ᵐ</span> lands as <em>m</em> runs to infinity:
+        or the time horizon. The constant <em>e</em> is the limit of{' '}
+        <span className="tnum">(1 + 1/m)ᵐ</span> as <em>m</em> goes to infinity:
       </Callout>
 
       <ETable />

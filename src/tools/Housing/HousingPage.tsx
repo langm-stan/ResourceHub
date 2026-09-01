@@ -82,7 +82,7 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Buying a home</p>
-          <h1 className={styles.h1}>What a house really costs</h1>
+          <h1 className={styles.h1}>What a house costs</h1>
           <p className={styles.lead}>
             Set a price, a down payment, and a credit score to see the monthly payment, what a
             lender would approve, and what the loan means for your taxes.
@@ -202,7 +202,7 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader
-          title="The bottom line"
+          title="The purchase in four numbers"
           hint="These four numbers summarize the purchase. The tabs below show where each one comes from."
         />
         <div className={`${styles.stats} ${styles.bottomLineStats}`}>
@@ -284,7 +284,7 @@ function PaymentView({ m, insYr }: { m: MortgageResult; insYr: number | null }) 
   return (
     <>
       <StepHeader
-        title="One price, four monthly bills"
+        title="The four parts of the monthly cost"
         hint="The loan payment, plus the taxes and insurance that ride along with it."
       />
       <div className={styles.stats}>
@@ -338,7 +338,7 @@ function PaymentView({ m, insYr }: { m: MortgageResult; insYr: number | null }) 
           until equity reaches 20%.
         </Callout>
       )}
-      <Callout tone="note" label="Why the first years feel slow">
+      <Callout tone="note" label="Why the balance falls slowly at first">
         Interest is charged on the remaining balance. Of the first {formatUSDWhole(m.pi)} payment,{' '}
         <strong>{formatUSDWhole(m.firstMonthInterest)}</strong> is interest and{' '}
         <strong>{formatUSDWhole(m.firstMonthPrincipal)}</strong> pays down the loan; the split
@@ -426,7 +426,7 @@ function AffordView({
           </>
         )}
       </Callout>
-      <Callout tone="note" label="Other debts shrink the house">
+      <Callout tone="note" label="How other debts lower the limit">
         The 36% ceiling counts car loans, student loans, and card minimums against the same budget
         as the mortgage. Clearing a $350 car payment can raise the approved price by tens of
         thousands of dollars.
@@ -563,7 +563,7 @@ function TermView({ m }: { m: MortgageResult }) {
         loan={m.loan}
         rate={loanRate}
         highlightYears={termYears}
-        caption={`Total interest never levels off: ${formatUSDWhole(interestFor(50))} by year 50, ${formatUSDWhole(interestFor(100))} by year 100. The interest-only loan is off this chart entirely: no end to the loan, no end to the interest.`}
+        caption={`Total interest never levels off: ${formatUSDWhole(interestFor(50))} by year 50, ${formatUSDWhole(interestFor(100))} by year 100. The interest-only loan is off this chart entirely, since the loan never ends.`}
         exportStats={[
           { label: `${termYears}-year`, value: formatUSDWhole(interestFor(termYears)), color: CARDINAL },
           { label: '30-year', value: formatUSDWhole(interestFor(30)), color: SLATE },
@@ -656,13 +656,13 @@ function HomeTaxView({ m, income }: { m: MortgageResult; income: number }) {
         )}
       </p>
 
-      <Callout tone="note" label="The folk wisdom is out of date">
+      <Callout tone="note" label="Why the tax break is smaller than people think">
         &ldquo;Buy a house for the tax break&rdquo; dates from a smaller standard deduction. A
         married couple now starts with {formatUSDWhole(ht.standard)} for free, so a typical
         loan&rsquo;s interest often does not clear the bar. State income taxes share the same{' '}
         {formatUSDWhole(ht.saltCap)} cap; this page counts only property tax.
       </Callout>
-      <Callout tone="note" label="The tax breaks that matter more">
+      <Callout tone="note" label="Two larger tax breaks">
         Living in the home is untaxed income, and up to{' '}
         {formatUSDWhole(status === 'mfj' ? 500_000 : 250_000)} of gain on a primary residence is
         tax-free. Neither requires itemizing.
@@ -723,7 +723,7 @@ function HousingMathView({
       />
       <FormulaBlock
         tex={`\\underbrace{${texUSD(m.piti)}}_{\\text{this home}} ${m.piti <= afford.maxMonthly ? '\\le' : '>'} ${texUSD(afford.maxMonthly)}`}
-        caption={`Step 7. The verdict: this home's all-in cost ${m.piti <= afford.maxMonthly ? 'fits inside' : 'exceeds'} the lender's ceiling.`}
+        caption={`Step 7. The comparison: this home's all-in cost ${m.piti <= afford.maxMonthly ? 'fits inside' : 'exceeds'} the lender's ceiling.`}
         muted
       />
       <Callout tone="note" label="Where the tax numbers come from">

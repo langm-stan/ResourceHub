@@ -101,7 +101,7 @@ function Inner({
           x={x(cross.year)}
           y={y(cross.interest)}
           dy={-36}
-          label={`year ${cross.year}: principal finally outpaces interest`}
+          label={`year ${cross.year}: principal overtakes interest`}
           align={x(cross.year) > innerWidth * 0.7 ? 'end' : 'middle'}
           tone="ink"
         />

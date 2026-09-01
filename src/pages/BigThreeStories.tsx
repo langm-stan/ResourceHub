@@ -9,7 +9,7 @@ const STORIES = [
     title: 'A Wedding Gift and Compound Interest',
     icon: PiggyBank,
     accent: '#8C1515',
-    summary: 'Dave and Michelle decide what to do with $5,000 in wedding gifts and discover the Rule of 72.',
+    summary: 'Dave and Michelle decide what to do with $5,000 in wedding gifts and learn the Rule of 72.',
     body: [
       'Dave and Michelle, two 25-year-olds who just got married, received $5,000 in cash as wedding presents and needed to decide what to do with it. Dave suggested waiting to invest until they had better jobs and made more money.',
       "Michelle told Dave about the Rule of 72, which approximates how many years it takes for an investment to double at a given annual rate of return. With a 7% return, plausible for a diversified stock portfolio held for the long term, their money would double roughly every 10 years.",

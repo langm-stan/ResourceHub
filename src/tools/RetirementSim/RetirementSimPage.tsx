@@ -319,8 +319,8 @@ function EmployerMatching() {
           ]}
         />
       </div>
-      <Callout tone="mark" label="The match multiplies the whole balance">
-        Every matched dollar rides the same compounding as your own, which is why the standard
+      <Callout tone="mark" label="The employer match, compounded">
+        Every matched dollar compounds the same way your own does, which is why the standard
         advice is to contribute at least up to the cap before saving anywhere else. Roughly 1 in 4
         employees with a match stops short of the full amount (Financial Engines, 2015).
       </Callout>
@@ -559,7 +559,7 @@ function RetirementTiming() {
       <div>
         <p className={styles.rulesTitle}>What if returns disappoint?</p>
         <p className={styles.sectionLede}>
-          The plan assumes {plannedPct} a year. Move the actual return and watch where the same{' '}
+          The plan assumes {plannedPct} a year. Move the actual return to see where the same{' '}
           {formatUSDWhole(plan.saving)} of yearly saving lands.
         </p>
       </div>

@@ -207,7 +207,7 @@ export function TvmCalculator() {
   }
 
   function displayValue(v: TvmVar, x: number): string {
-    if (!Number.isFinite(x)) return '—'
+    if (!Number.isFinite(x)) return '–'
     if (v === 'iy') return formatPercent(x / 100, 3)
     if (v === 'n') return `${Math.round(x * 100) / 100}`
     return formatUSD(x)

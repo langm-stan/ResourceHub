@@ -222,12 +222,12 @@ export function GamePage() {
 
           {phase === 'done' && (
             <>
-              <Callout tone={won ? 'mark' : 'note'} label={won ? 'Well played. Now ask why.' : 'Do not feel bad'}>
+              <Callout tone={won ? 'mark' : 'note'} label={won ? 'You won this round' : 'The market won this round'}>
                 {won ? (
                   <>
                     You ended with {formatUSDWhole(round.you)} against buy and hold&rsquo;s{' '}
-                    {formatUSDWhole(round.hold)}. Before celebrating: would the same moves have
-                    worked in a different decade? Play a few more rounds. The traders who win one
+                    {formatUSDWhole(round.hold)}. Would the same moves have worked in a
+                    different decade? Play a few more rounds. The traders who win one
                     round rarely stay ahead of the tally, and real trading adds taxes and fees
                     this game leaves out.
                   </>
@@ -236,9 +236,8 @@ export function GamePage() {
                     You ended with {formatUSDWhole(round.you)} against buy and hold&rsquo;s{' '}
                     {formatUSDWhole(round.hold)}. Professional fund managers lose this game too:
                     over the past decade only about 27% of active funds beat the index they are
-                    paid to beat. The hard part is not spotting the crash, it is being invested
-                    for the violent rebounds that follow, which tend to arrive on the scariest
-                    days.
+                    paid to beat. The hard part is staying invested for the sharp rebounds that
+                    follow a crash, which tend to arrive on the worst-looking days.
                   </>
                 )}
               </Callout>
@@ -248,9 +247,8 @@ export function GamePage() {
           {phase === 'idle' && (
             <Callout tone="plain" label="For the classroom">
               Project this and let one student drive while the class shouts advice. After three or
-              four rounds, the tally on the right tells the story better than a lecture: the
-              Timing the Market lesson next door shows the same result with forty years of data
-              and a perfect crystal ball.
+              four rounds, the tally makes the point. The Timing the Market lesson in the sidebar
+              shows the same result with forty years of data and perfect foresight.
             </Callout>
           )}
         </Card>
