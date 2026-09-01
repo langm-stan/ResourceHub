@@ -196,9 +196,8 @@ export default function TeacherTraining() {
             The Personal Finance Toolkit
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
-            Interactive tools for learning and teaching personal finance, arranged as a course.
-            Every tool runs in the browser, and each tool page shows how to embed it in your own
-            slides.
+            Interactive tools for teaching personal finance, organized by course unit. Each tool
+            runs in the browser and can be embedded in a slide or a course page.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
             <Search

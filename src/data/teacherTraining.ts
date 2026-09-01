@@ -35,26 +35,26 @@ export const FOUNDATION_TOOLS: TrainingTool[] = [
   {
     slug: 'big-three',
     label: 'The Big Three',
-    description: 'The three questions that anchor the course: take the quiz, read the explanations, and see the stories.',
+    description: 'The three questions used to measure financial literacy, with a quiz, explanations, and short stories.',
     keywords: ['quiz', 'financial literacy', 'interest', 'inflation', 'risk', 'diversification'],
   },
   {
     slug: 'tvm-calculator',
     label: 'TVM Calculator',
     description:
-      'The five-key financial calculator used throughout the course: N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
+      'A five-key financial calculator (N, I/Y, PV, PMT, and FV). Enter any four values and solve for the fifth.',
     keywords: ['time value of money', 'present value', 'future value', 'payment', 'annuity', 'discounting'],
   },
   {
     slug: 'literacy-data',
     label: 'Financial Literacy Data',
-    description: 'How U.S. adults score across eight functional areas, broken down by gender and generation.',
+    description: 'Survey results on how well U.S. adults understand personal finance in eight areas, by gender and generation.',
     keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
   },
   {
     slug: 'checklist',
     label: 'Financial Checklist',
-    description: 'The Seven Elements of Good Financial Health as a seven-question self-assessment.',
+    description: 'A seven-question self-assessment based on the Seven Elements of Good Financial Health.',
     keywords: ['financial health', 'habits', 'emergency fund', 'insurance', 'self-assessment'],
   },
 ]
@@ -66,25 +66,25 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'The Basics of Personal Finance',
     short: 'The Basics',
     description:
-      'How money grows and how prices erode it: interest earning interest, inflation, and the time value of money.',
+      'Compound interest, inflation, and the time value of money.',
     tools: [
       {
         slug: 'compound-interest',
         label: 'Compound Interest Scenario',
-        description: 'Interest earning interest over time, with the math shown and charts ready for a deck.',
+        description: 'How a balance grows under compound interest, with the formula and a chart of the growth.',
         keywords: ['compounding', 'growth', 'savings', 'interest on interest', 'exponential', 'APY'],
       },
       {
         slug: 'inflation',
         label: 'The Effect of Inflation',
         description:
-          'Rising prices, shrinking purchasing power, and whether cash, savings, bonds, or stocks keep pace.',
+          'How inflation reduces purchasing power, and whether cash, savings accounts, bonds, or stocks keep up with it.',
         keywords: ['prices', 'CPI', 'purchasing power', 'cost of living', 'real return'],
       },
       {
         slug: 'borrow-save',
         label: 'Borrow & Save',
-        description: 'Borrowing and saving scenarios built on the time value of money: the monthly payment on a loan, or the monthly saving that reaches a goal.',
+        description: 'The monthly payment on a loan and the monthly saving needed to reach a goal, calculated with the time value of money.',
         keywords: ['loan', 'saving', 'time value of money', 'scenarios', 'interest'],
       },
     ],
@@ -94,13 +94,13 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Accounting for Households',
     short: 'Household Accounting',
     description:
-      'Household accounting: the balance sheet, the budget, and pay-yourself-first saving.',
+      'The balance sheet, the budget, and saving before spending.',
     tools: [
       {
         slug: 'budget',
         label: 'Financial Budget',
         description:
-          'Balance sheet and budget with pay-yourself-first saving, a plan-versus-actual check, and where each dollar of income goes.',
+          'A personal balance sheet and monthly budget, with a comparison of the plan to actual spending.',
         keywords: ['budgeting', 'balance sheet', 'net worth', 'income', 'expenses', 'spending', 'pay yourself first', 'Excel', 'assets', 'liabilities'],
       },
     ],
@@ -110,12 +110,12 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Life-Cycle Model of Saving',
     short: 'Life-Cycle Model',
     description:
-      'Managing money over a lifetime: borrowing young, saving in midlife, and spending in retirement.',
+      'Borrowing, saving, and spending over a lifetime.',
     tools: [
       {
         slug: 'lifecycle',
         label: 'The Life-Cycle Model',
-        description: 'Income is hump-shaped; smoothing it explains borrowing young, saving in midlife, and retiring.',
+        description: 'How income and spending change over a lifetime, and why people borrow when young, save in midlife, and spend in retirement.',
         keywords: ['life cycle', 'income smoothing', 'consumption', 'borrowing', 'retirement', 'wealth over a lifetime'],
       },
     ],
@@ -125,13 +125,13 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Debt Management',
     short: 'Debt Management',
     description:
-      'What borrowing costs: how long a budgeted payment takes to clear a debt, and what a term costs per month.',
+      'The cost of borrowing and how loans are paid off.',
     tools: [
       {
         slug: 'paying-off-debt',
         label: 'Paying off Debt',
         description:
-          'Installment loans: how long a budgeted payment takes to clear a debt, what a term costs per month, and where each payment goes.',
+          'How long a loan takes to pay off at a given payment, what a loan costs per month over a given term, and how much of each payment is interest.',
         keywords: ['loans', 'credit card', 'student loan', 'payoff', 'amortization', 'minimum payment', 'interest'],
       },
     ],
@@ -141,12 +141,12 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'FICO Score and Its Determinants',
     short: 'FICO Score',
     description:
-      'What goes into the score that sets the price of credit, and what the same loan costs at every score band.',
+      'What determines a credit score and how the score affects the cost of a loan.',
     tools: [
       {
         slug: 'credit-score',
         label: 'Your FICO Score',
-        description: 'What goes into the score, and what the same car loan costs at every score band.',
+        description: 'The components of a FICO score and what the same car loan costs at each score range.',
         keywords: ['FICO', 'credit score', 'credit report', 'APR', 'car loan', 'payment history', 'credit history', 'VantageScore'],
       },
     ],
@@ -156,24 +156,24 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Home, Car, and Other Purchases',
     short: 'Home & Car',
     description:
-      'The biggest purchases: financing a car, and buying or renting a home.',
+      'Financing a car and buying or renting a home.',
     tools: [
       {
         slug: 'used-vs-new',
         label: 'Used vs. New',
-        description: 'The same car bought new or a few years old: the payment, the total interest, and how long the loan exceeds the car’s value. Takes real listing prices and rates.',
+        description: 'The monthly payment, total interest, and loan balance relative to the car’s value for a new car and a used one. Enter actual listing prices and rates.',
         keywords: ['cars', 'auto loan', 'used car', 'new car', 'depreciation', 'APR', 'negative equity', 'car payment'],
       },
       {
         slug: 'housing',
         label: 'Buying a Home',
-        description: 'PITI, affordability, rate and credit score, the length of the loan, and the itemize test.',
+        description: 'The monthly mortgage payment, how much house a lender allows, the effect of the interest rate, credit score, and loan term, and whether the mortgage interest deduction applies.',
         keywords: ['mortgage', 'house', 'home buying', 'PITI', 'down payment', 'affordability', 'property tax', 'homeowners insurance', 'itemize', '30-year', 'interest rate'],
       },
       {
         slug: 'rent-or-own',
         label: 'Rent or Own',
-        description: 'The first-year cost of owning versus renting the same home, then the wealth of each household over the loan’s thirty years.',
+        description: 'The first-year cost of owning versus renting the same home, and the wealth of each household over thirty years.',
         keywords: ['renting', 'mortgage', 'home', 'house', 'equity', 'landlord', 'wealth', 'buy vs rent'],
       },
     ],
@@ -183,7 +183,7 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Investing in Education',
     short: 'Education',
     description:
-      'What schooling costs, what it returns over a working life, and how to finance it.',
+      'What education costs, what it returns over a working life, and how to pay for it.',
     tools: [],
   },
   {
@@ -191,61 +191,61 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Investing in Financial Markets',
     short: 'Financial Markets',
     description:
-      'Risk, diversification, and fees: what stocks and bonds return, why the fund beats the single pick, and why gambling is not investing.',
+      'Returns and risk for stocks and bonds, diversification, fees, and the difference between investing and gambling.',
     tools: [
       {
         slug: 'stocks-bonds',
         label: 'Stocks vs. Bonds',
-        description: 'Rolling returns since 1928: pick the start year and window for stocks, then compare against bonds, bills, or the same stocks at another window.',
+        description: 'Returns on stocks, bonds, and Treasury bills since 1928 over holding periods from one to thirty years.',
         keywords: ['stocks', 'bonds', 'bills', 'returns', 'risk', 'volatility', 'holding period', 'market history'],
       },
       {
         slug: 'bond-pricing',
         label: 'Pricing a Bond',
-        description: 'A bond is a loan: set the coupon, the maturity, and the market rate, then price the stream of payments the borrower has promised.',
+        description: 'How a bond’s price is calculated from its coupon, its maturity, and the market interest rate.',
         keywords: ['bonds', 'coupon', 'face value', 'par', 'premium', 'discount', 'present value', 'yield', 'treasury', 'T-bill', 'zero coupon', 'valuation'],
       },
       {
         slug: 'bond-rates',
         label: 'Bonds and Interest Rates',
-        description: 'Why prices move opposite rates and why long bonds swing hardest, with the Silicon Valley Bank case priced live.',
+        description: 'Why bond prices fall when interest rates rise, why long-term bonds are affected most, and what happened at Silicon Valley Bank.',
         keywords: ['bonds', 'interest rate risk', 'duration', 'maturity', 'rate shock', 'Silicon Valley Bank', 'SVB', 'treasury', 'losses'],
       },
       {
         slug: 'stock-picker',
         label: 'Stock Diversifier',
-        description: 'Commit $1,000 to one of the 100 largest US companies of a real January and see its decade against the index, then spread the same $1,000 across more tickets until the basket tracks the market.',
+        description: 'Invest $1,000 in one of the 100 largest U.S. companies in a past year, compare its ten-year result to the index, then split the money across more companies.',
         keywords: ['stocks', 'single stock', 'diversification', 'index fund', 'S&P 500', 'stock picking', 'stock picker', 'market cap', 'basket'],
       },
       {
         slug: 'single-stock',
         label: 'One Stock or the Fund',
-        description: 'The real record of the most loved stocks of 2000, 2010, and 2021 next to a broad index fund: the same promise, and what happens when you are wrong.',
+        description: 'The ten-year record of the most popular stocks of 2000, 2010, and 2021 compared with an index fund.',
         keywords: ['stocks', 'single stock', 'index fund', 'diversification', 'famous stocks', 'concentration', 'S&P 500'],
       },
       {
         slug: 'index-fund-fees',
         label: 'Index Fund Fees',
-        description: 'The same monthly habit in a fund that owns all 500 companies, with the expense ratio as the only variable: a fee compounds against the balance the way a return compounds for it.',
+        description: 'How the expense ratio affects the balance of a monthly investment in an S&P 500 index fund over time.',
         keywords: ['index funds', 'fees', 'expense ratio', 'mutual funds', 'ETF', 'costs', 'compounding'],
       },
       {
         slug: 'gambling-investing',
         label: 'Gambling vs. Investing',
-        description: 'The same weekly dollars gambled at real house odds or put into SPY on actual market history: one habit has a negative expected value, the other a positive one.',
+        description: 'The same weekly amount spent on sports bets, lottery tickets, or casino games versus invested in an S&P 500 fund, using actual odds and market history.',
         keywords: ['gambling', 'investing', 'expected value', 'SPY', 'lottery', 'parlay', 'index fund', 'weekly habit'],
       },
       {
         slug: 'gambling-sim',
         label: 'Gambling Simulation',
-        description: 'A thousand players bet at real house odds: blackjack, straight bets, parlays, or prediction markets. The law of large numbers pulls the group total down.',
+        description: 'A thousand players bet on blackjack, sports, parlays, or prediction markets at actual house odds, and the group’s total falls over time.',
         keywords: ['gambling', 'betting', 'sports betting', 'casino', 'blackjack', 'parlays', 'prediction markets', 'house edge', 'odds', 'lottery'],
       },
       {
         slug: 'bitcoin-mining',
         label: 'Bitcoin Mining',
         description:
-          'The class acts as the network: race to find a nonce, add the block to the chain, and read the ledger from it. A QR code after each round syncs every phone, no server involved.',
+          'A classroom simulation of bitcoin mining. Students race to find a nonce, add the block to the chain, and read the ledger. A QR code syncs every phone after each round.',
         keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
       },
     ],
@@ -255,24 +255,24 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Investing, Taxes and Employer Benefits',
     short: 'Taxes & Benefits',
     description:
-      'How income is taxed, how retirement accounts shelter savings, and how an employer match adds free money.',
+      'How income is taxed, how retirement accounts are taxed, and what an employer match is worth.',
     tools: [
       {
         slug: 'taxes',
         label: 'Understanding Taxes',
-        description: 'Brackets, marginal vs. effective rates, and where each piece of the paycheck goes.',
+        description: 'Tax brackets, marginal and effective rates, and how a paycheck is divided between taxes and take-home pay.',
         keywords: ['income tax', 'tax brackets', 'marginal rate', 'effective rate', 'paycheck', 'withholding', 'federal', 'state', 'FICA', 'take-home pay'],
       },
       {
         slug: 'account-taxation',
         label: 'Account Taxation',
-        description: 'The same yearly saving in a taxable account, a traditional 401(k), and a Roth: where the tax lands, and what each is worth after tax.',
+        description: 'The same yearly contribution in a taxable account, a traditional 401(k), and a Roth account, with the after-tax value of each.',
         keywords: ['401k', '401(k)', 'Roth', 'traditional', 'IRA', 'retirement accounts', 'tax shelter', 'contributions', 'tax now', 'tax later'],
       },
       {
         slug: 'employer-match',
         label: 'Employer Matching',
-        description: 'What the employer match adds: the same contribution with no match, a 50% match, and a 100% match, compounded over a career.',
+        description: 'The value of an employer match over a career, comparing no match, a 50% match, and a 100% match.',
         keywords: ['employer match', '401k', '401(k)', 'matching', 'free money', 'benefits', 'contribution'],
       },
     ],
@@ -282,25 +282,25 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Insurance and Retirement Planning',
     short: 'Insurance & Retirement',
     description:
-      'Why insurance is worth its price for the right risks, and working backward from a retirement income to the yearly saving that funds it.',
+      'How insurance works, and how much to save for retirement.',
     tools: [
       {
         slug: 'insurance',
         label: 'Why Insurance Works',
         description:
-          'Price a risk, then run the same twenty years for a thousand households with and without the policy: what each group pays each year, who suffers the losses, and where every household ends up.',
+          'A simulation of a thousand households over twenty years, with and without insurance, showing what each pays and where each ends up.',
         keywords: ['insurance', 'premium', 'risk pooling', 'expected value', 'load', 'shock', 'renters insurance', 'self-insure', 'deductible', 'claim'],
       },
       {
         slug: 'retirement-simulator',
         label: 'Retirement Planning Simulator',
-        description: 'The two-step method: the savings that fund a retirement income, then the yearly saving that builds it, and what waiting or a weak market does to the plan.',
+        description: 'How much savings a retirement income requires, how much to save each year to reach it, and the effect of starting late or of a weak market.',
         keywords: ['retirement planning', '401k', 'nest egg', 'withdrawal', 'starting age', 'annuity', 'price of waiting'],
       },
       {
         slug: 'savings-rate',
         label: 'Savings Rate and Retirement Date',
-        description: 'The two-step method flipped around: fix the share of income saved, and solve for the age when work becomes optional.',
+        description: 'Given the share of income saved each year, the age at which savings can replace earnings.',
         keywords: ['savings rate', 'retirement age', 'financial independence', 'work optional', 'saving share', 'retirement date'],
       },
     ],

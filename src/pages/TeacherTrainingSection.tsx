@@ -67,7 +67,7 @@ const SECTIONS: Record<string, SectionConfig> = {
   budget: {
     title: 'Financial Budget',
     intro:
-      'An interactive balance sheet and budget: pay yourself first, compare the plan to what actually happened, and see where each dollar of take-home income goes. Your numbers save in your browser and download as Excel.',
+      'A personal balance sheet and monthly budget. Enter your own numbers, compare the plan to what you actually spent, and see where your income goes. Your numbers are saved in your browser and can be downloaded as an Excel file.',
     content: <FinancialStatements standalone={false} />,
   },
   'tvm-calculator': {
