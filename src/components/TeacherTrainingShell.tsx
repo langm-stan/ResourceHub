@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
 import { useFramed } from '../hooks/useFramed'
+import ToolkitRunner, { ToolkitRunnerToggle } from './ToolkitRunner'
+import { useToolkitRunner } from '../hooks/useToolkitRunner'
 
 /*
  * The teaching toolkit counterpart to ResourceHubShell, styled to match the
@@ -43,9 +45,11 @@ export default function TeacherTrainingShell({
   const [openId, setOpenId] = useState<string | null>(activeUnit?.id ?? null)
   const { prev, next } = adjacentTools(slug)
   // Inside the IFDM site's iframe the host supplies the side navigation, so
-  // the page is the banner and the content well alone; the banner's Toolkit
-  // Home link and the prev/next cards carry the visitor between tools.
+  // the page is the banner and the content well alone. The toolkit's own
+  // navigation moves into the banner as a collapsible runner (see
+  // ToolkitRunner), beside the Toolkit Home link.
   const framed = useFramed()
+  const [runnerOpen, toggleRunner] = useToolkitRunner()
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
@@ -64,17 +68,21 @@ export default function TeacherTrainingShell({
             <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">
               {eyebrow}
             </p>
-            <Link
-              to="/"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
-            >
-              <Home size={14} />
-              Toolkit Home
-            </Link>
+            <div className="flex shrink-0 items-center gap-2">
+              {framed && <ToolkitRunnerToggle open={runnerOpen} onToggle={toggleRunner} />}
+              <Link
+                to="/"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
+              >
+                <Home size={14} />
+                Toolkit Home
+              </Link>
+            </div>
           </div>
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
           {intro && <p className="mt-3 max-w-3xl text-white/85 leading-relaxed">{intro}</p>}
         </div>
+        {framed && runnerOpen && <ToolkitRunner slug={slug} />}
       </div>
 
       <div className="max-w-[1680px] mx-auto px-6 py-8">
