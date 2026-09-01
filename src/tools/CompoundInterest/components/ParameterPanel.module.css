@@ -12,16 +12,19 @@
   gap: var(--space-3);
 }
 
+/* Contributions take a full row of their own beneath the main controls,
+   with the toggle, the amount, and the timing side by side, so switching
+   them on widens the band rather than adding a tall column at the left. */
 .contrib {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--border-hairline);
 }
 
 .contribFields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding-left: var(--space-5);
-  border-left: 2px solid var(--accent-wash);
+  display: contents;
 }

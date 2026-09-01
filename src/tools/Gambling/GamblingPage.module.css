@@ -59,7 +59,8 @@
   margin-bottom: var(--space-5);
 }
 
-/* Per-asset stat rows: a swatch-labeled header over a shared column order. */
+/* Per-asset stat rows: a swatch-labeled header over a shared column order.
+   Each row's four stats share the band's full width evenly. */
 .assetRows {
   display: flex;
   flex-direction: column;
@@ -67,7 +68,15 @@
   margin-bottom: var(--space-4);
 }
 .assetRows .stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-5);
   margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .assetRows .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .assetHead {
   display: flex;
