@@ -191,8 +191,16 @@ export default function TeacherTraining() {
   return (
     <div>
       <div className="bg-cardinal">
-        <div className="max-w-7xl mx-auto px-6 pt-12 pb-14 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto">
+        <div className={`max-w-7xl mx-auto px-6 pb-14 text-center ${framed ? 'pt-9' : 'pt-12'}`}>
+          {/* Inside the IFDM site's iframe the host page carries the title,
+              so the banner keeps it only for screen readers. */}
+          <h1
+            className={
+              framed
+                ? 'sr-only'
+                : 'font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto'
+            }
+          >
             The Personal Finance Toolkit
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
@@ -230,7 +238,10 @@ export default function TeacherTraining() {
           )}
 
           <div className="flex-1 min-w-0">
-        <div className="flex flex-col lg:flex-row gap-2">
+        {/* Below the large breakpoint the units wrap into rows of natural
+            width (two rows in the IFDM site's 980px content well); from lg
+            up they share one row joined by connector ticks. */}
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
           {COURSE_UNITS.map((u, i) => {
             const active = !hits && i === selectedIndex
             // The joint before this unit is cardinal once the course has flowed past it.
@@ -249,7 +260,7 @@ export default function TeacherTraining() {
                   type="button"
                   onClick={() => setSelectedId(u.id)}
                   aria-pressed={active}
-                  className={`w-full lg:min-h-[112px] flex lg:flex-col items-center lg:justify-center gap-3 lg:gap-2 rounded-xl border px-3.5 py-3 text-left lg:text-center transition-all ${
+                  className={`w-full md:w-auto lg:w-full lg:min-h-[112px] flex lg:flex-col items-center lg:justify-center gap-3 lg:gap-2 rounded-xl border px-3.5 py-3 text-left lg:text-center transition-all ${
                     active
                       ? 'bg-cardinal border-cardinal text-white shadow-md'
                       : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
