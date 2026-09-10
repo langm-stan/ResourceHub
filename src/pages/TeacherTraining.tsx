@@ -216,8 +216,9 @@ function CatalogRow({
           />
         </button>
       </h2>
-      {open && (
-        <div id={panelId} className="px-3 pb-4 sm:pl-[3.375rem]">
+      {/* The panel stays in the document and hides, so the button's
+          aria-controls always resolves to a real element. */}
+      <div id={panelId} hidden={!open} className="px-3 pb-4 sm:pl-[3.375rem]">
           <p className="mb-2 max-w-3xl text-sm leading-relaxed text-stone-600">
             {entry.description}
           </p>
@@ -232,8 +233,7 @@ function CatalogRow({
               ))}
             </div>
           )}
-        </div>
-      )}
+      </div>
     </div>
   )
 }
