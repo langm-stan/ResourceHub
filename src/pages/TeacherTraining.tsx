@@ -278,7 +278,7 @@ export default function TeacherTraining() {
             The Personal Finance Toolkit
           </h1>
           <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
-            Interactive tools for teaching personal finance, organized by course unit.
+            Interactive tools for teaching personal finance, organized by unit.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
             <Search
