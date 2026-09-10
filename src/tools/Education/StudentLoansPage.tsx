@@ -32,7 +32,7 @@ type Surface = 'compare' | 'balance' | 'terms' | 'math'
 const TABS: TabItem<Surface>[] = [
   { value: 'compare', label: 'Subsidized or not' },
   { value: 'balance', label: 'The balance' },
-  { value: 'terms', label: 'If you cannot pay' },
+  { value: 'terms', label: 'Repayment options' },
   { value: 'math', label: 'The math' },
 ]
 
@@ -93,8 +93,8 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson &middot; Investing in education</p>
           <h1 className={styles.h1}>Student Loans</h1>
           <p className={styles.lead}>
-            What a subsidized loan is worth, and why the rate you pay can differ from the rate you
-            are quoted.
+            Subsidized and unsubsidized loans, the payment on each, and the rate paid over the
+            life of the loan.
           </p>
         </header>
       )}
@@ -273,13 +273,12 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
                   </div>
                 </div>
               </div>
-              <Callout tone="mark" label="Why the two rates differ">
-                Both loans are written at {formatPercent(inputs.aprPct / 100, 2)}. On the
-                unsubsidized loan that is what the borrower pays. On the subsidized loan the
-                borrower holds {formatUSDWhole(inputs.principal)} for {c.deferYears}{' '}
-                {c.deferYears === 1 ? 'year' : 'years'} before paying anything, and interest does
-                not run in that time, so the rate over the whole life of the loan works out at{' '}
-                {formatPercent(c.subsidized.impliedAnnualRate, 2)}.
+              <Callout tone="mark" label="The stated rate and the rate paid">
+                Both loans are written at {formatPercent(inputs.aprPct / 100, 2)}. The unsubsidized
+                borrower pays that rate. The subsidized borrower holds{' '}
+                {formatUSDWhole(inputs.principal)} for {c.deferYears}{' '}
+                {c.deferYears === 1 ? 'year' : 'years'} before any interest or payment, so the rate
+                over the life of the loan is {formatPercent(c.subsidized.impliedAnnualRate, 2)}.
               </Callout>
             </>
           )}
@@ -312,12 +311,11 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
                 xTickFormat={(v) => `yr ${v.toFixed(0)}`}
                 xHoverLabel={(v: number) => `Year ${v.toFixed(0)}`}
                 ariaLabel="What is owed on each loan, year by year"
-                caption={`What is owed from the day the money arrives to the last payment. For ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'} the subsidized balance holds at ${formatUSDWhole(inputs.principal)} while the unsubsidized one climbs to ${formatUSDWhole(c.unsubsidized.balanceAtRepayment)}.`}
+                caption={`What is owed from the day the money arrives to the last payment. The subsidized balance holds at ${formatUSDWhole(inputs.principal)} for ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'}; the unsubsidized balance reaches ${formatUSDWhole(c.unsubsidized.balanceAtRepayment)}.`}
               />
               <p className={styles.note}>
-                The gap at the start of repayment never closes. Both loans are then paid off over
-                the same {inputs.repayYears} years, so the larger balance simply carries a larger
-                payment for the whole term.
+                Both loans are repaid over the same {inputs.repayYears} years, so the larger balance
+                carries the larger payment for the whole term.
               </p>
             </>
           )}
@@ -355,11 +353,11 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
                   </dd>
                 </div>
               </dl>
-              <Callout tone="mark" label="What a student loan does not allow">
-                A student loan has to be repaid. The government can garnish wages, tax refunds and
-                Social Security payments. Discharge in bankruptcy is possible but not automatic: it
-                requires a separate action, an adversary proceeding, in which the court finds that
-                repayment would impose undue hardship.
+              <Callout tone="mark" label="Repayment and bankruptcy">
+                A student loan must be repaid. The government can garnish wages, tax refunds, and
+                Social Security payments. Discharge in bankruptcy requires a separate action, an
+                adversary proceeding, in which the court finds that repayment would impose undue
+                hardship.
               </Callout>
             </>
           )}
@@ -367,7 +365,7 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
           {active === 'math' && (
             <MathSection
               title="The math"
-              hint="The payment comes from the balance on the day repayment starts. The rate actually paid comes from comparing that stream with the money borrowed."
+              hint="The payment is set by the balance when repayment starts. The rate paid compares that stream with the amount borrowed."
               rows={[
                 {
                   tex: String.raw`PMT = \frac{B \times i}{1-(1+i)^{-n}}`,
@@ -376,22 +374,21 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
                 },
                 {
                   tex: String.raw`PMT = \frac{${texUSD(c.subsidized.balanceAtRepayment)} \times ${texNumber(inputs.aprPct / 100 / inputs.periodsPerYear, 5)}}{1-(1+${texNumber(inputs.aprPct / 100 / inputs.periodsPerYear, 5)})^{-${texNumber(inputs.repayYears * inputs.periodsPerYear)}}} = \boxed{${texUSD(c.subsidized.payment)}}`,
-                  caption: 'Subsidized: the balance never grew, so it is still what was borrowed.',
+                  caption: 'Subsidized: the balance is still the amount borrowed.',
                   muted: true,
                 },
                 {
                   tex: String.raw`B = ${texUSD(inputs.principal)} \times (1+${texNumber(inputs.aprPct / 100 / inputs.periodsPerYear, 5)})^{${texNumber(c.deferYears * inputs.periodsPerYear)}} = \boxed{${texUSD(c.unsubsidized.balanceAtRepayment)}}`,
-                  caption: `Unsubsidized: interest runs for ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'} first and is added to the balance.`,
+                  caption: `Unsubsidized: interest runs for ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'} and is added to the balance.`,
                   muted: true,
                 },
                 {
                   tex: String.raw`${texUSD(inputs.principal)} = \sum_{k=${texNumber(c.deferYears * inputs.periodsPerYear + 1)}}^{${texNumber(c.deferYears * inputs.periodsPerYear + inputs.repayYears * inputs.periodsPerYear)}} \frac{${texUSD(c.subsidized.payment)}}{(1+x)^{k}} \Rightarrow \boxed{${formatPercent(c.subsidized.impliedAnnualRate, 2)}}`,
-                  caption:
-                    'The rate that equates the money borrowed today with the payments made later.',
+                  caption: 'The rate at which the payments equal the amount borrowed.',
                   muted: true,
                 },
               ]}
-              note={`The stated rate and the rate paid are the same on an unsubsidized loan. On a subsidized one they part company, because the borrower has the money for ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'} before interest or payments begin.`}
+              note={`On an unsubsidized loan the stated rate and the rate paid are the same. On a subsidized loan they differ by the ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'} before interest and payments begin.`}
             />
           )}
         </Card>

@@ -121,7 +121,8 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
           <p className={styles.eyebrow}>Lesson &middot; Investing in education</p>
           <h1 className={styles.h1}>The Return on Education</h1>
           <p className={styles.lead}>
-            A degree costs money now and pays money later. Move both to today and compare them.
+            Tuition and the income given up while studying, set against the raise the degree
+            earns.
           </p>
         </header>
       )}
@@ -241,30 +242,21 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
             format={formatUSDWhole}
             emphasis
             accentColor={worthIt ? GREEN : RED}
-            note={worthIt ? 'the degree pays for itself' : 'the degree does not pay for itself'}
+            note={worthIt ? 'benefit above cost' : 'benefit below cost'}
           />
           <Stat
             label="Return on the money spent"
             value={result.irr ?? 0}
             format={(v) => (result.irr == null ? 'n/a' : formatPercent(v, 2))}
-            note={result.irr == null ? 'no rate balances the two' : 'the rate that makes the two equal'}
+            note={result.irr == null ? 'not defined for these numbers' : 'where benefit equals cost'}
           />
         </div>
 
-        <Callout tone={worthIt ? 'note' : 'mark'} label="The raise that would break even">
-          At {formatPercent(inputs.ratePct / 100, 1)}, the cost of{' '}
-          {formatUSDWhole(result.pvCosts)} is repaid by a raise of{' '}
-          <strong>{formatUSDWhole(result.breakEvenRaise)}</strong> a year over{' '}
-          {inputs.yearsEarning} years. This program is priced on a raise of{' '}
-          {formatUSDWhole(inputs.raisePerYear)}, which is{' '}
-          {inputs.raisePerYear >= result.breakEvenRaise ? 'above' : 'below'} that figure.
-          {result.irr != null && inputs.raisePerYear > 0 && (
-            <>
-              {' '}
-              The return of {formatPercent(result.irr, 2)} is what the money spent earns, and it is
-              the number to hold against what the same money could earn elsewhere.
-            </>
-          )}
+        <Callout tone={worthIt ? 'note' : 'mark'} label="The break-even raise">
+          At {formatPercent(inputs.ratePct / 100, 1)}, a raise of{' '}
+          <strong>{formatUSDWhole(result.breakEvenRaise)}</strong> a year for{' '}
+          {inputs.yearsEarning} years has a present value of {formatUSDWhole(result.pvCosts)}, the
+          same as the cost. This example uses a raise of {formatUSDWhole(inputs.raisePerYear)}.
         </Callout>
 
         <div className={styles.tabRow}>
@@ -281,13 +273,11 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
               <CashFlowChart
                 flows={result.flows}
                 ariaLabel="The cost and the raise, year by year"
-                caption={`${inputs.programYears === 1 ? 'One year' : `${inputs.programYears} years`} of ${formatUSDWhole(result.costPerYear)} against ${inputs.yearsEarning} years of ${formatUSDWhole(inputs.raisePerYear)}. The bars are the amounts as they fall; the figures above discount them back to today.`}
+                caption={`${inputs.programYears === 1 ? 'One year' : `${inputs.programYears} years`} of ${formatUSDWhole(result.costPerYear)} against ${inputs.yearsEarning} years of ${formatUSDWhole(inputs.raisePerYear)}, in the year each amount occurs.`}
               />
               <p className={styles.note}>
-                The costs are few and deep, the gains many and shallow. Discounting decides which
-                side wins, because a dollar in year 40 is worth{' '}
-                {formatUSDWhole(1000 / Math.pow(1 + inputs.ratePct / 100, 40))} per thousand today
-                at this rate.
+                The bars show the amounts in the year they occur. The figures above show them
+                discounted to today.
               </p>
             </>
           )}
@@ -306,12 +296,11 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                 xTickFormat={(v) => formatUSDWhole(v)}
                 xHoverLabel={(v: number) => `A raise of ${formatUSDWhole(v)}`}
                 ariaLabel="Net present value against the size of the raise"
-                caption={`Net present value as the raise changes, holding everything else. The line crosses zero at ${formatUSDWhole(result.breakEvenRaise)} a year: below that the degree costs more than it returns.`}
+                caption={`Net present value as the raise changes. The line crosses zero at ${formatUSDWhole(result.breakEvenRaise)} a year.`}
               />
               <p className={styles.note}>
-                The line is straight because the raise enters the calculation once, multiplied by
-                the value of one dollar a year for {inputs.yearsEarning} years. Doubling the raise
-                doubles the benefit; it does not change the cost.
+                The raise is multiplied by the present value of one dollar a year for{' '}
+                {inputs.yearsEarning} years, so the line is straight.
               </p>
             </>
           )}
@@ -330,12 +319,11 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                 xTickFormat={(v) => `${v.toFixed(0)}%`}
                 xHoverLabel={(v: number) => `At a rate of ${v.toFixed(1)}%`}
                 ariaLabel="Net present value against the discount rate"
-                caption={`Net present value as the discount rate changes. ${result.irr != null ? `The line crosses zero at ${formatPercent(result.irr, 2)}, which is the return on the money spent.` : 'The line does not cross zero over this range.'}`}
+                caption={`Net present value as the discount rate changes. ${result.irr != null ? `The line crosses zero at ${formatPercent(result.irr, 2)}.` : 'The line does not cross zero over this range.'}`}
               />
               <p className={styles.note}>
-                A higher rate pushes the gains further away without moving the costs, which sit at
-                the start. That is why the line falls, and why the crossing point is the return the
-                degree earns.
+                A higher rate reduces the present value of the raise more than it reduces the cost,
+                which falls at the start.
               </p>
             </>
           )}
@@ -343,12 +331,11 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
           {active === 'math' && (
             <MathSection
               title="The math"
-              hint="Every amount is moved to today, then the two sides are compared."
+              hint="Each amount is discounted to today, then the two sides are compared."
               rows={[
                 {
                   tex: String.raw`PV = \sum_{t} \frac{C_t}{(1+r)^t}`,
-                  caption:
-                    'The present value of a stream: each amount divided by the growth it misses by arriving later.',
+                  caption: 'The present value of a stream of amounts at rate r.',
                 },
                 {
                   tex: String.raw`PV_{\text{cost}} = ${texNumber(inputs.programYears)} \times \frac{${texUSD(result.costPerYear)}}{(1+${texNumber(inputs.ratePct / 100, 4)})^t} = \boxed{${texUSD(result.pvCosts)}}`,
@@ -373,14 +360,13 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
               ]}
               note={
                 worthIt
-                  ? 'A positive net present value means the raise, discounted, covers the tuition and the income given up. The project is worth undertaking on these numbers.'
-                  : 'A negative net present value means the raise, discounted, does not cover the tuition and the income given up. On these numbers the money does better elsewhere.'
+                  ? 'The present value of the raise is above the cost, so the degree pays for itself on these numbers.'
+                  : 'The present value of the raise is below the cost, so the degree does not pay for itself on these numbers.'
               }
             >
-              <Callout tone="note" label="What the cost leaves out">
-                Tuition is the visible cost. The income given up while studying is the larger one in
-                most full-time programs, and it is the term that turns a cheap degree into an
-                expensive one. Set it to zero only if you keep earning while you study.
+              <Callout tone="note" label="The two parts of the cost">
+                The cost of a full-time program is tuition plus the income given up while studying.
+                Set the income given up to zero if you keep earning.
               </Callout>
             </MathSection>
           )}
