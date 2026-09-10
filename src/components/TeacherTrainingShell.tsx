@@ -1,11 +1,15 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
-import { adjacentTools, COURSE_UNITS, FOUNDATION_TOOLS, unitForSlug } from '../data/teacherTraining'
+import {
+  adjacentTools,
+  COURSE_UNITS,
+  FOUNDATION_TOOLS,
+  isFoundationSlug,
+  unitForSlug,
+} from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
 import { useFramed } from '../hooks/useFramed'
-import ToolkitRunner, { ToolkitRunnerToggle } from './ToolkitRunner'
-import { useToolkitRunner } from '../hooks/useToolkitRunner'
 
 /*
  * The teaching toolkit counterpart to ResourceHubShell, styled to match the
@@ -45,11 +49,11 @@ export default function TeacherTrainingShell({
   const [openId, setOpenId] = useState<string | null>(activeUnit?.id ?? null)
   const { prev, next } = adjacentTools(slug)
   // Inside the IFDM site's iframe the host supplies the side navigation, so
-  // the page is the banner and the content well alone. The toolkit's own
-  // navigation moves into the banner as a collapsible runner (see
-  // ToolkitRunner), beside the Toolkit Home link.
+  // the page is the banner and the content well alone. The banner then
+  // carries the way back to the full list and the other tools in this unit;
+  // the whole course stays one click away on the toolkit home page.
   const framed = useFramed()
-  const [runnerOpen, toggleRunner] = useToolkitRunner()
+  const siblings = activeUnit ? activeUnit.tools : isFoundationSlug(slug) ? FOUNDATION_TOOLS : []
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
@@ -65,23 +69,47 @@ export default function TeacherTrainingShell({
       <div className="bg-cardinal">
         {framed ? (
           /* The frame view inside ifdm.stanford.edu: everything centered,
-             with the runner's toggle and Toolkit Home beneath the intro. */
+             with the way back and this unit's other tools beneath the intro. */
           <div className="max-w-[1680px] mx-auto px-6 py-8 text-center">
             <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-2">
               {eyebrow}
             </p>
             <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
             {intro && <p className="mt-3 max-w-3xl mx-auto text-white/85 leading-relaxed">{intro}</p>}
-            <div className="mt-5 flex flex-wrap justify-center items-center gap-2">
-              <ToolkitRunnerToggle open={runnerOpen} onToggle={toggleRunner} />
+            <div className="mt-5 flex justify-center">
               <Link
                 to="/"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-[13px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
               >
-                <Home size={14} />
-                Toolkit Home
+                <ArrowLeft size={14} />
+                All tools
               </Link>
             </div>
+            {siblings.length > 1 && (
+              <nav
+                aria-label="Other tools in this unit"
+                className="mt-5 border-t border-white/15 pt-4"
+              >
+                <ul className="flex flex-wrap justify-center gap-1.5">
+                  {siblings.map((t) => (
+                    <li key={t.slug}>
+                      <NavLink
+                        to={`/${t.slug}`}
+                        className={({ isActive }) =>
+                          `inline-block rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+                            isActive
+                              ? 'bg-white/20 font-semibold text-white'
+                              : 'text-white/80 hover:bg-white/10 hover:text-white'
+                          }`
+                        }
+                      >
+                        {t.label}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
           </div>
         ) : (
           <div className="max-w-[1680px] mx-auto px-6 py-8">
@@ -101,7 +129,6 @@ export default function TeacherTrainingShell({
             {intro && <p className="mt-3 max-w-3xl text-white/85 leading-relaxed">{intro}</p>}
           </div>
         )}
-        {framed && runnerOpen && <ToolkitRunner slug={slug} onHide={toggleRunner} />}
       </div>
 
       <div className="max-w-[1680px] mx-auto px-6 py-8">
