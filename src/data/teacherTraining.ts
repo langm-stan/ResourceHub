@@ -108,8 +108,8 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'savings-decisions',
-    title: 'Savings Decisions',
-    short: 'Savings Decisions',
+    title: 'Saving Decisions',
+    short: 'Saving Decisions',
     description:
       'Borrowing, saving, and spending over a lifetime.',
     tools: [
