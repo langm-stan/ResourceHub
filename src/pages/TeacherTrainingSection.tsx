@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
-import { PresentationToggle } from '../design-system'
+import { ToolStage } from '../components/ToolStage'
 import { COURSE_UNITS, toolDescription, unitForSlug } from '../data/teacherTraining'
 import { BigThreeContent } from './BigThree'
 import { BigThreeQuizContent } from './BigThreeQuiz'
@@ -257,18 +257,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
       }
       wide={section.toolkit}
     >
-      {section.toolkit ? (
-        <>
-          {/* The size control sits above the tool and outside the scaled
-              wrapper, so it stays put while the tool grows or shrinks. */}
-          <div className="flex justify-end mb-3">
-            <PresentationToggle />
-          </div>
-          <div className="toolkitScope">{section.content}</div>
-        </>
-      ) : (
-        section.content
-      )}
+      {section.toolkit ? <ToolStage>{section.content}</ToolStage> : section.content}
       {section.instructor && (
         <InstructorBar toolLabel={section.instructor.label} />
       )}
