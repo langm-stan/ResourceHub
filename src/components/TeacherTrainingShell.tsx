@@ -21,13 +21,6 @@ import { useFramed } from '../hooks/useFramed'
  * never into the main Resource Hub.
  */
 
-/*
- * tabIndex={0} on links and buttons that are already focusable is a no-op in
- * Chrome and Firefox, but Safari needs it: with macOS keyboard navigation off
- * (the default) Safari tabs only to text fields and pop-up menus, and an
- * explicit tab stop puts these controls back in the sequence.
- */
-
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return `px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
     isActive
@@ -86,7 +79,6 @@ export default function TeacherTrainingShell({
             <div className="mt-5 flex justify-center">
               <Link
                 to="/"
-                tabIndex={0}
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-[13px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
               >
                 <ArrowLeft size={14} />
@@ -103,7 +95,6 @@ export default function TeacherTrainingShell({
                     <li key={t.slug}>
                       <NavLink
                         to={`/${t.slug}`}
-                        tabIndex={0}
                         className={({ isActive }) =>
                           `inline-block rounded-full px-3 py-1.5 text-[13px] transition-colors ${
                             isActive
@@ -128,7 +119,6 @@ export default function TeacherTrainingShell({
               </p>
               <Link
                 to="/"
-                tabIndex={0}
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
               >
                 <Home size={14} />
@@ -217,7 +207,6 @@ export default function TeacherTrainingShell({
                         <NavLink
                           key={t.slug}
                           to={`/${t.slug}`}
-                          tabIndex={0}
                           className={(state) => `md:ml-6 ${navLinkClass(state)}`}
                         >
                           {t.label}
@@ -246,7 +235,6 @@ export default function TeacherTrainingShell({
                 {prev ? (
                   <Link
                     to={`/${prev.tool.slug}`}
-                    tabIndex={0}
                     className="group flex items-center gap-3 rounded-xl border border-stone-200 bg-white shadow-card px-5 py-4 hover:border-stone-300 hover:bg-stone-50 transition-all"
                   >
                     <ArrowLeft
@@ -268,7 +256,6 @@ export default function TeacherTrainingShell({
                 {next && (
                   <Link
                     to={`/${next.tool.slug}`}
-                    tabIndex={0}
                     className="group flex items-center justify-end gap-3 rounded-xl border border-stone-200 bg-white shadow-card px-5 py-4 text-right hover:border-stone-300 hover:bg-stone-50 transition-all"
                   >
                     <span className="min-w-0">

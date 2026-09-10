@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import { useFramed } from './hooks/useFramed'
+import { useSafariTabStops } from './hooks/useSafariTabStops'
 
 /*
  * The app routes on the hash (HashRouter), so a skip link cannot rely on an
@@ -14,7 +15,6 @@ function SkipLink() {
   return (
     <a
       href="#main"
-      tabIndex={0}
       onClick={(e) => {
         e.preventDefault()
         const main = document.getElementById('main')
@@ -37,6 +37,8 @@ function App() {
   // ?frame=1 (see useFramed) drops the header and footer too: the host
   // page on ifdm.stanford.edu provides both around the iframe.
   const framed = useFramed()
+  // Put every control back in Safari's tab sequence (see the hook).
+  useSafariTabStops()
 
   if (embed || framed) {
     return (
