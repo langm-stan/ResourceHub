@@ -4,8 +4,6 @@ import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import {
   adjacentTools,
   COURSE_UNITS,
-  FOUNDATION_TOOLS,
-  isFoundationSlug,
   unitForSlug,
 } from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
@@ -53,7 +51,7 @@ export default function TeacherTrainingShell({
   // carries the way back to the full list and the other tools in this unit;
   // the whole course stays one click away on the toolkit home page.
   const framed = useFramed()
-  const siblings = activeUnit ? activeUnit.tools : isFoundationSlug(slug) ? FOUNDATION_TOOLS : []
+  const siblings = activeUnit?.tools ?? []
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
@@ -147,18 +145,6 @@ export default function TeacherTrainingShell({
                 aria-label="Toolkit navigation"
                 className="flex flex-row md:flex-col gap-1 flex-wrap"
               >
-              <p className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400 w-full md:w-auto">
-                Basic Tools and Data
-              </p>
-              {FOUNDATION_TOOLS.map((t) => (
-                <NavLink key={t.slug} to={`/${t.slug}`} className={navLinkClass}>
-                  {t.label}
-                </NavLink>
-              ))}
-
-              <p className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400 w-full md:w-auto">
-                Units
-              </p>
               {COURSE_UNITS.map((u, i) => {
                 // A unit with no tools yet stays in the list as a muted row,
                 // so the course numbering reads 1–10 without a gap.

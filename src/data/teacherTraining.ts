@@ -28,36 +28,41 @@ export interface CourseUnit {
 }
 
 /**
- * The tools and data used throughout the course rather than inside one unit.
- * They lead the landing page and sit at the top of the sidebar. They are not
- * a unit and carry no number: nothing here has to be worked through before
- * the course starts.
+ * The course's fifteen units in teaching order. The first holds the tools and
+ * data used throughout rather than inside one topic; the rest follow the
+ * course outline slide for slide. Units whose tools are still being built
+ * have an empty list.
  */
-export const FOUNDATION_TOOLS: TrainingTool[] = [
-  {
-    slug: 'big-three',
-    label: 'The Big Three',
-    description: 'The three financial literacy questions, with a quiz, explanations, and stories.',
-    keywords: ['quiz', 'financial literacy', 'interest', 'inflation', 'risk', 'diversification'],
-  },
-  {
-    slug: 'tvm-calculator',
-    label: 'TVM Calculator',
-    description:
-      'A financial calculator with N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
-    keywords: ['time value of money', 'present value', 'future value', 'payment', 'annuity', 'discounting'],
-  },
-  {
-    slug: 'literacy-data',
-    label: 'Financial Literacy Data',
-    description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
-    keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
-  },
-]
-
-/** The course's ten units, matching the course outline slide for slide. */
-/** The course's fourteen units, matching the course outline slide for slide. */
 export const COURSE_UNITS: CourseUnit[] = [
+  {
+    id: 'basic-tools',
+    title: 'Basic Tools and Data',
+    short: 'Basic Tools',
+    description:
+      'Used throughout the course rather than inside one topic.',
+    tools: [
+
+      {
+        slug: 'big-three',
+        label: 'The Big Three',
+        description: 'The three financial literacy questions, with a quiz, explanations, and stories.',
+        keywords: ['quiz', 'financial literacy', 'interest', 'inflation', 'risk', 'diversification'],
+      },
+      {
+        slug: 'tvm-calculator',
+        label: 'TVM Calculator',
+        description:
+          'A financial calculator with N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
+        keywords: ['time value of money', 'present value', 'future value', 'payment', 'annuity', 'discounting'],
+      },
+      {
+        slug: 'literacy-data',
+        label: 'Financial Literacy Data',
+        description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
+        keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
+      },
+    ],
+  },
   {
     id: 'basics',
     title: 'Basics of Personal Finance',
@@ -359,12 +364,6 @@ export function unitForSlug(slug: string): CourseUnit | undefined {
   return COURSE_UNITS.find((u) => u.tools.some((t) => t.slug === root))
 }
 
-/** Whether a section page is one of the course-wide foundation resources. */
-export function isFoundationSlug(slug: string): boolean {
-  const root = slug.split('/')[0]!
-  return FOUNDATION_TOOLS.some((t) => t.slug === root)
-}
-
 /** The unit's one-line tool description, reused as the section page's intro. */
 export function toolDescription(slug: string): string | undefined {
   const root = slug.split('/')[0]!
@@ -372,22 +371,19 @@ export function toolDescription(slug: string): string | undefined {
     const tool = unit.tools.find((t) => t.slug === root)
     if (tool) return tool.description
   }
-  return FOUNDATION_TOOLS.find((t) => t.slug === root)?.description
+  return undefined
 }
 
 export interface SequencedTool {
   tool: TrainingTool
-  /** Where the tool sits in the course: 'Basic Tools and Data' or 'Unit N · Short'. */
+  /** Where the tool sits in the course, as 'Unit N · Short'. */
   badge: string
 }
 
-/** Every tool in course order: the foundations first, then unit by unit. */
-export const TOOL_SEQUENCE: SequencedTool[] = [
-  ...FOUNDATION_TOOLS.map((tool) => ({ tool, badge: 'Basic Tools and Data' })),
-  ...COURSE_UNITS.flatMap((u, i) =>
-    u.tools.map((tool) => ({ tool, badge: `Unit ${i + 1} · ${u.short}` })),
-  ),
-]
+/** Every tool in course order, unit by unit. */
+export const TOOL_SEQUENCE: SequencedTool[] = COURSE_UNITS.flatMap((u, i) =>
+  u.tools.map((tool) => ({ tool, badge: `Unit ${i + 1} · ${u.short}` })),
+)
 
 /** The tools before and after this page in course order, for prev/next links. */
 export function adjacentTools(slug: string): { prev?: SequencedTool; next?: SequencedTool } {

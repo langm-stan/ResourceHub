@@ -1,21 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Search } from 'lucide-react'
-import { COURSE_UNITS, FOUNDATION_TOOLS, type TrainingTool } from '../data/teacherTraining'
+import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFramed } from '../hooks/useFramed'
 
 /*
  * The Personal Finance Teaching Toolkit landing page: a catalog of the
- * tools as one vertical list. The basic tools and data lead, unnumbered
- * because they sit outside the sequence, then the fourteen units in
- * teaching order.
+ * tools as one vertical list: the fifteen units in teaching order, the
+ * first holding the tools used throughout.
  * Every row is visible at once and opens onto that unit's description and
  * tools; Expand all opens the whole catalog. Searching from the hero
  * replaces the list with the matching tools.
  */
-
-const FOUNDATIONS_DESC = 'Used throughout the course.'
 
 interface SearchHit {
   tool: TrainingTool
@@ -84,7 +81,6 @@ function searchEntry(tool: TrainingTool, badge: string, unitText: string): Searc
 }
 
 const SEARCH_INDEX: SearchEntry[] = [
-  ...FOUNDATION_TOOLS.map((t) => searchEntry(t, 'Foundations', 'foundations')),
   ...COURSE_UNITS.flatMap((u, i) =>
     u.tools.map((t) => searchEntry(t, `Unit ${i + 1} · ${u.short}`, `unit ${i + 1} ${u.title} ${u.short}`)),
   ),
@@ -150,26 +146,18 @@ interface CatalogEntry {
   title: string
   description: string
   tools: TrainingTool[]
-  /** Position in the course. Omitted for the basic tools, which have none. */
-  number?: number
+  /** Position in the course. */
+  number: number
 }
 
-/** The basic tools first, then the units in teaching order. */
-const CATALOG: CatalogEntry[] = [
-  {
-    id: 'foundations',
-    title: 'Basic Tools and Data',
-    description: FOUNDATIONS_DESC,
-    tools: FOUNDATION_TOOLS,
-  },
-  ...COURSE_UNITS.map((u, i) => ({
-    id: u.id,
-    title: u.title,
-    description: u.description,
-    tools: u.tools,
-    number: i + 1,
-  })),
-]
+/** The units in teaching order, numbered from one. */
+const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
+  id: u.id,
+  title: u.title,
+  description: u.description,
+  tools: u.tools,
+  number: i + 1,
+}))
 
 /** One row of the catalog: a header that opens onto its description and tools. */
 function CatalogRow({
@@ -194,17 +182,13 @@ function CatalogRow({
           aria-controls={panelId}
           className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
         >
-          {entry.number === undefined ? (
-            <span className="h-7 w-7 shrink-0" aria-hidden="true" />
-          ) : (
-            <span
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[13px] font-semibold ${
-                count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
-              }`}
-            >
-              {entry.number}
-            </span>
-          )}
+          <span
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[13px] font-semibold ${
+              count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
+            }`}
+          >
+            {entry.number}
+          </span>
           <span className="min-w-0 flex-1 font-serif text-[17px] font-semibold leading-snug text-stone-900">
             {entry.title}
           </span>

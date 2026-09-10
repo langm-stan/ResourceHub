@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
-import { COURSE_UNITS, isFoundationSlug, toolDescription, unitForSlug } from '../data/teacherTraining'
+import { COURSE_UNITS, toolDescription, unitForSlug } from '../data/teacherTraining'
 import { BigThreeContent } from './BigThree'
 import { BigThreeQuizContent } from './BigThreeQuiz'
 import { BigThreeExplainedContent } from './BigThreeExplained'
@@ -252,9 +252,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
       eyebrow={
         unit
           ? `Personal Finance Toolkit · Unit ${COURSE_UNITS.indexOf(unit) + 1}: ${unit.short}`
-          : isFoundationSlug(slug)
-            ? 'Personal Finance Toolkit · Basic Tools and Data'
-            : 'Personal Finance Toolkit'
+          : 'Personal Finance Toolkit'
       }
       wide={section.toolkit}
     >
