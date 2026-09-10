@@ -311,7 +311,9 @@ export default function TeacherTraining() {
             </aside>
           )}
 
-          <div className="flex-1 min-w-0 max-w-4xl">
+          {/* With no sidebar the list is centered in the well; alongside the
+              sidebar it stays where the sidebar leaves it. */}
+          <div className={`flex-1 min-w-0 max-w-4xl ${framed ? 'mx-auto w-full' : ''}`}>
             {hits ? (
               <>
                 <p className="mb-3 text-sm text-stone-600">
