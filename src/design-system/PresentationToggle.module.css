@@ -1,11 +1,21 @@
-.toggle {
+/* A minus, the current percentage, a plus. The readout doubles as the way
+   back to 100%, so the control needs no separate reset. */
+.group {
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 12px;
+  align-items: stretch;
   border-radius: var(--radius-pill);
   border: var(--hairline) solid var(--border-strong);
+  overflow: hidden;
+  background: transparent;
+}
+
+.step,
+.readout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border: 0;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -14,28 +24,32 @@
   font-variant-numeric: tabular-nums;
   transition:
     color var(--dur-fast) var(--ease-standard),
-    border-color var(--dur-fast) var(--ease-standard),
     background-color var(--dur-fast) var(--ease-standard);
 }
-.toggle:hover {
+
+.step {
+  width: 32px;
+}
+.readout {
+  min-width: 52px;
+  padding: 0 8px;
+  border-left: var(--hairline) solid var(--border-hairline);
+  border-right: var(--hairline) solid var(--border-hairline);
+}
+
+.step:hover:not(:disabled),
+.readout:hover:not(:disabled) {
   color: var(--accent);
-  border-color: var(--accent);
   background: var(--surface-sunken);
 }
 
-.active {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-wash);
-  font-weight: var(--fw-medium);
+.step:disabled,
+.readout:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
-
-.label {
-  line-height: 1;
-}
-
-@media (max-width: 560px) {
-  .label {
-    display: none;
-  }
+/* At 100% the readout is a label, not a control, so it should not look dimmed. */
+.readout:disabled {
+  opacity: 1;
+  color: var(--text-muted);
 }

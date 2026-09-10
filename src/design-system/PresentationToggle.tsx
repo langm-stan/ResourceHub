@@ -1,52 +1,88 @@
 import { useEffect, useState } from 'react'
 import styles from './PresentationToggle.module.css'
 
-type Level = 0 | 1 | 2
+/*
+ * Sizing for the tool itself. Larger settings are for projecting in a
+ * classroom; smaller ones fit more of a long tool on screen at once, which
+ * matters most inside the narrow content well on ifdm.stanford.edu. The
+ * attribute goes on <html> and only the tool scales, never the page around
+ * it, so the choice cannot shrink the site's own navigation.
+ */
 
-const LABELS: Record<Level, string> = { 0: '100%', 1: '125%', 2: '150%' }
+/** Percentages the tool can be shown at, smallest first. */
+const SIZES = [75, 90, 100, 125, 150] as const
+const DEFAULT_INDEX = SIZES.indexOf(100)
+const KEY = 'ifdm-present'
 
-function currentLevel(): Level {
-  if (typeof document === 'undefined') return 0
-  const p = document.documentElement.dataset.present
-  return p === '1' ? 1 : p === '2' ? 2 : 0
+function apply(size: number) {
+  if (size === 100) delete document.documentElement.dataset.present
+  else document.documentElement.dataset.present = String(size)
 }
 
-/**
- * Cycles the whole interface through presentation sizes (100% → 125% → 150%)
- * for projecting in a classroom. Remembers the choice.
- */
+function stored(): number {
+  if (typeof document === 'undefined') return DEFAULT_INDEX
+  try {
+    const raw = Number(localStorage.getItem(KEY))
+    const i = SIZES.indexOf(raw as (typeof SIZES)[number])
+    if (i >= 0) return i
+  } catch {
+    // Storage blocked: fall back to the normal size.
+  }
+  return DEFAULT_INDEX
+}
+
 export function PresentationToggle() {
-  const [level, setLevel] = useState<Level>(currentLevel)
+  const [index, setIndex] = useState(stored)
+  const size = SIZES[index]!
 
   useEffect(() => {
-    if (level === 0) delete document.documentElement.dataset.present
-    else document.documentElement.dataset.present = String(level)
+    apply(size)
     try {
-      localStorage.setItem('ifdm-present', String(level))
+      localStorage.setItem(KEY, String(size))
     } catch {
       // ignore storage failures
     }
-  }, [level])
+  }, [size])
 
-  const next = ((level + 1) % 3) as Level
+  const step = (delta: number) =>
+    setIndex((i) => Math.min(SIZES.length - 1, Math.max(0, i + delta)))
+
   return (
-    <button
-      type="button"
-      className={level === 0 ? styles.toggle : `${styles.toggle} ${styles.active}`}
-      onClick={() => setLevel(next)}
-      aria-label={`Presentation size ${LABELS[level]}. Click to set ${LABELS[next]}.`}
-      title={`Presentation size: ${LABELS[level]}. Click to enlarge.`}
-    >
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
-        <path
-          d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className={styles.label}>{LABELS[level]}</span>
-    </button>
+    <div className={styles.group} role="group" aria-label="Size of this tool">
+      <button
+        type="button"
+        className={styles.step}
+        onClick={() => step(-1)}
+        disabled={index === 0}
+        aria-label="Show this tool smaller"
+        title="Smaller"
+      >
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        className={styles.readout}
+        onClick={() => setIndex(DEFAULT_INDEX)}
+        disabled={size === 100}
+        aria-label={`This tool is shown at ${size} percent. Select to return to 100 percent.`}
+        title={size === 100 ? 'Normal size' : 'Back to 100%'}
+      >
+        {size}%
+      </button>
+      <button
+        type="button"
+        className={styles.step}
+        onClick={() => step(1)}
+        disabled={index === SIZES.length - 1}
+        aria-label="Show this tool larger"
+        title="Larger"
+      >
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
   )
 }

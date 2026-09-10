@@ -85,13 +85,19 @@ textarea {
   color: var(--text-primary);
 }
 
-/* Presentation / projection sizing — scales the tool (type, controls, charts,
-   spacing) uniformly so it reads from across a room. PresentationToggle sets
-   this attribute on <html>; scoped here so only the tool zooms, not the rest
-   of the Resource Hub around it. */
-html[data-present='1'] .toolkitScope {
+/* Tool sizing — scales the tool (type, controls, charts, spacing) uniformly.
+   Above 100% it reads from across a room; below it, more of a long tool fits
+   on screen at once. PresentationToggle sets this attribute on <html>; scoped
+   here so only the tool zooms, not the Resource Hub around it. */
+html[data-present='75'] .toolkitScope {
+  zoom: 0.75;
+}
+html[data-present='90'] .toolkitScope {
+  zoom: 0.9;
+}
+html[data-present='125'] .toolkitScope {
   zoom: 1.25;
 }
-html[data-present='2'] .toolkitScope {
+html[data-present='150'] .toolkitScope {
   zoom: 1.5;
 }
