@@ -75,7 +75,7 @@ textarea {
 :focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
-  /* Fills the offset gap, so the ring reads on any background colour. */
+  /* Fills the offset gap, so the ring reads on any background color. */
   box-shadow: 0 0 0 2px var(--focus-ring-halo);
   border-radius: var(--radius);
 }

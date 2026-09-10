@@ -1,0 +1,143 @@
+/* The tool fills the shell's content column; the shell owns the outer width. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.intro {
+  margin-bottom: var(--space-5);
+}
+.eyebrow {
+  font-size: var(--fs-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--c-cardinal);
+  margin-bottom: var(--space-2);
+}
+.h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 66ch;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Examples across the top, in the vocabulary the other tools use. */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.presetsLabel {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-right: var(--space-2);
+}
+
+/* Compact full-width parameter band, the house layout for every tool. */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+}
+.controlsSplit {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+}
+
+.tabRow {
+  margin-top: var(--space-2);
+}
+.panel {
+  padding: var(--space-5);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.note {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--text-faint);
+  max-width: 72ch;
+}
+
+/* The two loans side by side, each with its own column of figures. */
+.compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+.compareHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+.compareRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.termsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+.termsList dt {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+.termsList dd {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}

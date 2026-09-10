@@ -15,6 +15,8 @@ import { InflationPage } from '../tools/Inflation/InflationPage'
 import { TvmPage } from '../tools/Tvm/TvmPage'
 import { TvmCalculatorPage } from '../tools/Tvm/TvmCalculatorPage'
 import { LifeCyclePage } from '../tools/LifeCycle/LifeCyclePage'
+import { EducationReturnPage } from '../tools/Education/EducationReturnPage'
+import { StudentLoansPage } from '../tools/Education/StudentLoansPage'
 import { CreditScorePage } from '../tools/CreditScore/CreditScorePage'
 import { PayingOffDebtPage } from '../tools/PayingOffDebt/PayingOffDebtPage'
 import { TaxPage } from '../tools/Taxes/TaxPage'
@@ -99,6 +101,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     toolkit: true,
     instructor: { label: 'The Life-Cycle Model', path: 'lifecycle' },
     content: <LifeCyclePage intro={false} />,
+  },
+  'education-return': {
+    title: 'The Return on Education',
+    toolkit: true,
+    instructor: { label: 'The Return on Education', path: 'education-return' },
+    content: <EducationReturnPage intro={false} />,
+  },
+  'student-loans': {
+    title: 'Student Loans',
+    toolkit: true,
+    instructor: { label: 'Student Loans', path: 'student-loans' },
+    content: <StudentLoansPage intro={false} />,
   },
   'paying-off-debt': {
     title: 'Paying off Debt',
