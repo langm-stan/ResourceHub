@@ -6,7 +6,7 @@ import type { CashFlow } from '../compute'
 
 /*
  * The decision drawn as the money moves: a bar below the line for each year
- * of tuition and forgone income, a bar above it for each year the raise is
+ * of tuition and forgone income, a bar above it for each year the increase is
  * earned. The bars are the raw amounts, so the picture shows why a short
  * row of deep costs can still be outweighed by a long row of shallow gains.
  */

@@ -240,8 +240,8 @@ function CatalogRow({
 
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
-  // Foundations starts open so the top of the list shows what a row does.
-  const [openIds, setOpenIds] = useState<string[]>([CATALOG[0]!.id])
+  // Every row starts closed, so the whole course reads at once.
+  const [openIds, setOpenIds] = useState<string[]>([])
   const framed = useFramed()
 
   // A distinct document title for the course overview (WCAG 2.4.2).

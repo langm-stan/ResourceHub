@@ -198,13 +198,13 @@ export const COURSE_UNITS: CourseUnit[] = [
       {
         slug: 'education-return',
         label: 'The Return on Education',
-        description: 'The cost of a degree, the raise it earns, and the return on the money.',
+        description: 'The cost of a degree, the increase in income after it, and the return on the money.',
         keywords: ['net present value', 'NPV', 'IRR', 'internal rate of return', 'human capital', 'college', 'master\'s', 'degree', 'tuition', 'forgone income', 'opportunity cost', 'break-even', 'return on investment'],
       },
       {
         slug: 'student-loans',
         label: 'Student Loans',
-        description: 'Subsidized and unsubsidized loans, and what each costs to repay.',
+        description: 'The cost of repaying subsidized and unsubsidized loans.',
         keywords: ['student loan', 'subsidized', 'subsidized', 'unsubsidized', 'grace period', 'deferment', 'forbearance', 'income-driven repayment', 'PSLF', 'loan forgiveness', 'federal loans', 'FAFSA'],
       },
     ],

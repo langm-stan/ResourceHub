@@ -2,8 +2,8 @@
  * Investing in education, priced the way any other project is priced: the
  * costs and the benefits are moved to today and compared. The cost of a
  * degree is the tuition plus the income given up while studying, which is
- * the part people leave out. The benefit is the raise the degree earns,
- * every year it is earned.
+ * the part people leave out. The benefit is the higher income afterwards,
+ * every year it is received.
  */
 
 export type CostTiming = 'start' | 'end'
@@ -16,8 +16,8 @@ export interface EducationInputs {
   /** Income given up for one year of the program; zero if you keep working. */
   forgonePerYear: number
   /** Extra income per year once the program is finished. */
-  raisePerYear: number
-  /** Years the raise is earned, normally the years left until retirement. */
+  incomeIncrease: number
+  /** Years the increase is received, normally the years left until retirement. */
   yearsEarning: number
   ratePct: number
   /** Whether a year's tuition is paid at the start of that year or its end. */
@@ -27,7 +27,7 @@ export interface EducationInputs {
 export interface CashFlow {
   /** Years from today. */
   t: number
-  /** Negative while studying, positive once the raise arrives. */
+  /** Negative while studying, positive once the higher income arrives. */
   amount: number
 }
 
@@ -41,10 +41,10 @@ export interface EducationResult {
   npv: number
   /** The rate at which the degree exactly breaks even, or null if there is none. */
   irr: number | null
-  /** The smallest raise that still repays the cost. */
-  breakEvenRaise: number
-  /** Present value of $1 of raise, over the years it is earned. */
-  raiseFactor: number
+  /** The smallest yearly increase that still repays the cost. */
+  breakEvenIncrease: number
+  /** Present value of $1 a year, over the years the increase is received. */
+  increaseFactor: number
   lastYear: number
 }
 
@@ -57,7 +57,7 @@ function periods({ programYears, yearsEarning, costTiming }: EducationInputs) {
   const s = Math.max(0, Math.round(programYears))
   const w = Math.max(0, Math.round(yearsEarning))
   // Tuition paid up front runs from today; paid in arrears it runs from the
-  // end of the first year. Either way the raise starts the period after the
+  // end of the first year. Either way the increase starts the period after the
   // last tuition bill.
   const first = costTiming === 'start' ? 0 : 1
   const costPeriods = Array.from({ length: s }, (_, i) => first + i)
@@ -71,7 +71,7 @@ function npvAt(inputs: EducationInputs, r: number): number {
   const { costPeriods, benefitPeriods } = periods(inputs)
   const cost = inputs.tuitionPerYear + inputs.forgonePerYear
   const pvC = costPeriods.reduce((sum, t) => sum + cost * discount(t, r), 0)
-  const pvB = benefitPeriods.reduce((sum, t) => sum + inputs.raisePerYear * discount(t, r), 0)
+  const pvB = benefitPeriods.reduce((sum, t) => sum + inputs.incomeIncrease * discount(t, r), 0)
   return pvB - pvC
 }
 
@@ -109,12 +109,12 @@ export function evaluateEducation(inputs: EducationInputs): EducationResult {
   const costPerYear = inputs.tuitionPerYear + inputs.forgonePerYear
 
   const pvCosts = costPeriods.reduce((sum, t) => sum + costPerYear * discount(t, r), 0)
-  const raiseFactor = benefitPeriods.reduce((sum, t) => sum + discount(t, r), 0)
-  const pvBenefits = inputs.raisePerYear * raiseFactor
+  const increaseFactor = benefitPeriods.reduce((sum, t) => sum + discount(t, r), 0)
+  const pvBenefits = inputs.incomeIncrease * increaseFactor
 
   const flows: CashFlow[] = [
     ...costPeriods.map((t) => ({ t, amount: -costPerYear })),
-    ...benefitPeriods.map((t) => ({ t, amount: inputs.raisePerYear })),
+    ...benefitPeriods.map((t) => ({ t, amount: inputs.incomeIncrease })),
   ].sort((x, y) => x.t - y.t)
 
   return {
@@ -126,20 +126,20 @@ export function evaluateEducation(inputs: EducationInputs): EducationResult {
     pvBenefits,
     npv: pvBenefits - pvCosts,
     irr: solveIrr(inputs),
-    breakEvenRaise: raiseFactor > 0 ? pvCosts / raiseFactor : Infinity,
-    raiseFactor,
+    breakEvenIncrease: increaseFactor > 0 ? pvCosts / increaseFactor : Infinity,
+    increaseFactor,
     lastYear: benefitPeriods[benefitPeriods.length - 1] ?? costPeriods[costPeriods.length - 1] ?? 0,
   }
 }
 
-/** Net present value across a range of raises, for the sensitivity chart. */
-export function npvByRaise(inputs: EducationInputs, raises: number[]): number[] {
+/** Net present value across a range of income increases, for the sensitivity chart. */
+export function npvByIncrease(inputs: EducationInputs, increases: number[]): number[] {
   const r = inputs.ratePct / 100
   const { costPeriods, benefitPeriods } = periods(inputs)
   const cost = inputs.tuitionPerYear + inputs.forgonePerYear
   const pvC = costPeriods.reduce((sum, t) => sum + cost * discount(t, r), 0)
   const factor = benefitPeriods.reduce((sum, t) => sum + discount(t, r), 0)
-  return raises.map((raise) => raise * factor - pvC)
+  return increases.map((increase) => increase * factor - pvC)
 }
 
 /** Net present value across a range of rates, for the sensitivity chart. */

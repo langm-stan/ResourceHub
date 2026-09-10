@@ -12,7 +12,7 @@ import {
 } from '../../design-system'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { formatPercent, formatUSDWhole, texNumber, texUSD } from '../../lib/format'
-import { evaluateEducation, npvByRaise, npvByRate, type CostTiming, type EducationInputs } from './compute'
+import { evaluateEducation, npvByIncrease, npvByRate, type CostTiming, type EducationInputs } from './compute'
 import { CashFlowChart } from './components/CashFlowChart'
 import styles from './EducationPage.module.css'
 
@@ -20,18 +20,19 @@ import styles from './EducationPage.module.css'
  * The return on education. A degree is a project like any other: it costs
  * money now and pays money later, so both are moved to today and compared.
  * The cost is tuition plus the income given up while studying, which is the
- * term people leave out, and the benefit is the raise, every year it is
- * earned. The page also solves for the raise that makes the two equal.
+ * term people leave out, and the benefit is the higher income, every year
+ * it is received. The page also solves for the increase that makes the two
+ * equal.
  */
 
 const RED = 'var(--c-accent)'
 const GREEN = 'var(--c-series-1)'
 
-type Surface = 'flows' | 'raise' | 'rate' | 'math'
+type Surface = 'flows' | 'increase' | 'rate' | 'math'
 
 const TABS: TabItem<Surface>[] = [
   { value: 'flows', label: 'The cash flows' },
-  { value: 'raise', label: 'A smaller raise' },
+  { value: 'increase', label: 'A smaller increase' },
   { value: 'rate', label: 'A different rate' },
   { value: 'math', label: 'The math' },
 ]
@@ -50,20 +51,20 @@ const PRESETS: Preset[] = [
       programYears: 1,
       tuitionPerYear: 75000,
       forgonePerYear: 50000,
-      raisePerYear: 20000,
+      incomeIncrease: 20000,
       yearsEarning: 40,
       ratePct: 8,
       costTiming: 'start',
     },
   },
   {
-    id: 'small-raise',
-    label: 'The same degree, a $10,000 raise',
+    id: 'small-increase',
+    label: 'The same degree, a $10,000 increase',
     inputs: {
       programYears: 1,
       tuitionPerYear: 75000,
       forgonePerYear: 50000,
-      raisePerYear: 10000,
+      incomeIncrease: 10000,
       yearsEarning: 40,
       ratePct: 8,
       costTiming: 'start',
@@ -76,7 +77,7 @@ const PRESETS: Preset[] = [
       programYears: 2,
       tuitionPerYear: 31000,
       forgonePerYear: 0,
-      raisePerYear: 10000,
+      incomeIncrease: 10000,
       yearsEarning: 13,
       ratePct: 7,
       costTiming: 'end',
@@ -102,16 +103,16 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
 
   // The sensitivity sweeps run from zero to twice the current setting, so the
   // reader's own case sits in the middle of each chart.
-  const raises = useMemo(
-    () => Array.from({ length: 61 }, (_, i) => (i * Math.max(inputs.raisePerYear, 5000) * 2) / 60),
-    [inputs.raisePerYear]
+  const increases = useMemo(
+    () => Array.from({ length: 61 }, (_, i) => (i * Math.max(inputs.incomeIncrease, 5000) * 2) / 60),
+    [inputs.incomeIncrease]
   )
-  const raiseNpvs = useMemo(() => npvByRaise(inputs, raises), [inputs, raises])
+  const increaseNpvs = useMemo(() => npvByIncrease(inputs, increases), [inputs, increases])
   const rates = useMemo(() => Array.from({ length: 61 }, (_, i) => (i * 20) / 60), [])
   const rateNpvs = useMemo(() => npvByRate(inputs, rates), [inputs, rates])
 
-  const sweepMin = Math.min(0, ...raiseNpvs, ...rateNpvs)
-  const raiseMax = Math.max(...raiseNpvs, 0)
+  const sweepMin = Math.min(0, ...increaseNpvs, ...rateNpvs)
+  const increaseMax = Math.max(...increaseNpvs, 0)
   const rateMax = Math.max(...rateNpvs, 0)
 
   return (
@@ -121,8 +122,8 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
           <p className={styles.eyebrow}>Lesson &middot; Investing in education</p>
           <h1 className={styles.h1}>The Return on Education</h1>
           <p className={styles.lead}>
-            Tuition and the income given up while studying, set against the raise the degree
-            earns.
+            Tuition and the income given up while studying, set against the increase in income
+            afterwards.
           </p>
         </header>
       )}
@@ -177,19 +178,19 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
               note="Zero if you keep working while you study."
             />
             <Slider
-              label="Raise once you finish"
-              value={inputs.raisePerYear}
-              onChange={(raisePerYear) => set({ raisePerYear })}
+              label="Increase in income"
+              value={inputs.incomeIncrease}
+              onChange={(incomeIncrease) => set({ incomeIncrease })}
               min={0}
               max={100000}
               step={1000}
               editable
               inputMax={500000}
               prefix="$"
-              note="Extra income per year, not the whole salary."
+              note="Extra income per year once the program ends, not the whole salary."
             />
             <Slider
-              label="Years earning the raise"
+              label="Years receiving it"
               value={inputs.yearsEarning}
               onChange={(yearsEarning) => set({ yearsEarning })}
               min={1}
@@ -231,7 +232,7 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
             accentColor={RED}
           />
           <Stat
-            label="The raise, in today's money"
+            label="The increase, in today's money"
             value={result.pvBenefits}
             format={formatUSDWhole}
             accentColor={GREEN}
@@ -252,11 +253,12 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
           />
         </div>
 
-        <Callout tone={worthIt ? 'note' : 'mark'} label="The break-even raise">
-          At {formatPercent(inputs.ratePct / 100, 1)}, a raise of{' '}
-          <strong>{formatUSDWhole(result.breakEvenRaise)}</strong> a year for{' '}
+        <Callout tone={worthIt ? 'note' : 'mark'} label="The break-even increase">
+          At {formatPercent(inputs.ratePct / 100, 1)}, an increase of{' '}
+          <strong>{formatUSDWhole(result.breakEvenIncrease)}</strong> a year for{' '}
           {inputs.yearsEarning} years has a present value of {formatUSDWhole(result.pvCosts)}, the
-          same as the cost. This example uses a raise of {formatUSDWhole(inputs.raisePerYear)}.
+          same as the cost. This example uses an increase of{' '}
+          {formatUSDWhole(inputs.incomeIncrease)}.
         </Callout>
 
         <div className={styles.tabRow}>
@@ -268,12 +270,12 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
             <>
               <p className={styles.legend}>
                 <span style={{ color: RED }}>&#9632; tuition and income given up</span>
-                <span style={{ color: GREEN }}>&#9632; the raise</span>
+                <span style={{ color: GREEN }}>&#9632; the increase in income</span>
               </p>
               <CashFlowChart
                 flows={result.flows}
-                ariaLabel="The cost and the raise, year by year"
-                caption={`${inputs.programYears === 1 ? 'One year' : `${inputs.programYears} years`} of ${formatUSDWhole(result.costPerYear)} against ${inputs.yearsEarning} years of ${formatUSDWhole(inputs.raisePerYear)}, in the year each amount occurs.`}
+                ariaLabel="The cost and the increase in income, year by year"
+                caption={`${inputs.programYears === 1 ? 'One year' : `${inputs.programYears} years`} of ${formatUSDWhole(result.costPerYear)} against ${inputs.yearsEarning} years of ${formatUSDWhole(inputs.incomeIncrease)}, in the year each amount occurs.`}
               />
               <p className={styles.note}>
                 The bars show the amounts in the year they occur. The figures above show them
@@ -282,24 +284,24 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
             </>
           )}
 
-          {active === 'raise' && (
+          {active === 'increase' && (
             <>
               <StationChart
-                x={raises}
-                lines={[{ ys: raiseNpvs, color: GREEN, width: 2, label: 'Net present value' }]}
+                x={increases}
+                lines={[{ ys: increaseNpvs, color: GREEN, width: 2, label: 'Net present value' }]}
                 yMin={sweepMin}
-                yMax={raiseMax * 1.1 || 1}
+                yMax={increaseMax * 1.1 || 1}
                 yRef={0}
                 refLabel="breaks even"
-                xRef={result.breakEvenRaise}
-                xRefLabel={`${formatUSDWhole(result.breakEvenRaise)} breaks even`}
+                xRef={result.breakEvenIncrease}
+                xRefLabel={`${formatUSDWhole(result.breakEvenIncrease)} breaks even`}
                 xTickFormat={(v) => formatUSDWhole(v)}
-                xHoverLabel={(v: number) => `A raise of ${formatUSDWhole(v)}`}
-                ariaLabel="Net present value against the size of the raise"
-                caption={`Net present value as the raise changes. The line crosses zero at ${formatUSDWhole(result.breakEvenRaise)} a year.`}
+                xHoverLabel={(v: number) => `An increase of ${formatUSDWhole(v)}`}
+                ariaLabel="Net present value against the size of the increase in income"
+                caption={`Net present value as the increase in income changes. The line crosses zero at ${formatUSDWhole(result.breakEvenIncrease)} a year.`}
               />
               <p className={styles.note}>
-                The raise is multiplied by the present value of one dollar a year for{' '}
+                The increase is multiplied by the present value of one dollar a year for{' '}
                 {inputs.yearsEarning} years, so the line is straight.
               </p>
             </>
@@ -322,8 +324,8 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                 caption={`Net present value as the discount rate changes. ${result.irr != null ? `The line crosses zero at ${formatPercent(result.irr, 2)}.` : 'The line does not cross zero over this range.'}`}
               />
               <p className={styles.note}>
-                A higher rate reduces the present value of the raise more than it reduces the cost,
-                which falls at the start.
+                A higher rate reduces the present value of the increase more than it reduces the
+                cost, which falls at the start.
               </p>
             </>
           )}
@@ -343,8 +345,8 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                   muted: true,
                 },
                 {
-                  tex: String.raw`PV_{\text{raise}} = ${texUSD(inputs.raisePerYear)} \times ${texNumber(result.raiseFactor, 4)} = \boxed{${texUSD(result.pvBenefits)}}`,
-                  caption: `A dollar a year for ${inputs.yearsEarning} years, starting once the program ends, is worth ${texNumber(result.raiseFactor, 4)} today.`,
+                  tex: String.raw`PV_{\text{increase}} = ${texUSD(inputs.incomeIncrease)} \times ${texNumber(result.increaseFactor, 4)} = \boxed{${texUSD(result.pvBenefits)}}`,
+                  caption: `A dollar a year for ${inputs.yearsEarning} years, starting once the program ends, is worth ${texNumber(result.increaseFactor, 4)} today.`,
                   muted: true,
                 },
                 {
@@ -353,15 +355,15 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                   muted: true,
                 },
                 {
-                  tex: String.raw`\text{break-even raise} = \frac{${texUSD(result.pvCosts)}}{${texNumber(result.raiseFactor, 4)}} = \boxed{${texUSD(result.breakEvenRaise)}}`,
-                  caption: 'The raise at which the two sides are equal.',
+                  tex: String.raw`\text{break-even increase} = \frac{${texUSD(result.pvCosts)}}{${texNumber(result.increaseFactor, 4)}} = \boxed{${texUSD(result.breakEvenIncrease)}}`,
+                  caption: 'The yearly increase at which the two sides are equal.',
                   muted: true,
                 },
               ]}
               note={
                 worthIt
-                  ? 'The present value of the raise is above the cost, so the degree pays for itself on these numbers.'
-                  : 'The present value of the raise is below the cost, so the degree does not pay for itself on these numbers.'
+                  ? 'The present value of the increase is above the cost, so the degree pays for itself on these numbers.'
+                  : 'The present value of the increase is below the cost, so the degree does not pay for itself on these numbers.'
               }
             >
               <Callout tone="note" label="The two parts of the cost">
