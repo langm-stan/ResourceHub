@@ -270,12 +270,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
         section.content
       )}
       {section.instructor && (
-        <InstructorBar
-          route={section.instructor.route}
-          toolKey={section.instructor.toolKey}
-          path={section.instructor.path}
-          toolLabel={section.instructor.label}
-        />
+        <InstructorBar toolLabel={section.instructor.label} />
       )}
     </TeacherTrainingShell>
   )
