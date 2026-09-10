@@ -14,6 +14,7 @@ function SkipLink() {
   return (
     <a
       href="#main"
+      tabIndex={0}
       onClick={(e) => {
         e.preventDefault()
         const main = document.getElementById('main')

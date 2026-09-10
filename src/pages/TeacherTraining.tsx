@@ -116,11 +116,19 @@ function runSearch(query: string): SearchHit[] {
   return results.map(({ entry }) => ({ tool: entry.tool, badge: entry.badge }))
 }
 
+/*
+ * tabIndex={0} on links and buttons that are already focusable is a no-op in
+ * Chrome and Firefox, but Safari needs it: with macOS keyboard navigation off
+ * (the default) Safari tabs only to text fields and pop-up menus, and an
+ * explicit tab stop puts these controls back in the sequence.
+ */
+
 /** One tool as a row: its name, its one-line description, and where it sits. */
 function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
   return (
     <Link
       to={`/${tool.slug}`}
+      tabIndex={0}
       className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
       <span className="min-w-0 flex-1">
@@ -191,6 +199,7 @@ function CatalogRow({
           onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
+          tabIndex={0}
           className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
         >
           {entry.number === undefined ? (
