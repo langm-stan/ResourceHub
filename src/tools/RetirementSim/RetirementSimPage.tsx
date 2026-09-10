@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, Slider, Stat } from '../../design-system'
+import { Callout, Card, MathSection, Slider, Stat, StepHeader, Tabs, type TabItem } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -350,7 +350,17 @@ function EmployerMatching() {
 
 /* ================= Part 4: Retirement Timing ================= */
 
+type RetirementSurface = 'target' | 'saving' | 'returns' | 'math'
+
+const RETIREMENT_TABS: TabItem<RetirementSurface>[] = [
+  { value: 'target', label: '1. The target' },
+  { value: 'saving', label: '2. The saving' },
+  { value: 'returns', label: 'If returns fall short' },
+  { value: 'math', label: 'The math' },
+]
+
 function RetirementTiming() {
+  const [surface, setSurface] = useState<RetirementSurface>('target')
   // Step 1: the retirement to fund.
   const [income, setIncome] = useState(70000)
   const [retYears, setRetYears] = useState(RETIREMENT_YEARS)
@@ -408,109 +418,10 @@ function RetirementTiming() {
         and compute the annual amount that gets there by {retireAge}.
       </p>
 
-      <div>
-        <p className={styles.rulesTitle}>Step 1: the retirement to fund</p>
-        <p className={styles.sectionLede}>
-          A couple wants {formatUSDWhole(income)} a year for {retYears} years, withdrawing safely
-          at {pct(retiredPct / 100, 1)} growth in retirement.
-        </p>
-      </div>
-      <div className={styles.controlsRow}>
-        <Slider
-          label="Retirement income goal"
-          value={income}
-          onChange={setIncome}
-          min={40000}
-          max={150000}
-          step={5000}
-          editable
-          prefix="$"
-          suffix="/yr"
-          inputMax={500_000}
-        />
-        <Slider
-          label="Years of retirement"
-          value={retYears}
-          onChange={setRetYears}
-          min={20}
-          max={40}
-          step={1}
-          editable
-          suffix="yrs"
-          plain
-        />
-        <Slider
-          label="Return while withdrawing"
-          value={retiredPct}
-          onChange={setRetiredPct}
-          min={2}
-          max={5}
-          step={0.5}
-          editable
-          suffix="%"
-          precision={1}
-        />
-      </div>
+      {/* Both answers of the two-step method stay above the tabs, so the
+          target set in step 1 is still in view while step 2 is being set. */}
       <div className={styles.stats}>
         <Stat label={`Savings needed at ${retireAge}`} value={plan.target} format={formatUSDWhole} accentColor={GOLD} emphasis animate={false} />
-      </div>
-
-      <div>
-        <p className={styles.rulesTitle}>Step 2: the working years that build it</p>
-        <p className={styles.sectionLede}>
-          Choose the starting age, the retirement age, anything already saved, and the return while
-          working; the long horizon supports planning around {plannedPct}. The curve shows the
-          annual price of the same target from every starting age.
-        </p>
-      </div>
-      <div className={styles.controlsRow}>
-        <Slider
-          label="Age saving starts"
-          value={startAge}
-          onChange={setStartAge}
-          min={25}
-          max={45}
-          step={1}
-          editable
-          prefix="age"
-          plain
-        />
-        <Slider
-          label="Retire at age"
-          value={retireAge}
-          onChange={setRetireAge}
-          min={55}
-          max={75}
-          step={1}
-          editable
-          prefix="age"
-          plain
-        />
-        <Slider
-          label="Already saved today"
-          value={saved}
-          onChange={setSaved}
-          min={0}
-          max={500000}
-          step={5000}
-          editable
-          prefix="$"
-          inputMax={5_000_000}
-        />
-        <Slider
-          label="Return while saving"
-          value={savePct}
-          onChange={setSavePct}
-          min={4}
-          max={10}
-          step={0.5}
-          editable
-          suffix="%"
-          precision={1}
-        />
-      </div>
-      <div className={styles.stats}>
-        <Stat label="Working years" value={planYears} format={(v) => `${Math.round(v)} yrs`} animate={false} />
         <Stat
           label={`Saving per year from ${startAge}`}
           value={plan.saving}
@@ -519,161 +430,287 @@ function RetirementTiming() {
           animate={false}
         />
       </div>
-      {funded && (
-        <p className={styles.note}>
-          At {plannedPct}, the {formatUSDWhole(saved)} already saved grows past the target on its
-          own, so the required yearly saving is zero. The plan still assumes that balance stays
-          invested until {retireAge}.
-        </p>
-      )}
-      <div>
-        <div className={styles.legend}>
-          <span style={{ color: GOLD }}>&#9632; annual saving by starting age</span>
-          <span style={{ color: RED }}>&#9476; your starting age</span>
-        </div>
-        <StationChart
-          x={waitX}
-          yMax={Math.max(waitY[waitY.length - 1]!, 1000) * 1.1}
-          ratio={CHART_RATIO}
-          maxHeight={CHART_MAX_HEIGHT}
-          xRef={startAge}
-          xRefLabel="you"
-          lines={[{ ys: waitY, color: GOLD, width: 3, label: 'Annual saving needed' }]}
-          xTickFormat={(v) => `age ${Math.round(v)}`}
-          xHoverLabel={(v) => `Start at ${Math.round(v)}`}
-          figure="Figure 1."
-          caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${retireAge} at a ${plannedPct} return, by starting age${saved > 0 ? `, after what the ${formatUSDWhole(saved)} already saved grows to from each age` : ''}. ${
-            priceAt(25) > 0
-              ? `Waiting from 25 to 40 multiplies the annual price by ${waitRatio.toFixed(1)}, and each further year of waiting costs more than the last.`
-              : 'From the earliest starting ages the existing balance covers the goal by itself; waiting is what brings back a yearly price.'
-          }`}
-          ariaLabel={`Annual saving needed to reach the target by ${retireAge}, as a function of starting age`}
-          exportStats={[
-            { label: 'Start at 25', value: `${formatUSDWhole(priceAt(25))}/yr`, color: GREEN },
-            { label: 'Start at 30', value: `${formatUSDWhole(priceAt(30))}/yr`, color: GOLD },
-            { label: 'Start at 40', value: `${formatUSDWhole(priceAt(40))}/yr`, color: RED },
-          ]}
-        />
-      </div>
 
-      <div>
-        <p className={styles.rulesTitle}>What if returns disappoint?</p>
-        <p className={styles.sectionLede}>
-          The plan assumes {plannedPct} a year. Move the actual return to see where the same{' '}
-          {formatUSDWhole(plan.saving)} of yearly saving lands.
-        </p>
-      </div>
-      <div className={styles.controlsRow}>
-        <Slider
-          label="Actual return while saving"
-          value={actualPct}
-          onChange={setActualPct}
-          min={4}
-          max={8}
-          step={0.5}
-          editable
-          suffix="%"
-          precision={1}
-        />
-      </div>
-      <div className={styles.stats}>
-        <Stat label={`Planned at ${plannedPct}`} value={planEnd.plan} format={formatUSDWhole} accentColor={GOLD} animate={false} />
-        <Stat label={`Actual at ${actualPct}%`} value={planEnd.actual} format={formatUSDWhole} accentColor={actualPct < savePct ? RED : GREEN} animate={false} />
-        <Stat
-          label="Retirement income it funds"
-          value={plan.actualIncome}
-          format={(v) => `${formatUSDWhole(v)}/yr`}
-          accentColor={actualPct < savePct ? RED : GREEN}
-          emphasis
-          animate={false}
-        />
-      </div>
-      <p className={styles.note}>
-        {actualPct < savePct
-          ? `The balance falls short, and the income it funds falls to ${formatUSDWhole(plan.actualIncome)} instead of ${formatUSDWhole(income)}.`
-          : actualPct === savePct
-            ? 'Returns came in as planned, and the balance funds the goal.'
-            : 'Returns beat the plan.'}
-      </p>
-      <div>
-        <div className={styles.legend}>
-          <span style={{ color: GOLD }}>&#9632; planned at {plannedPct}</span>
-          <span style={{ color: actualPct < savePct ? RED : GREEN }}>&#9632; actual at {actualPct}%</span>
-        </div>
-        <StationChart
-          x={planX}
-          yMax={planYMax}
-          ratio={CHART_RATIO}
-          maxHeight={CHART_MAX_HEIGHT}
-          yRef={plan.target}
-          refLabel="the savings the plan needs"
-          lines={[
-            { ys: plan.rows.map((r) => r.plan), color: GOLD, width: 3, label: `Planned at ${plannedPct}` },
-            { ys: plan.rows.map((r) => r.actual), color: actualPct < savePct ? RED : GREEN, width: 3, label: `Actual at ${actualPct}%` },
-          ]}
-          xTickFormat={(v) => `age ${Math.round(v)}`}
-          xHoverLabel={(v) => `Age ${Math.round(v)}`}
-          figure="Figure 2."
-          caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${retireAge}${saved > 0 ? `, on top of the ${formatUSDWhole(saved)} starting balance` : ''}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
-          ariaLabel="Accumulation under the planned return versus the actual return"
-          exportStats={[
-            { label: `Planned at ${plannedPct}`, value: formatUSDWhole(planEnd.plan), color: GOLD },
-            { label: `Actual at ${actualPct}%`, value: formatUSDWhole(planEnd.actual), color: actualPct < savePct ? RED : GREEN },
-            { label: 'Income it funds', value: `${formatUSDWhole(plan.actualIncome)}/yr` },
-          ]}
-        />
-      </div>
-      <Callout tone="mark" label="A retirement plan is adjusted over time">
-        Save more than the minimum so the plan carries a buffer, recheck the balance every few
-        years, and adjust the contribution.
-      </Callout>
+      <Tabs items={RETIREMENT_TABS} value={surface} onChange={setSurface} />
 
-      <MathSection
-        hint="Both steps are one time-value-of-money formula each, evaluated here with the sliders' current values."
-        rows={[
-          {
-            tex: '\\text{Step 1: target} = \\text{income} \\times \\frac{1 - (1 + r)^{-n}}{r}',
-            caption: `Present value of n years of withdrawals at the return r of the safer withdrawal portfolio. Here r = ${texRate(retiredPct)} and n = ${retYears}.`,
-          },
-          {
-            tex: `${texUSD(income)} \\times \\frac{1 - (1 + ${texRate(retiredPct)})^{-${retYears}}}{${texRate(retiredPct)}} = \\boxed{${texUSD(plan.target)}}`,
-            caption: `On the TVM calculator: N = ${retYears}, I/Y = ${retiredPct}, PMT = ${Math.round(income).toLocaleString('en-US')}, FV = 0; solve for PV.`,
-            muted: true,
-          },
-          {
-            tex:
-              saved > 0
-                ? '\\text{Step 2: saving} = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{N}\\right) \\times \\frac{g}{(1 + g)^{N} - 1}'
-                : '\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}',
-            caption: `The level yearly saving whose future value${saved > 0 ? `, on top of what today's savings grow to,` : ''} reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`,
-          },
-          funded
-            ? {
-                tex: `${texUSD(plan.grown)} \\ge ${texUSD(plan.target)} \\;\\Rightarrow\\; \\text{saving} = \\boxed{\\$0}`,
-                caption: `What the ${formatUSDWhole(saved)} already saved grows to by ${retireAge} exceeds the target on its own, so the plan needs no new yearly saving.`,
-                muted: true,
+      <Card tone="raised" className={styles.panel}>
+        {surface === 'target' && (
+          <>
+            <StepHeader
+              title="Step 1: the retirement to fund"
+              hint={
+                <>
+                  A couple wants {formatUSDWhole(income)} a year for {retYears} years, withdrawing safely
+at {pct(retiredPct / 100, 1)} growth in retirement.
+                </>
               }
-            : {
-                tex:
-                  saved > 0
-                    ? `\\left(${texUSD(plan.target)} - ${texUSD(plan.grown)}\\right) \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`
-                    : `${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`,
-                caption: `On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = ${saved > 0 ? `-${Math.round(saved).toLocaleString('en-US')}` : 0}, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`,
+            />
+        <div className={styles.controlsRow}>
+          <Slider
+            label="Retirement income goal"
+            value={income}
+            onChange={setIncome}
+            min={40000}
+            max={150000}
+            step={5000}
+            editable
+            prefix="$"
+            suffix="/yr"
+            inputMax={500_000}
+          />
+          <Slider
+            label="Years of retirement"
+            value={retYears}
+            onChange={setRetYears}
+            min={20}
+            max={40}
+            step={1}
+            editable
+            suffix="yrs"
+            plain
+          />
+          <Slider
+            label="Return while withdrawing"
+            value={retiredPct}
+            onChange={setRetiredPct}
+            min={2}
+            max={5}
+            step={0.5}
+            editable
+            suffix="%"
+            precision={1}
+          />
+        </div>
+          </>
+        )}
+
+        {surface === 'saving' && (
+          <>
+            <StepHeader
+              title="Step 2: the working years that build it"
+              hint={
+                <>
+                  Choose the starting age, the retirement age, anything already saved, and the return while
+working; the long horizon supports planning around {plannedPct}. The curve shows the
+annual price of the same target from every starting age.
+                </>
+              }
+            />
+        <div className={styles.controlsRow}>
+          <Slider
+            label="Age saving starts"
+            value={startAge}
+            onChange={setStartAge}
+            min={25}
+            max={45}
+            step={1}
+            editable
+            prefix="age"
+            plain
+          />
+          <Slider
+            label="Retire at age"
+            value={retireAge}
+            onChange={setRetireAge}
+            min={55}
+            max={75}
+            step={1}
+            editable
+            prefix="age"
+            plain
+          />
+          <Slider
+            label="Already saved today"
+            value={saved}
+            onChange={setSaved}
+            min={0}
+            max={500000}
+            step={5000}
+            editable
+            prefix="$"
+            inputMax={5_000_000}
+          />
+          <Slider
+            label="Return while saving"
+            value={savePct}
+            onChange={setSavePct}
+            min={4}
+            max={10}
+            step={0.5}
+            editable
+            suffix="%"
+            precision={1}
+          />
+        </div>
+            <div className={styles.stats}>
+          <Stat label="Working years" value={planYears} format={(v) => `${Math.round(v)} yrs`} animate={false} />
+            </div>
+        {funded && (
+          <p className={styles.note}>
+            At {plannedPct}, the {formatUSDWhole(saved)} already saved grows past the target on its
+            own, so the required yearly saving is zero. The plan still assumes that balance stays
+            invested until {retireAge}.
+          </p>
+        )}
+        <div>
+          <div className={styles.legend}>
+            <span style={{ color: GOLD }}>&#9632; annual saving by starting age</span>
+            <span style={{ color: RED }}>&#9476; your starting age</span>
+          </div>
+          <StationChart
+            x={waitX}
+            yMax={Math.max(waitY[waitY.length - 1]!, 1000) * 1.1}
+            ratio={CHART_RATIO}
+            maxHeight={CHART_MAX_HEIGHT}
+            xRef={startAge}
+            xRefLabel="you"
+            lines={[{ ys: waitY, color: GOLD, width: 3, label: 'Annual saving needed' }]}
+            xTickFormat={(v) => `age ${Math.round(v)}`}
+            xHoverLabel={(v) => `Start at ${Math.round(v)}`}
+            figure="Figure 1."
+            caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${retireAge} at a ${plannedPct} return, by starting age${saved > 0 ? `, after what the ${formatUSDWhole(saved)} already saved grows to from each age` : ''}. ${
+              priceAt(25) > 0
+                ? `Waiting from 25 to 40 multiplies the annual price by ${waitRatio.toFixed(1)}, and each further year of waiting costs more than the last.`
+                : 'From the earliest starting ages the existing balance covers the goal by itself; waiting is what brings back a yearly price.'
+            }`}
+            ariaLabel={`Annual saving needed to reach the target by ${retireAge}, as a function of starting age`}
+            exportStats={[
+              { label: 'Start at 25', value: `${formatUSDWhole(priceAt(25))}/yr`, color: GREEN },
+              { label: 'Start at 30', value: `${formatUSDWhole(priceAt(30))}/yr`, color: GOLD },
+              { label: 'Start at 40', value: `${formatUSDWhole(priceAt(40))}/yr`, color: RED },
+            ]}
+          />
+        </div>
+          </>
+        )}
+
+        {surface === 'returns' && (
+          <>
+            <StepHeader
+              title="If returns fall short"
+              hint={
+                <>
+                  The plan assumes {plannedPct} a year. Move the actual return to see where the same{' '}
+{formatUSDWhole(plan.saving)} of yearly saving lands.
+                </>
+              }
+            />
+        <div className={styles.controlsRow}>
+          <Slider
+            label="Actual return while saving"
+            value={actualPct}
+            onChange={setActualPct}
+            min={4}
+            max={8}
+            step={0.5}
+            editable
+            suffix="%"
+            precision={1}
+          />
+        </div>
+        <div className={styles.stats}>
+          <Stat label={`Planned at ${plannedPct}`} value={planEnd.plan} format={formatUSDWhole} accentColor={GOLD} animate={false} />
+          <Stat label={`Actual at ${actualPct}%`} value={planEnd.actual} format={formatUSDWhole} accentColor={actualPct < savePct ? RED : GREEN} animate={false} />
+          <Stat
+            label="Retirement income it funds"
+            value={plan.actualIncome}
+            format={(v) => `${formatUSDWhole(v)}/yr`}
+            accentColor={actualPct < savePct ? RED : GREEN}
+            emphasis
+            animate={false}
+          />
+        </div>
+        <p className={styles.note}>
+          {actualPct < savePct
+            ? `The balance falls short, and the income it funds falls to ${formatUSDWhole(plan.actualIncome)} instead of ${formatUSDWhole(income)}.`
+            : actualPct === savePct
+              ? 'Returns came in as planned, and the balance funds the goal.'
+              : 'Returns beat the plan.'}
+        </p>
+        <div>
+          <div className={styles.legend}>
+            <span style={{ color: GOLD }}>&#9632; planned at {plannedPct}</span>
+            <span style={{ color: actualPct < savePct ? RED : GREEN }}>&#9632; actual at {actualPct}%</span>
+          </div>
+          <StationChart
+            x={planX}
+            yMax={planYMax}
+            ratio={CHART_RATIO}
+            maxHeight={CHART_MAX_HEIGHT}
+            yRef={plan.target}
+            refLabel="the savings the plan needs"
+            lines={[
+              { ys: plan.rows.map((r) => r.plan), color: GOLD, width: 3, label: `Planned at ${plannedPct}` },
+              { ys: plan.rows.map((r) => r.actual), color: actualPct < savePct ? RED : GREEN, width: 3, label: `Actual at ${actualPct}%` },
+            ]}
+            xTickFormat={(v) => `age ${Math.round(v)}`}
+            xHoverLabel={(v) => `Age ${Math.round(v)}`}
+            figure="Figure 2."
+            caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${retireAge}${saved > 0 ? `, on top of the ${formatUSDWhole(saved)} starting balance` : ''}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
+            ariaLabel="Accumulation under the planned return versus the actual return"
+            exportStats={[
+              { label: `Planned at ${plannedPct}`, value: formatUSDWhole(planEnd.plan), color: GOLD },
+              { label: `Actual at ${actualPct}%`, value: formatUSDWhole(planEnd.actual), color: actualPct < savePct ? RED : GREEN },
+              { label: 'Income it funds', value: `${formatUSDWhole(plan.actualIncome)}/yr` },
+            ]}
+          />
+        </div>
+        <Callout tone="mark" label="A retirement plan is adjusted over time">
+          Save more than the minimum so the plan carries a buffer, recheck the balance every few
+          years, and adjust the contribution.
+        </Callout>
+          </>
+        )}
+
+        {surface === 'math' && (
+          <MathSection
+            hint="Both steps are one time-value-of-money formula each, evaluated here with the sliders' current values."
+            rows={[
+              {
+                tex: '\\text{Step 1: target} = \\text{income} \\times \\frac{1 - (1 + r)^{-n}}{r}',
+                caption: `Present value of n years of withdrawals at the return r of the safer withdrawal portfolio. Here r = ${texRate(retiredPct)} and n = ${retYears}.`,
+              },
+              {
+                tex: `${texUSD(income)} \\times \\frac{1 - (1 + ${texRate(retiredPct)})^{-${retYears}}}{${texRate(retiredPct)}} = \\boxed{${texUSD(plan.target)}}`,
+                caption: `On the TVM calculator: N = ${retYears}, I/Y = ${retiredPct}, PMT = ${Math.round(income).toLocaleString('en-US')}, FV = 0; solve for PV.`,
                 muted: true,
               },
-          {
-            tex:
-              saved > 0
-                ? `\\text{Figure 1: saving}(a) = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{${retireAge} - a}\\right) \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`
-                : `\\text{Figure 1: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`,
-            caption: 'Figure 1 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars and clamp at zero once the existing balance covers the goal.',
-          },
-          {
-            tex: `\\text{Figure 2: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
-            caption: `Future value of the same saving at the actual return. At the slider's ${actualPct}%: ${formatUSDWhole(plan.saving)} grows to ${formatUSDWhole(planEnd.actual)}, and dividing by the step 1 factor at the shifted withdrawal return of ${pct(plan.retiredR, 1)} gives the ${formatUSDWhole(plan.actualIncome)} it funds.`,
-          },
-        ]}
-      />
+              {
+                tex:
+                  saved > 0
+                    ? '\\text{Step 2: saving} = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{N}\\right) \\times \\frac{g}{(1 + g)^{N} - 1}'
+                    : '\\text{Step 2: saving} = \\text{target} \\times \\frac{g}{(1 + g)^{N} - 1}',
+                caption: `The level yearly saving whose future value${saved > 0 ? `, on top of what today's savings grow to,` : ''} reaches the target after N years at the working return g. Here g = ${texRate(savePct)} and N = ${planYears}, and the result rounds to whole dollars.`,
+              },
+              funded
+                ? {
+                    tex: `${texUSD(plan.grown)} \\ge ${texUSD(plan.target)} \\;\\Rightarrow\\; \\text{saving} = \\boxed{\\$0}`,
+                    caption: `What the ${formatUSDWhole(saved)} already saved grows to by ${retireAge} exceeds the target on its own, so the plan needs no new yearly saving.`,
+                    muted: true,
+                  }
+                : {
+                    tex:
+                      saved > 0
+                        ? `\\left(${texUSD(plan.target)} - ${texUSD(plan.grown)}\\right) \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`
+                        : `${texUSD(plan.target)} \\times \\frac{${texRate(savePct)}}{(1 + ${texRate(savePct)})^{${planYears}} - 1} = \\boxed{${texUSD(plan.saving)}}`,
+                    caption: `On the TVM calculator: N = ${planYears}, I/Y = ${savePct}, PV = ${saved > 0 ? `-${Math.round(saved).toLocaleString('en-US')}` : 0}, FV = ${Math.round(plan.target).toLocaleString('en-US')}; solve for PMT.`,
+                    muted: true,
+                  },
+              {
+                tex:
+                  saved > 0
+                    ? `\\text{Figure 1: saving}(a) = \\left(\\text{target} - \\text{saved}\\,(1 + g)^{${retireAge} - a}\\right) \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`
+                    : `\\text{Figure 1: saving}(a) = \\text{target} \\times \\frac{g}{(1 + g)^{${retireAge} - a} - 1}`,
+                caption: 'Figure 1 repeats step 2 for each starting age a, with the same step 1 target; results round to whole dollars and clamp at zero once the existing balance covers the goal.',
+              },
+              {
+                tex: `\\text{Figure 2: balance at } r_a = \\text{saving} \\times \\frac{(1 + r_a)^{N} - 1}{r_a}`,
+                caption: `Future value of the same saving at the actual return. At the slider's ${actualPct}%: ${formatUSDWhole(plan.saving)} grows to ${formatUSDWhole(planEnd.actual)}, and dividing by the step 1 factor at the shifted withdrawal return of ${pct(plan.retiredR, 1)} gives the ${formatUSDWhole(plan.actualIncome)} it funds.`,
+              },
+            ]}
+          />
+        )}
+      </Card>
     </div>
   )
 }
