@@ -246,7 +246,9 @@
 }
 .liveHashCol {
   flex: 1;
-  min-width: 260px;
+  /* Caps at 260px on a roomy screen but gives way on a narrow one, so the
+     hash column cannot push the page into sideways scrolling (WCAG 1.4.10). */
+  min-width: min(260px, 100%);
 }
 .liveHash {
   margin-top: 4px;
@@ -752,6 +754,9 @@
   border: 1px solid #eee;
   border-radius: 6px;
   padding: 18px;
+  /* A grid item defaults to min-width:auto and will not shrink below its
+     content, which pushed this panel past its track on a narrow screen. */
+  min-width: 0;
 }
 .footTitle {
   font: 700 18px 'Source Serif 4', Georgia, serif;
@@ -769,10 +774,12 @@
   border: 1px solid #eee;
   border-radius: 4px;
   background: #fff;
-  flex: none;
-  width: 320px;
-  height: 320px;
-  max-width: 100%;
+  /* 320px on a roomy screen, but free to shrink on a narrow one and stay
+     square as it does, so the code never pushes the page sideways. */
+  flex: 0 1 auto;
+  width: min(320px, 100%);
+  height: auto;
+  aspect-ratio: 1 / 1;
 }
 .qrEmpty {
   display: flex;

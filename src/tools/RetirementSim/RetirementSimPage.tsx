@@ -128,7 +128,7 @@ function AccountTaxation() {
         <p className={styles.rulesTitle}>
           The rules that come with each account ({TAX_YEAR}, single filer)
         </p>
-        <div className={styles.rulesScroll}>
+        <div className={styles.rulesScroll} tabIndex={0}>
           <table className={styles.rulesTable}>
             <thead>
               <tr>

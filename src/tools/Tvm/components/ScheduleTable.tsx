@@ -4,7 +4,7 @@ import styles from './ScheduleTable.module.css'
 
 export function ScheduleTable({ rows }: { rows: YearRow[] }) {
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} tabIndex={0}>
       <table className={styles.table}>
         <thead>
           <tr>

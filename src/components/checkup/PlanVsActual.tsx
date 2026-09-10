@@ -130,7 +130,7 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
 
   return (
     <div className={styles.stack}>
-      <div className={styles.scroll}>
+      <div className={styles.scroll} tabIndex={0}>
         <div className={styles.table}>
           <span className={styles.colHead}>Expense</span>
           <span className={`${styles.colHead} ${styles.cell} ${styles.right}`}>Planned</span>

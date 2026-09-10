@@ -57,7 +57,7 @@ export function FrequencyExplorer({ scenario }: { scenario: Scenario }) {
         <ConvergenceInner rows={rows} continuousBalance={continuousBalance} annualBalance={annualBalance} />
       </ChartFrame>
 
-      <div className={styles.tableWrap}>
+      <div className={styles.tableWrap} tabIndex={0}>
         <table className={styles.table}>
           <thead>
             <tr>

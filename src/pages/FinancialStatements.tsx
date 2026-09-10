@@ -197,7 +197,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
                 emphasis
                 accentColor={netWorth >= 0 ? GREEN : CARDINAL}
               />
-              <div className="flex items-baseline gap-x-6 text-stone-500">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:gap-x-6 text-stone-500">
                 <Stat label="Total assets" value={totalAssets} format={formatUSDWhole} />
                 <span className="text-2xl" aria-hidden="true">
                   &minus;

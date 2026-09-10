@@ -33,7 +33,9 @@
   /* Data series — friendly and clear inside charts. */
   --c-series-1: #127a43; /* green (growth / interest-on-interest) — AA as text on white */
   --c-series-2: #b45309; /* amber (simple interest) — dark enough for AA text on white */
-  --c-series-3: #8a94a6; /* slate (principal contributed) */
+  /* Darkened from #8a94a6, which was the one series colour that failed AA
+     as text: the chart legends print the series name in its own colour. */
+  --c-series-3: #5d6a7d; /* slate (principal contributed) — AA as text on white */
   --c-series-4: #8c1515; /* cardinal (highlight / extreme) */
   --c-series-5: #7c5cd6; /* violet */
 
