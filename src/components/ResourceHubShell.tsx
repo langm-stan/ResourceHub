@@ -20,7 +20,6 @@ const SECTIONS: { to: string; label: string; children?: SubItem[] }[] = [
     ],
   },
   { to: '/literacy-data', label: 'Financial Literacy Data' },
-  { to: '/checklist', label: 'Financial Checklist' },
   { to: '/budget', label: 'Financial Budget' },
   {
     to: '/calculators',

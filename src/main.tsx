@@ -21,7 +21,6 @@ const TEACHER_TRAINING_SECTIONS = [
   'big-three/explained',
   'big-three/stories',
   'literacy-data',
-  'checklist',
   'tvm-calculator',
   'budget',
   'compound-interest',
@@ -120,7 +119,10 @@ createRoot(document.getElementById('root')!).render(
           <Route path="teacher-training/*" element={<TeacherTrainingRedirect />} />
 
           {/* Hub-era shells and renames. The bare content URLs (/big-three,
-              /checklist, /budget, /literacy-data) are live routes again. */}
+              /budget, /literacy-data) are live routes again. The checklist
+              was removed in September 2026: it repeated the hub's own
+              Financial Checkup page, so /checklist falls through to the
+              catch-all and lands on the course overview. */}
           <Route path="checkup" element={<LegacyRedirect to="/budget" />} />
           <Route
             path="calculators"

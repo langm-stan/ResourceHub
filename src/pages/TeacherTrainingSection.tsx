@@ -8,7 +8,6 @@ import { BigThreeQuizContent } from './BigThreeQuiz'
 import { BigThreeExplainedContent } from './BigThreeExplained'
 import { BigThreeStoriesContent } from './BigThreeStories'
 import { LITERACY_DATA_INTRO, LiteracyDataContent } from './LiteracyData'
-import { CHECKLIST_INTRO, ChecklistContent } from './Checklist'
 import FinancialStatements from './FinancialStatements'
 import { CompoundInterestPage } from '../tools/CompoundInterest/CompoundInterestPage'
 import { InflationPage } from '../tools/Inflation/InflationPage'
@@ -65,7 +64,6 @@ const SECTIONS: Record<string, SectionConfig> = {
   'big-three/explained': { title: 'The Big Three Explained', content: <BigThreeExplainedContent /> },
   'big-three/stories': { title: 'The Big Three Stories', content: <BigThreeStoriesContent /> },
   'literacy-data': { title: 'Financial Literacy Data', intro: LITERACY_DATA_INTRO, content: <LiteracyDataContent /> },
-  checklist: { title: 'Financial Checklist', intro: CHECKLIST_INTRO, content: <ChecklistContent base={BASE} /> },
   budget: {
     title: 'Financial Budget',
     intro:

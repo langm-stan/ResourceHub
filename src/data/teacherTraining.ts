@@ -53,12 +53,6 @@ export const FOUNDATION_TOOLS: TrainingTool[] = [
     description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
     keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
   },
-  {
-    slug: 'checklist',
-    label: 'Financial Checklist',
-    description: 'A seven-question self-assessment of financial health.',
-    keywords: ['financial health', 'habits', 'emergency fund', 'insurance', 'self-assessment'],
-  },
 ]
 
 /** The course's ten units, matching the course outline slide for slide. */
