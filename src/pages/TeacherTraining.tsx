@@ -257,10 +257,8 @@ export default function TeacherTraining() {
   const q = normalize(query)
   const hits = useMemo<SearchHit[] | null>(() => (q ? runSearch(q) : null), [q])
 
-  const allOpen = openIds.length === CATALOG.length
   const toggle = (id: string) =>
     setOpenIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
-  const toggleAll = () => setOpenIds(allOpen ? [] : CATALOG.map((e) => e.id))
 
   return (
     <div>
@@ -331,15 +329,8 @@ export default function TeacherTraining() {
               </>
             ) : (
               <>
-                <div className="mb-2 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={toggleAll}
-                    className="text-[13px] font-semibold text-cardinal transition-colors hover:text-stone-900"
-                  >
-                    {allOpen ? 'Collapse all' : 'Expand all'}
-                  </button>
-                </div>
+                {/* Nothing sits between the search box and the list, so Tab
+                    from the search lands on the first row. */}
                 <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
                   {CATALOG.map((entry) => (
                     <CatalogRow
