@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, FOUNDATION_TOOLS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFramed } from '../hooks/useFramed'
 
 /*
- * The Personal Finance Teaching Toolkit landing page. The course's units run
- * as a single even path across the page, joined by connector ticks and
- * resting on the Foundations slab that spans the base; selecting a unit (or
- * searching from the hero) fills the detail panel below with that unit's
- * tools. Every link stays inside /teacher-training so teachers never fall
- * out into the main Resource Hub.
+ * The Personal Finance Teaching Toolkit landing page: a catalog of the
+ * tools as one vertical list. Foundations lead, unnumbered because they
+ * sit outside the sequence, then the fourteen units in teaching order.
+ * Every row is visible at once and opens onto that unit's description and
+ * tools; Expand all opens the whole catalog. Searching from the hero
+ * replaces the list with the matching tools.
  */
 
-const FOUNDATIONS_DESC =
-  'Four tools used throughout the course.'
+const FOUNDATIONS_DESC = 'Used throughout the course.'
 
 interface SearchHit {
   tool: TrainingTool
@@ -117,32 +116,132 @@ function runSearch(query: string): SearchHit[] {
   return results.map(({ entry }) => ({ tool: entry.tool, badge: entry.badge }))
 }
 
-function ToolCard({ tool, badge }: { tool: TrainingTool; badge?: string }) {
+/** One tool as a row: its name, its one-line description, and where it sits. */
+function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
   return (
     <Link
       to={`/${tool.slug}`}
-      className="group flex flex-col gap-1.5 rounded-2xl border border-stone-200 bg-white shadow-card p-5 hover:border-stone-300 hover:bg-stone-50 transition-all"
+      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
-      <p className="font-serif text-lg font-semibold text-stone-900 leading-snug flex items-center gap-2">
-        {tool.label}
-        <ArrowRight
-          size={16}
-          className="shrink-0 text-cardinal transition-transform group-hover:translate-x-1"
-        />
-      </p>
-      <p className="text-sm text-stone-600 leading-relaxed">{tool.description}</p>
-      {badge && (
-        <p className="mt-auto pt-1.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
-          {badge}
-        </p>
-      )}
+      <span className="min-w-0 flex-1">
+        <span className="font-serif text-[15px] font-semibold text-stone-900 transition-colors group-hover:text-cardinal">
+          {tool.label}
+        </span>
+        {badge && (
+          <span className="ml-2 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+            {badge}
+          </span>
+        )}
+        <span className="mt-0.5 block text-sm leading-relaxed text-stone-600">
+          {tool.description}
+        </span>
+      </span>
+      <ArrowRight
+        size={15}
+        className="shrink-0 text-stone-300 transition-all group-hover:translate-x-0.5 group-hover:text-cardinal"
+      />
     </Link>
   )
 }
 
+interface CatalogEntry {
+  id: string
+  title: string
+  description: string
+  tools: TrainingTool[]
+  /** Position in the course. Omitted for Foundations, which has no number. */
+  number?: number
+}
+
+/** Foundations first, then the units in teaching order. */
+const CATALOG: CatalogEntry[] = [
+  {
+    id: 'foundations',
+    title: 'Foundations',
+    description: FOUNDATIONS_DESC,
+    tools: FOUNDATION_TOOLS,
+  },
+  ...COURSE_UNITS.map((u, i) => ({
+    id: u.id,
+    title: u.title,
+    description: u.description,
+    tools: u.tools,
+    number: i + 1,
+  })),
+]
+
+/** One row of the catalog: a header that opens onto its description and tools. */
+function CatalogRow({
+  entry,
+  open,
+  onToggle,
+}: {
+  entry: CatalogEntry
+  open: boolean
+  onToggle: () => void
+}) {
+  const count = entry.tools.length
+  const panelId = `catalog-panel-${entry.id}`
+
+  return (
+    <div className="border-b border-stone-200 last:border-b-0">
+      <h2>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-controls={panelId}
+          className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
+        >
+          {entry.number === undefined ? (
+            <span className="h-7 w-7 shrink-0" aria-hidden="true" />
+          ) : (
+            <span
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[13px] font-semibold ${
+                count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
+              }`}
+            >
+              {entry.number}
+            </span>
+          )}
+          <span className="min-w-0 flex-1 font-serif text-[17px] font-semibold leading-snug text-stone-900">
+            {entry.title}
+          </span>
+          <span className="hidden shrink-0 text-xs text-stone-400 sm:block">
+            {count === 0 ? 'In development' : count === 1 ? '1 tool' : `${count} tools`}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`shrink-0 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
+      </h2>
+      {open && (
+        <div id={panelId} className="px-3 pb-4 sm:pl-[3.375rem]">
+          <p className="mb-2 max-w-3xl text-sm leading-relaxed text-stone-600">
+            {entry.description}
+          </p>
+          {count === 0 ? (
+            <p className="px-3 text-sm text-stone-500">
+              The tools for this unit are still being built.
+            </p>
+          ) : (
+            <div className="flex flex-col">
+              {entry.tools.map((tool) => (
+                <ToolRow key={tool.slug} tool={tool} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function TeacherTraining() {
-  const [selectedId, setSelectedId] = useState('foundations')
   const [query, setQuery] = useState('')
+  // Foundations starts open so the top of the list shows what a row does.
+  const [openIds, setOpenIds] = useState<string[]>([CATALOG[0]!.id])
   const framed = useFramed()
 
   // A distinct document title for the course overview (WCAG 2.4.2).
@@ -158,35 +257,10 @@ export default function TeacherTraining() {
   const q = normalize(query)
   const hits = useMemo<SearchHit[] | null>(() => (q ? runSearch(q) : null), [q])
 
-  const selectedIndex = COURSE_UNITS.findIndex((u) => u.id === selectedId)
-  const selectedUnit = selectedIndex >= 0 ? COURSE_UNITS[selectedIndex]! : undefined
-  const foundationsActive = !hits && !selectedUnit
-
-  const panel = hits
-    ? {
-        eyebrow: 'Search',
-        title: `“${query.trim()}”`,
-        desc:
-          hits.length === 0
-            ? 'No tools match that search.'
-            : hits.length === 1
-              ? 'One matching tool.'
-              : `${hits.length} matching tools.`,
-        cards: hits,
-      }
-    : selectedUnit
-      ? {
-          eyebrow: `Unit ${selectedIndex + 1}`,
-          title: selectedUnit.title,
-          desc: selectedUnit.description,
-          cards: selectedUnit.tools.map((tool) => ({ tool, badge: undefined })),
-        }
-      : {
-          eyebrow: 'Used throughout the course',
-          title: 'Foundations',
-          desc: FOUNDATIONS_DESC,
-          cards: FOUNDATION_TOOLS.map((tool) => ({ tool, badge: undefined })),
-        }
+  const allOpen = openIds.length === CATALOG.length
+  const toggle = (id: string) =>
+    setOpenIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
+  const toggleAll = () => setOpenIds(allOpen ? [] : CATALOG.map((e) => e.id))
 
   return (
     <div>
@@ -237,103 +311,45 @@ export default function TeacherTraining() {
             </aside>
           )}
 
-          <div className="flex-1 min-w-0">
-        {/* Below the large breakpoint the units wrap into rows of natural
-            width (two rows in the IFDM site's 980px content well); from lg
-            up they share one row joined by connector ticks. */}
-        <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
-          {COURSE_UNITS.map((u, i) => {
-            const active = !hits && i === selectedIndex
-            // The joint before this unit is cardinal once the course has flowed past it.
-            const flowed = !hits && (foundationsActive || i <= selectedIndex)
-            return (
-              <div key={u.id} className="relative lg:flex-1 lg:min-w-0">
-                {i > 0 && (
-                  <span
-                    aria-hidden
-                    className={`hidden lg:block absolute -left-2 top-1/2 -translate-y-1/2 h-px w-2 ${
-                      flowed ? 'bg-cardinal/50' : 'bg-stone-300'
-                    }`}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(u.id)}
-                  aria-pressed={active}
-                  className={`w-full md:w-auto lg:w-full lg:min-h-[112px] flex lg:flex-col items-center lg:justify-center gap-3 lg:gap-2 rounded-xl border px-3.5 py-3 text-left lg:text-center transition-all ${
-                    active
-                      ? 'bg-cardinal border-cardinal text-white shadow-md'
-                      : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
-                  }`}
-                >
-                  <span
-                    className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center font-serif text-sm font-semibold ${
-                      active ? 'bg-white/15 text-white' : 'bg-cardinal/10 text-cardinal'
-                    }`}
+          <div className="flex-1 min-w-0 max-w-4xl">
+            {hits ? (
+              <>
+                <p className="mb-3 text-sm text-stone-600">
+                  {hits.length === 0
+                    ? 'No tools match that search.'
+                    : hits.length === 1
+                      ? '1 matching tool.'
+                      : `${hits.length} matching tools.`}
+                </p>
+                <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-2">
+                  {hits.map(({ tool, badge }) => (
+                    <ToolRow key={tool.slug} tool={tool} badge={badge} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={toggleAll}
+                    className="text-[13px] font-semibold text-cardinal transition-colors hover:text-stone-900"
                   >
-                    {i + 1}
-                  </span>
-                  <span
-                    className={`text-[13px] font-medium leading-snug ${active ? 'text-white' : 'text-stone-700'}`}
-                  >
-                    {u.short}
-                  </span>
-                </button>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="relative mt-6">
-          <span
-            aria-hidden
-            className={`hidden lg:block absolute left-1/2 -top-6 h-6 w-px ${
-              !hits ? 'bg-cardinal/50' : 'bg-stone-300'
-            }`}
-          />
-          <button
-            type="button"
-            onClick={() => setSelectedId('foundations')}
-            aria-pressed={foundationsActive}
-            className={`w-full flex flex-wrap items-baseline justify-center gap-x-3 gap-y-0.5 rounded-xl border-2 px-5 py-4 text-center transition-all ${
-              foundationsActive
-                ? 'bg-cardinal border-cardinal text-white shadow-md'
-                : 'bg-stone-100 border-stone-200 hover:border-stone-300 hover:bg-stone-50'
-            }`}
-          >
-            <span
-              className={`font-serif text-lg font-semibold ${foundationsActive ? 'text-white' : 'text-stone-900'}`}
-            >
-              Foundations
-            </span>
-            <span className={`text-xs ${foundationsActive ? 'text-white/80' : 'text-stone-500'}`}>
-              Used throughout the course
-            </span>
-          </button>
-        </div>
-        <p className="mt-3 text-center text-xs text-stone-400">Select a unit to see its tools</p>
-
-        <div className="mt-12">
-          <p className="text-xs font-semibold tracking-widest text-cardinal uppercase">
-            {panel.eyebrow}
-          </p>
-          <h2 className="font-serif text-3xl font-semibold text-stone-900 mt-1">{panel.title}</h2>
-          <p className="text-stone-600 mt-2 max-w-2xl leading-relaxed">{panel.desc}</p>
-          {panel.cards.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-              {panel.cards.map(({ tool, badge }) => (
-                <ToolCard key={tool.slug} tool={tool} badge={badge} />
-              ))}
-            </div>
-          ) : (
-            !hits && (
-              <p className="text-sm text-stone-500 mt-6">
-                The tools for this unit are still being built. The foundation tools cover it in the
-                meantime.
-              </p>
-            )
-          )}
-        </div>
+                    {allOpen ? 'Collapse all' : 'Expand all'}
+                  </button>
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+                  {CATALOG.map((entry) => (
+                    <CatalogRow
+                      key={entry.id}
+                      entry={entry}
+                      open={openIds.includes(entry.id)}
+                      onToggle={() => toggle(entry.id)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
