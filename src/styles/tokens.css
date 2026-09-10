@@ -123,7 +123,11 @@
   --mark: var(--c-cardinal);
   --mark-wash: var(--c-cardinal-wash);
 
-  --focus-ring: var(--c-accent);
+  /* Ink ring with a paper halo, so focus stays legible on the white pages
+     and on the cardinal banner alike. A cardinal ring vanished against the
+     banner and blurred into the cardinal link text in the site header. */
+  --focus-ring: var(--c-ink);
+  --focus-ring-halo: var(--c-paper);
 
   --chart-axis: var(--c-ink-faint);
   --chart-grid: var(--c-rule);
