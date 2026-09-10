@@ -7,8 +7,9 @@ import { useFramed } from '../hooks/useFramed'
 
 /*
  * The Personal Finance Teaching Toolkit landing page: a catalog of the
- * tools as one vertical list. Foundations lead, unnumbered because they
- * sit outside the sequence, then the fourteen units in teaching order.
+ * tools as one vertical list. The basic tools and data lead, unnumbered
+ * because they sit outside the sequence, then the fourteen units in
+ * teaching order.
  * Every row is visible at once and opens onto that unit's description and
  * tools; Expand all opens the whole catalog. Searching from the hero
  * replaces the list with the matching tools.
@@ -149,15 +150,15 @@ interface CatalogEntry {
   title: string
   description: string
   tools: TrainingTool[]
-  /** Position in the course. Omitted for Foundations, which has no number. */
+  /** Position in the course. Omitted for the basic tools, which have none. */
   number?: number
 }
 
-/** Foundations first, then the units in teaching order. */
+/** The basic tools first, then the units in teaching order. */
 const CATALOG: CatalogEntry[] = [
   {
     id: 'foundations',
-    title: 'Foundations',
+    title: 'Basic Tools and Data',
     description: FOUNDATIONS_DESC,
     tools: FOUNDATION_TOOLS,
   },

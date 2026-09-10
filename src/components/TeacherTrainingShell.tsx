@@ -148,7 +148,7 @@ export default function TeacherTrainingShell({
                 className="flex flex-row md:flex-col gap-1 flex-wrap"
               >
               <p className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-stone-400 w-full md:w-auto">
-                Foundations
+                Basic Tools and Data
               </p>
               {FOUNDATION_TOOLS.map((t) => (
                 <NavLink key={t.slug} to={`/${t.slug}`} className={navLinkClass}>

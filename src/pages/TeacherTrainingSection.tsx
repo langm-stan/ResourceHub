@@ -255,7 +255,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
         unit
           ? `Personal Finance Toolkit · Unit ${COURSE_UNITS.indexOf(unit) + 1}: ${unit.short}`
           : isFoundationSlug(slug)
-            ? 'Personal Finance Toolkit · Foundations'
+            ? 'Personal Finance Toolkit · Basic Tools and Data'
             : 'Personal Finance Toolkit'
       }
       wide={section.toolkit}

@@ -28,8 +28,10 @@ export interface CourseUnit {
 }
 
 /**
- * Reference material used throughout the course rather than in one unit:
- * shown across the top of the landing page and pinned atop the sidebar.
+ * The tools and data used throughout the course rather than inside one unit.
+ * They lead the landing page and sit at the top of the sidebar. They are not
+ * a unit and carry no number: nothing here has to be worked through before
+ * the course starts.
  */
 export const FOUNDATION_TOOLS: TrainingTool[] = [
   {
@@ -154,8 +156,8 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'car',
-    title: 'Buying the Car',
-    short: 'Buying the Car',
+    title: 'Buying a Car',
+    short: 'Buying a Car',
     description:
       'Financing a car.',
     tools: [
@@ -169,8 +171,8 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'home',
-    title: 'Home Buying Decision',
-    short: 'Home Buying',
+    title: 'Buying a House',
+    short: 'Buying a House',
     description:
       'Buying or renting a home.',
     tools: [
@@ -190,7 +192,7 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'education',
-    title: 'Investing in Education: Return on Investment',
+    title: 'Investing in Education',
     short: 'Education',
     description:
       'What education costs, what it returns over a working life, and how to pay for it.',
@@ -211,7 +213,7 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'markets',
-    title: 'Bonds, Stocks, Mutual Funds',
+    title: 'Investing: Bonds, Stocks and Mutual Funds',
     short: 'Bonds & Stocks',
     description:
       'Returns and risk for stocks and bonds, diversification, and fees.',
@@ -381,13 +383,13 @@ export function toolDescription(slug: string): string | undefined {
 
 export interface SequencedTool {
   tool: TrainingTool
-  /** Where the tool sits in the course: 'Foundations' or 'Unit N · Short'. */
+  /** Where the tool sits in the course: 'Basic Tools and Data' or 'Unit N · Short'. */
   badge: string
 }
 
 /** Every tool in course order: the foundations first, then unit by unit. */
 export const TOOL_SEQUENCE: SequencedTool[] = [
-  ...FOUNDATION_TOOLS.map((tool) => ({ tool, badge: 'Foundations' })),
+  ...FOUNDATION_TOOLS.map((tool) => ({ tool, badge: 'Basic Tools and Data' })),
   ...COURSE_UNITS.flatMap((u, i) =>
     u.tools.map((tool) => ({ tool, badge: `Unit ${i + 1} · ${u.short}` })),
   ),

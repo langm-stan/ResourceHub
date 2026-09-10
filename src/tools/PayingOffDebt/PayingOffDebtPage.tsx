@@ -408,7 +408,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           <Callout tone="note" label="The same calculation on the TVM calculator">
             This is the TVM calculator with FV = 0: the amount borrowed is PV, the payment is PMT,
             the rate is I/Y, the horizon is N. Any number here can be reproduced on the TVM
-            Calculator in Foundations.
+            Calculator in the basic tools.
           </Callout>
         </MathSection>
       </Card>
