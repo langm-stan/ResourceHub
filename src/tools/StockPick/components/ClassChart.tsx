@@ -127,7 +127,7 @@ function Inner({
         strokeWidth={1}
         strokeDasharray="4 4"
       />
-      <text x={x(STAKE)} y={-12} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--text-muted)">
+      <text x={x(STAKE)} y={-12} textAnchor="middle" fontSize={13} fontWeight={600} fill="var(--text-muted)">
         the $1,000 you put in
       </text>
     </>

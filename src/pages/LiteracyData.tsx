@@ -110,7 +110,7 @@ export function LiteracyDataContent() {
               }`}
               style={active ? { borderColor: a.color, boxShadow: `0 0 0 1px ${a.color}` } : undefined}
             >
-              <p className="text-xs font-semibold text-stone-600 mb-1.5 leading-snug">{a.label}</p>
+              <p className="text-[13px] font-semibold text-stone-600 mb-1.5 leading-snug">{a.label}</p>
               <p className="text-2xl font-semibold tnum" style={{ color: a.color }}>
                 {a.national}%
               </p>
@@ -123,7 +123,7 @@ export function LiteracyDataContent() {
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <h3 className="text-lg font-semibold text-stone-900">{activeArea.label}: breakdown</h3>
-            <p className="text-xs text-stone-500">
+            <p className="text-[13px] text-stone-500">
               Full 28-question index, % correct in this area, {dim.label.toLowerCase()}
             </p>
           </div>
@@ -133,9 +133,9 @@ export function LiteracyDataContent() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={drillData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-              <XAxis dataKey="group" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="group" tick={{ fontSize: 13 }} tickLine={false} axisLine={false} />
               <YAxis
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 13 }}
                 tickLine={false}
                 axisLine={false}
                 domain={[0, 100]}
@@ -176,13 +176,13 @@ export function LiteracyDataContent() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 11 }}
+                    tick={{ fontSize: 13 }}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, 100]}
                     tickFormatter={(v) => `${v}%`}
                   />
-                  <YAxis type="category" dataKey="group" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={130} />
+                  <YAxis type="category" dataKey="group" tick={{ fontSize: 13 }} tickLine={false} axisLine={false} width={130} />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
                   <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
                 </BarChart>

@@ -262,7 +262,7 @@ function DonutSlices({ selected, onSelect }: { selected: string; onSelect: (key:
               y={cy + lr * Math.sin(mid)}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontSize={12}
+              fontSize={13}
               fontWeight={isSel ? 700 : 500}
               fill="var(--text-primary)"
               className="tnum"
@@ -285,7 +285,7 @@ function DonutSlices({ selected, onSelect }: { selected: string; onSelect: (key:
       >
         {active.weight}%
       </text>
-      <text x={cx} y={cy + 16} textAnchor="middle" fontSize={11} fill="var(--text-muted)" pointerEvents="none">
+      <text x={cx} y={cy + 16} textAnchor="middle" fontSize={13} fill="var(--text-muted)" pointerEvents="none">
         of the score
       </text>
     </g>
@@ -333,14 +333,14 @@ function BandBarsMarks({ costs, selectedKey }: { costs: BandCost[]; selectedKey:
               y={y + barH / 2}
               textAnchor="end"
               dominantBaseline="middle"
-              fontSize={12}
+              fontSize={13}
               fontWeight={isSel ? 700 : 400}
               fill={isSel ? 'var(--text-primary)' : 'var(--text-muted)'}
             >
               <tspan x={-10} dy={-6}>
                 {c.band.label}
               </tspan>
-              <tspan x={-10} dy={13} fontSize={10.5} fontWeight={400} fill="var(--text-faint)" className="tnum">
+              <tspan x={-10} dy={13} fontSize={13} fontWeight={400} fill="var(--text-faint)" className="tnum">
                 {c.band.min}-{c.band.max}
               </tspan>
             </text>
@@ -349,7 +349,7 @@ function BandBarsMarks({ costs, selectedKey }: { costs: BandCost[]; selectedKey:
               x={w + 8}
               y={y + barH / 2}
               dominantBaseline="middle"
-              fontSize={12}
+              fontSize={13}
               fontWeight={isSel ? 700 : 500}
               fill="var(--text-primary)"
               className="tnum"

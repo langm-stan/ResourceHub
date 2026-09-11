@@ -4,6 +4,7 @@ import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFramed } from '../hooks/useFramed'
+import { PresentationToggle } from '../design-system'
 
 /*
  * The Personal Finance Teaching Toolkit landing page: a catalog of the
@@ -125,7 +126,7 @@ function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
           {tool.label}
         </span>
         {badge && (
-          <span className="ml-2 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+          <span className="ml-2 text-[13px] font-semibold uppercase tracking-wider text-stone-400">
             {badge}
           </span>
         )}
@@ -183,7 +184,7 @@ function CatalogRow({
           className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
         >
           <span
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[13px] font-semibold ${
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[14px] font-semibold ${
               count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
             }`}
           >
@@ -192,7 +193,7 @@ function CatalogRow({
           <span className="min-w-0 flex-1 font-serif text-[17px] font-semibold leading-snug text-stone-900">
             {entry.title}
           </span>
-          <span className="hidden shrink-0 text-xs text-stone-400 sm:block">
+          <span className="hidden shrink-0 text-[13px] text-stone-400 sm:block">
             {count === 0 ? 'In development' : count === 1 ? '1 tool' : `${count} tools`}
           </span>
           <ChevronDown
@@ -297,6 +298,11 @@ export default function TeacherTraining() {
           {/* With no sidebar the list is centered in the well; alongside the
               sidebar it stays where the sidebar leaves it. */}
           <div className={`flex-1 min-w-0 max-w-4xl ${framed ? 'mx-auto w-full' : ''}`}>
+            {/* Text size sits above the list, in the same place it sits above
+                a tool, so it is in one spot throughout the toolkit. */}
+            <div className="mb-3 flex justify-end">
+              <PresentationToggle />
+            </div>
             {hits ? (
               <>
                 <p className="mb-3 text-sm text-stone-600">

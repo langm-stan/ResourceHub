@@ -141,7 +141,7 @@ function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries
       <text
         x={innerWidth - 6}
         y={y(0) + 14}
-        fontSize={11}
+        fontSize={13}
         fill="var(--text-faint)"
         textAnchor="end"
       >

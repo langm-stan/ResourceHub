@@ -92,7 +92,7 @@ function Inner() {
         x={x(1)}
         y={-14}
         textAnchor="middle"
-        fontSize={11}
+        fontSize={13}
         fontWeight={600}
         fill="var(--text-muted)"
       >

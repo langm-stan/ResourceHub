@@ -139,7 +139,7 @@ function Inner({
       <text
         x={x(retireAge) + 5}
         y={12}
-        fontSize={11}
+        fontSize={13}
         fontWeight={600}
         fill="var(--c-cardinal)"
       >

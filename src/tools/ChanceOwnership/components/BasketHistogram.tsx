@@ -147,7 +147,7 @@ function Inner({ a, b, market }: { a: HistogramPile; b?: HistogramPile; market: 
         strokeDasharray="5 4"
         opacity={0.85}
       />
-      <text x={x(market) + 6} y={12} fontSize={11} fontWeight={600} fill="var(--c-accent)">
+      <text x={x(market) + 6} y={12} fontSize={13} fontWeight={600} fill="var(--c-accent)">
         the market
       </text>
     </>

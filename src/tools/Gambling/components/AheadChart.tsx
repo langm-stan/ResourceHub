@@ -67,7 +67,7 @@ function Inner({ points }: { points: AheadPoint[] }) {
         strokeWidth={1}
         strokeDasharray="2 3"
       />
-      <text x={6} y={y(0.5) - 6} fontSize={11} fill="var(--text-faint)">
+      <text x={6} y={y(0.5) - 6} fontSize={13} fill="var(--text-faint)">
         a fair coin toss
       </text>
 

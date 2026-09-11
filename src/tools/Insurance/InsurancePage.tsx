@@ -501,14 +501,14 @@ function BillsAndHits({
             x={innerWidth + 12}
             y={yc(v)}
             dy="0.32em"
-            fontSize={12}
+            fontSize={13}
             fill="var(--text-faint)"
             className="tnum"
           >
             {v}
           </text>
         ))}
-        <text x={innerWidth + 12} y={-8} fontSize={10} fill="var(--text-faint)">
+        <text x={innerWidth + 12} y={-8} fontSize={13} fill="var(--text-faint)">
           hit
         </text>
       </g>
@@ -538,7 +538,7 @@ function BillsAndHits({
         strokeDasharray="2 4"
         opacity={0.6}
       />
-      <text x={4} y={yc(expected) - 5} fontSize={10} fill="var(--text-faint)">
+      <text x={4} y={yc(expected) - 5} fontSize={13} fill="var(--text-faint)">
         expected {Math.round(expected)} hit a year
       </text>
       <LineSeries
@@ -630,7 +630,7 @@ function OutcomeBars({
               x={x + barW / 2}
               y={baseline - h - 6}
               textAnchor="middle"
-              fontSize={11}
+              fontSize={13}
               fill={b.count === 0 ? 'var(--text-faint)' : 'var(--text-primary)'}
               className="tnum"
             >
@@ -640,7 +640,7 @@ function OutcomeBars({
               x={x + barW / 2}
               y={baseline + 16}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={13}
               fill="var(--text-muted)"
               className="tnum"
             >

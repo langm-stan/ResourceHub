@@ -26,7 +26,7 @@ export default function ResourceHubNav() {
     <nav aria-label="Resource Hub section">
       <a
         href={`${SITE}/resourcehub`}
-        className="block px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-stone-500 hover:text-cardinal"
+        className="block px-3 pb-2 text-[13px] font-semibold uppercase tracking-wider text-stone-500 hover:text-cardinal"
       >
         Resource Hub
       </a>

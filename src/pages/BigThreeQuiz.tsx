@@ -46,7 +46,7 @@ export function BigThreeQuizContent() {
               <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-cardinal' : 'bg-stone-200'}`} />
             ))}
           </div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-cardinal mb-3">
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-3">
             Question {step + 1} of {QUESTIONS.length} · {QUESTIONS[step].concept}
           </p>
           <h2 className="font-serif text-xl font-semibold text-stone-900 mb-6 leading-snug">{QUESTIONS[step].q}</h2>
@@ -93,7 +93,7 @@ export function BigThreeQuizContent() {
                 )}
                 <div>
                   <p className="font-semibold text-sm text-stone-900">{q.concept}</p>
-                  <p className="text-xs text-stone-500">Correct answer: {q.options[q.answer]}</p>
+                  <p className="text-[13px] text-stone-500">Correct answer: {q.options[q.answer]}</p>
                 </div>
               </div>
             ))}

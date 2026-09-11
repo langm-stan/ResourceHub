@@ -86,7 +86,7 @@ function Inner({ points, n, noun }: { points: PortfolioPoint[]; n: number; noun:
         x={innerWidth - 6}
         y={y(MARKET_SD) - 8}
         textAnchor="end"
-        fontSize={11}
+        fontSize={13}
         fontWeight={600}
         fill="var(--c-accent)"
       >
@@ -136,7 +136,7 @@ function Inner({ points, n, noun }: { points: PortfolioPoint[]; n: number; noun:
       <text
         x={x(current.n) + 9}
         y={y(current.real) - 9}
-        fontSize={11}
+        fontSize={13}
         fontWeight={600}
         fill="var(--c-series-1)"
       >

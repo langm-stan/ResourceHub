@@ -12,7 +12,7 @@
 export default function InstructorBar({ toolLabel }: { toolLabel: string }) {
   return (
     <div className="mt-10 rounded-xl border border-stone-200 bg-white p-5">
-      <p className="text-[0.7rem] font-semibold uppercase tracking-widest text-stone-400 mb-1.5">
+      <p className="text-[13px] font-semibold uppercase tracking-widest text-stone-400 mb-1.5">
         For instructors
       </p>
       <p className="text-sm text-stone-600 max-w-2xl leading-relaxed">

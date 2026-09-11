@@ -12,7 +12,7 @@
 
 .tickLabel {
   font-family: var(--ff-mono);
-  font-size: 12px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   fill: var(--text-faint);
 }
@@ -22,7 +22,7 @@
 }
 .annLabel {
   font-family: var(--ff-ui);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 .annDot {
@@ -67,13 +67,13 @@
 }
 .markerLabel {
   font-family: var(--ff-mono);
-  font-size: 11px;
+  font-size: 13px;
   fill: var(--text-muted);
 }
 
 .endLabel {
   font-family: var(--ff-ui);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 

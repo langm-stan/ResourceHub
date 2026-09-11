@@ -110,7 +110,7 @@ function Inner({ results, years }: { results: TvmResults; years: number }) {
             x={innerWidth - 4}
             y={y(results.amount) - 6}
             textAnchor="end"
-            fontSize={12}
+            fontSize={13}
             fontWeight={600}
             fill="var(--c-cardinal)"
           >

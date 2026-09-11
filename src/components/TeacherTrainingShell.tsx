@@ -20,7 +20,7 @@ import { useFramed } from '../hooks/useFramed'
  */
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-  return `px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+  return `px-3 py-1.5 rounded-md text-[14px] font-medium transition-colors ${
     isActive
       ? 'bg-cardinal/10 text-cardinal font-semibold'
       : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
@@ -69,7 +69,7 @@ export default function TeacherTrainingShell({
           /* The frame view inside ifdm.stanford.edu: everything centered,
              with the way back and this unit's other tools beneath the intro. */
           <div className="max-w-[1680px] mx-auto px-6 py-8 text-center">
-            <p className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-2">
+            <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase mb-2">
               {eyebrow}
             </p>
             <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
@@ -77,7 +77,7 @@ export default function TeacherTrainingShell({
             <div className="mt-5 flex justify-center">
               <Link
                 to="/"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-[13px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-[14px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
               >
                 <ArrowLeft size={14} />
                 All tools
@@ -94,7 +94,7 @@ export default function TeacherTrainingShell({
                       <NavLink
                         to={`/${t.slug}`}
                         className={({ isActive }) =>
-                          `inline-block rounded-full px-3 py-1.5 text-[13px] transition-colors ${
+                          `inline-block rounded-full px-3 py-1.5 text-[14px] transition-colors ${
                             isActive
                               ? 'bg-white/20 font-semibold text-white'
                               : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -112,12 +112,12 @@ export default function TeacherTrainingShell({
         ) : (
           <div className="max-w-[1680px] mx-auto px-6 py-8">
             <div className="flex items-start justify-between gap-4 mb-2">
-              <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">
+              <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase">
                 {eyebrow}
               </p>
               <Link
                 to="/"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20 transition-colors"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-[14px] font-semibold text-white hover:bg-white/20 transition-colors"
               >
                 <Home size={14} />
                 Toolkit Home
@@ -155,10 +155,10 @@ export default function TeacherTrainingShell({
                       className="flex items-center gap-2.5 px-3 py-1.5"
                       title="Tools for this unit are in the works"
                     >
-                      <span className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center font-serif text-xs font-semibold bg-stone-100 text-stone-400">
+                      <span className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center font-serif text-[13px] font-semibold bg-stone-100 text-stone-400">
                         {i + 1}
                       </span>
-                      <span className="flex-1 min-w-0 text-[13px] font-medium text-stone-400 leading-snug">
+                      <span className="flex-1 min-w-0 text-[14px] font-medium text-stone-400 leading-snug">
                         {u.short}
                       </span>
                     </div>
@@ -174,13 +174,13 @@ export default function TeacherTrainingShell({
                       className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-left hover:bg-stone-100 transition-colors"
                     >
                       <span
-                        className={`h-6 w-6 shrink-0 rounded-full flex items-center justify-center font-serif text-xs font-semibold ${
+                        className={`h-6 w-6 shrink-0 rounded-full flex items-center justify-center font-serif text-[13px] font-semibold ${
                           current ? 'bg-cardinal text-white' : 'bg-cardinal/10 text-cardinal'
                         }`}
                       >
                         {i + 1}
                       </span>
-                      <span className="flex-1 min-w-0 text-[13px] font-medium text-stone-700 leading-snug">
+                      <span className="flex-1 min-w-0 text-[14px] font-medium text-stone-700 leading-snug">
                         {u.short}
                       </span>
                       <ChevronDown
@@ -228,7 +228,7 @@ export default function TeacherTrainingShell({
                       className="shrink-0 text-cardinal transition-transform group-hover:-translate-x-1"
                     />
                     <span className="min-w-0">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                      <span className="block text-[13px] font-semibold uppercase tracking-wider text-stone-400">
                         Previous · {prev.badge}
                       </span>
                       <span className="block font-serif font-semibold text-stone-900 leading-snug">
@@ -245,7 +245,7 @@ export default function TeacherTrainingShell({
                     className="group flex items-center justify-end gap-3 rounded-xl border border-stone-200 bg-white shadow-card px-5 py-4 text-right hover:border-stone-300 hover:bg-stone-50 transition-all"
                   >
                     <span className="min-w-0">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                      <span className="block text-[13px] font-semibold uppercase tracking-wider text-stone-400">
                         Next · {next.badge}
                       </span>
                       <span className="block font-serif font-semibold text-stone-900 leading-snug">

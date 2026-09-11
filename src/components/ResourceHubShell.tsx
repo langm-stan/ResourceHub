@@ -131,7 +131,7 @@ export default function ResourceHubShell({
           </nav>
         </aside>
         <div className={`flex-1 min-w-0 ${wide ? '' : 'max-w-5xl'}`}>
-          <p className="text-xs font-semibold tracking-widest text-cardinal uppercase mb-2">Resource Hub</p>
+          <p className="text-[13px] font-semibold tracking-widest text-cardinal uppercase mb-2">Resource Hub</p>
           <h1 className="text-4xl md:text-5xl font-semibold text-stone-900 mb-4">{title}</h1>
           {intro && <p className="text-stone-600 max-w-3xl text-lg mb-10 leading-relaxed">{intro}</p>}
           {!intro && <div className="mb-10" />}

@@ -53,9 +53,12 @@
   --fs-h4: 1.563rem;
   --fs-lead: 1.25rem;
   --fs-body: 1rem;
-  --fs-ui: 0.889rem;
-  --fs-caption: 0.79rem;
-  --fs-micro: 0.7rem;
+  /* The small end of the scale was raised in September 2026: labels and
+     captions rendered at 11 and 12.6px and dominated a tool page. Headings
+     were already large and did not move, so only these four changed. */
+  --fs-ui: 0.9375rem;
+  --fs-caption: 0.875rem;
+  --fs-micro: 0.8125rem;
 
   --lh-display: 1.08;
   --lh-heading: 1.15;

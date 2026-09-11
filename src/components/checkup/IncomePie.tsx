@@ -159,7 +159,7 @@ function PieSlices({
       >
         {formatUSDWhole(centerValue)}
       </text>
-      <text x={cx} y={cy + 18} textAnchor="middle" fontSize={12} fill="var(--text-muted)" pointerEvents="none">
+      <text x={cx} y={cy + 18} textAnchor="middle" fontSize={13} fill="var(--text-muted)" pointerEvents="none">
         {centerLabel}
       </text>
     </g>

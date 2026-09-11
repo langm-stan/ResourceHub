@@ -15,7 +15,7 @@
   margin-bottom: var(--space-6);
 }
 .eyebrow {
-  font: 600 11px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #8c1515;
@@ -55,7 +55,7 @@
 .badge {
   background: #8c1515;
   color: #fff;
-  font: 700 12px 'Source Sans 3', sans-serif;
+  font: 700 13px 'Source Sans 3', sans-serif;
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -78,7 +78,7 @@
 }
 
 .label {
-  font: 600 10px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #6e6e6e;
@@ -130,7 +130,7 @@
   margin-top: 6px;
 }
 .hashRowText {
-  font: 500 12px 'IBM Plex Mono', monospace;
+  font: 500 13px 'IBM Plex Mono', monospace;
   color: #444;
   word-break: break-all;
 }
@@ -162,7 +162,7 @@
   color: #fff;
 }
 .paceCopy {
-  font-size: 12px;
+  font-size: 13px;
   color: #666666;
   padding-bottom: 7px;
 }
@@ -313,7 +313,7 @@
 }
 .miningLine {
   margin-top: 10px;
-  font: 500 12px 'IBM Plex Mono', monospace;
+  font: 500 13px 'IBM Plex Mono', monospace;
   color: #8c1515;
   animation: pulseDot 0.8s infinite;
 }
@@ -323,7 +323,7 @@
 }
 .dataText {
   margin-top: 4px;
-  font: 500 12px 'IBM Plex Mono', monospace;
+  font: 500 13px 'IBM Plex Mono', monospace;
   color: #555;
   word-break: break-all;
   line-height: 1.5;
@@ -331,13 +331,13 @@
 
 .warnLine {
   margin-top: 10px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: #c0392b;
 }
 
 .halvingCopy {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: #6e6e6e;
 }
 
@@ -348,7 +348,7 @@
   border-radius: 4px;
   border: 1px solid #ddd;
   background: #fff;
-  font: 600 12px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   color: #555;
   cursor: pointer;
 }
@@ -391,11 +391,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font: 500 11px 'IBM Plex Mono', monospace;
+  font: 500 13px 'IBM Plex Mono', monospace;
   color: #666666;
 }
 .genesisNote {
-  font-size: 11px;
+  font-size: 13px;
   color: #6e6e6e;
 }
 
@@ -459,15 +459,15 @@
   color: #1a1a1a;
 }
 .statusOk {
-  font: 700 11px 'Source Sans 3', sans-serif;
+  font: 700 13px 'Source Sans 3', sans-serif;
   color: #1a7f37;
 }
 .statusBad {
-  font: 700 11px 'Source Sans 3', sans-serif;
+  font: 700 13px 'Source Sans 3', sans-serif;
   color: #c0392b;
 }
 .cardLabel {
-  font: 600 9px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #6e6e6e;
@@ -481,7 +481,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 2px;
-  font: 500 11px 'IBM Plex Mono', monospace;
+  font: 500 13px 'IBM Plex Mono', monospace;
   color: #666;
 }
 .hashOkText {
@@ -491,12 +491,12 @@
   color: #c0392b;
 }
 .cardContents {
-  font-size: 12px;
+  font-size: 13px;
   color: #333;
   margin-top: 2px;
 }
 .nonceLine {
-  font-size: 11px;
+  font-size: 13px;
   color: #666666;
 }
 .nonceValue {
@@ -517,7 +517,7 @@
   padding: 4px 6px;
   border: 1px solid #e0b4b4;
   border-radius: 3px;
-  font: 400 12px 'Source Sans 3', sans-serif;
+  font: 400 13px 'Source Sans 3', sans-serif;
 }
 
 .brokenNote {
@@ -583,7 +583,7 @@
 }
 .ledgerHead {
   background: #faf9f7;
-  font: 600 10px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #6e6e6e;
@@ -637,7 +637,7 @@
   display: flex;
   gap: 16px;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .ledgerBalance {
   text-align: right;
@@ -670,7 +670,7 @@
   min-width: max-content;
 }
 .sheet th {
-  font: 600 10px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   letter-spacing: 0.12em;
   color: #6e6e6e;
   text-align: right;
@@ -724,7 +724,7 @@
 .cellDeltaDown,
 .cellDeltaMine {
   display: block;
-  font: 600 10px 'Source Sans 3', sans-serif;
+  font: 600 13px 'Source Sans 3', sans-serif;
   line-height: 1.4;
 }
 .cellDeltaUp {

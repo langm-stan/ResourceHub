@@ -165,7 +165,7 @@ function Inner({
             opacity={0.5}
           />
           {refLabel && (
-            <text x={6} y={ys(yRef) - 6} fontSize={11} fill="var(--text-faint)">
+            <text x={6} y={ys(yRef) - 6} fontSize={13} fill="var(--text-faint)">
               {refLabel}
             </text>
           )}
@@ -185,7 +185,7 @@ function Inner({
             opacity={0.7}
           />
           {xRefLabel && (
-            <text x={xs(xRef) + 5} y={12} fontSize={11} fill="var(--c-accent)">
+            <text x={xs(xRef) + 5} y={12} fontSize={13} fill="var(--c-accent)">
               {xRefLabel}
             </text>
           )}

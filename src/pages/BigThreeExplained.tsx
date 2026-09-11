@@ -53,7 +53,7 @@ const QUESTIONS = [
 function ResponseBar({ responses: r }: { responses: { correct: number; incorrect: number; dontKnow: number } }) {
   return (
     <div className="mt-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-stone-400 mb-1.5">
+      <p className="text-[13px] font-semibold uppercase tracking-wide text-stone-400 mb-1.5">
         How U.S. adults answer
       </p>
       <div
@@ -65,7 +65,7 @@ function ResponseBar({ responses: r }: { responses: { correct: number; incorrect
         <div className="bg-stone-300" style={{ width: `${r.incorrect}%` }} />
         <div className="bg-sand" style={{ width: `${r.dontKnow}%` }} />
       </div>
-      <p className="text-xs text-stone-500 mt-1.5">
+      <p className="text-[13px] text-stone-500 mt-1.5">
         <span className="font-semibold text-palo-teal">{Math.round(r.correct)}% correct</span>
         {' · '}
         {Math.round(r.incorrect)}% incorrect
@@ -90,7 +90,7 @@ export function BigThreeExplainedContent() {
       <div className="flex flex-col gap-6 max-w-3xl">
         {QUESTIONS.map((item) => (
           <div key={item.number} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-card">
-            <p className="text-xs font-semibold uppercase tracking-wide text-cardinal mb-2">
+            <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-2">
               Question #{item.number}: {item.concept}
             </p>
             <p className="font-serif text-lg font-semibold text-stone-900 mb-3 leading-snug">{item.q}</p>
@@ -108,7 +108,7 @@ export function BigThreeExplainedContent() {
         ))}
 
         <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-card">
-          <p className="text-xs font-semibold uppercase tracking-wide text-cardinal mb-2">
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-2">
             All three together
           </p>
           <p className="text-stone-700 leading-relaxed">
@@ -119,7 +119,7 @@ export function BigThreeExplainedContent() {
           </p>
         </div>
 
-        <p className="text-xs text-stone-400 leading-relaxed">
+        <p className="text-[13px] text-stone-400 leading-relaxed">
           Response shares are U.S. adults in the FINRA Foundation National Financial Capability
           Study, 2024 wave (25,539 respondents), the most recent as of 2026. About 1% of
           respondents preferred not to answer each question, so shares total slightly under 100%.

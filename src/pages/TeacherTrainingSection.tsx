@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
 import { ToolStage } from '../components/ToolStage'
+import { PresentationToggle } from '../design-system'
 import { COURSE_UNITS, toolDescription, unitForSlug } from '../data/teacherTraining'
 import { BigThreeContent } from './BigThree'
 import { BigThreeQuizContent } from './BigThreeQuiz'
@@ -257,7 +258,16 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
       }
       wide={section.toolkit}
     >
-      {section.toolkit ? <ToolStage>{section.content}</ToolStage> : section.content}
+      {section.toolkit ? (
+        <ToolStage>{section.content}</ToolStage>
+      ) : (
+        <>
+          <div className="mb-3 flex justify-end">
+            <PresentationToggle />
+          </div>
+          {section.content}
+        </>
+      )}
       {section.instructor && (
         <InstructorBar toolLabel={section.instructor.label} />
       )}

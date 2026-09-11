@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import styles from './PresentationToggle.module.css'
 
 /*
- * Sizing for the tool itself. Larger settings are for projecting in a
- * classroom; smaller ones fit more of a long tool on screen at once, which
- * matters most inside the narrow content well on ifdm.stanford.edu. The
- * attribute goes on <html> and only the tool scales, never the page around
- * it, so the choice cannot shrink the site's own navigation.
+ * Text size for the page. Scaling everything inside <main> together enlarges
+ * the type without the reflow that changing font sizes alone would cause, and
+ * keeps charts and controls in proportion with it. Larger settings are for
+ * projecting in a classroom or for anyone who wants bigger text; smaller ones
+ * fit more on screen, which matters inside the narrow content well on
+ * ifdm.stanford.edu. The Stanford header and footer are left alone.
  */
 
 /** Percentages the tool can be shown at, smallest first. */
@@ -48,13 +49,13 @@ export function PresentationToggle() {
     setIndex((i) => Math.min(SIZES.length - 1, Math.max(0, i + delta)))
 
   return (
-    <div className={styles.group} role="group" aria-label="Size of this tool">
+    <div className={styles.group} role="group" aria-label="Text size">
       <button
         type="button"
         className={styles.step}
         onClick={() => step(-1)}
         disabled={index === 0}
-        aria-label="Show this tool smaller"
+        aria-label="Smaller text"
         title="Smaller"
       >
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -66,7 +67,7 @@ export function PresentationToggle() {
         className={styles.readout}
         onClick={() => setIndex(DEFAULT_INDEX)}
         disabled={size === 100}
-        aria-label={`This tool is shown at ${size} percent. Select to return to 100 percent.`}
+        aria-label={`Text size ${size} percent. Select to return to 100 percent.`}
         title={size === 100 ? 'Normal size' : 'Back to 100%'}
       >
         {size}%
@@ -76,7 +77,7 @@ export function PresentationToggle() {
         className={styles.step}
         onClick={() => step(1)}
         disabled={index === SIZES.length - 1}
-        aria-label="Show this tool larger"
+        aria-label="Larger text"
         title="Larger"
       >
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">

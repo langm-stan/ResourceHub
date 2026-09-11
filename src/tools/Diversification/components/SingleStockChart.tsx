@@ -77,7 +77,7 @@ function Inner({ sim }: { sim: SingleStockSim }) {
             y={y(v)}
             dy="0.32em"
             textAnchor="end"
-            fontSize={11}
+            fontSize={13}
             fill="var(--text-muted)"
           >
             {formatUSDCompact(v)}
@@ -122,13 +122,13 @@ function Inner({ sim }: { sim: SingleStockSim }) {
         x={innerWidth - 6}
         y={y(sim.index.final * START) - 10}
         textAnchor="end"
-        fontSize={12}
+        fontSize={13}
         fontWeight={600}
         fill="var(--c-series-1)"
       >
         the index
       </text>
-      <text x={6} y={y(START) - 8} fontSize={11} fill="var(--text-faint)">
+      <text x={6} y={y(START) - 8} fontSize={13} fill="var(--text-faint)">
         {formatUSDCompact(START)} invested
       </text>
     </>

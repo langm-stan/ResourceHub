@@ -19,7 +19,7 @@ export default function NetWorthChart({ history }: { history: HistoryPoint[] }) 
         <p className="text-sm font-medium text-stone-600">
           {history.length === 0 ? 'No trend yet' : 'One point recorded so far'}
         </p>
-        <p className="text-xs text-stone-400 max-w-xs">
+        <p className="text-[13px] text-stone-400 max-w-xs">
           Each day you edit your numbers, that day's net worth is recorded in this browser. The line
           appears after your next update.
         </p>
@@ -40,8 +40,8 @@ export default function NetWorthChart({ history }: { history: HistoryPoint[] }) 
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(v) => formatUSDCompact(Number(v))} />
+          <XAxis dataKey="label" tick={{ fontSize: 13 }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fontSize: 13 }} tickLine={false} axisLine={false} tickFormatter={(v) => formatUSDCompact(Number(v))} />
           <Tooltip formatter={(v) => fmtUSD(Number(v))} />
           <Area
             type="monotone"

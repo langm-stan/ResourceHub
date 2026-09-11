@@ -160,7 +160,7 @@ function Inner({
         strokeDasharray="4 4"
         opacity={0.65}
       />
-      <text x={x(peakAge) + 5} y={12} fontSize={11} fontWeight={600} fill="var(--c-cardinal)">
+      <text x={x(peakAge) + 5} y={12} fontSize={13} fontWeight={600} fill="var(--c-cardinal)">
         peak · {peakAge}
       </text>
 
@@ -178,7 +178,7 @@ function Inner({
           <text
             x={x(brokeAge) + 5}
             y={28}
-            fontSize={11}
+            fontSize={13}
             fontWeight={600}
             fill="var(--c-accent)"
           >

@@ -74,7 +74,7 @@ export function BigThreeStoriesContent() {
                   <s.icon size={22} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: s.accent }}>
+                  <p className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: s.accent }}>
                     {s.concept}
                   </p>
                   <h3 className="font-serif text-lg font-semibold text-stone-900">{s.title}</h3>

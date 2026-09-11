@@ -11,7 +11,7 @@ export default function StorageNotice({
 }) {
   return (
     <div className="rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div className="flex items-start gap-2 text-xs text-stone-600">
+      <div className="flex items-start gap-2 text-[13px] text-stone-600">
         <ShieldCheck size={15} className="mt-0.5 shrink-0 text-palo-teal" />
         <p>
           {isExampleData ? (
@@ -34,7 +34,7 @@ export default function StorageNotice({
             onClear()
           }
         }}
-        className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-cardinal shrink-0"
+        className="flex items-center gap-1.5 text-[13px] font-semibold text-stone-500 hover:text-cardinal shrink-0"
       >
         <Trash2 size={13} />
         Clear my data from this browser
