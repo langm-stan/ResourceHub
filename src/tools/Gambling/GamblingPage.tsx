@@ -44,7 +44,9 @@ const GREEN = 'var(--c-series-1)'
 const SLATE = 'var(--c-series-3)'
 const CARDINAL = 'var(--c-accent)'
 
-const DEFAULTS = { weekly: 20, startYear: 2006, endYear: SPY_LAST_YEAR, game: 'lottery' as GameKey }
+/* 2018 is the default start: in May of that year the Supreme Court struck
+   down the federal ban on sports betting, and the states began legalising it. */
+const DEFAULTS = { weekly: 20, startYear: 2018, endYear: SPY_LAST_YEAR, game: 'lottery' as GameKey }
 
 /* `intro` hides the page's own header when a surrounding shell already provides the title. */
 export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
@@ -74,11 +76,9 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
           <h1 className={styles.h1}>Gambling and investing compared</h1>
           <p className={styles.lead}>
-            A lottery ticket, a parlay, and an index fund all put money at risk. The difference is
-            the direction of the odds. A gamble has a negative expected value: the longer you
-            play, the more certainly you lose. A diversified investment has a positive expected
-            value: the longer you hold, the more certainly you gain. This lesson makes both halves
-            of that sentence precise.
+            A lottery ticket, a parlay, and an index fund all put money at risk. A gamble has a
+            negative expected value; a diversified fund has a positive one. This lesson runs the
+            same weekly amount through both.
           </p>
         </header>
       )}
@@ -108,7 +108,7 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
             max={SPY_LAST_START}
             step={1}
             readout={`January ${startYear}`}
-            note="SPY's first full year is 1993."
+            note="The default is 2018, when the Supreme Court struck down the federal ban on sports betting and the states began legalizing it. SPY's first full year is 1993."
           />
           <Slider
             label="End the habit in"
@@ -201,7 +201,7 @@ function Overview({
     <>
       <StepHeader
         title="Where the weekly money ends up"
-        hint="A literal comparison: the same dollars into the game or into SPY, on actual market history."
+        hint="The same dollars into the game or into an S&amp;P 500 fund, on actual market history."
       />
       <div className={styles.stats}>
         <Stat label="Total put in" value={end.staked} format={formatUSDWhole} accentColor={SLATE} />
@@ -230,12 +230,12 @@ function Overview({
           { label: `Expected pocket, ${gameLabel.toLowerCase()}`, value: formatUSDWhole(end.pocket), color: CARDINAL },
           { label: 'SPY balance', value: formatUSDWhole(end.invested), color: GREEN },
         ]}
-        caption={`${formatUSDWhole(weekly)} a week from January ${startYear} to ${endText} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value falls to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually ${behind ? `shrank to ${formatUSDWhole(end.invested)}` : `grew to ${formatUSDWhole(end.invested)}`} (green)${crashNote}.${behind ? ' This window ends inside a downturn, the real risk investing carries; the next chart shows how that chance shrinks as the years add up.' : ''}`}
+        caption={`${formatUSDWhole(weekly)} a week from January ${startYear} to ${endText} is ${formatUSDWhole(end.staked)} (grey). Spent on ${gameShort}, its expected value falls to ${formatUSDWhole(end.pocket)} (red dashed). Put into SPY, the S&P 500 ETF, it actually ${behind ? `shrank to ${formatUSDWhole(end.invested)}` : `grew to ${formatUSDWhole(end.invested)}`} (green)${crashNote}.${behind ? ' This window ends inside a downturn, which is the risk investing carries.' : ''}`}
       />
 
       <StepHeader
         title="The chance of being ahead"
-        hint="Averages hide luck. What is the chance that you are ahead at all?"
+        hint="The share of players who are ahead of what they put in, year by year."
       />
       <AheadChart
         points={ahead}
@@ -246,16 +246,14 @@ function Overview({
         caption={`The chance of being ahead of your money. Red: one standard sports bet every week at typical odds with no special skill, the friendliest odds of the three wagers compared here. Green: a diversified index fund bought and held, with an 8% average return and yearly swings of about 20%. After ${years} years the bettor is ahead ${formatPercent(endAhead.bettor, endAhead.bettor < 0.01 ? 2 : 0)} of the time and the investor ${formatPercent(endAhead.investor, 0)} of the time.`}
       />
 
-      <Callout tone="mark" label="The law of large numbers, in both directions">
-        Repeating a losing bet does not rescue it; it makes the loss more certain. The same canceling of ups and
-        downs that makes a diversified portfolio steadier every year makes a repeated gamble more
-        certain to end behind. It is the same mathematics as in the One Stock or the Fund
-        lesson, working in the opposite direction.
+      <Callout tone="mark" label="The law of large numbers">
+        Repeating a bet with a negative expected value makes the loss more certain, not less. The
+        same averaging out that steadies a diversified portfolio over the years drives a repeated
+        gamble further behind.
       </Callout>
-      <Callout tone="note" label="What the numbers say">
-        Nothing here says never buy a ticket. It says to know what the ticket costs: entertainment
-        with a negative expected value. The trouble starts when a gamble is treated as a savings
-        plan. A diversified investment already does that job, with the odds in your favor.
+      <Callout tone="note" label="What a ticket costs">
+        A lottery ticket or a bet is entertainment with a negative expected value. That is a
+        different thing from a way to build savings, which is what a diversified investment does.
       </Callout>
     </>
   )
@@ -276,19 +274,17 @@ function KnowTheOdds() {
           { label: 'Worst in the list', value: 'jackpot draws, about 50¢', color: CARDINAL },
           { label: 'Index fund, average year', value: '$1.08', color: GREEN },
         ]}
-        caption="Every gamble returns less than the dollar that goes in; the differences are just the size of the house's cut. An index fund's average year is on the other side of the line, and it is the only entry that compounds."
+        caption="Every gamble returns less than the dollar that goes in. The differences between them are the size of the house's cut. An index fund's average year is above the line."
       />
       <Callout tone="mark" label="Parlays compound the house edge">
         A single sports bet gives up about 4.5%. Chain four legs into a parlay and the book takes
         its cut on every leg, which is how sportsbooks report keeping 20¢ or more of every parlay
-        dollar. The bets advertised most heavily to young bettors are, as a rule, the worst ones
-        offered.
+        dollar. Parlays are also the bets advertised most heavily to young bettors.
       </Callout>
-      <Callout tone="note" label="Two more deductions">
-        Jackpot figures advertise the annuity value before taxes: a lump-sum winner keeps roughly
-        half the headline number after federal and state income tax, which the Understanding Taxes
-        lesson can make concrete. And casino paybacks assume flawless play; casual blackjack gives
-        up another point or two to the table minimum and hunches.
+      <Callout tone="note" label="Taxes and imperfect play">
+        Jackpot figures advertise the annuity value before taxes. A lump-sum winner keeps roughly
+        half the headline number after federal and state income tax. Casino paybacks also assume
+        flawless play: casual blackjack gives up another point or two.
       </Callout>
     </>
   )
@@ -320,7 +316,7 @@ function ResearchView() {
     <>
       <StepHeader
         title="Evidence from legalized sports betting"
-        hint="Legal sports betting is eight years old. The first careful studies of its effect on household finances have been published."
+        hint="Sports betting has been legal in most states since 2018. These are the published studies of what it has done to household finances."
       />
       <div className={styles.stats}>
         <Stat
@@ -353,8 +349,8 @@ function ResearchView() {
         Following hundreds of thousands of households before and after their state legalized
         online sports betting, Baker, Balthrop, Johnson, Kotter, and Pisciotta find net brokerage
         investment falls about <strong>14%</strong>, roughly a dollar less invested for every
-        dollar bet. The strain lands hardest on households already stretched thin: bettors with
-        low savings cut investing about three times as much, carry roughly{' '}
+        dollar bet. The effect is largest among households with low savings, who cut investing
+        about three times as much, carry roughly{' '}
         <strong>8% higher credit card balances</strong>, and overdraft more often.
       </Callout>
       <Callout tone="mark" label="Effects on credit reports">
@@ -362,23 +358,22 @@ function ResearchView() {
         <strong>online</strong> sports betting see average credit scores slip about 3 points,
         bankruptcies rise roughly <strong>10%</strong>, and debt in collections rise about 8%,
         with the effects arriving about two years after launch and concentrated among young,
-        lower-income men, exactly who your students are about to be.
+        lower-income men.
       </Callout>
       <Callout tone="note" label="Trading apps can work like a sportsbook">
         Barber, Huang, Odean, and Schwarz (Journal of Finance, 2022) studied Robinhood&rsquo;s
         design: when its users herded into the day&rsquo;s most attention-grabbing stocks, those
         stocks went on to lose about <strong>4.7% over the next 20 days</strong>, and nearly 20%
         after the most extreme episodes. Massachusetts fined Robinhood $7.5 million over the
-        game-like features involved. An app can make a negative expected value feel like
-        investing.
+        game-like features involved.
       </Callout>
       <Callout tone="note" label="Prediction markets">
         Kalshi and Polymarket traded about <strong>$45 billion in June 2026 alone</strong>, and
         roughly nine of every ten of those dollars were bets on sports, running through a
-        federally regulated exchange rather than a state sportsbook. Regulators are still
-        catching up: the CFTC proposed its first real limits in June 2026. There is no
-        peer-reviewed evidence yet on what these do to households. The accurate description is
-        that the odds structure is the sportsbook&rsquo;s, sold through a brokerage-style app.
+        federally regulated exchange rather than a state sportsbook. The CFTC proposed its first
+        limits in June 2026. There is no peer-reviewed evidence yet on what these do to
+        households. The odds structure is a sportsbook&rsquo;s, sold through a brokerage-style
+        app.
       </Callout>
       <p className={styles.footnote}>
         Sources: Baker, Balthrop, Johnson, Kotter, and Pisciotta, Gambling Away Stability, NBER
@@ -411,19 +406,18 @@ function MathView() {
       />
       <FormulaBlock
         tex={`\\mathbb{E}[\\text{scratch ticket}] \\;=\\; 0.65 - 1 \\;=\\; -\\$0.35 \\text{ per dollar}`}
-        caption="Lotteries publish prize payouts near 65% of sales, so the expected value of a $1 ticket is about negative 35 cents. No pattern of numbers, store, or streak changes it."
+        caption="Lotteries publish prize payouts near 65% of sales, so the expected value of a $1 ticket is about negative 35 cents."
         muted
       />
       <FormulaBlock
         tex={`\\bar{X}_n \\;\\longrightarrow\\; \\mathbb{E}[X] \\quad \\text{as plays pile up}`}
-        caption="The law of large numbers: the average result per play converges to the expected value as plays pile up. Negative expected value plus repetition equals near-certain loss; positive expected value plus patience equals near-certain gain. Repetition works against the gambler and for the investor."
+        caption="The law of large numbers: the average result per play converges to the expected value as the number of plays rises. A negative expected value repeated often enough becomes a near-certain loss, and a positive one a near-certain gain."
       />
-      <Callout tone="note" label="Why the investor's odds improve">
-        A diversified index fund is a positive expected value bet whose yearly ups and downs partly
-        cancel over time, the diversification argument applied across years instead of across
-        stocks. The 8% average and yearly swings of about 20% behind the chance-of-being-ahead model are similar
-        to the assumptions in the One Stock or the Fund lesson; the U.S. market has finished a calendar
-        year higher roughly three times out of four.
+      <Callout tone="note" label="Why the investor's odds improve with time">
+        A diversified index fund has a positive expected value, and its yearly ups and downs partly
+        cancel out over a long holding period. The chance-of-being-ahead model uses an 8% average
+        return and yearly swings of about 20%. The U.S. market has finished a calendar year higher
+        roughly three times out of four.
       </Callout>
     </>
   )

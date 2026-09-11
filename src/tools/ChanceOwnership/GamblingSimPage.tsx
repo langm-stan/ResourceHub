@@ -68,28 +68,27 @@ function BettingStation() {
   const insight = isPM ? (
     <Callout tone="mark" label="Zero-sum, minus fees">
       An event contract has no house on the other side: one trader's gain is another trader's loss,
-      less the exchange's fee. That fee looks tiny (at most 1.75¢ per $1 contract), but measured
-      against the money wagered, a market order near 50¢ gives up about 3.5% per trade, not far
-      below the sportsbook's 4.5%. The exchange collects it on every trade, and the product is
-      built to produce many trades.
+      less the exchange's fee. The fee is at most 1.75¢ per $1 contract, but measured against the
+      money wagered, a market order near 50¢ gives up about 3.5% per trade, against the
+      sportsbook's 4.5%. The exchange collects it on every trade.
     </Callout>
   ) : betType === 'blackjack' ? (
-    <Callout tone="mark" label="Skill lowers the house edge but does not remove it">
-      Basic strategy reduces the house edge to about 1%, the smallest of any common casino game. The
-      expected value of each hand is still negative, so the median player still loses; the loss
-      simply accumulates more slowly.
+    <Callout tone="mark" label="Blackjack and the house edge">
+      Basic strategy reduces the house edge to about 1%, the smallest of any common casino game.
+      The expected value of each hand is still negative, so the median player still loses. The
+      loss accumulates more slowly.
     </Callout>
   ) : betType === 'parlay' ? (
     <Callout tone="mark" label="Why parlays cost more">
       A same-game parlay applies the sportsbook's margin to every leg, compounding it into an
-      effective edge near 25%. Compare the band here with the straight bet: the distribution of
-      outcomes shifts toward loss much faster per bet placed.
+      effective edge near 25%. Set the game to a straight bet to compare: the outcomes here shift
+      toward loss faster per bet placed.
     </Callout>
   ) : (
     <Callout tone="mark" label="The law of large numbers">
-      Any single player's result is dominated by luck, which is why the band is wide. The group's
-      result is arithmetic: with a negative expected value per bet, the average bankroll falls as
-      bets accumulate, and the spread of likely outcomes concentrates around that falling average.
+      Any single player's result is dominated by luck, which is why the band is wide. With a
+      negative expected value per bet, the average bankroll falls as bets accumulate, and the
+      spread of likely outcomes narrows around that falling average.
     </Callout>
   )
 
@@ -195,10 +194,9 @@ export function GamblingSimPage({ intro = true }: { intro?: boolean } = {}) {
           <p className={styles.eyebrow}>Lesson · Gambling vs. investing</p>
           <h1 className={styles.h1}>Gambling Simulation</h1>
           <p className={styles.lead}>
-            A thousand people play the same game over and over. Any one of them might get
-            lucky, but the house keeps a cut of every bet, so as the bets add up the group falls
-            behind. This is the losing side of the same law of large numbers that later works for the
-            patient investor.
+            A thousand people play the same game over and over. Any one of them might get lucky,
+            but the house keeps a cut of every bet, so the group falls behind as the bets add
+            up.
           </p>
         </header>
       )}

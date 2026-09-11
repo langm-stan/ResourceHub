@@ -263,16 +263,16 @@ export const COURSE_UNITS: CourseUnit[] = [
       'The difference between investing and gambling, and bitcoin mining.',
     tools: [
 {
-        slug: 'gambling-investing',
-        label: 'Gambling vs. Investing',
-        description: 'The same weekly amount spent on gambling versus invested in an index fund.',
-        keywords: ['gambling', 'investing', 'expected value', 'SPY', 'lottery', 'parlay', 'index fund', 'weekly habit'],
-      },
-{
         slug: 'gambling-sim',
         label: 'Gambling Simulation',
         description: 'A thousand players bet on blackjack, sports, parlays, or prediction markets at actual house odds.',
         keywords: ['gambling', 'betting', 'sports betting', 'casino', 'blackjack', 'parlays', 'prediction markets', 'house edge', 'odds', 'lottery'],
+      },
+{
+        slug: 'gambling-investing',
+        label: 'Gambling vs. Investing',
+        description: 'The same weekly amount spent on gambling versus invested in an index fund.',
+        keywords: ['gambling', 'investing', 'expected value', 'SPY', 'lottery', 'parlay', 'index fund', 'weekly habit'],
       },
 {
         slug: 'bitcoin-mining',
