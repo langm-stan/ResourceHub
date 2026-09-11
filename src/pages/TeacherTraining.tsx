@@ -122,15 +122,15 @@ function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
       className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
       <span className="min-w-0 flex-1">
-        <span className="font-serif text-[15px] font-semibold text-stone-900 transition-colors group-hover:text-cardinal">
+        <span className="font-serif text-[17px] font-semibold text-stone-900 transition-colors group-hover:text-cardinal">
           {tool.label}
         </span>
         {badge && (
-          <span className="ml-2 text-[13px] font-semibold uppercase tracking-wider text-stone-400">
+          <span className="ml-2 text-[14px] font-semibold uppercase tracking-wider text-stone-400">
             {badge}
           </span>
         )}
-        <span className="mt-0.5 block text-sm leading-relaxed text-stone-600">
+        <span className="mt-0.5 block text-[15px] leading-relaxed text-stone-600">
           {tool.description}
         </span>
       </span>
@@ -184,16 +184,16 @@ function CatalogRow({
           className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
         >
           <span
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[14px] font-semibold ${
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-[15px] font-semibold ${
               count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
             }`}
           >
             {entry.number}
           </span>
-          <span className="min-w-0 flex-1 font-serif text-[17px] font-semibold leading-snug text-stone-900">
+          <span className="min-w-0 flex-1 font-serif text-[19px] font-semibold leading-snug text-stone-900">
             {entry.title}
           </span>
-          <span className="hidden shrink-0 text-[13px] text-stone-400 sm:block">
+          <span className="hidden shrink-0 text-[14px] text-stone-400 sm:block">
             {count === 0 ? 'In development' : count === 1 ? '1 tool' : `${count} tools`}
           </span>
           <ChevronDown
@@ -205,11 +205,11 @@ function CatalogRow({
       {/* The panel stays in the document and hides, so the button's
           aria-controls always resolves to a real element. */}
       <div id={panelId} hidden={!open} className="px-3 pb-4 sm:pl-[3.375rem]">
-          <p className="mb-2 max-w-3xl text-sm leading-relaxed text-stone-600">
+          <p className="mb-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">
             {entry.description}
           </p>
           {count === 0 ? (
-            <p className="px-3 text-sm text-stone-500">
+            <p className="px-3 text-[15px] text-stone-500">
               The tools for this unit are still being built.
             </p>
           ) : (
@@ -261,7 +261,7 @@ export default function TeacherTraining() {
           >
             The Personal Finance Toolkit
           </h1>
-          <p className="mt-4 max-w-3xl mx-auto text-white/85 leading-relaxed">
+          <p className="mt-4 max-w-3xl mx-auto text-[18px] text-white/85 leading-relaxed">
             Interactive tools for teaching personal finance, organized by unit.
           </p>
           <div className="relative mt-7 max-w-md mx-auto">
@@ -275,7 +275,7 @@ export default function TeacherTraining() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search the tools"
               aria-label="Search the tools"
-              className="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-[15px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+              className="w-full rounded-xl border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
             />
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function TeacherTraining() {
             </div>
             {hits ? (
               <>
-                <p className="mb-3 text-sm text-stone-600">
+                <p className="mb-3 text-[15px] text-stone-600">
                   {hits.length === 0
                     ? 'No tools match that search.'
                     : hits.length === 1
