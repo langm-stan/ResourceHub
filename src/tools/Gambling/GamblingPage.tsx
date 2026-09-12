@@ -27,16 +27,13 @@ import {
 import { AheadChart } from './components/AheadChart'
 import { MoneyPathChart } from './components/MoneyPathChart'
 import { OddsChart } from './components/OddsChart'
-import { StocksBondsContent } from './StocksBondsPage'
 import styles from './GamblingPage.module.css'
 
-type Surface = 'overview' | 'odds' | 'history' | 'research' | 'math'
+type Surface = 'overview' | 'odds' | 'math'
 
 const TABS: TabItem<Surface>[] = [
   { value: 'overview', label: 'Overview' },
   { value: 'odds', label: 'Know the odds' },
-  { value: 'history', label: 'Stocks vs. bonds' },
-  { value: 'research', label: 'What the research says' },
   { value: 'math', label: 'The math' },
 ]
 
@@ -149,8 +146,6 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
             <Overview weekly={weekly} startYear={startYear} endYear={endYear} game={game} />
           )}
           {surface === 'odds' && <KnowTheOdds />}
-          {surface === 'history' && <StocksBondsContent figure="Figure 4." />}
-          {surface === 'research' && <ResearchView />}
           {surface === 'math' && <MathView />}
         </Card>
       </div>
@@ -291,101 +286,6 @@ function KnowTheOdds() {
 }
 
 /* ------------------------------------------------------------------ */
-
-/*
- * Every figure below was verified against primary sources in July 2026:
- * - Baker, Balthrop, Johnson, Kotter & Pisciotta, "Gambling Away
- *   Stability" (NBER WP 33108, 2024; R&R at the Journal of Financial
- *   Economics): net investment -14% (~$53/quarter); ~$0.99 less invested
- *   per $1 bet (2SLS); constrained bettors' card balances +$368 (~8%).
- * - Hollenbeck, Larsen & Proserpio, "The Financial Consequences of
- *   Legalized Sports Gambling" (ACM EC '25; April 2025 revision): online
- *   legalization cuts credit scores ~2.75 points, bankruptcies +~10%,
- *   collections +8%. Use the 2025 revision's numbers, not the larger
- *   2024-media figures.
- * - Barber, Huang, Odean & Schwarz (Journal of Finance, 2022): Robinhood
- *   herding, -4.7% abnormal over 20 days; -19.6% for the 45 most extreme
- *   episodes; Massachusetts $7.5M gamification settlement (2024).
- * - Scale: AGA 2025 handle $166.9B; Pew (Oct 2025) 31% of adults under
- *   30 bet on sports in the past year; Kalshi+Polymarket $44.8B volume
- *   in June 2026, ~87% of Kalshi volume is sports (CRS, March 2026);
- *   CFTC proposed rule June 2026.
- */
-function ResearchView() {
-  return (
-    <>
-      <StepHeader
-        title="Evidence from legalized sports betting"
-        hint="Sports betting has been legal in most states since 2018. These are the published studies of what it has done to household finances."
-      />
-      <div className={styles.stats}>
-        <Stat
-          label="Legal U.S. sports bets, 2025"
-          value={167}
-          format={(v) => `$${Math.round(v)}B`}
-          emphasis
-          accentColor={CARDINAL}
-          animate={false}
-          note="across about 39 states, from zero in 2018"
-        />
-        <Stat
-          label="Adults under 30 who bet on sports"
-          value={0.31}
-          format={(v) => formatPercent(v, 0)}
-          animate={false}
-          note="in the past year (Pew, 2025); 36% of men under 30"
-        />
-        <Stat
-          label="Invested less, per dollar bet"
-          value={0.99}
-          format={(v) => `$${v.toFixed(2)}`}
-          accentColor={CARDINAL}
-          animate={false}
-          note="betting crowds out brokerage deposits almost one for one"
-        />
-      </div>
-
-      <Callout tone="mark" label="Betting crowds out investing">
-        Following hundreds of thousands of households before and after their state legalized
-        online sports betting, Baker, Balthrop, Johnson, Kotter, and Pisciotta find net brokerage
-        investment falls about <strong>14%</strong>, roughly a dollar less invested for every
-        dollar bet. The effect is largest among households with low savings, who cut investing
-        about three times as much, carry roughly{' '}
-        <strong>8% higher credit card balances</strong>, and overdraft more often.
-      </Callout>
-      <Callout tone="mark" label="Effects on credit reports">
-        Hollenbeck, Larsen, and Proserpio track millions of credit files: states that legalize{' '}
-        <strong>online</strong> sports betting see average credit scores slip about 3 points,
-        bankruptcies rise roughly <strong>10%</strong>, and debt in collections rise about 8%,
-        with the effects arriving about two years after launch and concentrated among young,
-        lower-income men.
-      </Callout>
-      <Callout tone="note" label="Trading apps can work like a sportsbook">
-        Barber, Huang, Odean, and Schwarz (Journal of Finance, 2022) studied Robinhood&rsquo;s
-        design: when its users herded into the day&rsquo;s most attention-grabbing stocks, those
-        stocks went on to lose about <strong>4.7% over the next 20 days</strong>, and nearly 20%
-        after the most extreme episodes. Massachusetts fined Robinhood $7.5 million over the
-        game-like features involved.
-      </Callout>
-      <Callout tone="note" label="Prediction markets">
-        Kalshi and Polymarket traded about <strong>$45 billion in June 2026 alone</strong>, and
-        roughly nine of every ten of those dollars were bets on sports, running through a
-        federally regulated exchange rather than a state sportsbook. The CFTC proposed its first
-        limits in June 2026. There is no peer-reviewed evidence yet on what these do to
-        households. The odds structure is a sportsbook&rsquo;s, sold through a brokerage-style
-        app.
-      </Callout>
-      <p className={styles.footnote}>
-        Sources: Baker, Balthrop, Johnson, Kotter, and Pisciotta, Gambling Away Stability, NBER
-        Working Paper 33108 (2024). Hollenbeck, Larsen, and Proserpio, The Financial Consequences
-        of Legalized Sports Gambling, ACM EC &rsquo;25 (April 2025 revision). Barber, Huang,
-        Odean, and Schwarz, Attention-Induced Trading and Returns, Journal of Finance 77(6),
-        2022. American Gaming Association 2025 revenue tracker; Pew Research Center, October
-        2025; Congressional Research Service IF13187, March 2026. Figures verified July 2026.
-      </p>
-    </>
-  )
-}
 
 /* ------------------------------------------------------------------ */
 
