@@ -64,25 +64,38 @@ export default function TeacherTrainingShell({
 
   return (
     <div>
+      {/* The way back travels with the reader. A sticky element can only move
+          within its own parent, so this sits at the top of the page rather
+          than inside the banner, which scrolls away. Inside the iframe the
+          host page's own scrollbar is far off, and without this the only
+          navigation left after a scroll is the prev/next pair at the foot. */}
+      {framed && (
+        <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
+          <div className="max-w-[1680px] mx-auto flex items-center gap-3 px-4 py-2">
+            <Link
+              to="/"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-[14px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
+            >
+              <ArrowLeft size={14} />
+              All tools
+            </Link>
+            <span className="min-w-0 flex-1 truncate text-left text-[15px] font-semibold text-white">
+              {title}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="bg-cardinal">
         {framed ? (
           /* The frame view inside ifdm.stanford.edu: everything centered,
              with the way back and this unit's other tools beneath the intro. */
-          <div className="max-w-[1680px] mx-auto px-6 py-8 text-center">
+          <div className="text-center">
+            <div className="max-w-[1680px] mx-auto px-6 pb-8 pt-7">
             <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase mb-2">
               {eyebrow}
             </p>
             <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
             {intro && <p className="mt-3 max-w-3xl mx-auto text-white/85 leading-relaxed">{intro}</p>}
-            <div className="mt-5 flex justify-center">
-              <Link
-                to="/"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-[14px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"
-              >
-                <ArrowLeft size={14} />
-                All tools
-              </Link>
-            </div>
             {siblings.length > 1 && (
               <nav
                 aria-label="Other tools in this unit"
@@ -108,6 +121,7 @@ export default function TeacherTrainingShell({
                 </ul>
               </nav>
             )}
+            </div>
           </div>
         ) : (
           <div className="max-w-[1680px] mx-auto px-6 py-8">

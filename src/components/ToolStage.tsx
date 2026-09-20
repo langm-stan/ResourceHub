@@ -22,6 +22,13 @@ export function ToolStage({ children }: { children: ReactNode }) {
   const [full, setFull] = useState(false)
   /** True when the browser refused real fullscreen and the frame is filled instead. */
   const [inFrameOnly, setInFrameOnly] = useState(false)
+  /*
+   * A page embedded in another site can only reach true fullscreen if that
+   * site allows it. The browser says so up front, so the button promises the
+   * screen only when it can deliver it, and says Expand when all it can do is
+   * fill the frame. It corrects itself if the host page starts allowing it.
+   */
+  const canGoFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled
 
   // The browser can leave fullscreen without us (Escape, the system control),
   // so the button follows the document rather than its own memory.
@@ -72,9 +79,18 @@ export function ToolStage({ children }: { children: ReactNode }) {
     >
       <div className={styles.bar}>
         <PresentationToggle />
-        <button type="button" onClick={() => void toggle()} className={styles.expand}>
+        <button
+          type="button"
+          onClick={() => void toggle()}
+          className={styles.expand}
+          title={
+            canGoFullscreen
+              ? 'Fill the screen'
+              : 'Fill the frame. This page cannot reach full screen unless the site it sits in allows it.'
+          }
+        >
           {full ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          {full ? 'Leave full screen' : 'Full screen'}
+          {full ? 'Close' : canGoFullscreen ? 'Full screen' : 'Expand'}
         </button>
       </div>
       <div className="toolkitScope">{children}</div>

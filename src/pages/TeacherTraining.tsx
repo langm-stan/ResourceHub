@@ -204,8 +204,8 @@ function CatalogRow({
       </h2>
       {/* The panel stays in the document and hides, so the button's
           aria-controls always resolves to a real element. */}
-      <div id={panelId} hidden={!open} className="px-3 pb-4 sm:pl-[3.375rem]">
-          <p className="mb-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">
+      <div id={panelId} hidden={!open} className="px-3 pb-4 pt-3 sm:pl-[3.375rem]">
+          <p className="mb-3 max-w-3xl text-[15px] leading-relaxed text-stone-600">
             {entry.description}
           </p>
           {count === 0 ? (
