@@ -47,25 +47,3 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* The setting sits beside the controls, quieter than either of them. */
-.pref {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-family: var(--ff-ui);
-  font-size: var(--fs-caption);
-  white-space: nowrap;
-  user-select: none;
-}
-.pref input {
-  width: 15px;
-  height: 15px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-.pref:hover {
-  color: var(--text-primary);
-}

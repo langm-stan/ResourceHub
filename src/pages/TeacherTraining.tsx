@@ -4,7 +4,7 @@ import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFullscreen } from '../components/FullscreenProvider'
-import { OpenFullToggle, StageControls } from '../components/StageControls'
+import { StageControls } from '../components/StageControls'
 import { useFramed } from '../hooks/useFramed'
 
 /*
@@ -374,8 +374,7 @@ export default function TeacherTraining() {
             {/* Text size and the way to a filled screen sit in one place
                 throughout the toolkit. Filled, they are up in the bar. */}
             {!isFull && (
-              <div className="mb-3 flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
-                <OpenFullToggle />
+              <div className="mb-3 flex justify-end">
                 <StageControls />
               </div>
             )}
