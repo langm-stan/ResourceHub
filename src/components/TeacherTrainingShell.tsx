@@ -273,18 +273,13 @@ export default function TeacherTrainingShell({
               a large window. */}
           <div
             /*
-             * With no site chrome around it the window is the width, so a
-             * tool takes all of it. Pages that are prose rather than a tool
-             * keep a reading measure, since a line of text 1800px long is
-             * not a kindness.
+             * With no site chrome around it the window is the width. The
+             * measure that keeps a line of prose readable belongs on the
+             * prose itself, not on the whole well: capping the well boxed the
+             * cards and the prev/next into the middle of the page while the
+             * banner above them ran edge to edge.
              */
-            className={`flex-1 min-w-0 ${
-              showBar
-                ? `mx-auto w-full ${wide || isFull ? '' : 'max-w-5xl'}`
-                : wide
-                  ? ''
-                  : 'max-w-5xl'
-            }`}
+            className={`flex-1 min-w-0 ${showBar ? 'mx-auto w-full' : wide ? '' : 'max-w-5xl'}`}
           >
             {children}
 
