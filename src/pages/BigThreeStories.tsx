@@ -52,13 +52,13 @@ export function BigThreeStoriesContent() {
 
   return (
     <>
-      <p className="max-w-3xl text-stone-700 leading-relaxed mb-8">
+      <p className="mx-auto mb-8 max-w-4xl leading-relaxed text-stone-700">
         Three stories in which characters apply fundamental financial concepts from the Big Three to make better
         decisions. Research shows that reading stories like these significantly improves understanding of these
         concepts, and revisiting them helps the lessons stick.
       </p>
 
-      <div className="flex flex-col gap-4 max-w-3xl">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4">
         {STORIES.map((s) => {
           const isOpen = open === s.key
           return (

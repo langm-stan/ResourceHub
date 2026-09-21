@@ -80,14 +80,14 @@ function ResponseBar({ responses: r }: { responses: { correct: number; incorrect
 export function BigThreeExplainedContent() {
   return (
     <>
-      <p className="max-w-3xl text-stone-700 leading-relaxed mb-10">
+      <p className="mx-auto mb-10 max-w-4xl leading-relaxed text-stone-700">
         The Big Three, a trio of financial literacy questions, evaluate understanding of compound interest,
         inflation, and risk diversification, three fundamental financial concepts that we encourage you to learn,
         as they are the basis of sound financial decision-making. Below is the correct answer to each of the Big
         Three questions and the explanation for that answer.
       </p>
 
-      <div className="flex flex-col gap-6 max-w-3xl">
+      <div className="mx-auto flex max-w-4xl flex-col gap-6">
         {QUESTIONS.map((item) => (
           <div key={item.number} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-card">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-2">

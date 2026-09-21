@@ -40,7 +40,7 @@ const CARDS = [
 export function BigThreeContent({ base = '' }: { base?: string }) {
   return (
     <>
-      <div className="flex flex-col gap-6 max-w-3xl mb-10 text-[18px] leading-relaxed text-stone-700">
+      <div className="mx-auto mb-10 flex max-w-4xl flex-col gap-6 leading-relaxed text-stone-700">
         <p>
           For more than 20 years, the Big Three allowed us to gauge whether people understand the basic concepts
           needed to manage money, build wealth, and create a financially secure future. These three questions have
@@ -75,10 +75,10 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
             <div>
               {/* The banner's title is the only heading above these, so they are the
                   second level, not the third. The size comes from the class. */}
-              <h2 className="mb-1.5 text-[19px] font-bold tracking-[-0.016em] text-stone-900">{c.title}</h2>
-              <p className="text-[16px] leading-relaxed text-stone-600">{c.description}</p>
+              <h2 className="mb-1.5 text-[21px] font-bold tracking-[-0.016em] text-stone-900">{c.title}</h2>
+              <p className="text-[18px] leading-relaxed text-stone-600">{c.description}</p>
             </div>
-            <span className="mt-auto text-[16px] font-semibold text-cardinal">{c.cta} →</span>
+            <span className="mt-auto text-[18px] font-semibold text-cardinal">{c.cta} →</span>
           </Link>
         ))}
       </div>
