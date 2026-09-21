@@ -172,7 +172,7 @@ export default function TeacherTrainingShell({
             </div>
           </div>
         ) : (
-          <div className={`mx-auto px-6 py-8 ${isFull ? 'w-full' : 'max-w-[1680px]'}`}>
+          <div className={`mx-auto px-6 py-8 ${showBar ? 'w-full' : 'max-w-[1680px]'}`}>
             <div className="flex items-start justify-between gap-4 mb-2">
               <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase">
                 {eyebrow}
@@ -191,7 +191,7 @@ export default function TeacherTrainingShell({
         )}
       </div>
 
-      <div className={`mx-auto px-6 py-8 ${isFull ? 'w-full' : 'max-w-[1680px]'}`}>
+      <div className={`mx-auto px-6 py-8 ${showBar ? 'w-full' : 'max-w-[1680px]'}`}>
         <div className="flex flex-col md:flex-row gap-x-10 gap-y-6">
           {!showBar && (
           <aside className="md:w-56 shrink-0">
@@ -272,11 +272,15 @@ export default function TeacherTrainingShell({
               pages are capped, so a parameter band does not stretch across
               a large window. */}
           <div
-            /* Filled, the screen is the width: a cap here wasted a fifth of
-               a 1920 display on either side. */
+            /*
+             * With no site chrome around it the window is the width, so a
+             * tool takes all of it. Pages that are prose rather than a tool
+             * keep a reading measure, since a line of text 1800px long is
+             * not a kindness.
+             */
             className={`flex-1 min-w-0 ${
               showBar
-                ? `mx-auto w-full ${isFull ? '' : wide ? 'max-w-7xl' : 'max-w-5xl'}`
+                ? `mx-auto w-full ${wide || isFull ? '' : 'max-w-5xl'}`
                 : wide
                   ? ''
                   : 'max-w-5xl'

@@ -7,6 +7,7 @@ import { useFullscreen } from '../components/FullscreenProvider'
 import { StageControls } from '../components/StageControls'
 import { ToolMark } from '../components/ToolMark'
 import { useFramed } from '../hooks/useFramed'
+import styles from './TeacherTraining.module.css'
 
 /*
  * The Personal Finance Teaching Toolkit landing page: the fifteen units in
@@ -380,7 +381,7 @@ export default function TeacherTraining() {
         </div>
       )}
 
-      <div className={`mx-auto px-6 pb-6 pt-8 ${isFull ? 'w-full' : 'max-w-7xl'}`}>
+      <div className={`mx-auto px-6 pb-6 pt-8 ${framed || isFull ? 'w-full' : 'max-w-7xl'}`}>
         <div className="flex flex-col gap-x-10 gap-y-8 md:flex-row">
           {/* The hub's left rail stays alongside the toolkit, so arriving from
               ifdm.stanford.edu/resourcehub keeps the section's shell. Inside
@@ -395,10 +396,12 @@ export default function TeacherTraining() {
           )}
 
           <div
-            /* Filled, the screen is the width. A cap here left a fifth of a
-               1920 display empty on either side. */
-            className={`min-w-0 flex-1 ${isFull ? 'w-full' : 'max-w-5xl'} ${
-              framed || isFull ? 'mx-auto w-full' : ''
+            /* Without the site's own chrome around it, the window is the
+               width. The cap here was chosen for the 880px iframe, where it
+               never binds; in a wide window it was throwing away 448px on
+               either side. */
+            className={`min-w-0 flex-1 ${
+              framed || isFull ? 'mx-auto w-full' : 'max-w-5xl'
             }`}
           >
             {/* Text size and the way to a filled screen sit in one place
@@ -426,7 +429,7 @@ export default function TeacherTraining() {
             ) : (
               /* Nothing sits between the search box and the cards, so Tab from
                  the search lands on the first unit. */
-              <div className="flex flex-col gap-3">
+              <div className={`flex flex-col gap-3 ${styles.units}`}>
                 {lead && (
                   <UnitCard
                     entry={lead}
@@ -438,7 +441,7 @@ export default function TeacherTraining() {
                 )}
                 {/* Two to a row, each card its own height, so opening one does
                     not stretch the one beside it. */}
-                <div className="grid items-start gap-3 md:grid-cols-2">
+                <div className={styles.grid}>
                   {others.map((entry) => (
                     <UnitCard
                       key={entry.id}
