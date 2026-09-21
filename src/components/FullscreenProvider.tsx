@@ -38,11 +38,13 @@ interface FullscreenApi {
   enter: () => void
   /*
    * Asked for on the reader's behalf, by a link that is about to open a tool.
-   * It stands down for the rest of the visit once the reader has left a
-   * filled screen themselves: leaving is an answer, and a screen that keeps
-   * taking itself over after that is one that is not listening.
+   * Governed by openToolsFull, so it is a setting the reader can see rather
+   * than a rule the page keeps to itself.
    */
   enterUnlessDeclined: () => void
+  /** Whether opening a tool should fill the screen. The reader's setting. */
+  openToolsFull: boolean
+  setOpenToolsFull: (on: boolean) => void
   exit: () => void
   toggle: () => void
 }
@@ -52,11 +54,31 @@ const OFF: FullscreenApi = {
   canFullscreen: false,
   enter: () => {},
   enterUnlessDeclined: () => {},
+  openToolsFull: false,
+  setOpenToolsFull: () => {},
   exit: () => {},
   toggle: () => {},
 }
 
 const FullscreenContext = createContext<FullscreenApi>(OFF)
+
+/*
+ * Opening a tool fills the screen unless the reader says otherwise, because
+ * the frame it sits in on ifdm.stanford.edu is shorter than any of the tools
+ * and leaves two scrollbars fighting each other. The setting is remembered
+ * the same way the text size is.
+ */
+const PREF_KEY = 'ifdm-open-full'
+
+function storedPref(): boolean {
+  if (typeof localStorage === 'undefined') return true
+  try {
+    return localStorage.getItem(PREF_KEY) !== '0'
+  } catch {
+    // Storage blocked: fall back to filling the screen.
+    return true
+  }
+}
 
 export function useFullscreen() {
   return useContext(FullscreenContext)
@@ -76,30 +98,47 @@ export function FullscreenProvider({
   const [filled, setFilled] = useState(false)
   const isFull = real || filled
   const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled
+  const [openToolsFull, setOpenToolsFullState] = useState(storedPref)
   const { pathname } = useLocation()
+
+  const setOpenToolsFull = useCallback((on: boolean) => {
+    setOpenToolsFullState(on)
+    try {
+      localStorage.setItem(PREF_KEY, on ? '1' : '0')
+    } catch {
+      // ignore storage failures
+    }
+  }, [])
 
   // The browser can leave fullscreen without us (Escape, the system control),
   // so the state follows the document rather than its own memory.
   useEffect(() => {
     const sync = () => {
       const granted = document.fullscreenElement === ref.current
-      setReal(granted)
+      setReal((was) => {
+        // Leaving by the system control or Escape is the reader saying no as
+        // plainly as the button does, so it moves the same setting.
+        if (was && !granted) setOpenToolsFull(false)
+        return granted
+      })
       // A late grant supersedes the filled frame, so the two never stack.
       if (granted) setFilled(false)
     }
     document.addEventListener('fullscreenchange', sync)
     return () => document.removeEventListener('fullscreenchange', sync)
-  }, [])
+  }, [setOpenToolsFull])
 
   // Escape also closes the fallback, which the browser knows nothing about.
   useEffect(() => {
     if (!filled) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFilled(false)
+      if (e.key !== 'Escape') return
+      setFilled(false)
+      setOpenToolsFull(false)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [filled])
+  }, [filled, setOpenToolsFull])
 
   // Filled, this element scrolls rather than the window, so each new page has
   // to be scrolled back to its top by hand.
@@ -133,18 +172,16 @@ export function FullscreenProvider({
     })
   }, [])
 
-  const declined = useRef(false)
-
   const exit = useCallback(() => {
-    declined.current = true
+    setOpenToolsFull(false)
     setFilled(false)
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
-  }, [])
+  }, [setOpenToolsFull])
 
   const enterUnlessDeclined = useCallback(() => {
-    if (declined.current) return
+    if (!openToolsFull) return
     enter()
-  }, [enter])
+  }, [enter, openToolsFull])
 
   const api = useMemo<FullscreenApi>(
     () => ({
@@ -152,18 +189,18 @@ export function FullscreenProvider({
       canFullscreen,
       enter,
       enterUnlessDeclined,
+      openToolsFull,
+      setOpenToolsFull,
       exit,
-      toggle: () => {
-        if (isFull) {
-          exit()
-          return
-        }
-        // Asking for it outright takes back an earlier refusal.
-        declined.current = false
-        enter()
-      },
+      /*
+       * Filling the screen once is not the same as asking for every tool to
+       * do it, so the button only turns the setting off, never on. Turning it
+       * off by mistake costs one press of the button; turning it on by
+       * mistake costs a surprise on every tool after it.
+       */
+      toggle: () => (isFull ? exit() : enter()),
     }),
-    [isFull, canFullscreen, enter, enterUnlessDeclined, exit],
+    [isFull, canFullscreen, enter, enterUnlessDeclined, openToolsFull, setOpenToolsFull, exit],
   )
 
   return (

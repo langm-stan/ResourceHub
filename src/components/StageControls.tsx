@@ -62,3 +62,28 @@ export function StageControlsRow() {
     </div>
   )
 }
+
+/*
+ * The setting behind the automatic full screen, shown where the reader can
+ * see it. It only earns its place inside the iframe on ifdm.stanford.edu,
+ * where the frame is shorter than the tools; on the full site the window is
+ * already the whole window. The wording follows the button's: a browser that
+ * cannot reach the screen can still fill the frame, and neither should be
+ * called the other.
+ */
+export function OpenFullToggle() {
+  const framed = useFramed()
+  const { canFullscreen, openToolsFull, setOpenToolsFull } = useFullscreen()
+  if (!framed) return null
+
+  return (
+    <label className={styles.pref}>
+      <input
+        type="checkbox"
+        checked={openToolsFull}
+        onChange={(e) => setOpenToolsFull(e.target.checked)}
+      />
+      {canFullscreen ? 'Open tools full screen' : 'Open tools expanded'}
+    </label>
+  )
+}
