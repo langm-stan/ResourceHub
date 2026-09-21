@@ -120,12 +120,10 @@ function runSearch(query: string): SearchHit[] {
 function ToolRow({
   tool,
   badge,
-  onOpen,
   compact = false,
 }: {
   tool: TrainingTool
   badge?: string
-  onOpen: () => void
   /** The mark and the name alone, for the three-across row at the top. */
   compact?: boolean
 }) {
@@ -133,7 +131,6 @@ function ToolRow({
     return (
       <Link
         to={`/${tool.slug}`}
-        onClick={onOpen}
         className="group flex items-center gap-2.5 px-3 py-2 transition-all hover:bg-white hover:shadow-card"
       >
         <span className="shrink-0">
@@ -148,7 +145,6 @@ function ToolRow({
   return (
     <Link
       to={`/${tool.slug}`}
-      onClick={onOpen}
       className="group flex items-center gap-3 px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
       <span className="shrink-0 text-stone-400">
@@ -210,13 +206,11 @@ function UnitCard({
   entry,
   open,
   onToggle,
-  onOpen,
   wide = false,
 }: {
   entry: CatalogEntry
   open: boolean
   onToggle: () => void
-  onOpen: () => void
   /** The card at the top, whose tools run three across without descriptions. */
   wide?: boolean
 }) {
@@ -263,7 +257,7 @@ function UnitCard({
         ) : (
           <div className={wide ? 'grid gap-1 sm:grid-cols-3' : 'flex flex-col'}>
             {entry.tools.map((tool) => (
-              <ToolRow key={tool.slug} tool={tool} onOpen={onOpen} compact={wide} />
+              <ToolRow key={tool.slug} tool={tool} compact={wide} />
             ))}
           </div>
         )}
@@ -285,18 +279,7 @@ export default function TeacherTraining() {
    */
   const [openId, setOpenId] = useState<string | null>(CATALOG[0]?.id ?? null)
   const framed = useFramed()
-  const { isFull, enterUnlessDeclined } = useFullscreen()
-
-  /*
-   * Inside the iframe on ifdm.stanford.edu the toolkit has a narrow well and
-   * a second scrollbar to work against, so opening a tool fills the screen.
-   * A browser only grants that during a click, which is why the link asks on
-   * its way out rather than the tool page asking once it has arrived. On the
-   * full site the page already has the window and nothing needs to change.
-   */
-  const openTool = () => {
-    if (framed) enterUnlessDeclined()
-  }
+  const { isFull } = useFullscreen()
 
   // A distinct document title for the course overview (WCAG 2.4.2).
   useEffect(() => {
@@ -422,7 +405,7 @@ export default function TeacherTraining() {
                 </p>
                 <div className="border border-stone-200 bg-stone-50/70 p-2 shadow-card">
                   {hits.map(({ tool, badge }) => (
-                    <ToolRow key={tool.slug} tool={tool} badge={badge} onOpen={openTool} />
+                    <ToolRow key={tool.slug} tool={tool} badge={badge} />
                   ))}
                 </div>
               </>
@@ -435,7 +418,6 @@ export default function TeacherTraining() {
                     entry={lead}
                     open={openId === lead.id}
                     onToggle={() => toggle(lead.id)}
-                    onOpen={openTool}
                     wide
                   />
                 )}
@@ -448,7 +430,6 @@ export default function TeacherTraining() {
                       entry={entry}
                       open={openId === entry.id}
                       onToggle={() => toggle(entry.id)}
-                      onOpen={openTool}
                     />
                   ))}
                 </div>

@@ -25,10 +25,9 @@ import styles from './FullscreenProvider.module.css'
  * opens a tool stays filled the whole way through. An element owned by a
  * single tool page would be destroyed the moment the reader moved on.
  *
- * The browser only grants fullscreen during a click, which is the other
- * reason this lives here: a link can call enter() from its own handler
- * before the router moves, rather than a tool page asking for it after the
- * fact, once the gesture has expired.
+ * Filling the screen is asked for outright, by the button, and never on the
+ * reader's behalf: a viewport that takes itself over because someone opened
+ * a tool is a surprise, and the tools are readable in the frame.
  *
  * A page inside an iframe only reaches real fullscreen if the host page
  * allows it. When the request is refused, the fallback fills the frame,
@@ -42,13 +41,6 @@ interface FullscreenApi {
   canFullscreen: boolean
   /** Asked for outright, by the button. */
   enter: () => void
-  /*
-   * Asked for on the reader's behalf, by a link that is about to open a tool.
-   * It stands down once the reader has left a filled screen themselves, and
-   * starts again the next time they ask for one outright. The button is the
-   * control: leaving says no, pressing it says yes.
-   */
-  enterUnlessDeclined: () => void
   exit: () => void
   toggle: () => void
 }
@@ -57,7 +49,6 @@ const OFF: FullscreenApi = {
   isFull: false,
   canFullscreen: false,
   enter: () => {},
-  enterUnlessDeclined: () => {},
   exit: () => {},
   toggle: () => {},
 }
@@ -82,12 +73,6 @@ export function FullscreenProvider({
   const [filled, setFilled] = useState(false)
   const isFull = real || filled
   const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled
-  /*
-   * Set when the reader leaves a filled screen themselves, which is them
-   * saying they would rather read in the frame. It lasts the visit, and
-   * pressing the button again clears it.
-   */
-  const declined = useRef(false)
   const { pathname } = useLocation()
 
   /*
@@ -128,12 +113,7 @@ export function FullscreenProvider({
   useEffect(() => {
     const sync = () => {
       const granted = document.fullscreenElement === ref.current
-      setReal((was) => {
-        // Leaving by the system control or Escape is the reader saying no as
-        // plainly as the button does, so it counts the same.
-        if (was && !granted) declined.current = true
-        return granted
-      })
+      setReal(granted)
       // A late grant supersedes the filled frame, so the two never stack.
       if (granted) setFilled(false)
     }
@@ -145,9 +125,7 @@ export function FullscreenProvider({
   useEffect(() => {
     if (!filled) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      setFilled(false)
-      declined.current = true
+      if (e.key === 'Escape') setFilled(false)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -186,35 +164,19 @@ export function FullscreenProvider({
   }, [])
 
   const exit = useCallback(() => {
-    declined.current = true
     setFilled(false)
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
   }, [])
-
-  const enterUnlessDeclined = useCallback(() => {
-    if (declined.current) return
-    enter()
-  }, [enter])
 
   const api = useMemo<FullscreenApi>(
     () => ({
       isFull,
       canFullscreen,
       enter,
-      enterUnlessDeclined,
       exit,
-      // The button is the whole control, so it has to work both ways: leaving
-      // stops tools filling the screen, and pressing it again starts them.
-      toggle: () => {
-        if (isFull) {
-          exit()
-          return
-        }
-        declined.current = false
-        enter()
-      },
+      toggle: () => (isFull ? exit() : enter()),
     }),
-    [isFull, canFullscreen, enter, enterUnlessDeclined, exit],
+    [isFull, canFullscreen, enter, exit],
   )
 
   return (
