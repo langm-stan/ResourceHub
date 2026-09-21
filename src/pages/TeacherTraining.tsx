@@ -222,9 +222,9 @@ function UnitCard({
       <div
         id={panelId}
         hidden={!open}
-        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-3 pt-2"
+        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-3 pt-3"
       >
-        <p className="px-3 pb-1 pt-1 text-[15px] leading-relaxed text-stone-600">
+        <p className="px-3 pb-3 text-[15px] leading-relaxed text-stone-600">
           {entry.description}
         </p>
         {entry.tools.length === 0 ? (

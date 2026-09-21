@@ -15,6 +15,18 @@ export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
 
   return (
     <div className={styles.group}>
+      {/* The control shows a bare percentage, which reads like the browser's
+          own zoom. The name says which one it is. It repeats the group's
+          aria-label, so it is hidden from a screen reader rather than said
+          twice, and it steps aside on a narrow bar. */}
+      <span
+        aria-hidden="true"
+        className={`hidden text-[13px] sm:inline ${
+          tone === 'dark' ? 'text-white/75' : 'text-stone-500'
+        }`}
+      >
+        Text size
+      </span>
       <PresentationToggle tone={tone} />
       <button
         type="button"
