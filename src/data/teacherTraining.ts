@@ -257,7 +257,7 @@ export const COURSE_UNITS: CourseUnit[] = [
   },
   {
     id: 'special-topics',
-    title: 'Special Topics: Gambling, Bitcoin',
+    title: 'Special Topics: Gambling, Bitcoin and Crypto',
     short: 'Special Topics',
     description:
       'The difference between investing and gambling, and bitcoin mining.',

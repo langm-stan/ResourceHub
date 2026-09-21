@@ -169,13 +169,11 @@ const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
   number: i + 1,
 }))
 
-const TOOL_COUNT = CATALOG.reduce((n, u) => n + u.tools.length, 0)
-
 /*
  * One unit of the course, as a card that opens onto its tools. Folded, the
- * card is the unit's name and what it covers; open, it lists the tools with
- * what each one does, which is the part a reader cannot guess from a name
- * like "Your FICO Score".
+ * card is the unit's name alone, so the whole course fits on one screen;
+ * open, it gives what the unit covers and lists its tools with what each one
+ * does, the part a reader cannot guess from a name like "Your FICO Score".
  *
  * The first unit runs the full width, since its tools are the ones used
  * throughout the course rather than inside one topic. The rest sit two to a
@@ -205,29 +203,17 @@ function UnitCard({
           onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
-          /* Two cards sit side by side, and their names and descriptions run
-             to different lengths, so a folded card keeps a floor height and
-             the pair lines up. In rem, so the text size control carries it. */
-          className={`flex w-full items-start gap-3.5 px-5 py-4 text-left transition-colors hover:bg-stone-50 ${
-            wide ? '' : 'md:min-h-[8.75rem]'
-          }`}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-50"
         >
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cardinal/10 font-serif text-[15px] font-semibold text-cardinal">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cardinal/10 font-serif text-[14px] font-semibold text-cardinal">
             {entry.number}
           </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-serif text-[19px] font-semibold leading-snug text-stone-900">
-              {entry.title}
-            </span>
-            <span className="mt-1 block text-[15px] leading-relaxed text-stone-600">
-              {entry.description}
-            </span>
+          <span className="min-w-0 flex-1 font-serif text-[18px] font-semibold leading-snug text-stone-900">
+            {entry.title}
           </span>
           <ChevronDown
             size={16}
-            className={`mt-1.5 shrink-0 text-stone-400 transition-transform ${
-              open ? 'rotate-180' : ''
-            }`}
+            className={`shrink-0 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`}
           />
         </button>
       </h2>
@@ -238,6 +224,9 @@ function UnitCard({
         hidden={!open}
         className="border-t border-stone-100 bg-stone-50/60 px-3 pb-3 pt-2"
       >
+        <p className="px-3 pb-1 pt-1 text-[15px] leading-relaxed text-stone-600">
+          {entry.description}
+        </p>
         {entry.tools.length === 0 ? (
           <p className="px-3 py-2 text-[15px] text-stone-500">
             The tools for this unit are still being built.
@@ -256,9 +245,8 @@ function UnitCard({
 
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
-  // The first unit opens by default: its tools are the ones every other unit
-  // leans on, so they are worth seeing on arrival.
-  const [openIds, setOpenIds] = useState<string[]>([CATALOG[0]!.id])
+  // Every unit starts folded, so the course reads as one list on arrival.
+  const [openIds, setOpenIds] = useState<string[]>([])
   const framed = useFramed()
   const { isFull, enter } = useFullscreen()
 
@@ -293,58 +281,69 @@ export default function TeacherTraining() {
 
   return (
     <div>
-      {/* Filling the screen leaves nothing else on it, so the catalog carries
-          the same bar the tools do, minus the way back to itself. */}
-      {isFull && (
+      {/* Filling the screen, the banner and the bar would be two cardinal
+          bands stacked on each other, so they become one: the name, the
+          search, and the controls on a single row that stays put while the
+          course scrolls under it. */}
+      {isFull ? (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
-          <div className="mx-auto flex max-w-[1680px] items-center gap-3 px-4 py-2">
-            <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-white">
+          <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
+            <h1 className="min-w-0 shrink font-serif text-[17px] font-semibold text-white">
               The Personal Finance Toolkit
-            </span>
+            </h1>
+            <div className="relative ml-auto w-full max-w-[15rem] shrink">
+              <Search
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search the tools"
+                aria-label="Search the tools"
+                className="w-full rounded-lg border-0 bg-white py-1.5 pl-9 pr-3 text-[15px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+              />
+            </div>
             <div className="shrink-0">
               <StageControls tone="dark" />
             </div>
           </div>
         </div>
-      )}
-
-      <div className="bg-cardinal">
-        <div
-          className={`mx-auto max-w-7xl px-6 text-center ${
-            framed || isFull ? 'pb-9 pt-8' : 'pb-11 pt-12'
-          }`}
-        >
-          {/* Inside the IFDM site's iframe the host page carries the title,
-              so the banner keeps it only for screen readers. */}
-          <h1
-            className={
-              framed
-                ? 'sr-only'
-                : 'font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto'
-            }
-          >
-            The Personal Finance Toolkit
-          </h1>
-          <p className="mx-auto mt-4 max-w-3xl text-[18px] leading-relaxed text-white/85">
-            Interactive tools for teaching personal finance. {TOOL_COUNT} tools, organized by the{' '}
-            {CATALOG.length} units of the course.
-          </p>
-          <div className="relative mx-auto mt-6 max-w-md">
-            <Search
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the tools"
-              aria-label="Search the tools"
-              className="w-full rounded-xl border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
-            />
+      ) : (
+        <div className="bg-cardinal">
+          <div className={`mx-auto max-w-7xl px-6 text-center ${framed ? 'pb-8 pt-7' : 'pb-11 pt-12'}`}>
+            {/* Inside the IFDM site's iframe the host page carries the title,
+                so the banner keeps it only for screen readers. */}
+            <h1
+              className={
+                framed
+                  ? 'sr-only'
+                  : 'font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto'
+              }
+            >
+              The Personal Finance Toolkit
+            </h1>
+            <p className="mx-auto mt-4 max-w-3xl text-[18px] leading-relaxed text-white/85">
+              Interactive tools for teaching personal finance.
+            </p>
+            <div className="relative mx-auto mt-6 max-w-md">
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search the tools"
+                aria-label="Search the tools"
+                className="w-full rounded-xl border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="flex flex-col gap-x-10 gap-y-8 md:flex-row">

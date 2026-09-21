@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ChevronDown, Home } from 'lucide-react'
 import {
@@ -58,6 +58,35 @@ export default function TeacherTrainingShell({
   // does: no site navigation around them. Both get the bar.
   const showBar = framed || isFull
   const siblings = activeUnit?.tools ?? []
+  /*
+   * The banner already names the page, so repeating the name in the bar
+   * above it is the same words twice over a stack of cardinal. The bar
+   * takes the name only once the banner has scrolled out of sight, which is
+   * the point the reader has nothing else telling them where they are.
+   */
+  const bannerTitle = useRef<HTMLHeadingElement>(null)
+  const [nameInBar, setNameInBar] = useState(false)
+  useEffect(() => {
+    const el = bannerTitle.current
+    if (!el) {
+      setNameInBar(true)
+      return
+    }
+    if (typeof IntersectionObserver === 'undefined') {
+      // Without the observer there is no way to tell, and a name that never
+      // appears is worse than one shown twice.
+      setNameInBar(true)
+      return
+    }
+    setNameInBar(false)
+    const io = new IntersectionObserver(([e]) => setNameInBar(!e?.isIntersecting), {
+      // The filled element and a real fullscreen element both fill the
+      // viewport, so the viewport is the right frame of reference either way.
+      threshold: 0,
+    })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [showBar, title])
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
@@ -85,7 +114,12 @@ export default function TeacherTrainingShell({
               <ArrowLeft size={14} />
               All tools
             </Link>
-            <span className="min-w-0 flex-1 truncate text-left text-[15px] font-semibold text-white">
+            <span
+              aria-hidden={!nameInBar}
+              className={`min-w-0 flex-1 truncate text-left text-[15px] font-semibold text-white transition-opacity duration-200 ${
+                nameInBar ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
               {title}
             </span>
             <div className="shrink-0">
@@ -103,7 +137,12 @@ export default function TeacherTrainingShell({
             <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase mb-2">
               {eyebrow}
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl font-semibold text-white">{title}</h1>
+            <h1
+              ref={bannerTitle}
+              className="font-serif text-3xl md:text-4xl font-semibold text-white"
+            >
+              {title}
+            </h1>
             {intro && <p className="mt-3 max-w-3xl mx-auto text-white/85 leading-relaxed">{intro}</p>}
             {siblings.length > 1 && (
               <nav
