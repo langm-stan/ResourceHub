@@ -34,7 +34,15 @@ interface FullscreenApi {
   isFull: boolean
   /** False when the host page forbids it, so a button can name itself honestly. */
   canFullscreen: boolean
+  /** Asked for outright, by the button. */
   enter: () => void
+  /*
+   * Asked for on the reader's behalf, by a link that is about to open a tool.
+   * It stands down for the rest of the visit once the reader has left a
+   * filled screen themselves: leaving is an answer, and a screen that keeps
+   * taking itself over after that is one that is not listening.
+   */
+  enterUnlessDeclined: () => void
   exit: () => void
   toggle: () => void
 }
@@ -43,6 +51,7 @@ const OFF: FullscreenApi = {
   isFull: false,
   canFullscreen: false,
   enter: () => {},
+  enterUnlessDeclined: () => {},
   exit: () => {},
   toggle: () => {},
 }
@@ -124,20 +133,37 @@ export function FullscreenProvider({
     })
   }, [])
 
+  const declined = useRef(false)
+
   const exit = useCallback(() => {
+    declined.current = true
     setFilled(false)
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
   }, [])
+
+  const enterUnlessDeclined = useCallback(() => {
+    if (declined.current) return
+    enter()
+  }, [enter])
 
   const api = useMemo<FullscreenApi>(
     () => ({
       isFull,
       canFullscreen,
       enter,
+      enterUnlessDeclined,
       exit,
-      toggle: () => (isFull ? exit() : enter()),
+      toggle: () => {
+        if (isFull) {
+          exit()
+          return
+        }
+        // Asking for it outright takes back an earlier refusal.
+        declined.current = false
+        enter()
+      },
     }),
-    [isFull, canFullscreen, enter, exit],
+    [isFull, canFullscreen, enter, enterUnlessDeclined, exit],
   )
 
   return (

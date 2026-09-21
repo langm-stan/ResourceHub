@@ -256,7 +256,7 @@ export default function TeacherTraining() {
    */
   const [openId, setOpenId] = useState<string | null>(CATALOG[0]?.id ?? null)
   const framed = useFramed()
-  const { isFull, enter } = useFullscreen()
+  const { isFull, enterUnlessDeclined } = useFullscreen()
 
   /*
    * Inside the iframe on ifdm.stanford.edu the toolkit has a narrow well and
@@ -266,7 +266,7 @@ export default function TeacherTraining() {
    * full site the page already has the window and nothing needs to change.
    */
   const openTool = () => {
-    if (framed) enter()
+    if (framed) enterUnlessDeclined()
   }
 
   // A distinct document title for the course overview (WCAG 2.4.2).

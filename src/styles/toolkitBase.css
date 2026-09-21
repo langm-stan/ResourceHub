@@ -80,6 +80,15 @@ textarea {
   border-radius: var(--radius);
 }
 
+/* On cardinal the near-black ring measures 1.74:1, under the 3:1 a focus
+   indicator owes. It only reads at all because of the pale halo behind it.
+   Dark surfaces get the two the other way round, which puts the ring itself
+   at about 9:1. */
+.bg-cardinal :focus-visible {
+  outline-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(34, 31, 30, 0.55);
+}
+
 ::selection {
   background: var(--accent-wash);
   color: var(--text-primary);

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -30,6 +31,30 @@ function SkipLink() {
   )
 }
 
+/*
+ * The router swaps the page under the reader, and the element they activated
+ * goes with it, which drops focus onto <body>. A keyboard visitor then starts
+ * again from the top of the document on every tool they open, and a screen
+ * reader says nothing about where they landed. Moving focus to <main> answers
+ * both: it announces the new page and puts the next Tab inside it.
+ *
+ * The first render is left alone. Nobody navigated to arrive there, and
+ * taking focus from a browser that has just loaded a page is its own rudeness.
+ */
+function useFocusMainOnNavigation() {
+  const { pathname } = useLocation()
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    // preventScroll: the page has its own idea of where to start, and the
+    // filled element scrolls itself back to the top separately.
+    document.getElementById('main')?.focus({ preventScroll: true })
+  }, [pathname])
+}
+
 function App() {
   // ?embed=1 renders the page content alone, with no site chrome, so a tool
   // can live inside an <iframe> on a slide or another course page.
@@ -40,6 +65,7 @@ function App() {
   const framed = useFramed()
   // Put every control back in Safari's tab sequence (see the hook).
   useSafariTabStops()
+  useFocusMainOnNavigation()
 
   // FullscreenProvider owns the element that fills the screen. It is the
   // outermost wrapper on purpose: the router replaces what is inside it but

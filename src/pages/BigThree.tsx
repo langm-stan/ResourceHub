@@ -73,7 +73,9 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
               <c.icon size={22} strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-serif text-lg font-semibold text-stone-900 mb-1.5">{c.title}</h3>
+              {/* The banner's title is the only heading above these, so they are the
+                  second level, not the third. The size comes from the class. */}
+              <h2 className="font-serif text-lg font-semibold text-stone-900 mb-1.5">{c.title}</h2>
               <p className="text-stone-600 text-sm leading-relaxed">{c.description}</p>
             </div>
             <span className="mt-auto text-sm font-semibold text-cardinal">{c.cta} →</span>
