@@ -245,8 +245,16 @@ function UnitCard({
 
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
-  // Every unit starts folded, so the course reads as one list on arrival.
-  const [openIds, setOpenIds] = useState<string[]>([])
+  /*
+   * One unit is open at a time, so the list never pushes itself past the
+   * frame, and opening a second closes the first. Clicking the open one
+   * closes it and leaves the course folded flat, which is a state worth
+   * being able to reach.
+   *
+   * Basic Tools and Data starts open: its tools are the ones every other
+   * unit leans on.
+   */
+  const [openId, setOpenId] = useState<string | null>(CATALOG[0]?.id ?? null)
   const framed = useFramed()
   const { isFull, enter } = useFullscreen()
 
@@ -274,8 +282,7 @@ export default function TeacherTraining() {
   const q = normalize(query)
   const hits = useMemo<SearchHit[] | null>(() => (q ? runSearch(q) : null), [q])
 
-  const toggle = (id: string) =>
-    setOpenIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
+  const toggle = (id: string) => setOpenId((current) => (current === id ? null : id))
 
   const [lead, ...others] = CATALOG
 
@@ -393,7 +400,7 @@ export default function TeacherTraining() {
                 {lead && (
                   <UnitCard
                     entry={lead}
-                    open={openIds.includes(lead.id)}
+                    open={openId === lead.id}
                     onToggle={() => toggle(lead.id)}
                     onOpen={openTool}
                     wide
@@ -406,7 +413,7 @@ export default function TeacherTraining() {
                     <UnitCard
                       key={entry.id}
                       entry={entry}
-                      open={openIds.includes(entry.id)}
+                      open={openId === entry.id}
                       onToggle={() => toggle(entry.id)}
                       onOpen={openTool}
                     />
