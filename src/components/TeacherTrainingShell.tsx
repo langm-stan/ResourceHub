@@ -8,7 +8,7 @@ import {
 } from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
 import { useFullscreen } from './FullscreenProvider'
-import { StageControls } from './StageControls'
+import { ExitFullScreenFooter, StageControls } from './StageControls'
 import { useFramed } from '../hooks/useFramed'
 
 /*
@@ -327,6 +327,8 @@ export default function TeacherTrainingShell({
                 )}
               </div>
             )}
+
+            <ExitFullScreenFooter />
           </div>
         </div>
       </div>

@@ -47,3 +47,35 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* The way out again at the foot of the page, set apart by a rule so it reads
+   as the end of the page rather than another thing on it. */
+.footer {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+
+.footerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: var(--hairline) solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard);
+}
+.footerButton:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface-sunken);
+}

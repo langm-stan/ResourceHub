@@ -63,3 +63,24 @@ export function StageControlsRow() {
   )
 }
 
+/*
+ * The way out, repeated at the foot of the page.
+ *
+ * The bar at the top carries the same control, but a filled screen is a page
+ * scrolled to the end of, and a reader who has reached the bottom should not
+ * have to travel back up to leave. It appears only on a filled screen, since
+ * there is nothing to leave otherwise.
+ */
+export function ExitFullScreenFooter() {
+  const { isFull, exit } = useFullscreen()
+  if (!isFull) return null
+
+  return (
+    <div className={styles.footer}>
+      <button type="button" onClick={exit} className={styles.footerButton}>
+        <Minimize2 size={17} />
+        Exit full screen
+      </button>
+    </div>
+  )
+}

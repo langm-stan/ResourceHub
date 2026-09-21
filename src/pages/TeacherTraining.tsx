@@ -4,7 +4,7 @@ import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFullscreen } from '../components/FullscreenProvider'
-import { StageControls } from '../components/StageControls'
+import { ExitFullScreenFooter, StageControls } from '../components/StageControls'
 import { ToolMark } from '../components/ToolMark'
 import { useFramed } from '../hooks/useFramed'
 import styles from './TeacherTraining.module.css'
@@ -435,6 +435,7 @@ export default function TeacherTraining() {
                 </div>
               </div>
             )}
+            <ExitFullScreenFooter />
           </div>
         </div>
       </div>
