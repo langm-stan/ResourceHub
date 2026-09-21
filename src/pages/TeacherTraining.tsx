@@ -5,6 +5,7 @@ import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFullscreen } from '../components/FullscreenProvider'
 import { StageControls } from '../components/StageControls'
+import { ToolMark } from '../components/ToolMark'
 import { useFramed } from '../hooks/useFramed'
 
 /*
@@ -119,17 +120,39 @@ function ToolRow({
   tool,
   badge,
   onOpen,
+  compact = false,
 }: {
   tool: TrainingTool
   badge?: string
   onOpen: () => void
+  /** The mark and the name alone, for the three-across row at the top. */
+  compact?: boolean
 }) {
+  if (compact)
+    return (
+      <Link
+        to={`/${tool.slug}`}
+        onClick={onOpen}
+        className="group flex items-center gap-2.5 px-3 py-2 transition-all hover:bg-white hover:shadow-card"
+      >
+        <span className="shrink-0">
+          <ToolMark slug={tool.slug} />
+        </span>
+        <span className="min-w-0 text-[16px] font-bold leading-snug tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
+          {tool.label}
+        </span>
+      </Link>
+    )
+
   return (
     <Link
       to={`/${tool.slug}`}
       onClick={onOpen}
       className="group flex items-center gap-3 px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
+      <span className="shrink-0 text-stone-400">
+        <ToolMark slug={tool.slug} />
+      </span>
       <span className="min-w-0 flex-1">
         <span className="text-[17px] font-bold tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
           {tool.label}
@@ -177,7 +200,10 @@ const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
  *
  * The first unit runs the full width, since its tools are the ones used
  * throughout the course rather than inside one topic. The rest sit two to a
- * row.
+ * row. The top card runs its three across on one line, the mark and the
+ * name alone: those three are named plainly enough to need no sentence
+ * each, and a description apiece would wrap to five lines in a third of the
+ * width.
  */
 function UnitCard({
   entry,
@@ -190,7 +216,7 @@ function UnitCard({
   open: boolean
   onToggle: () => void
   onOpen: () => void
-  /** The full-width card at the top, whose tools can run in three columns. */
+  /** The card at the top, whose tools run three across without descriptions. */
   wide?: boolean
 }) {
   const panelId = `unit-panel-${entry.id}`
@@ -224,7 +250,7 @@ function UnitCard({
       <div
         id={panelId}
         hidden={!open}
-        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-3 pt-3"
+        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-2 pt-2"
       >
         <p className="px-3 pb-3 text-[15px] leading-relaxed text-stone-600">
           {entry.description}
@@ -234,9 +260,9 @@ function UnitCard({
             The tools for this unit are still being built.
           </p>
         ) : (
-          <div className={wide ? 'grid gap-1 md:grid-cols-3' : 'flex flex-col'}>
+          <div className={wide ? 'grid gap-1 sm:grid-cols-3' : 'flex flex-col'}>
             {entry.tools.map((tool) => (
-              <ToolRow key={tool.slug} tool={tool} onOpen={onOpen} />
+              <ToolRow key={tool.slug} tool={tool} onOpen={onOpen} compact={wide} />
             ))}
           </div>
         )}
@@ -354,7 +380,7 @@ export default function TeacherTraining() {
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-7xl px-6 pb-6 pt-8">
         <div className="flex flex-col gap-x-10 gap-y-8 md:flex-row">
           {/* The hub's left rail stays alongside the toolkit, so arriving from
               ifdm.stanford.edu/resourcehub keeps the section's shell. Inside
@@ -398,7 +424,7 @@ export default function TeacherTraining() {
             ) : (
               /* Nothing sits between the search box and the cards, so Tab from
                  the search lands on the first unit. */
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
                 {lead && (
                   <UnitCard
                     entry={lead}
@@ -410,7 +436,7 @@ export default function TeacherTraining() {
                 )}
                 {/* Two to a row, each card its own height, so opening one does
                     not stretch the one beside it. */}
-                <div className="grid items-start gap-4 md:grid-cols-2">
+                <div className="grid items-start gap-3 md:grid-cols-2">
                   {others.map((entry) => (
                     <UnitCard
                       key={entry.id}

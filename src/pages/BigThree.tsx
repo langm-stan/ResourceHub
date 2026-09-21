@@ -40,7 +40,7 @@ const CARDS = [
 export function BigThreeContent({ base = '' }: { base?: string }) {
   return (
     <>
-      <div className="flex flex-col gap-6 max-w-3xl mb-10 text-stone-700 leading-relaxed">
+      <div className="flex flex-col gap-6 max-w-3xl mb-10 text-[18px] leading-relaxed text-stone-700">
         <p>
           For more than 20 years, the Big Three allowed us to gauge whether people understand the basic concepts
           needed to manage money, build wealth, and create a financially secure future. These three questions have
@@ -64,10 +64,10 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
           <Link
             key={c.to}
             to={`${base}${c.to}`}
-            className="group flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-6 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all"
+            className="group flex flex-col gap-4 border border-stone-200 bg-white p-6 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
           >
             <div
-              className="h-11 w-11 rounded-xl flex items-center justify-center"
+              className="flex h-11 w-11 items-center justify-center"
               style={{ backgroundColor: `${c.accent}1a`, color: c.accent }}
             >
               <c.icon size={22} strokeWidth={2} />
@@ -75,10 +75,10 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
             <div>
               {/* The banner's title is the only heading above these, so they are the
                   second level, not the third. The size comes from the class. */}
-              <h2 className="font-serif text-lg font-semibold text-stone-900 mb-1.5">{c.title}</h2>
-              <p className="text-stone-600 text-sm leading-relaxed">{c.description}</p>
+              <h2 className="mb-1.5 text-[19px] font-bold tracking-[-0.016em] text-stone-900">{c.title}</h2>
+              <p className="text-[16px] leading-relaxed text-stone-600">{c.description}</p>
             </div>
-            <span className="mt-auto text-sm font-semibold text-cardinal">{c.cta} →</span>
+            <span className="mt-auto text-[16px] font-semibold text-cardinal">{c.cta} →</span>
           </Link>
         ))}
       </div>

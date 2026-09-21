@@ -1,52 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+import { getTextSize, setTextSize, SIZES, subscribeTextSize } from './textSize'
 import styles from './PresentationToggle.module.css'
 
 /*
- * Text size for the page. Scaling everything inside <main> together enlarges
- * the type without the reflow that changing font sizes alone would cause, and
- * keeps charts and controls in proportion with it. Larger settings are for
- * projecting in a classroom or for anyone who wants bigger text; smaller ones
- * fit more on screen, which matters inside the narrow content well on
- * ifdm.stanford.edu. The Stanford header and footer are left alone.
+ * A minus, the current percentage, a plus. The readout doubles as the way
+ * back to 100%, so the control needs no separate reset.
+ *
+ * The size itself lives in textSize, not here: this control unmounts and
+ * remounts whenever the screen fills, and the size has to outlast that.
  */
 
-/** Percentages the tool can be shown at, smallest first. */
-const SIZES = [75, 90, 100, 125, 150] as const
-const DEFAULT_INDEX = SIZES.indexOf(100)
-const KEY = 'ifdm-present'
-
-function apply(size: number) {
-  if (size === 100) delete document.documentElement.dataset.present
-  else document.documentElement.dataset.present = String(size)
-}
-
-function stored(): number {
-  if (typeof document === 'undefined') return DEFAULT_INDEX
-  try {
-    const raw = Number(localStorage.getItem(KEY))
-    const i = SIZES.indexOf(raw as (typeof SIZES)[number])
-    if (i >= 0) return i
-  } catch {
-    // Storage blocked: fall back to the normal size.
-  }
-  return DEFAULT_INDEX
-}
-
 export function PresentationToggle({ tone = 'light' }: { tone?: 'light' | 'dark' } = {}) {
-  const [index, setIndex] = useState(stored)
-  const size = SIZES[index]!
+  const size = useSyncExternalStore(subscribeTextSize, getTextSize, getTextSize)
+  const index = SIZES.indexOf(size)
 
-  useEffect(() => {
-    apply(size)
-    try {
-      localStorage.setItem(KEY, String(size))
-    } catch {
-      // ignore storage failures
-    }
-  }, [size])
-
-  const step = (delta: number) =>
-    setIndex((i) => Math.min(SIZES.length - 1, Math.max(0, i + delta)))
+  const step = (delta: number) => {
+    const next = SIZES[Math.min(SIZES.length - 1, Math.max(0, index + delta))]
+    if (next) setTextSize(next)
+  }
 
   return (
     <div
@@ -69,7 +40,7 @@ export function PresentationToggle({ tone = 'light' }: { tone?: 'light' | 'dark'
       <button
         type="button"
         className={styles.readout}
-        onClick={() => setIndex(DEFAULT_INDEX)}
+        onClick={() => setTextSize(100)}
         disabled={size === 100}
         aria-label={`Text size ${size} percent. Select to return to 100 percent.`}
         title={size === 100 ? 'Normal size' : 'Back to 100%'}

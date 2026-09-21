@@ -20,3 +20,11 @@ export type { TabItem } from './Tabs'
 export { Toggle } from './Toggle'
 export { ThemeToggle } from './ThemeToggle'
 export { PresentationToggle } from './PresentationToggle'
+export {
+  DEFAULT_SIZE,
+  FULL_SCREEN_SIZE,
+  getTextSize,
+  setTextSize,
+  SIZES,
+  subscribeTextSize,
+} from './textSize'

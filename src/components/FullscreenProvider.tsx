@@ -9,6 +9,12 @@ import {
   type ReactNode,
 } from 'react'
 import { useLocation } from 'react-router-dom'
+import {
+  FULL_SCREEN_SIZE,
+  getTextSize,
+  setTextSize,
+  subscribeTextSize,
+} from '../design-system'
 import styles from './FullscreenProvider.module.css'
 
 /*
@@ -83,6 +89,39 @@ export function FullscreenProvider({
    */
   const declined = useRef(false)
   const { pathname } = useLocation()
+
+  /*
+   * A filled screen is usually a room looking at it, so the type steps up on
+   * the way in and back down on the way out. The size before the fill is kept
+   * so the reader gets their own back, and dropped the moment they set a size
+   * themselves, since a preference stated out loud outranks one we guessed.
+   */
+  const sizeBeforeFull = useRef<number | null>(null)
+  const settingSize = useRef(false)
+  useEffect(
+    () =>
+      subscribeTextSize(() => {
+        if (!settingSize.current) sizeBeforeFull.current = null
+      }),
+    [],
+  )
+  const moveSize = (to: number) => {
+    settingSize.current = true
+    setTextSize(to as Parameters<typeof setTextSize>[0])
+    settingSize.current = false
+  }
+  useEffect(() => {
+    if (isFull) {
+      if (getTextSize() >= FULL_SCREEN_SIZE) return
+      sizeBeforeFull.current = getTextSize()
+      moveSize(FULL_SCREEN_SIZE)
+      return
+    }
+    const back = sizeBeforeFull.current
+    if (back === null) return
+    sizeBeforeFull.current = null
+    moveSize(back)
+  }, [isFull])
 
   // The browser can leave fullscreen without us (Escape, the system control),
   // so the state follows the document rather than its own memory.
