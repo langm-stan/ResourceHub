@@ -3,9 +3,9 @@
  *
  * Text size is applied as a zoom on <main>, and zoom does not reach media
  * queries: at 200% the window still reports 1920px, so a media query would
- * lay three columns into the 960px the zoom actually leaves. A container
- * query measures what is really there, so asking for larger text gives
- * fewer columns rather than three cramped ones.
+ * lay two columns into the 960px the zoom actually leaves. A container query
+ * measures what is really there, so asking for larger text drops the list to
+ * one column rather than squeezing two.
  */
 .units {
   container-type: inline-size;
@@ -18,17 +18,11 @@
   grid-template-columns: 1fr;
 }
 
-/* Two across in the iframe, which leaves about 52rem. */
+/* Two across, and two at any width above this one. Three fitted a wide
+   screen better, but the course is read as a list of fifteen units in order
+   and two columns is how that list was asked for. */
 @container (min-width: 46rem) {
   .grid {
     grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Three once there is a screen's worth, or the cards become long empty bars
-   with a short name at one end. */
-@container (min-width: 72rem) {
-  .grid {
-    grid-template-columns: 1fr 1fr 1fr;
   }
 }
