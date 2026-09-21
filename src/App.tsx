@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import { FullscreenProvider } from './components/FullscreenProvider'
 import { useFramed } from './hooks/useFramed'
 import { useSafariTabStops } from './hooks/useSafariTabStops'
 
@@ -40,9 +41,13 @@ function App() {
   // Put every control back in Safari's tab sequence (see the hook).
   useSafariTabStops()
 
+  // FullscreenProvider owns the element that fills the screen. It is the
+  // outermost wrapper on purpose: the router replaces what is inside it but
+  // never the element itself, so a filled screen survives moving between the
+  // catalog and the tools.
   if (embed || framed) {
     return (
-      <div className="min-h-screen bg-stone-50">
+      <FullscreenProvider className="min-h-screen bg-stone-50">
         {/* The frame view still repeats a banner on every tool page, so a
             keyboard visitor gets the same way past it. The embed view has no
             chrome at all, but the link costs nothing and stays consistent. */}
@@ -50,19 +55,19 @@ function App() {
         <main id="main" tabIndex={-1} className="outline-none">
           <Outlet />
         </main>
-      </div>
+      </FullscreenProvider>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
+    <FullscreenProvider className="min-h-screen flex flex-col bg-stone-50">
       <SkipLink />
       <Header />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>
       <Footer />
-    </div>
+    </FullscreenProvider>
   )
 }
 

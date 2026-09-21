@@ -53,3 +53,25 @@
   opacity: 1;
   color: var(--text-muted);
 }
+
+/* On the cardinal bar the control sits on a dark field, so it borrows the
+   bar's white rather than the page's muted ink. */
+.dark {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.dark .step,
+.dark .readout {
+  color: rgba(255, 255, 255, 0.9);
+}
+.dark .readout {
+  border-left-color: rgba(255, 255, 255, 0.25);
+  border-right-color: rgba(255, 255, 255, 0.25);
+}
+.dark .step:hover:not(:disabled),
+.dark .readout:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark .readout:disabled {
+  color: rgba(255, 255, 255, 0.9);
+}

@@ -2,8 +2,8 @@ import { useSearchParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
+import { StageControlsRow } from '../components/StageControls'
 import { ToolStage } from '../components/ToolStage'
-import { PresentationToggle } from '../design-system'
 import { COURSE_UNITS, toolDescription, unitForSlug } from '../data/teacherTraining'
 import { BigThreeContent } from './BigThree'
 import { BigThreeQuizContent } from './BigThreeQuiz'
@@ -262,9 +262,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
         <ToolStage>{section.content}</ToolStage>
       ) : (
         <>
-          <div className="mb-3 flex justify-end">
-            <PresentationToggle />
-          </div>
+          <StageControlsRow />
           {section.content}
         </>
       )}

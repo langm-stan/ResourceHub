@@ -32,7 +32,7 @@ function stored(): number {
   return DEFAULT_INDEX
 }
 
-export function PresentationToggle() {
+export function PresentationToggle({ tone = 'light' }: { tone?: 'light' | 'dark' } = {}) {
   const [index, setIndex] = useState(stored)
   const size = SIZES[index]!
 
@@ -49,7 +49,11 @@ export function PresentationToggle() {
     setIndex((i) => Math.min(SIZES.length - 1, Math.max(0, i + delta)))
 
   return (
-    <div className={styles.group} role="group" aria-label="Text size">
+    <div
+      className={`${styles.group} ${tone === 'dark' ? styles.dark : ''}`}
+      role="group"
+      aria-label="Text size"
+    >
       <button
         type="button"
         className={styles.step}

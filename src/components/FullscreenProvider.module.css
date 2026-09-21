@@ -1,0 +1,15 @@
+/* Filling the screen, the element is the page: it supplies its own background
+   and does its own scrolling, since the window behind it no longer scrolls. */
+.shell:fullscreen {
+  overflow-y: auto;
+  background: var(--surface-page, #f7f6f5);
+}
+
+/* The fallback, for a host page that refuses fullscreen: fill the frame. */
+.filled {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow-y: auto;
+  background: var(--surface-page, #f7f6f5);
+}

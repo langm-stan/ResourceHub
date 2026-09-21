@@ -1,0 +1,48 @@
+.row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard);
+}
+.button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface-sunken);
+}
+
+/* On the cardinal bar, against a dark field. */
+.dark {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+}
+.dark:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+}

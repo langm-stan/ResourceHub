@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
+import { useFullscreen } from '../components/FullscreenProvider'
+import { StageControls } from '../components/StageControls'
 import { useFramed } from '../hooks/useFramed'
-import { PresentationToggle } from '../design-system'
 
 /*
- * The Personal Finance Teaching Toolkit landing page: a catalog of the
- * tools as one vertical list: the fifteen units in teaching order, the
- * first holding the tools used throughout.
- * Every row is visible at once and opens onto that unit's description and
- * tools; Expand all opens the whole catalog. Searching from the hero
- * replaces the list with the matching tools.
+ * The Personal Finance Teaching Toolkit landing page: the fifteen units in
+ * teaching order as one vertical list, each showing what is in it. Nothing is
+ * folded away, because fifteen closed rows tell a first-time reader nothing
+ * about the thirty tools behind them. Searching from the hero replaces the
+ * list with the matching tools.
  */
 
 interface SearchHit {
@@ -115,10 +115,19 @@ function runSearch(query: string): SearchHit[] {
 }
 
 /** One tool as a row: its name, its one-line description, and where it sits. */
-function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
+function ToolRow({
+  tool,
+  badge,
+  onOpen,
+}: {
+  tool: TrainingTool
+  badge?: string
+  onOpen: () => void
+}) {
   return (
     <Link
       to={`/${tool.slug}`}
+      onClick={onOpen}
       className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
       <span className="min-w-0 flex-1">
@@ -160,65 +169,86 @@ const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
   number: i + 1,
 }))
 
-/** One row of the catalog: a header that opens onto its description and tools. */
-function CatalogRow({
+const TOOL_COUNT = CATALOG.reduce((n, u) => n + u.tools.length, 0)
+
+/*
+ * One unit of the course, as a card that opens onto its tools. Folded, the
+ * card is the unit's name and what it covers; open, it lists the tools with
+ * what each one does, which is the part a reader cannot guess from a name
+ * like "Your FICO Score".
+ *
+ * The first unit runs the full width, since its tools are the ones used
+ * throughout the course rather than inside one topic. The rest sit two to a
+ * row.
+ */
+function UnitCard({
   entry,
   open,
   onToggle,
+  onOpen,
+  wide = false,
 }: {
   entry: CatalogEntry
   open: boolean
   onToggle: () => void
+  onOpen: () => void
+  /** The full-width card at the top, whose tools can run in three columns. */
+  wide?: boolean
 }) {
-  const count = entry.tools.length
-  const panelId = `catalog-panel-${entry.id}`
+  const panelId = `unit-panel-${entry.id}`
 
   return (
-    <div className="border-b border-stone-200 last:border-b-0">
+    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
       <h2>
         <button
           type="button"
           onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
-          className="flex w-full items-center gap-3.5 px-3 py-3 text-left transition-colors hover:bg-stone-50"
+          /* Two cards sit side by side, and their names and descriptions run
+             to different lengths, so a folded card keeps a floor height and
+             the pair lines up. In rem, so the text size control carries it. */
+          className={`flex w-full items-start gap-3.5 px-5 py-4 text-left transition-colors hover:bg-stone-50 ${
+            wide ? '' : 'md:min-h-[8.75rem]'
+          }`}
         >
-          <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-[15px] font-semibold ${
-              count === 0 ? 'bg-stone-100 text-stone-400' : 'bg-cardinal/10 text-cardinal'
-            }`}
-          >
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cardinal/10 font-serif text-[15px] font-semibold text-cardinal">
             {entry.number}
           </span>
-          <span className="min-w-0 flex-1 font-serif text-[19px] font-semibold leading-snug text-stone-900">
-            {entry.title}
-          </span>
-          <span className="hidden shrink-0 text-[14px] text-stone-400 sm:block">
-            {count === 0 ? 'In development' : count === 1 ? '1 tool' : `${count} tools`}
+          <span className="min-w-0 flex-1">
+            <span className="block font-serif text-[19px] font-semibold leading-snug text-stone-900">
+              {entry.title}
+            </span>
+            <span className="mt-1 block text-[15px] leading-relaxed text-stone-600">
+              {entry.description}
+            </span>
           </span>
           <ChevronDown
             size={16}
-            className={`shrink-0 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`mt-1.5 shrink-0 text-stone-400 transition-transform ${
+              open ? 'rotate-180' : ''
+            }`}
           />
         </button>
       </h2>
       {/* The panel stays in the document and hides, so the button's
           aria-controls always resolves to a real element. */}
-      <div id={panelId} hidden={!open} className="px-3 pb-4 pt-3 sm:pl-[3.375rem]">
-          <p className="mb-3 max-w-3xl text-[15px] leading-relaxed text-stone-600">
-            {entry.description}
+      <div
+        id={panelId}
+        hidden={!open}
+        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-3 pt-2"
+      >
+        {entry.tools.length === 0 ? (
+          <p className="px-3 py-2 text-[15px] text-stone-500">
+            The tools for this unit are still being built.
           </p>
-          {count === 0 ? (
-            <p className="px-3 text-[15px] text-stone-500">
-              The tools for this unit are still being built.
-            </p>
-          ) : (
-            <div className="flex flex-col">
-              {entry.tools.map((tool) => (
-                <ToolRow key={tool.slug} tool={tool} />
-              ))}
-            </div>
-          )}
+        ) : (
+          <div className={wide ? 'grid gap-1 md:grid-cols-3' : 'flex flex-col'}>
+            {entry.tools.map((tool) => (
+              <ToolRow key={tool.slug} tool={tool} onOpen={onOpen} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -226,9 +256,22 @@ function CatalogRow({
 
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
-  // Every row starts closed, so the whole course reads at once.
-  const [openIds, setOpenIds] = useState<string[]>([])
+  // The first unit opens by default: its tools are the ones every other unit
+  // leans on, so they are worth seeing on arrival.
+  const [openIds, setOpenIds] = useState<string[]>([CATALOG[0]!.id])
   const framed = useFramed()
+  const { isFull, enter } = useFullscreen()
+
+  /*
+   * Inside the iframe on ifdm.stanford.edu the toolkit has a narrow well and
+   * a second scrollbar to work against, so opening a tool fills the screen.
+   * A browser only grants that during a click, which is why the link asks on
+   * its way out rather than the tool page asking once it has arrived. On the
+   * full site the page already has the window and nothing needs to change.
+   */
+  const openTool = () => {
+    if (framed) enter()
+  }
 
   // A distinct document title for the course overview (WCAG 2.4.2).
   useEffect(() => {
@@ -246,10 +289,31 @@ export default function TeacherTraining() {
   const toggle = (id: string) =>
     setOpenIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
 
+  const [lead, ...others] = CATALOG
+
   return (
     <div>
+      {/* Filling the screen leaves nothing else on it, so the catalog carries
+          the same bar the tools do, minus the way back to itself. */}
+      {isFull && (
+        <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
+          <div className="mx-auto flex max-w-[1680px] items-center gap-3 px-4 py-2">
+            <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-white">
+              The Personal Finance Toolkit
+            </span>
+            <div className="shrink-0">
+              <StageControls tone="dark" />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-cardinal">
-        <div className={`max-w-7xl mx-auto px-6 pb-14 text-center ${framed ? 'pt-9' : 'pt-12'}`}>
+        <div
+          className={`mx-auto max-w-7xl px-6 text-center ${
+            framed || isFull ? 'pb-9 pt-8' : 'pb-11 pt-12'
+          }`}
+        >
           {/* Inside the IFDM site's iframe the host page carries the title,
               so the banner keeps it only for screen readers. */}
           <h1
@@ -261,10 +325,11 @@ export default function TeacherTraining() {
           >
             The Personal Finance Toolkit
           </h1>
-          <p className="mt-4 max-w-3xl mx-auto text-[18px] text-white/85 leading-relaxed">
-            Interactive tools for teaching personal finance, organized by unit.
+          <p className="mx-auto mt-4 max-w-3xl text-[18px] leading-relaxed text-white/85">
+            Interactive tools for teaching personal finance. {TOOL_COUNT} tools, organized by the{' '}
+            {CATALOG.length} units of the course.
           </p>
-          <div className="relative mt-7 max-w-md mx-auto">
+          <div className="relative mx-auto mt-6 max-w-md">
             <Search
               size={16}
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
@@ -281,28 +346,32 @@ export default function TeacherTraining() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row gap-x-10 gap-y-8">
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="flex flex-col gap-x-10 gap-y-8 md:flex-row">
           {/* The hub's left rail stays alongside the toolkit, so arriving from
               ifdm.stanford.edu/resourcehub keeps the section's shell. Inside
-              the IFDM site's iframe (?frame=1) the host page shows the real
-              rail, so it is left out. */}
-          {!framed && (
-            <aside className="md:w-52 shrink-0">
+              the IFDM site's iframe (?frame=1), and on a filled screen, the
+              rail is either supplied by the host or out of place, so it goes. */}
+          {!framed && !isFull && (
+            <aside className="shrink-0 md:w-52">
               <div className="md:sticky md:top-6">
                 <ResourceHubNav />
               </div>
             </aside>
           )}
 
-          {/* With no sidebar the list is centered in the well; alongside the
-              sidebar it stays where the sidebar leaves it. */}
-          <div className={`flex-1 min-w-0 max-w-4xl ${framed ? 'mx-auto w-full' : ''}`}>
-            {/* Text size sits above the list, in the same place it sits above
-                a tool, so it is in one spot throughout the toolkit. */}
-            <div className="mb-3 flex justify-end">
-              <PresentationToggle />
-            </div>
+          <div
+            className={`min-w-0 flex-1 ${isFull ? 'max-w-6xl' : 'max-w-5xl'} ${
+              framed || isFull ? 'mx-auto w-full' : ''
+            }`}
+          >
+            {/* Text size and the way to a filled screen sit in one place
+                throughout the toolkit. Filled, they are up in the bar. */}
+            {!isFull && (
+              <div className="mb-3 flex justify-end">
+                <StageControls />
+              </div>
+            )}
             {hits ? (
               <>
                 <p className="mb-3 text-[15px] text-stone-600">
@@ -314,25 +383,37 @@ export default function TeacherTraining() {
                 </p>
                 <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-2">
                   {hits.map(({ tool, badge }) => (
-                    <ToolRow key={tool.slug} tool={tool} badge={badge} />
+                    <ToolRow key={tool.slug} tool={tool} badge={badge} onOpen={openTool} />
                   ))}
                 </div>
               </>
             ) : (
-              <>
-                {/* Nothing sits between the search box and the list, so Tab
-                    from the search lands on the first row. */}
-                <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-                  {CATALOG.map((entry) => (
-                    <CatalogRow
+              /* Nothing sits between the search box and the cards, so Tab from
+                 the search lands on the first unit. */
+              <div className="flex flex-col gap-4">
+                {lead && (
+                  <UnitCard
+                    entry={lead}
+                    open={openIds.includes(lead.id)}
+                    onToggle={() => toggle(lead.id)}
+                    onOpen={openTool}
+                    wide
+                  />
+                )}
+                {/* Two to a row, each card its own height, so opening one does
+                    not stretch the one beside it. */}
+                <div className="grid items-start gap-4 md:grid-cols-2">
+                  {others.map((entry) => (
+                    <UnitCard
                       key={entry.id}
                       entry={entry}
                       open={openIds.includes(entry.id)}
                       onToggle={() => toggle(entry.id)}
+                      onOpen={openTool}
                     />
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

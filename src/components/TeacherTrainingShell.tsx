@@ -7,6 +7,8 @@ import {
   unitForSlug,
 } from '../data/teacherTraining'
 import ResourceHubNav from './ResourceHubNav'
+import { useFullscreen } from './FullscreenProvider'
+import { StageControls } from './StageControls'
 import { useFramed } from '../hooks/useFramed'
 
 /*
@@ -51,6 +53,10 @@ export default function TeacherTrainingShell({
   // carries the way back to the full list and the other tools in this unit;
   // the whole course stays one click away on the toolkit home page.
   const framed = useFramed()
+  const { isFull } = useFullscreen()
+  // Filling the screen puts the reader in the same position as the iframe
+  // does: no site navigation around them. Both get the bar.
+  const showBar = framed || isFull
   const siblings = activeUnit?.tools ?? []
 
   // Each page gets its own distinct document title (WCAG 2.4.2).
@@ -69,7 +75,7 @@ export default function TeacherTrainingShell({
           than inside the banner, which scrolls away. Inside the iframe the
           host page's own scrollbar is far off, and without this the only
           navigation left after a scroll is the prev/next pair at the foot. */}
-      {framed && (
+      {showBar && (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
           <div className="max-w-[1680px] mx-auto flex items-center gap-3 px-4 py-2">
             <Link
@@ -82,11 +88,14 @@ export default function TeacherTrainingShell({
             <span className="min-w-0 flex-1 truncate text-left text-[15px] font-semibold text-white">
               {title}
             </span>
+            <div className="shrink-0">
+              <StageControls tone="dark" />
+            </div>
           </div>
         </div>
       )}
       <div className="bg-cardinal">
-        {framed ? (
+        {showBar ? (
           /* The frame view inside ifdm.stanford.edu: everything centered,
              with the way back and this unit's other tools beneath the intro. */
           <div className="text-center">
@@ -145,7 +154,7 @@ export default function TeacherTrainingShell({
 
       <div className="max-w-[1680px] mx-auto px-6 py-8">
         <div className="flex flex-col md:flex-row gap-x-10 gap-y-6">
-          {!framed && (
+          {!showBar && (
           <aside className="md:w-56 shrink-0">
             <div className="sticky top-6">
               {/* The Resource Hub rail from the live site tops the sidebar so
@@ -225,7 +234,11 @@ export default function TeacherTrainingShell({
               a large window. */}
           <div
             className={`flex-1 min-w-0 ${
-              framed ? `mx-auto w-full ${wide ? 'max-w-7xl' : 'max-w-5xl'}` : wide ? '' : 'max-w-5xl'
+              showBar
+                ? `mx-auto w-full ${wide || isFull ? 'max-w-7xl' : 'max-w-5xl'}`
+                : wide
+                  ? ''
+                  : 'max-w-5xl'
             }`}
           >
             {children}
