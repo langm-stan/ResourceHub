@@ -128,10 +128,10 @@ function ToolRow({
     <Link
       to={`/${tool.slug}`}
       onClick={onOpen}
-      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
+      className="group flex items-center gap-3 px-3 py-2.5 transition-all hover:bg-white hover:shadow-card"
     >
       <span className="min-w-0 flex-1">
-        <span className="font-serif text-[17px] font-semibold text-stone-900 transition-colors group-hover:text-cardinal">
+        <span className="text-[17px] font-bold tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
           {tool.label}
         </span>
         {badge && (
@@ -196,7 +196,9 @@ function UnitCard({
   const panelId = `unit-panel-${entry.id}`
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+    /* Square, with a hairline and a soft drop: the treatment Stanford's own
+       su-card uses on the Resource Hub pages this sits beside. */
+    <div className="overflow-hidden border border-stone-200 bg-white shadow-card">
       <h2>
         <button
           type="button"
@@ -205,10 +207,10 @@ function UnitCard({
           aria-controls={panelId}
           className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-50"
         >
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cardinal/10 font-serif text-[14px] font-semibold text-cardinal">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cardinal/10 text-[14px] font-bold text-cardinal">
             {entry.number}
           </span>
-          <span className="min-w-0 flex-1 font-serif text-[18px] font-semibold leading-snug text-stone-900">
+          <span className="min-w-0 flex-1 text-[18px] font-bold leading-snug tracking-[-0.016em] text-stone-900">
             {entry.title}
           </span>
           <ChevronDown
@@ -295,7 +297,7 @@ export default function TeacherTraining() {
       {isFull ? (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
           <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-            <h1 className="min-w-0 shrink font-serif text-[17px] font-semibold text-white">
+            <h1 className="min-w-0 shrink text-[17px] font-bold tracking-[-0.016em] text-white">
               The Personal Finance Toolkit
             </h1>
             <div className="relative ml-auto w-full max-w-[15rem] shrink">
@@ -309,7 +311,7 @@ export default function TeacherTraining() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the tools"
                 aria-label="Search the tools"
-                className="w-full rounded-lg border-0 bg-white py-1.5 pl-9 pr-3 text-[15px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+                className="w-full border-0 bg-white py-1.5 pl-9 pr-3 text-[15px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
               />
             </div>
             <div className="shrink-0">
@@ -326,7 +328,7 @@ export default function TeacherTraining() {
               className={
                 framed
                   ? 'sr-only'
-                  : 'font-serif text-4xl md:text-5xl font-semibold text-white max-w-3xl mx-auto'
+                  : 'text-4xl md:text-5xl font-bold tracking-[-0.016em] text-white max-w-3xl mx-auto'
               }
             >
               The Personal Finance Toolkit
@@ -345,7 +347,7 @@ export default function TeacherTraining() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the tools"
                 aria-label="Search the tools"
-                className="w-full rounded-xl border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+                className="w-full border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
               />
             </div>
           </div>
@@ -387,7 +389,7 @@ export default function TeacherTraining() {
                       ? '1 matching tool.'
                       : `${hits.length} matching tools.`}
                 </p>
-                <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-2">
+                <div className="border border-stone-200 bg-stone-50/70 p-2 shadow-card">
                   {hits.map(({ tool, badge }) => (
                     <ToolRow key={tool.slug} tool={tool} badge={badge} onOpen={openTool} />
                   ))}
