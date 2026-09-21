@@ -138,7 +138,7 @@ function ToolRow({
         <span className="shrink-0">
           <ToolMark slug={tool.slug} />
         </span>
-        <span className="min-w-0 text-[16px] font-bold leading-snug tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
+        <span className="min-w-0 text-[18px] font-bold leading-snug tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
           {tool.label}
         </span>
       </Link>
@@ -154,15 +154,15 @@ function ToolRow({
         <ToolMark slug={tool.slug} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-[17px] font-bold tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
+        <span className="text-[19px] font-bold tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
           {tool.label}
         </span>
         {badge && (
-          <span className="ml-2 text-[14px] font-semibold uppercase tracking-wider text-stone-400">
+          <span className="ml-2 text-[15px] font-semibold uppercase tracking-wider text-stone-400">
             {badge}
           </span>
         )}
-        <span className="mt-0.5 block text-[15px] leading-relaxed text-stone-600">
+        <span className="mt-0.5 block text-[17px] leading-relaxed text-stone-600">
           {tool.description}
         </span>
       </span>
@@ -233,10 +233,10 @@ function UnitCard({
           aria-controls={panelId}
           className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-50"
         >
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cardinal/10 text-[14px] font-bold text-cardinal">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cardinal/10 text-[15px] font-bold text-cardinal">
             {entry.number}
           </span>
-          <span className="min-w-0 flex-1 text-[18px] font-bold leading-snug tracking-[-0.016em] text-stone-900">
+          <span className="min-w-0 flex-1 text-[20px] font-bold leading-snug tracking-[-0.016em] text-stone-900">
             {entry.title}
           </span>
           <ChevronDown
@@ -252,11 +252,11 @@ function UnitCard({
         hidden={!open}
         className="border-t border-stone-100 bg-stone-50/60 px-3 pb-2 pt-2"
       >
-        <p className="px-3 pb-3 text-[15px] leading-relaxed text-stone-600">
+        <p className="px-3 pb-3 text-[17px] leading-relaxed text-stone-600">
           {entry.description}
         </p>
         {entry.tools.length === 0 ? (
-          <p className="px-3 py-2 text-[15px] text-stone-500">
+          <p className="px-3 py-2 text-[17px] text-stone-500">
             The tools for this unit are still being built.
           </p>
         ) : (
@@ -323,7 +323,7 @@ export default function TeacherTraining() {
       {isFull ? (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
           <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-            <h1 className="min-w-0 shrink text-[17px] font-bold tracking-[-0.016em] text-white">
+            <h1 className="min-w-0 shrink text-[18px] font-bold tracking-[-0.016em] text-white">
               The Personal Finance Toolkit
             </h1>
             <div className="relative ml-auto w-full max-w-[15rem] shrink">
@@ -337,7 +337,7 @@ export default function TeacherTraining() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the tools"
                 aria-label="Search the tools"
-                className="w-full border-0 bg-white py-1.5 pl-9 pr-3 text-[15px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+                className="w-full border-0 bg-white py-2 pl-9 pr-3 text-[16px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
               />
             </div>
             <div className="shrink-0">
@@ -359,7 +359,7 @@ export default function TeacherTraining() {
             >
               The Personal Finance Toolkit
             </h1>
-            <p className="mx-auto mt-4 max-w-3xl text-[18px] leading-relaxed text-white/85">
+            <p className="mx-auto mt-4 max-w-3xl text-[20px] leading-relaxed text-white/85">
               Interactive tools for teaching personal finance.
             </p>
             <div className="relative mx-auto mt-6 max-w-md">
@@ -373,14 +373,14 @@ export default function TeacherTraining() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search the tools"
                 aria-label="Search the tools"
-                className="w-full border-0 bg-white py-3 pl-10 pr-4 text-[17px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+                className="w-full border-0 bg-white py-3 pl-10 pr-4 text-[18px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
               />
             </div>
           </div>
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-6 pb-6 pt-8">
+      <div className={`mx-auto px-6 pb-6 pt-8 ${isFull ? 'w-full' : 'max-w-7xl'}`}>
         <div className="flex flex-col gap-x-10 gap-y-8 md:flex-row">
           {/* The hub's left rail stays alongside the toolkit, so arriving from
               ifdm.stanford.edu/resourcehub keeps the section's shell. Inside
@@ -395,7 +395,9 @@ export default function TeacherTraining() {
           )}
 
           <div
-            className={`min-w-0 flex-1 ${isFull ? 'max-w-6xl' : 'max-w-5xl'} ${
+            /* Filled, the screen is the width. A cap here left a fifth of a
+               1920 display empty on either side. */
+            className={`min-w-0 flex-1 ${isFull ? 'w-full' : 'max-w-5xl'} ${
               framed || isFull ? 'mx-auto w-full' : ''
             }`}
           >
@@ -408,7 +410,7 @@ export default function TeacherTraining() {
             )}
             {hits ? (
               <>
-                <p className="mb-3 text-[15px] text-stone-600">
+                <p className="mb-3 text-[17px] text-stone-600">
                   {hits.length === 0
                     ? 'No tools match that search.'
                     : hits.length === 1

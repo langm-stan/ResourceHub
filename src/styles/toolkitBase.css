@@ -111,3 +111,10 @@ html[data-present='125'] main {
 html[data-present='150'] main {
   zoom: 1.5;
 }
+/* Above 150 is for a room at the back, or for anyone who wants it. */
+html[data-present='175'] main {
+  zoom: 1.75;
+}
+html[data-present='200'] main {
+  zoom: 2;
+}

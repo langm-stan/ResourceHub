@@ -14,12 +14,17 @@
  */
 
 /** Percentages the page can be shown at, smallest first. */
-export const SIZES = [75, 90, 100, 125, 150] as const
+export const SIZES = [75, 90, 100, 125, 150, 175, 200] as const
 export type TextSize = (typeof SIZES)[number]
 
 export const DEFAULT_SIZE: TextSize = 100
-/** What a filled screen steps up to, when it is not already larger. */
-export const FULL_SCREEN_SIZE: TextSize = 125
+/*
+ * What a filled screen steps up to, when it is not already larger. A tool on
+ * a screen is being read by a room, and by people who would rather not be
+ * squinting; the sizes above this one are there for when that is still not
+ * enough.
+ */
+export const FULL_SCREEN_SIZE: TextSize = 150
 
 const KEY = 'ifdm-present'
 
