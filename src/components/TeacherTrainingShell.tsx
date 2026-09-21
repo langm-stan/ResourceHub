@@ -134,7 +134,7 @@ export default function TeacherTrainingShell({
              with the way back and this unit's other tools beneath the intro. */
           <div className="text-center">
             <div className="max-w-[1680px] mx-auto px-6 pb-8 pt-7">
-            <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase mb-2">
+            <p className="mb-2 text-[15px] font-semibold uppercase tracking-widest text-white/70">
               {eyebrow}
             </p>
             <h1
@@ -155,7 +155,7 @@ export default function TeacherTrainingShell({
                       <NavLink
                         to={`/${t.slug}`}
                         className={({ isActive }) =>
-                          `inline-block rounded-full px-3 py-1.5 text-[14px] transition-colors ${
+                          `inline-block rounded-full px-3.5 py-1.5 text-[16px] transition-colors ${
                             isActive
                               ? 'bg-white/20 font-semibold text-white'
                               : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -174,7 +174,7 @@ export default function TeacherTrainingShell({
         ) : (
           <div className={`mx-auto px-6 py-8 ${showBar ? 'w-full' : 'max-w-[1680px]'}`}>
             <div className="flex items-start justify-between gap-4 mb-2">
-              <p className="text-[13px] font-semibold tracking-widest text-white/70 uppercase">
+              <p className="text-[15px] font-semibold uppercase tracking-widest text-white/70">
                 {eyebrow}
               </p>
               <Link
