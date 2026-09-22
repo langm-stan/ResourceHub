@@ -109,7 +109,7 @@ export function RiskCard() {
           <tr>
             <th scope="col">Bought</th>
             <th scope="col">Price</th>
-            <th scope="col">At purchase</th>
+            <th scope="col">Value at purchase</th>
             {r.topBuys[0]?.after.map((a) => (
               <th key={a.years} scope="col">
                 After {a.years} year{a.years === 1 ? '' : 's'}
