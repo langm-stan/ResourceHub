@@ -595,11 +595,14 @@ function MathView({
         hint="Why consumption is constant: Modigliani's result (1954, Nobel Prize 1985) chooses the steady spending level whose lifetime cost equals lifetime income."
       />
       <FormulaBlock
-        tex={`\\sum_{t=1}^{T} \\frac{c}{(1+r)^{t}} \\;=\\; \\sum_{t=1}^{T} \\frac{y_t}{(1+r)^{t}}`}
+        /* Set as rows rather than one line. A single = wedged between two
+           summations reads as though it has slipped below them, because the
+           sums tower over it on both sides. Given its own row it does not. */
+        tex={`\\begin{aligned} &\\sum_{t=1}^{T} \\frac{c}{(1+r)^{t}} \\\\[6pt] =\\; &\\sum_{t=1}^{T} \\frac{y_t}{(1+r)^{t}} \\end{aligned}`}
         caption="The lifetime budget constraint: the present value of consumption must equal the present value of income, with no bequest."
       />
       <FormulaBlock
-        tex={`c \\;=\\; PV \\cdot \\frac{r}{1-(1+r)^{-T}} \\;=\\; \\boxed{${texUSD(annuityC)}}`}
+        tex={`\\begin{aligned} c &= PV \\cdot \\frac{r}{1-(1+r)^{-T}} \\\\[6pt] &= \\boxed{${texUSD(annuityC)}} \\end{aligned}`}
         caption={`With these inputs, PV = ${formatUSDWhole(r.lifetimeIncomePV)}, T = ${T} years, and r = ${state.realRatePct}%. This is the annuity formula from the Time Value of Money lesson: lifetime income paid back in equal installments.${binding ? ' With no borrowing allowed, the early years are held below this level, and the later years sit slightly above it once the constraint stops binding.' : ''}`}
       />
       <FormulaBlock
