@@ -152,6 +152,23 @@ export interface TopBuy {
   stake: number
   /** Value of the stake at one, two and three years after the purchase. */
   after: { years: number; date: Date; value: number }[]
+  /*
+   * The same stake into the S&P 500 on the same days, which is the question
+   * behind the first one: not whether the money came back, but what it would
+   * have done somewhere ordinary meanwhile. The index is price only, so it
+   * leaves out dividends and understates the comparison.
+   */
+  spx: { years: number; value: number }[]
+}
+
+/** The last S&P close on or before a day, since it does not trade every day. */
+function spxOn(when: Date): Point | null {
+  let last: Point | null = null
+  for (const p of spxSeries) {
+    if (p.date.getTime() <= when.getTime()) last = p
+    else break
+  }
+  return last
 }
 
 export function boughtAtTheTop(series: Point[], stake = 10_000): TopBuy[] {
@@ -168,7 +185,16 @@ export function boughtAtTheTop(series: Point[], stake = 10_000): TopBuy[] {
             : null
         })
         .filter((x): x is { years: number; date: Date; value: number } => x !== null)
-      return { peakDate: peak.date, peakPrice: peak.price, stake, after }
+      const spxStart = spxOn(peak.date)
+      const spx = spxStart
+        ? after
+            .map((a) => {
+              const later = spxOn(a.date)
+              return later ? { years: a.years, value: (stake * later.price) / spxStart.price } : null
+            })
+            .filter((x): x is { years: number; value: number } => x !== null)
+        : []
+      return { peakDate: peak.date, peakPrice: peak.price, stake, after, spx }
     })
     .sort((a, b) => a.peakDate.getTime() - b.peakDate.getTime())
 }

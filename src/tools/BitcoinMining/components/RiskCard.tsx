@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { Callout, Card, Stat, StepHeader } from '../../../design-system'
 import { formatPercent } from '../../../lib/format'
 import { bitcoinRisk } from '../riskCompute'
@@ -102,18 +102,17 @@ export function RiskCard() {
 
       <h3 className={styles.riskSubhead}>$10,000 bought at a top</h3>
       <p className={styles.riskNote}>
-        The two all-time highs in the record, and what a purchase at each was worth afterwards.
+        The two all-time highs in the record, against the same money put into the S&amp;P 500 on
+        the same day.
       </p>
       <table className={styles.riskTable}>
         <thead>
-          {/* One "Value" over the money columns, so each of them can say when
-              rather than repeating what. */}
           <tr>
             <th scope="col" rowSpan={2}>
               Bought
             </th>
             <th scope="col" rowSpan={2}>
-              Price
+              Put into
             </th>
             <th
               scope="colgroup"
@@ -134,25 +133,36 @@ export function RiskCard() {
         </thead>
         <tbody>
           {r.topBuys.map((b) => (
-            <tr key={b.peakDate.toISOString()}>
-              <td>{iso(b.peakDate)}</td>
-              <td className={styles.riskPlain}>{usd(b.peakPrice)}</td>
-              <td className={styles.riskPlain}>{usd(b.stake)}</td>
-              {b.after.map((a) => (
-                <td key={a.years} className={a.value < 10_000 ? undefined : styles.riskPlain}>
-                  {usd(a.value)}
-                </td>
-              ))}
-            </tr>
+            <Fragment key={b.peakDate.toISOString()}>
+              <tr>
+                <td rowSpan={2}>{iso(b.peakDate)}</td>
+                <td className={styles.riskPlain}>Bitcoin</td>
+                <td className={styles.riskPlain}>{usd(b.stake)}</td>
+                {b.after.map((a) => (
+                  <td key={a.years} className={a.value < b.stake ? undefined : styles.riskPlain}>
+                    {usd(a.value)}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className={styles.riskPlain}>S&amp;P 500</td>
+                <td className={styles.riskPlain}>{usd(b.stake)}</td>
+                {b.spx.map((a) => (
+                  <td key={a.years} className={a.value < b.stake ? undefined : styles.riskPlain}>
+                    {usd(a.value)}
+                  </td>
+                ))}
+              </tr>
+            </Fragment>
           ))}
         </tbody>
       </table>
       <p className={styles.riskNote}>
         A buyer at the December 2017 high was down to{' '}
-        <strong>{usd(r.topBuys[0]!.after[0]!.value)}</strong> a year later and waited three years
-        to get back to roughly what they put in. A buyer at the November 2021 high was at{' '}
-        <strong>{usd(r.topBuys[1]!.after[0]!.value)}</strong> after a year. Neither lost the money
-        permanently, and both spent years finding that out.
+        <strong>{usd(r.topBuys[0]!.after[0]!.value)}</strong> a year later and still short of what
+        they put in three years on, while the S&amp;P over those same three years turned the same{' '}
+        {usd(r.topBuys[0]!.stake)} into <strong>{usd(r.topBuys[0]!.spx[2]!.value)}</strong>. The
+        S&amp;P figures are the price index, so they leave out dividends and understate it.
       </p>
 
       <h3 className={styles.riskSubhead}>The three deepest falls</h3>
