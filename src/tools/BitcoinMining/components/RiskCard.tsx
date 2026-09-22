@@ -54,19 +54,19 @@ export function RiskCard() {
 
       <StepHeader
         title="Price history and volatility"
-        hint={`Daily prices from ${iso(r.first.date)} to ${iso(r.last.date)}. The comparison with the S&P 500 starts ${iso(r.windowStart)}, where the two records overlap.`}
+        hint={`Daily prices, ${iso(r.first.date)} to ${iso(r.last.date)}. The S&P 500 comparison starts ${iso(r.windowStart)}, where the records overlap.`}
       />
 
       <div className={styles.riskStats}>
         <Stat
-          label="Bitcoin, yearly swing"
+          label="Bitcoin, annual volatility"
           value={r.btcVol}
           format={(v) => formatPercent(v, 0)}
           emphasis
           accentColor="var(--c-accent)"
         />
         <Stat
-          label="S&P 500, yearly swing"
+          label="S&P 500, annual volatility"
           value={r.spxVol}
           format={(v) => formatPercent(v, 0)}
           accentColor="var(--c-series-1)"
@@ -88,7 +88,7 @@ export function RiskCard() {
       </p>
 
       <UnderwaterChart
-        caption={`How far bitcoin sat below its own previous high, each day since ${r.first.date.getUTCFullYear()}. Zero is a new record; everything below it is the wait to get back to one.`}
+        caption={`How far bitcoin sat below its own previous high, each day since ${r.first.date.getUTCFullYear()}. Zero means a new high; everything below is time spent under the previous one.`}
         exportStats={[
           { label: 'Deepest fall', value: formatPercent(worst.depth, 0), color: 'var(--c-accent)' },
           {

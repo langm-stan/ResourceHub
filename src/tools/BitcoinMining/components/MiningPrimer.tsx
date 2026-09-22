@@ -16,8 +16,7 @@ export function MiningPrimer() {
       <summary className={styles.guideSummary}>How bitcoin is made</summary>
       <div className={styles.guideBody}>
         <p className={styles.primerLead}>
-          Every bitcoin in existence was paid out as a prize for doing the work below. There is no
-          other way to make one.
+          Every bitcoin in existence was paid out for doing the work below.
         </p>
 
         <ol className={styles.primer}>

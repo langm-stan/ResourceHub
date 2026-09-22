@@ -89,7 +89,7 @@ function OutcomesSection() {
     <>
       <StepHeader
         title="Financial literacy and financial outcomes"
-        hint="The same survey asks people about their own finances. Grouped by how much of the index they answered correctly, 2026."
+        hint="Two questions about people's own finances, grouped by their score. 2026."
       />
       <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
         <Stat
@@ -178,7 +178,7 @@ function DecadeSection() {
     <>
       <StepHeader
         title="The index, 2017 to 2026"
-        hint="The same 28 questions, asked every year since 2017. Each band is the share of U.S. adults answering that many correctly."
+        hint="Share of U.S. adults in each band, every year since 2017."
       />
       <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
         <Stat
@@ -370,7 +370,7 @@ function AgeBandsSection() {
     <>
       <StepHeader
         title="Scores by age group"
-        hint="Every column is one age group, divided into the four bands of the 28-question index, 2026."
+        hint="Share of each age group in each band of the 28-question index, 2026."
       />
       <Card tone="raised">
         <ul className="mb-4 flex flex-wrap gap-x-6 gap-y-2">
@@ -503,7 +503,7 @@ function AreaSection() {
     <>
       <StepHeader
         title="Financial literacy by functional area"
-        hint="% answering the 2026 P-Fin 8 proxy question correctly: one representative question for each of the eight areas U.S. adults routinely function in. Select an area to see the breakdown."
+        hint="% correct on one representative question per area, 2026. Select an area for the full-index breakdown."
       />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {AREAS.map((a) => {
@@ -601,7 +601,7 @@ function DemographicSection() {
     <>
       <StepHeader
         title="Overall financial literacy by demographic"
-        hint="% of the full 28-question P-Fin Index answered correctly, 2026. Each chart stops just above its own highest bar, so the differences are visible."
+        hint="% of the 28-question index answered correctly, 2026."
       />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {OVERALL_CHARTS.map((c) => {
