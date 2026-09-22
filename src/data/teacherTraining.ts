@@ -260,7 +260,7 @@ export const COURSE_UNITS: CourseUnit[] = [
     title: 'Special Topics: Gambling, Bitcoin and Crypto',
     short: 'Special Topics',
     description:
-      'The difference between investing and gambling, and bitcoin mining.',
+      'Betting and crypto, and how each compares with investing: the odds, the prices, and what holding them has been like.',
     tools: [
 {
         slug: 'gambling-sim',
@@ -278,7 +278,7 @@ export const COURSE_UNITS: CourseUnit[] = [
         slug: 'bitcoin-mining',
         label: 'Bitcoin Mining',
         description:
-          'A classroom simulation of bitcoin mining. Students race to find a nonce, add a block to the chain, and read the ledger.',
+          'How far bitcoin has fallen and how long it took to recover, next to the S&P 500, and a simulation of where new bitcoin comes from.',
         keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
       },
     ],

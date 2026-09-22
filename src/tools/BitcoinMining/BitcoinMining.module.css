@@ -819,3 +819,62 @@
   max-width: 70ch;
   text-align: center;
 }
+
+/* The price-and-risk tab: statistics before the simulation. */
+.riskStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.riskLead {
+  margin: 0 0 var(--space-5);
+  max-width: 62ch;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+.riskLead strong {
+  color: var(--text-primary);
+}
+
+.riskSubhead {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.016em;
+  color: var(--text-primary);
+}
+
+.riskTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.riskTable th,
+.riskTable td {
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  text-align: left;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.riskTable th {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.riskTable td:first-child {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.riskSource {
+  margin: var(--space-5) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+.tabs {
+  margin-bottom: var(--space-4);
+}

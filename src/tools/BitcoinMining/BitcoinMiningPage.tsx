@@ -37,6 +37,8 @@ import {
   swatch,
 } from './compute'
 import styles from './BitcoinMining.module.css'
+import { Tabs, type TabItem } from '../../design-system'
+import { RiskCard } from './components/RiskCard'
 
 /*
  * Bitcoin Mining, "Chain Rail" design: the classroom mining game as one
@@ -782,21 +784,37 @@ function MiningCard() {
   )
 }
 
-/* `intro` hides the page's own header when a surrounding shell already provides the title. */
+const SURFACES: TabItem<'risk' | 'mining'>[] = [
+  { value: 'risk', label: 'Price and risk' },
+  { value: 'mining', label: 'Mining simulation' },
+]
+
+/*
+ * `intro` hides the page's own header when a surrounding shell already
+ * provides the title.
+ *
+ * Price and risk comes first. The simulation asks a reader to go and produce
+ * bitcoin, which is a strange thing to be asked before anyone has said what
+ * the stuff is worth or how much it moves.
+ */
 export function BitcoinMiningPage({ intro = true }: { intro?: boolean } = {}) {
+  const [surface, setSurface] = useState<'risk' | 'mining'>('risk')
+
   return (
     <div className={styles.page}>
       {intro && (
         <header className={styles.intro}>
-          <p className={styles.eyebrow}>Personal Finance Toolkit · Unit 8: Financial Markets</p>
+          <p className={styles.eyebrow}>Personal Finance Toolkit · Unit 11: Special Topics</p>
           <h1 className={styles.h1}>Bitcoin Mining</h1>
           <p className={styles.lead}>
-            The class acts as the network: race to find a nonce, see the block added to the chain, and read the ledger
-            straight off it.
+            What bitcoin&rsquo;s price has done, and where new bitcoin comes from.
           </p>
         </header>
       )}
-      <MiningCard />
+      <div className={styles.tabs}>
+        <Tabs items={SURFACES} value={surface} onChange={setSurface} />
+      </div>
+      {surface === 'risk' ? <RiskCard /> : <MiningCard />}
     </div>
   )
 }
