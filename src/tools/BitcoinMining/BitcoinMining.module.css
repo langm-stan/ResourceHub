@@ -977,3 +977,18 @@
   line-height: var(--lh-body);
   color: var(--text-muted);
 }
+
+.riskNote {
+  margin: var(--space-3) 0 var(--space-5);
+  max-width: 68ch;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+.riskNote strong {
+  color: var(--text-primary);
+}
+/* The table's first column is the accent; money columns are not. */
+.riskPlain {
+  color: var(--text-primary) !important;
+  font-weight: 400 !important;
+}

@@ -124,6 +124,60 @@ export function underwaterPath(series: Point[]): { t: number; date: Date; depth:
   })
 }
 
+/*
+ * The record opens on 1 December 2014, and bitcoin had traded above $1,000
+ * a year before that, so a fall measured from the first days of the record
+ * is a fall from where the data happens to start and not from an all-time
+ * high. Peaks inside this window are not treated as highs.
+ */
+const RECORD_EDGE_DAYS = 60
+
+/** Falls from a genuine all-time high, deepest first. */
+export function allTimeHighDrawdowns(series: Point[]): Drawdown[] {
+  const opens = series[0]!.date.getTime()
+  return drawdowns(series).filter(
+    (d) => (d.peakDate.getTime() - opens) / DAY_MS > RECORD_EDGE_DAYS,
+  )
+}
+
+/*
+ * What $10,000 put in at a top was worth afterwards. The question a person
+ * who bought at the wrong moment actually has, and the one an average
+ * annual return never answers.
+ */
+export interface TopBuy {
+  peakDate: Date
+  peakPrice: number
+  /** Value of $10,000, at one, two, three years, and at the end of the record. */
+  after: { years: number; date: Date; value: number }[]
+  today: { date: Date; value: number }
+}
+
+export function boughtAtTheTop(series: Point[], stake = 10_000): TopBuy[] {
+  const last = series[series.length - 1]!
+  return allTimeHighDrawdowns(series)
+    .slice(0, 2)
+    .map((d) => {
+      const peak = series.find((p) => p.date.getTime() === d.peakDate.getTime())!
+      const after = [1, 2, 3]
+        .map((years) => {
+          const target = peak.t + Math.round(years * 365)
+          const point = series.find((p) => p.t >= target)
+          return point && point.t <= target + 5
+            ? { years, date: point.date, value: (stake * point.price) / peak.price }
+            : null
+        })
+        .filter((x): x is { years: number; date: Date; value: number } => x !== null)
+      return {
+        peakDate: peak.date,
+        peakPrice: peak.price,
+        after,
+        today: { date: last.date, value: (stake * last.price) / peak.price },
+      }
+    })
+    .sort((a, b) => a.peakDate.getTime() - b.peakDate.getTime())
+}
+
 /** Best and worst return over any window of the given length, in days. */
 function extremesOver(series: Point[], days: number) {
   let best = { ret: -Infinity, from: series[0]!, to: series[0]! }
@@ -160,7 +214,9 @@ export function bitcoinRisk() {
       btc: shareBeyond(btcReturns, threshold),
       spx: shareBeyond(spxReturns, threshold),
     })),
-    worstDrawdowns: drawdowns(btcSeries).slice(0, 3),
+    worstDrawdowns: allTimeHighDrawdowns(btcSeries).slice(0, 3),
+    topBuys: boughtAtTheTop(btcSeries),
+    recordOpens: btcSeries[0]!.date,
     year: extremesOver(btcSeries, 365),
     first: btcSeries[0]!,
     last: btcSeries[btcSeries.length - 1]!,

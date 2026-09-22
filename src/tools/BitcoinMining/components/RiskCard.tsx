@@ -14,6 +14,8 @@ import styles from '../BitcoinMining.module.css'
  * data moves the page. Nothing here is typed in.
  */
 
+const usd = (v: number) => `$${Math.round(v).toLocaleString('en-US')}`
+
 const iso = (d: Date) =>
   d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 
@@ -98,6 +100,46 @@ export function RiskCard() {
         ]}
       />
 
+      <h3 className={styles.riskSubhead}>$10,000 bought at a top</h3>
+      <p className={styles.riskNote}>
+        The two all-time highs in the record, and what a purchase at each was worth afterwards.
+      </p>
+      <table className={styles.riskTable}>
+        <thead>
+          <tr>
+            <th scope="col">Bought</th>
+            <th scope="col">Price</th>
+            {r.topBuys[0]?.after.map((a) => (
+              <th key={a.years} scope="col">
+                After {a.years} year{a.years === 1 ? '' : 's'}
+              </th>
+            ))}
+            <th scope="col">Today</th>
+          </tr>
+        </thead>
+        <tbody>
+          {r.topBuys.map((b) => (
+            <tr key={b.peakDate.toISOString()}>
+              <td>{iso(b.peakDate)}</td>
+              <td className={styles.riskPlain}>{usd(b.peakPrice)}</td>
+              {b.after.map((a) => (
+                <td key={a.years} className={a.value < 10_000 ? undefined : styles.riskPlain}>
+                  {usd(a.value)}
+                </td>
+              ))}
+              <td className={styles.riskPlain}>{usd(b.today.value)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className={styles.riskNote}>
+        A buyer at the December 2017 high was down to{' '}
+        <strong>{usd(r.topBuys[0]!.after[0]!.value)}</strong> a year later and waited three years
+        to get back to roughly what they put in. A buyer at the November 2021 high was at{' '}
+        <strong>{usd(r.topBuys[1]!.after[0]!.value)}</strong> after a year. Neither lost the money
+        permanently, and both spent years finding that out.
+      </p>
+
       <h3 className={styles.riskSubhead}>The three deepest falls</h3>
       <table className={styles.riskTable}>
         <thead>
@@ -133,7 +175,11 @@ export function RiskCard() {
         asset held for one year.
       </Callout>
 
-      <p className={styles.riskSource}>Source: {SOURCE}.</p>
+      <p className={styles.riskSource}>
+        Source: {SOURCE}. The record opens {iso(r.recordOpens)}, and bitcoin traded above $1,000
+        the year before that, so falls are measured from all-time highs inside the record rather
+        than from any earlier one.
+      </p>
     </Card>
   )
 }
