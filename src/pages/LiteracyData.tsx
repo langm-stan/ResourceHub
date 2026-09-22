@@ -50,7 +50,15 @@ const OVERALL_CHARTS = [
   { key: 'race', label: 'Race & Ethnicity', data: OVERALL_BY_RACE },
   { key: 'gender', label: 'Gender', data: OVERALL_BY_GENDER },
   { key: 'generation', label: 'Generation', data: OVERALL_BY_GENERATION },
-] as const
+  /* The sixth of the same kind: each age group's own average, so all six
+     charts answer one question and can be read against each other. The
+     distribution behind this average is the chart below the grid. */
+  {
+    key: 'age',
+    label: 'Age Group',
+    data: BANDS_BY_AGE.map((r) => ({ group: r.group, value: r.average })),
+  },
+]
 
 const pct = (v: number) => fmtPct(v, 0)
 
@@ -603,7 +611,7 @@ function DemographicSection() {
         title="Overall financial literacy by demographic"
         hint="% of the 28-question index answered correctly, 2026."
       />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {OVERALL_CHARTS.map((c) => {
           const top = topOf(c.data.map((r) => r.value))
           return (
