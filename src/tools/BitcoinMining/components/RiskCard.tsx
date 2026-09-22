@@ -26,6 +26,35 @@ export function RiskCard() {
 
   return (
     <Card tone="raised">
+      {/*
+        What the thing does, before what it costs.
+        A price chart invites a reader to treat the price as evidence that
+        something works. Bitcoin's function is narrow and worth stating
+        plainly, and it is a separate question from what anyone will pay.
+      */}
+      <StepHeader
+        title="What bitcoin does"
+        hint="One thing, and the price is not a measure of how well it does it."
+      />
+      <div className={styles.definition}>
+        <p>
+          Bitcoin lets one person send bitcoin to another without a bank in the middle, in a way
+          nobody can forge and nobody can reverse. That is the whole of the function. It is not a
+          share of a company, a claim on anyone&rsquo;s profits, or a promise from anyone to pay
+          you back.
+        </p>
+        <p>
+          So the price below is not a measure of how well it works. It is what people were willing
+          to pay on each day, which is a different question from whether the thing does its job.
+        </p>
+        <p>
+          <strong>Nobody issues bitcoin.</strong> New bitcoin appears only as the payment to
+          whoever adds the next block to the record, and that payment halves about every four
+          years until it stops, at 21 million. Mining is the only thing that changes how much
+          bitcoin exists, and it is what the next tab does.
+        </p>
+      </div>
+
       <StepHeader
         title="What holding bitcoin has been like"
         hint={`Daily prices from ${iso(r.first.date)} to ${iso(r.last.date)}. The comparison with the S&P 500 starts ${iso(r.windowStart)}, where the two records overlap.`}
