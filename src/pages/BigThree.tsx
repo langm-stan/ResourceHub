@@ -4,6 +4,7 @@ import { HelpCircle, BookOpen, Library } from 'lucide-react'
 
 const CARDS = [
   {
+    key: 'quiz',
     to: '/big-three/quiz',
     icon: HelpCircle,
     accent: '#8C1515',
@@ -13,6 +14,7 @@ const CARDS = [
     cta: 'The Big Three Quiz',
   },
   {
+    key: 'explained',
     to: '/big-three/explained',
     icon: BookOpen,
     accent: '#1E756A',
@@ -22,6 +24,7 @@ const CARDS = [
     cta: 'The Big Three Explained',
   },
   {
+    key: 'stories',
     to: '/big-three/stories',
     icon: Library,
     accent: '#6E7630',
@@ -31,6 +34,56 @@ const CARDS = [
     cta: 'The Big Three Stories',
   },
 ]
+
+/*
+ * The three pages are read one after another, so each of them ends by naming
+ * the ones a reader has not seen: the quiz sends them to the explanations and
+ * the stories, the explanations to the stories, and the stories back to
+ * either. Without it a reader finishes the quiz and has nowhere to go but the
+ * way they came.
+ */
+export function BigThreeNext({
+  show,
+  base = '',
+}: {
+  show: Array<'quiz' | 'explained' | 'stories'>
+  base?: string
+}) {
+  const cards = CARDS.filter((c) => show.includes(c.key as 'quiz' | 'explained' | 'stories'))
+  if (cards.length === 0) return null
+
+  return (
+    <div className="mt-10 border-t border-stone-200 pt-6">
+      <p className="mb-4 text-[15px] font-semibold uppercase tracking-wider text-stone-400">
+        Also in the Big Three
+      </p>
+      <div className={`grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+        {cards.map((c) => (
+          <Link
+            key={c.to}
+            to={`${base}${c.to}`}
+            className="group flex flex-col gap-3 border border-stone-200 bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+          >
+            <span
+              className="flex h-10 w-10 items-center justify-center"
+              style={{ backgroundColor: `${c.accent}1a`, color: c.accent }}
+            >
+              <c.icon size={20} strokeWidth={2} />
+            </span>
+            <span>
+              <span className="block text-[20px] font-bold tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
+                {c.title}
+              </span>
+              <span className="mt-1 block text-[17px] leading-relaxed text-stone-600">
+                {c.description}
+              </span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 /**
  * The overview body, shared by the Resource Hub page and the teacher training

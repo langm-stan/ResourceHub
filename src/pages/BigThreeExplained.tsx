@@ -1,4 +1,5 @@
 import ResourceHubShell from '../components/ResourceHubShell'
+import { BigThreeNext } from './BigThree'
 
 /*
  * Response shares are U.S. adults in the FINRA Foundation National Financial
@@ -53,7 +54,7 @@ const QUESTIONS = [
 function ResponseBar({ responses: r }: { responses: { correct: number; incorrect: number; dontKnow: number } }) {
   return (
     <div className="mt-4">
-      <p className="text-[13px] font-semibold uppercase tracking-wide text-stone-400 mb-1.5">
+      <p className="text-[15px] font-semibold uppercase tracking-wide text-stone-400 mb-1.5">
         How U.S. adults answer
       </p>
       <div
@@ -65,7 +66,7 @@ function ResponseBar({ responses: r }: { responses: { correct: number; incorrect
         <div className="bg-stone-300" style={{ width: `${r.incorrect}%` }} />
         <div className="bg-sand" style={{ width: `${r.dontKnow}%` }} />
       </div>
-      <p className="text-[13px] text-stone-500 mt-1.5">
+      <p className="text-[15px] text-stone-500 mt-1.5">
         <span className="font-semibold text-palo-teal">{Math.round(r.correct)}% correct</span>
         {' · '}
         {Math.round(r.incorrect)}% incorrect
@@ -89,12 +90,12 @@ export function BigThreeExplainedContent() {
 
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         {QUESTIONS.map((item) => (
-          <div key={item.number} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-card">
-            <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-2">
+          <div key={item.number} className="border border-stone-200 bg-white p-6 shadow-card">
+            <p className="text-[15px] font-semibold uppercase tracking-wide text-cardinal mb-2">
               Question #{item.number}: {item.concept}
             </p>
-            <p className="font-serif text-lg font-semibold text-stone-900 mb-3 leading-snug">{item.q}</p>
-            <ul className="text-sm text-stone-600 mb-4 flex flex-col gap-1">
+            <p className="text-[21px] font-bold tracking-[-0.016em] text-stone-900 mb-3 leading-snug">{item.q}</p>
+            <ul className="text-[18px] text-stone-600 mb-4 flex flex-col gap-1">
               {item.options.map((o) => (
                 <li key={o} className={o === item.answer ? 'font-semibold text-palo-teal' : ''}>
                   • {o}
@@ -102,13 +103,13 @@ export function BigThreeExplainedContent() {
                 </li>
               ))}
             </ul>
-            <p className="text-sm text-stone-600 bg-stone-50 rounded-lg p-4 leading-relaxed">{item.explanation}</p>
+            <p className="text-[18px] text-stone-600 bg-stone-50 p-4 leading-relaxed">{item.explanation}</p>
             <ResponseBar responses={item.responses} />
           </div>
         ))}
 
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-card">
-          <p className="text-[13px] font-semibold uppercase tracking-wide text-cardinal mb-2">
+        <div className="border border-stone-200 bg-white p-6 shadow-card">
+          <p className="text-[15px] font-semibold uppercase tracking-wide text-cardinal mb-2">
             All three together
           </p>
           <p className="text-stone-700 leading-relaxed">
@@ -119,7 +120,7 @@ export function BigThreeExplainedContent() {
           </p>
         </div>
 
-        <p className="text-[13px] text-stone-400 leading-relaxed">
+        <p className="text-[15px] text-stone-400 leading-relaxed">
           Response shares are U.S. adults in the FINRA Foundation National Financial Capability
           Study, 2024 wave (25,539 respondents), the most recent as of 2026. About 1% of
           respondents preferred not to answer each question, so shares total slightly under 100%.
@@ -127,6 +128,7 @@ export function BigThreeExplainedContent() {
           is unchanged from the 2021 wave.
         </p>
       </div>
+      <BigThreeNext show={['stories']} />
     </>
   )
 }

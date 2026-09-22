@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ResourceHubShell from '../components/ResourceHubShell'
 import { PiggyBank, Shirt, Egg } from 'lucide-react'
+import { BigThreeNext } from './BigThree'
 
 const STORIES = [
   {
@@ -62,29 +63,29 @@ export function BigThreeStoriesContent() {
         {STORIES.map((s) => {
           const isOpen = open === s.key
           return (
-            <div key={s.key} className="rounded-2xl border border-stone-200 bg-white shadow-card overflow-hidden">
+            <div key={s.key} className="border border-stone-200 bg-white shadow-card overflow-hidden">
               <button
                 onClick={() => setOpen(isOpen ? '' : s.key)}
                 className="w-full flex items-center gap-4 p-6 text-left"
               >
                 <div
-                  className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
+                  className="h-11 w-11 flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${s.accent}1a`, color: s.accent }}
                 >
                   <s.icon size={22} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[13px] font-semibold uppercase tracking-wide" style={{ color: s.accent }}>
+                  <p className="text-[15px] font-semibold uppercase tracking-wide" style={{ color: s.accent }}>
                     {s.concept}
                   </p>
-                  <h3 className="font-serif text-lg font-semibold text-stone-900">{s.title}</h3>
-                  <p className="text-sm text-stone-500 mt-0.5">{s.summary}</p>
+                  <h3 className="text-[21px] font-bold tracking-[-0.016em] text-stone-900">{s.title}</h3>
+                  <p className="text-[18px] text-stone-500 mt-0.5">{s.summary}</p>
                 </div>
               </button>
               {isOpen && (
                 <div className="px-6 pb-6 flex flex-col gap-3 border-t border-stone-100 pt-4">
                   {s.body.map((p, i) => (
-                    <p key={i} className="text-sm text-stone-700 leading-relaxed">
+                    <p key={i} className="text-[18px] text-stone-700 leading-relaxed">
                       {p}
                     </p>
                   ))}
@@ -94,6 +95,7 @@ export function BigThreeStoriesContent() {
           )
         })}
       </div>
+      <BigThreeNext show={['quiz', 'explained']} />
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ResourceHubShell from '../components/ResourceHubShell'
 import { CheckCircle2, XCircle, ArrowRight } from 'lucide-react'
+import { BigThreeNext } from './BigThree'
 
 const QUESTIONS = [
   {
@@ -81,10 +82,6 @@ export function BigThreeQuizContent() {
           <h2 className="mb-2 text-[28px] font-bold tracking-[-0.016em] text-stone-900">
             You scored {score} of {QUESTIONS.length}
           </h2>
-          <p className="mb-6 text-[19px] leading-relaxed text-stone-600">
-            Read <span className="font-semibold">The Big Three Explained</span> to see why, or{' '}
-            <span className="font-semibold">The Big Three Stories</span> to see the concepts applied.
-          </p>
           <div className="flex flex-col gap-3 mb-6">
             {QUESTIONS.map((q, i) => (
               <div key={q.concept} className="flex items-start gap-3 bg-stone-50 p-4">
@@ -109,6 +106,7 @@ export function BigThreeQuizContent() {
           >
             Retake the quiz
           </button>
+          <BigThreeNext show={['explained', 'stories']} />
         </>
       )}
     </div>
