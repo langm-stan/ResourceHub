@@ -1,48 +1,59 @@
 import styles from '../BitcoinMining.module.css'
 
 /*
- * How to run the thing, folded away.
+ * What each control does, in the order you would touch them.
  *
- * Open by default would push the simulation itself off the screen, and a
- * reader who has used it once does not need it again. <details> rather than
- * a scripted overlay: it opens on a click or a keypress, prints with the
+ * Folded away: someone who has run it once does not need it again, and open
+ * by default it would push the simulation off the screen. A <details> rather
+ * than a scripted tour, so it opens on a click or a keypress, prints with the
  * page, and needs no focus handling of its own.
  */
 export function SimulationGuide() {
   return (
     <details className={styles.guide}>
-      <summary className={styles.guideSummary}>How to run this with a class</summary>
+      <summary className={styles.guideSummary}>How to run it</summary>
       <div className={styles.guideBody}>
         <ol>
           <li>
-            <strong>Set the room.</strong> Put in how many people are mining and choose a
-            difficulty. One zero is found in a few guesses; four takes a room a while. Start at one
-            and raise it once they have the idea.
+            <strong>Set the difficulty.</strong> It is the number of zeros a block&rsquo;s
+            fingerprint has to start with. One zero takes about 16 guesses, two about 256, and
+            every zero after that multiplies by sixteen again.
           </li>
           <li>
-            <strong>Send the chain round.</strong> The QR code carries the whole chain, so every
-            phone in the room can open the same one. Nothing is stored on a server.
+            <strong>Say how many are mining.</strong> This only feeds the estimate of how many
+            guesses each person needs. It does not change the puzzle.
           </li>
           <li>
-            <strong>Race.</strong> Everyone types a name and a guess at the nonce. The fingerprint
-            updates as they type. The first guess that produces enough leading zeros wins the
-            block, and only that person&rsquo;s name goes on it.
+            <strong>Add a transfer, if you want one.</strong> Who pays, who is paid, how much. It
+            goes inside the block you are about to mine, and shows up in the balances afterwards.
           </li>
           <li>
-            <strong>Pay someone.</strong> Before mining a block, fill in a transfer: who pays, who
-            is paid, how much. It rides along inside the block and shows up in the balances below.
+            <strong>Put a name in &ldquo;Who mined it?&rdquo;</strong> Whoever commits the block is
+            the name recorded on it.
           </li>
           <li>
-            <strong>Let the machine do it.</strong> Auto-mine guesses thousands of nonces a second.
-            Use it after the room has done one by hand, so they can feel what it replaced.
+            <strong>Type a number in the nonce box.</strong> The fingerprint recomputes as you
+            type. When it starts with enough zeros the block commits on its own.
           </li>
           <li>
-            <strong>Break it.</strong> Turn on tamper mode and edit an amount in a block already
-            mined. Every block after it turns red at once, because each one names the fingerprint
-            of the one before. That is the whole security argument in one click.
+            <strong>Or press Auto-mine.</strong> The page guesses thousands a second until one
+            lands. Worth doing by hand first, so the guessing is not an abstraction.
           </li>
           <li>
-            <strong>Reset.</strong> Clears the chain for the next class. It asks twice.
+            <strong>Read the chain and the balances.</strong> Every block is listed with its
+            fingerprint, and the sheet below totals who holds what.
+          </li>
+          <li>
+            <strong>Turn on tamper mode and change a committed block.</strong> Every block after
+            it fails at once, because each one carries the fingerprint of the one before. This is
+            the security argument in a single click.
+          </li>
+          <li>
+            <strong>Scan the QR code to move the chain.</strong> It carries the whole chain in the
+            link, so another device opens the same one. Nothing is stored on a server.
+          </li>
+          <li>
+            <strong>Reset clears it.</strong> It asks twice.
           </li>
         </ol>
       </div>
