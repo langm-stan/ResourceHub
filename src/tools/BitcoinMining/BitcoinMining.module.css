@@ -851,18 +851,17 @@
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
-/* Numbers read down a column, so they are centred and the first column,
-   which is a label rather than a figure, stays left. */
+/*
+ * Everything centres. A :first-child exception for the label column caught
+ * the wrong cells as well: "At purchase" is the first cell of the second
+ * header row, and "S&P 500" the first of every second body row, because the
+ * date above it spans them both.
+ */
 .riskTable th,
 .riskTable td {
   padding: var(--space-3);
   text-align: center;
   border-bottom: var(--hairline) solid var(--border-hairline);
-}
-.riskTable th:first-child,
-.riskTable td:first-child {
-  padding-left: 0;
-  text-align: left;
 }
 .riskTable th {
   font-size: var(--fs-caption);
