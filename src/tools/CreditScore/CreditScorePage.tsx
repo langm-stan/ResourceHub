@@ -106,8 +106,8 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised">
         <StepHeader
-          title="The same loan, priced by your score"
-          hint="Pick a car loan and drag the score. The rate follows the score band, and the difference compounds for the whole life of the loan."
+          title="What the same car loan costs at each score"
+          hint="Pick a loan and move the score. Each range of scores carries a different rate, and you pay that rate on every payment for the life of the loan."
         />
         <div className={styles.loanGrid}>
           <div className={styles.controlsCol}>
