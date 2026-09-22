@@ -49,17 +49,17 @@ export const COURSE_UNITS: CourseUnit[] = [
         keywords: ['quiz', 'financial literacy', 'interest', 'inflation', 'risk', 'diversification'],
       },
       {
+        slug: 'literacy-data',
+        label: 'Financial Literacy Data',
+        description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
+        keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
+      },
+      {
         slug: 'tvm-calculator',
         label: 'TVM Calculator',
         description:
           'A financial calculator with N, I/Y, PV, PMT, and FV. Enter any four and solve for the fifth.',
         keywords: ['time value of money', 'present value', 'future value', 'payment', 'annuity', 'discounting'],
-      },
-      {
-        slug: 'literacy-data',
-        label: 'Financial Literacy Data',
-        description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
-        keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
       },
     ],
   },
