@@ -109,20 +109,20 @@ function OutcomesSection() {
         />
       </div>
       <Card tone="raised">
-        <div className="h-72">
+        <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={OUTCOMES_BY_BAND} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               {GRID}
-              <XAxis dataKey="band" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="band" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
               <YAxis
-                tick={{ fontSize: 14 }}
+                tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
                 domain={[0, 100]}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v)}%`} />
-              <Legend wrapperStyle={{ fontSize: 14 }} />
+              <Legend wrapperStyle={{ fontSize: 15 }} />
               <Bar
                 dataKey="couldRaise2000"
                 name="Certain they could raise $2,000 in a month"
@@ -194,21 +194,21 @@ function DecadeSection() {
         />
       </div>
       <Card tone="raised">
-        <p className="mb-3 font-semibold text-stone-800">Share of adults in each band</p>
-        <div className="h-72">
+        <p className="mb-3 text-[17px] font-semibold text-stone-800">Share of adults in each band</p>
+        <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={DECADE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               {GRID}
-              <XAxis dataKey="year" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
               <YAxis
-                tick={{ fontSize: 14 }}
+                tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
                 domain={[0, 40]}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
-              <Legend wrapperStyle={{ fontSize: 14 }} />
+              <Legend wrapperStyle={{ fontSize: 15 }} />
               {BANDS.map((b) => (
                 <Line
                   key={b.key}
@@ -236,10 +236,10 @@ function DecadeSection() {
 
       <div className="mt-6">
         <Card tone="raised">
-          <p className="mb-3 font-semibold text-stone-800">
+          <p className="mb-3 text-[17px] font-semibold text-stone-800">
             By functional area, {first.year} against {last.year}
           </p>
-          <div className="h-80">
+          <div className="h-[26rem]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={AREA_THEN_NOW}
@@ -249,7 +249,7 @@ function DecadeSection() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 14 }}
+                  tick={{ fontSize: 15 }}
                   tickLine={false}
                   axisLine={false}
                   domain={[0, 70]}
@@ -258,13 +258,13 @@ function DecadeSection() {
                 <YAxis
                   type="category"
                   dataKey="area"
-                  tick={{ fontSize: 13 }}
+                  tick={{ fontSize: 15 }}
                   tickLine={false}
                   axisLine={false}
-                  width={175}
+                  width={200}
                 />
                 <Tooltip formatter={(v) => `${Number(v)}%`} />
-                <Legend wrapperStyle={{ fontSize: 14 }} />
+                <Legend wrapperStyle={{ fontSize: 15 }} />
                 <Bar dataKey="y2017" name="2017" fill="var(--border-strong)" radius={[0, 5, 5, 0]} isAnimationActive={false} />
                 <Bar dataKey="y2026" name="2026" fill="var(--accent)" radius={[0, 5, 5, 0]} isAnimationActive={false} />
               </BarChart>
@@ -295,14 +295,14 @@ function BigThreeSection() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {BIG_THREE_ALL_CORRECT.map((d) => (
           <Card key={d.dimension} tone="raised">
-            <p className="mb-3 font-semibold text-stone-800">{d.dimension}</p>
-            <div className="h-48">
+            <p className="mb-3 text-[17px] font-semibold text-stone-800">{d.dimension}</p>
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={d.rows} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 13 }}
+                    tick={{ fontSize: 15 }}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, 60]}
@@ -311,10 +311,10 @@ function BigThreeSection() {
                   <YAxis
                     type="category"
                     dataKey="group"
-                    tick={{ fontSize: 13 }}
+                    tick={{ fontSize: 15 }}
                     tickLine={false}
                     axisLine={false}
-                    width={140}
+                    width={165}
                   />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
                   <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
@@ -345,20 +345,20 @@ function AgeBandsSection() {
         hint="Share of each age group in each band of the 28-question index, 2026."
       />
       <Card tone="raised">
-        <div className="h-72">
+        <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={BANDS_BY_AGE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               {GRID}
-              <XAxis dataKey="group" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
               <YAxis
-                tick={{ fontSize: 14 }}
+                tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
                 domain={[0, 100]}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v)}%`} />
-              <Legend wrapperStyle={{ fontSize: 14 }} />
+              <Legend wrapperStyle={{ fontSize: 15 }} />
               {BANDS.map((b) => (
                 <Bar
                   key={b.key}
@@ -384,14 +384,8 @@ function AgeBandsSection() {
   )
 }
 
-export function LiteracyDataContent() {
-  const [area, setArea] = useState<AreaKey>('earning')
-  const [dimension, setDimension] = useState<Dimension>('gender')
-
-  const activeArea = AREAS.find((a) => a.key === area)!
-  const dim = AREA_DIMENSIONS.find((d) => d.value === dimension)!
-  const drillData = useMemo(() => dim.data[area], [dim, area])
-
+/* The source note and the three headline numbers, above every tab. */
+function DataHeader() {
   return (
     <>
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -432,13 +426,27 @@ export function LiteracyDataContent() {
             note="of U.S. adults"
           />
         </div>
-        <p className="text-sm text-stone-600 leading-relaxed mt-5 max-w-3xl border-t border-stone-200 pt-4">
+        <p className="mt-5 max-w-3xl border-t border-stone-200 pt-4 text-[17px] leading-relaxed text-stone-600">
           U.S. adults have averaged about half the questions right for a decade. The average has never
           exceeded {NATIONAL.fullIndexAvgNeverExceeded}% since the index began in 2017, and it
           declined again this year.
         </p>
       </Card>
 
+    </>
+  )
+}
+
+/* Tab 1: what people know, area by area. */
+function AreaSection() {
+  const [area, setArea] = useState<AreaKey>('earning')
+  const [dimension, setDimension] = useState<Dimension>('gender')
+  const activeArea = AREAS.find((a) => a.key === area)!
+  const dim = AREA_DIMENSIONS.find((d) => d.value === dimension)!
+  const drillData = useMemo(() => dim.data[area], [dim, area])
+
+  return (
+    <>
       <StepHeader
         title="Financial literacy by functional area"
         hint="% answering the 2026 P-Fin 8 proxy question correctly: one representative question for each of the eight areas U.S. adults routinely function in. Select an area to see the breakdown."
@@ -456,7 +464,7 @@ export function LiteracyDataContent() {
               }`}
               style={active ? { borderColor: a.color, boxShadow: `0 0 0 1px ${a.color}` } : undefined}
             >
-              <p className="text-[13px] font-semibold text-stone-600 mb-1.5 leading-snug">{a.label}</p>
+              <p className="mb-1.5 text-[15px] font-semibold leading-snug text-stone-600">{a.label}</p>
               <p className="text-2xl font-semibold tnum" style={{ color: a.color }}>
                 {a.national}%
               </p>
@@ -468,20 +476,20 @@ export function LiteracyDataContent() {
       <Card tone="raised" className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-stone-900">{activeArea.label}: breakdown</h3>
-            <p className="text-[13px] text-stone-500">
+            <h3 className="text-[21px] font-bold tracking-[-0.016em] text-stone-900">{activeArea.label}: breakdown</h3>
+            <p className="text-[15px] text-stone-500">
               Full 28-question index, % correct in this area, {dim.label.toLowerCase()}
             </p>
           </div>
           <Tabs items={AREA_DIMENSIONS} value={dimension} onChange={setDimension} />
         </div>
-        <div className="h-64">
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={drillData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-              <XAxis dataKey="group" tick={{ fontSize: 13 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
               <YAxis
-                tick={{ fontSize: 13 }}
+                tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
                 domain={[0, 100]}
@@ -508,27 +516,35 @@ export function LiteracyDataContent() {
         </div>
       </Card>
 
+    </>
+  )
+}
+
+/* Tab 2, first half: the same score cut by who is answering. */
+function DemographicSection() {
+  return (
+    <>
       <StepHeader
         title="Overall financial literacy by demographic"
         hint="% of the full 28-question P-Fin Index answered correctly, 2026."
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {OVERALL_CHARTS.map((c) => (
           <Card key={c.key} tone="raised">
-            <p className="text-sm font-semibold text-stone-800 mb-3">{c.label}</p>
-            <div className="h-44">
+            <p className="mb-3 text-[17px] font-semibold text-stone-800">{c.label}</p>
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={c.data} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 13 }}
+                    tick={{ fontSize: 15 }}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, 100]}
                     tickFormatter={(v) => `${v}%`}
                   />
-                  <YAxis type="category" dataKey="group" tick={{ fontSize: 13 }} tickLine={false} axisLine={false} width={130} />
+                  <YAxis type="category" dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} width={165} />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
                   <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
                 </BarChart>
@@ -538,18 +554,48 @@ export function LiteracyDataContent() {
         ))}
       </div>
 
-      <div className="mt-10">
-        <AgeBandsSection />
+    </>
+  )
+}
+
+/*
+ * Four views rather than one scroll. The page had grown to seven thousand
+ * pixels and twenty-five charts, which is a lot to ask of someone looking
+ * for one number.
+ */
+type View = 'areas' | 'groups' | 'bigthree' | 'time' | 'why'
+
+const VIEWS: TabItem<View>[] = [
+  { value: 'areas', label: 'What people know' },
+  { value: 'groups', label: 'Who knows it' },
+  { value: 'bigthree', label: 'The Big Three' },
+  { value: 'time', label: 'Over ten years' },
+  { value: 'why', label: 'Why it matters' },
+]
+
+export function LiteracyDataContent() {
+  const [view, setView] = useState<View>('areas')
+
+  return (
+    <>
+      <DataHeader />
+
+      <div className="mb-8">
+        <Tabs items={VIEWS} value={view} onChange={setView} />
       </div>
-      <div className="mt-10">
-        <BigThreeSection />
-      </div>
-      <div className="mt-10">
-        <DecadeSection />
-      </div>
-      <div className="mt-10">
-        <OutcomesSection />
-      </div>
+
+      {view === 'areas' && <AreaSection />}
+      {view === 'groups' && (
+        <>
+          <DemographicSection />
+          <div className="mt-10">
+            <AgeBandsSection />
+          </div>
+        </>
+      )}
+      {view === 'bigthree' && <BigThreeSection />}
+      {view === 'time' && <DecadeSection />}
+      {view === 'why' && <OutcomesSection />}
     </>
   )
 }
