@@ -3,6 +3,7 @@ import { effectiveAnnualRate, FREQUENCIES, type FrequencyName } from '../../../l
 import { formatPercent } from '../../../lib/format'
 import type { Mode, Scenario } from '../state'
 import styles from './ParameterPanel.module.css'
+import { FREQUENCY_ADVERB } from '../../../lib/finance/types'
 
 const FREQ_OPTIONS: Segment<FrequencyName>[] = [
   { value: 'annual', label: 'Annual' },
@@ -29,7 +30,7 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
   const earNote =
     scenario.frequency === 'annual'
       ? 'Compounded once a year.'
-      : `${formatPercent(rate, 1)} compounded ${scenario.frequency} = ${formatPercent(ear, 2)} effective.`
+      : `${formatPercent(rate, 1)} compounded ${FREQUENCY_ADVERB[scenario.frequency]} = ${formatPercent(ear, 2)} effective.`
 
   const isPv = scenario.mode === 'pv'
 

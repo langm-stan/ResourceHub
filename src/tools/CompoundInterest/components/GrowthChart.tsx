@@ -17,6 +17,7 @@ import { formatUSDCompact, formatUSDWhole, formatYears } from '../../../lib/form
 import type { SeriesPoint } from '../../../lib/finance'
 import type { Results } from '../compute'
 import type { Scenario } from '../state'
+import { FREQUENCY_ADVERB } from '../../../lib/finance/types'
 
 const PRINCIPAL_FILL = 'color-mix(in srgb, var(--c-series-3) 16%, var(--surface))'
 const SIMPLE_FILL = 'color-mix(in srgb, var(--c-series-2) 26%, var(--surface))'
@@ -47,9 +48,9 @@ function FvChart({ scenario, results, overlayHeader }: GrowthChartProps) {
       {scenario.contribution
         ? ` plus ${formatUSDWhole(scenario.contribution.amount)} added each period`
         : ''}{' '}
-      at {scenario.ratePct}%, compounded {scenario.frequency}. Three bands, from the bottom up:
-      the money you put in, the interest on that money, and the green wedge, which is interest
-      earning interest.
+      at {scenario.ratePct}%, compounded {FREQUENCY_ADVERB[scenario.frequency]}. Grey is the money
+      you put in, red is the interest that money earned, and green is the interest earned by the
+      interest.
     </>
   )
 

@@ -34,3 +34,16 @@ export const FREQUENCIES = {
 } as const satisfies Record<string, Frequency>
 
 export type FrequencyName = keyof typeof FREQUENCIES
+
+/*
+ * The names above are adjectives, and prose wants an adverb: a balance is
+ * compounded annually, not compounded annual. Three of the six differ.
+ */
+export const FREQUENCY_ADVERB: Record<FrequencyName, string> = {
+  annual: 'annually',
+  semiannual: 'semiannually',
+  quarterly: 'quarterly',
+  monthly: 'monthly',
+  daily: 'daily',
+  continuous: 'continuously',
+}
