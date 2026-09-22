@@ -39,6 +39,8 @@ import {
 import styles from './BitcoinMining.module.css'
 import { Tabs, type TabItem } from '../../design-system'
 import { RiskCard } from './components/RiskCard'
+import { MiningPrimer } from './components/MiningPrimer'
+import { SimulationGuide } from './components/SimulationGuide'
 
 /*
  * Bitcoin Mining, "Chain Rail" design: the classroom mining game as one
@@ -814,7 +816,15 @@ export function BitcoinMiningPage({ intro = true }: { intro?: boolean } = {}) {
       <div className={styles.tabs}>
         <Tabs items={SURFACES} value={surface} onChange={setSurface} />
       </div>
-      {surface === 'risk' ? <RiskCard /> : <MiningCard />}
+      {surface === 'risk' ? (
+        <RiskCard />
+      ) : (
+        <>
+          <MiningPrimer />
+          <SimulationGuide />
+          <MiningCard />
+        </>
+      )}
     </div>
   )
 }

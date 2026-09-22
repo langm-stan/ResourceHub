@@ -878,3 +878,76 @@
 .tabs {
   margin-bottom: var(--space-4);
 }
+
+/* How bitcoin is made: a numbered argument, not a list of facts. */
+.primer {
+  margin: var(--space-4) 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+  counter-reset: primer;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 68ch;
+}
+.primer li {
+  counter-increment: primer;
+  position: relative;
+  padding-left: 2.5rem;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+.primer li::before {
+  content: counter(primer);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent-wash, rgba(140, 21, 21, 0.1));
+  color: var(--accent);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.primer strong {
+  color: var(--text-primary);
+}
+
+/* The guide, folded away so it does not push the simulation off screen. */
+.guide {
+  margin: var(--space-5) 0;
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--surface);
+}
+.guideSummary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  color: var(--accent);
+}
+.guideSummary:hover {
+  background: var(--surface-sunken);
+}
+.guideBody {
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: var(--hairline) solid var(--border-hairline);
+}
+.guideBody ol {
+  margin: var(--space-4) 0 0;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 68ch;
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+.guideBody strong {
+  color: var(--text-primary);
+}
