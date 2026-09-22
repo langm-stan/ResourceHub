@@ -47,7 +47,8 @@ function FvChart({ scenario, results, overlayHeader }: GrowthChartProps) {
       {scenario.contribution
         ? ` plus ${formatUSDWhole(scenario.contribution.amount)} added each period`
         : ''}{' '}
-      at {scenario.ratePct}%, compounded {scenario.frequency}. The green wedge is interest
+      at {scenario.ratePct}%, compounded {scenario.frequency}. Three bands, from the bottom up:
+      the money you put in, the interest on that money, and the green wedge, which is interest
       earning interest.
     </>
   )

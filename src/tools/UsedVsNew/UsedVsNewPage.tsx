@@ -243,7 +243,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
                   },
                 ]
               })()}
-              note={`The car's value follows the depreciation curve: about 20% in year one, then 15% a year. The loan is underwater whenever the red line sits above the gold one.`}
+              note={`The car's value follows the depreciation curve: about 20% in year one, then 15% a year. A loan is underwater when you owe more than the car is worth, so selling it would not clear the debt: that is wherever the red line sits above the gold one.`}
             />
       </Card>
 

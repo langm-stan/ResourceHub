@@ -95,14 +95,14 @@ export function BigThreeContent({ base = '' }: { base?: string }) {
     <>
       <div className="mx-auto mb-10 flex max-w-4xl flex-col gap-6 leading-relaxed text-stone-700">
         <p>
-          For more than 20 years, the Big Three allowed us to gauge whether people understand the basic concepts
+          For more than 20 years, the Big Three has allowed us to gauge whether people understand the basic concepts
           needed to manage money, build wealth, and create a financially secure future. These three questions have
           become the gold standard for measuring financial literacy, and research tells us that people who
           understand principles woven into the Big Three save more for retirement, manage their debt more
           effectively, and make smarter investment decisions.
         </p>
         <p>
-          At IFDM we believe that measuring financial literacy is important. It helps us identify the most
+          At IFDM, we believe that measuring financial literacy is important. It helps us identify the most
           vulnerable populations and find ways to narrow gaps in financial knowledge.
         </p>
         <p>

@@ -324,8 +324,7 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
         {HISTORY_FIRST_YEAR} <strong>no 20- or 30-year stretch of the U.S. stock market has ever
         finished with a loss</strong>. The worst 20-year run still returned{' '}
         {formatPercent(twenty.worst, 1)} a year, and stocks beat the 10-year Treasury in{' '}
-        {formatPercent(twenty.beat, 0)} of all 20-year windows. A repeated gamble becomes a more
-        certain loss; a diversified investment held longer becomes a more certain gain.
+        {formatPercent(twenty.beat, 0)} of all 20-year windows.
       </Callout>
       <Callout tone="note" label="What bonds are for">
         Set the comparison to the 10-year Treasury and hold both windows at one year: the bond

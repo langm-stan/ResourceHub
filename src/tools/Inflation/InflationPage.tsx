@@ -271,7 +271,10 @@ export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
             <div className={styles.vehicleRow}>
               <SegmentedControl
                 label="Investment strategy"
-                options={VEHICLES.map((v) => ({ value: v.key, label: v.label }))}
+                /* The rate is the point of the comparison, so it belongs on the
+                   control where all four can be read at once, not in the caption
+                   of whichever one happens to be selected. */
+                options={VEHICLES.map((v) => ({ value: v.key, label: `${v.label} · ${v.rate}%` }))}
                 value={vehicleKey}
                 onChange={setVehicleKey}
               />

@@ -50,7 +50,7 @@ export function FrequencyExplorer({ scenario }: { scenario: Scenario }) {
       <ChartFrame
         ratio={0.42}
         figure="Figure 2."
-        caption={`Final balance on ${formatUSDWhole(P)} at ${scenario.ratePct}% over ${t} years, as compounding grows more frequent. The dashed line is the continuous limit.`}
+        caption={`Final balance on ${formatUSDWhole(P)} at ${scenario.ratePct}% over ${t} years, as compounding grows more frequent. The dashed line is the balance compounded continuously.`}
         margin={{ top: 24, right: 120, bottom: 40, left: 64 }}
         ariaLabel="Points approaching the continuous-compounding limit as frequency increases"
       >

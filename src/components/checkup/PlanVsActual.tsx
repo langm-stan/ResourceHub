@@ -166,7 +166,7 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
                   <strong>{it.label || 'an untitled row'}</strong> (+{formatUSDWhole(it.actual! - it.value)})
                 </span>
               ))}
-              . Start there. One cut in a large category does more than five small ones.
+              . Start there.
             </>
           )}
           {savShortfall > 0 && (

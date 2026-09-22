@@ -206,8 +206,8 @@ export default function FinancialStatements({ standalone = true }: { standalone?
               </div>
               <p className="text-stone-600 max-w-md basis-72 grow">
                 {netWorth < 0
-                  ? 'This is the number to watch. You owe more than you own right now, which is common early in a career. Paying down debt and saving both move it up.'
-                  : 'This is the number to watch: what you would keep if you sold everything and paid off every debt. Saving and paying down debt both move it up.'}
+                  ? 'This is the number to watch. You owe more than you own right now, which is common early in a career. Saving out of income moves it up; paying a debt with cash you already hold leaves it where it is, since the cash falls by what the debt falls by.'
+                  : 'This is the number to watch: what you would keep if you sold everything and paid off every debt. Saving out of income moves it up; paying a debt with cash you already hold leaves it where it is, since the cash falls by what the debt falls by.'}
               </p>
             </div>
           </Card>
@@ -238,7 +238,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
           <Card tone="raised">
             <StepHeader
               title="Your monthly budget"
-              hint="List what comes in, what you pay yourself first, and what goes out. The totals update as you type."
+              hint="List what comes in, what you save before anything else (paying yourself first), and what goes out. The totals update as you type."
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               <LineItemsEditor

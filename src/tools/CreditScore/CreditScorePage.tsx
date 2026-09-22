@@ -62,7 +62,7 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
       <Card tone="raised">
         <StepHeader
           title="What goes into the score"
-          hint="FICO weighs five things, published at myFICO. Click a slice or a row to see what each one measures and what improves it."
+          hint="FICO weighs five categories, published at myFICO. Click a slice or a row to see what each one measures and what improves it."
         />
         <div className={styles.factorGrid}>
           <div className={styles.donutCol}>

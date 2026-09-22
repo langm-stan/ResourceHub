@@ -154,10 +154,10 @@ export function LiteracyDataContent() {
         </div>
         <div className="mt-4">
           <Callout tone="plain" label="Reading this chart">
-            These bars can sit above or below the {activeArea.national}% tile. That is not an error. The
-            tile scores one representative question (the "P-Fin 8"); this chart scores all 28 index
-            questions that touch {activeArea.label.toLowerCase()}. Compare the bars with each other, not
-            with the tile.
+            This chart scores all 28 index questions that touch{' '}
+            {activeArea.label.toLowerCase()}. The tile scores one representative question (the
+            &ldquo;P-Fin 8&rdquo;), so the bars can sit above or below the{' '}
+            {activeArea.national}% tile. Compare the bars with each other, not with the tile.
           </Callout>
         </div>
       </Card>

@@ -82,10 +82,9 @@ export function BigThreeExplainedContent() {
   return (
     <>
       <p className="mx-auto mb-10 max-w-4xl leading-relaxed text-stone-700">
-        The Big Three, a trio of financial literacy questions, evaluate understanding of compound interest,
-        inflation, and risk diversification, three fundamental financial concepts that we encourage you to learn,
-        as they are the basis of sound financial decision-making. Below is the correct answer to each of the Big
-        Three questions and the explanation for that answer.
+        The Big Three are three financial literacy questions. They test compound interest, inflation,
+        and risk diversification, the concepts most financial decisions rest on. Below is the correct
+        answer to each, and why it is the correct answer.
       </p>
 
       <div className="mx-auto flex max-w-4xl flex-col gap-6">

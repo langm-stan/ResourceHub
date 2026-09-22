@@ -562,8 +562,9 @@ function CaseStudy({ realRatePct }: { realRatePct: number }) {
       </Callout>
       <Callout tone="note" label="What the case shows">
         A saver on the green plan essentially never goes bankrupt in the study&rsquo;s simulations.
-        Professor Lusardi&rsquo;s conclusion: <strong>consumption should not track income</strong>,
-        for a football player or for anyone. Only the size of the income hump differs.
+        This is the life-cycle model&rsquo;s central claim:{' '}
+        <strong>consumption should not track income</strong>, for a football player or for anyone.
+        Only the size of the income hump differs.
       </Callout>
     </>
   )
@@ -607,7 +608,7 @@ function MathView({
         muted
       />
       <Callout tone="note" label="Check it yourself">
-        With no growth the formula is just <em>c = lifetime income ÷ years</em>. Set the return on
+        With no growth, the formula is just <em>c = lifetime income ÷ years</em>. Set the return on
         savings to zero and the green line lands on that simple average; raise it and c climbs.
         {binding &&
           ' With the no-borrowing toggle on, the green line straddles the formula value instead of sitting on it; turn the toggle off to see the match exactly.'}{' '}
