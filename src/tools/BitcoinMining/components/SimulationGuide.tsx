@@ -11,7 +11,7 @@ import styles from '../BitcoinMining.module.css'
 export function SimulationGuide() {
   return (
     <details className={styles.guide}>
-      <summary className={styles.guideSummary}>How to run it</summary>
+      <summary className={styles.guideSummary}>How to run this page</summary>
       <div className={styles.guideBody}>
         <ol>
           <li>

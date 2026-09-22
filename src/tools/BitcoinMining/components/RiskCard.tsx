@@ -114,7 +114,6 @@ export function RiskCard() {
                 After {a.years} year{a.years === 1 ? '' : 's'}
               </th>
             ))}
-            <th scope="col">Today</th>
           </tr>
         </thead>
         <tbody>
@@ -127,7 +126,6 @@ export function RiskCard() {
                   {usd(a.value)}
                 </td>
               ))}
-              <td className={styles.riskPlain}>{usd(b.today.value)}</td>
             </tr>
           ))}
         </tbody>

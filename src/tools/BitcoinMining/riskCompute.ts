@@ -148,13 +148,11 @@ export function allTimeHighDrawdowns(series: Point[]): Drawdown[] {
 export interface TopBuy {
   peakDate: Date
   peakPrice: number
-  /** Value of $10,000, at one, two, three years, and at the end of the record. */
+  /** Value of $10,000 at one, two and three years after the purchase. */
   after: { years: number; date: Date; value: number }[]
-  today: { date: Date; value: number }
 }
 
 export function boughtAtTheTop(series: Point[], stake = 10_000): TopBuy[] {
-  const last = series[series.length - 1]!
   return allTimeHighDrawdowns(series)
     .slice(0, 2)
     .map((d) => {
@@ -168,12 +166,7 @@ export function boughtAtTheTop(series: Point[], stake = 10_000): TopBuy[] {
             : null
         })
         .filter((x): x is { years: number; date: Date; value: number } => x !== null)
-      return {
-        peakDate: peak.date,
-        peakPrice: peak.price,
-        after,
-        today: { date: last.date, value: (stake * last.price) / peak.price },
-      }
+      return { peakDate: peak.date, peakPrice: peak.price, after }
     })
     .sort((a, b) => a.peakDate.getTime() - b.peakDate.getTime())
 }
