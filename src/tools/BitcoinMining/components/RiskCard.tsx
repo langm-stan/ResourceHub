@@ -109,6 +109,7 @@ export function RiskCard() {
           <tr>
             <th scope="col">Bought</th>
             <th scope="col">Price</th>
+            <th scope="col">At purchase</th>
             {r.topBuys[0]?.after.map((a) => (
               <th key={a.years} scope="col">
                 After {a.years} year{a.years === 1 ? '' : 's'}
@@ -121,6 +122,7 @@ export function RiskCard() {
             <tr key={b.peakDate.toISOString()}>
               <td>{iso(b.peakDate)}</td>
               <td className={styles.riskPlain}>{usd(b.peakPrice)}</td>
+              <td className={styles.riskPlain}>{usd(b.stake)}</td>
               {b.after.map((a) => (
                 <td key={a.years} className={a.value < 10_000 ? undefined : styles.riskPlain}>
                   {usd(a.value)}

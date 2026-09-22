@@ -851,11 +851,18 @@
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
+/* Numbers read down a column, so they are centred and the first column,
+   which is a label rather than a figure, stays left. */
 .riskTable th,
 .riskTable td {
-  padding: var(--space-3) var(--space-3) var(--space-3) 0;
-  text-align: left;
+  padding: var(--space-3);
+  text-align: center;
   border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.riskTable th:first-child,
+.riskTable td:first-child {
+  padding-left: 0;
+  text-align: left;
 }
 .riskTable th {
   font-size: var(--fs-caption);
