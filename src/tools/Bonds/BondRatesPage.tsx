@@ -241,7 +241,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
 
         <Callout tone="mark" label="Longer maturity, larger price swing">
           Rising rates hurt long bonds most, which is why holding shorter bonds limits
-          losses. The trade is that short bonds pay less. Matching the bond&rsquo;s maturity to when
+          losses. The trade-off is that short bonds pay less. Matching the bond&rsquo;s maturity to when
           you need the money back is the practical defense.
         </Callout>
         <Callout tone="note" label="Priced with the same equation">
