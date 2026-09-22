@@ -370,7 +370,6 @@ export function TvmCalculator() {
       )}
 
       <MathSection
-        hint="The one equation every financial calculator solves, with your registers substituted in."
         rows={workedRows(
           registers,
           lastSolved ?? 'fv',
