@@ -970,3 +970,10 @@
 .definition strong {
   color: var(--text-primary);
 }
+
+.primerLead {
+  margin: var(--space-4) 0 0;
+  max-width: 68ch;
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}

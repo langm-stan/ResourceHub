@@ -1,4 +1,4 @@
-import { Callout, Card, StepHeader } from '../../../design-system'
+import { Callout } from '../../../design-system'
 import styles from '../BitcoinMining.module.css'
 
 /*
@@ -12,13 +12,15 @@ import styles from '../BitcoinMining.module.css'
  */
 export function MiningPrimer() {
   return (
-    <Card tone="raised">
-      <StepHeader
-        title="How bitcoin is actually made"
-        hint="Every bitcoin in existence was paid out as a prize for doing the work below. There is no other way to make one."
-      />
+    <details className={styles.guide} open>
+      <summary className={styles.guideSummary}>How bitcoin is actually made</summary>
+      <div className={styles.guideBody}>
+        <p className={styles.primerLead}>
+          Every bitcoin in existence was paid out as a prize for doing the work below. There is no
+          other way to make one.
+        </p>
 
-      <ol className={styles.primer}>
+        <ol className={styles.primer}>
         <li>
           <strong>Nobody keeps the ledger.</strong> A bank knows what is in your account because
           the bank keeps the record. Bitcoin has no bank, so everyone keeps a copy of the same
@@ -45,15 +47,16 @@ export function MiningPrimer() {
           halves every 210,000 blocks, and is 3.125 today. It keeps halving until it reaches
           nothing, some time around 2140, and no more than 21 million bitcoin will ever exist.
         </li>
-      </ol>
+        </ol>
 
-      <Callout tone="note" label="More miners does not mean more bitcoin">
+        <Callout tone="note" label="More miners does not mean more bitcoin">
         The network watches how fast blocks are arriving and changes how many zeros it demands, so
         a block takes about ten minutes however many machines are guessing. Doubling the computing
         power in the world does not produce bitcoin twice as fast. It makes the puzzle twice as
         hard and produces bitcoin at the same rate, using twice the electricity. That is the
-        difficulty setting in the simulation below.
-      </Callout>
-    </Card>
+          difficulty setting in the simulation below.
+        </Callout>
+      </div>
+    </details>
   )
 }

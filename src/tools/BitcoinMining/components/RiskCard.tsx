@@ -32,10 +32,7 @@ export function RiskCard() {
         something works. Bitcoin's function is narrow and worth stating
         plainly, and it is a separate question from what anyone will pay.
       */}
-      <StepHeader
-        title="What bitcoin does"
-        hint="One thing, and the price is not a measure of how well it does it."
-      />
+      <StepHeader title="What bitcoin does" />
       <div className={styles.definition}>
         <p>
           Bitcoin lets one person send bitcoin to another without a bank in the middle, in a way
