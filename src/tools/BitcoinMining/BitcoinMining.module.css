@@ -999,3 +999,10 @@
   color: var(--text-primary) !important;
   font-weight: 400 !important;
 }
+
+/* The one header that spans the money columns. Its rule stops where the
+   span does, so it reads as covering those columns and not the whole row. */
+.riskGroupHead {
+  border-bottom: var(--hairline) solid var(--border-strong) !important;
+  padding-bottom: var(--space-2) !important;
+}

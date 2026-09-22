@@ -106,10 +106,25 @@ export function RiskCard() {
       </p>
       <table className={styles.riskTable}>
         <thead>
+          {/* One "Value" over the money columns, so each of them can say when
+              rather than repeating what. */}
           <tr>
-            <th scope="col">Bought</th>
-            <th scope="col">Price</th>
-            <th scope="col">Value at purchase</th>
+            <th scope="col" rowSpan={2}>
+              Bought
+            </th>
+            <th scope="col" rowSpan={2}>
+              Price
+            </th>
+            <th
+              scope="colgroup"
+              colSpan={(r.topBuys[0]?.after.length ?? 0) + 1}
+              className={styles.riskGroupHead}
+            >
+              Value
+            </th>
+          </tr>
+          <tr>
+            <th scope="col">At purchase</th>
             {r.topBuys[0]?.after.map((a) => (
               <th key={a.years} scope="col">
                 After {a.years} year{a.years === 1 ? '' : 's'}
