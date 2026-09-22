@@ -168,3 +168,136 @@ export const OVERALL_BY_GENERATION = [
   { group: 'Boomers', value: 54 },
   { group: 'Silent', value: 47 },
 ]
+
+/* ------------------------------------------------------------------ *
+ * Added from the IFDM conference deck "Using Data to Strengthen
+ * Teaching" (Lusardi & Lang, Teaching Personal Finance Conference,
+ * September 2026). Every figure below is read from that deck's native
+ * chart data rather than from a picture of a chart, so it carries the
+ * precision the deck carries.
+ * ------------------------------------------------------------------ */
+
+/** The four bands the P-Fin Index reports, lowest first. */
+export const BANDS = [
+  { key: 'low', label: '0–7 correct', share: 'Under 26%', color: '#8C1515' },
+  { key: 'lowMid', label: '8–14 correct', share: '26–50%', color: '#B1040E' },
+  { key: 'highMid', label: '15–21 correct', share: '51–75%', color: '#6E7630' },
+  { key: 'high', label: '22–28 correct', share: '76–100%', color: '#1E756A' },
+] as const
+
+/*
+ * What financial literacy is associated with. The share of each band who
+ * are certain they could raise $2,000 for an unexpected need within a
+ * month, and the share who have ever worked out how much they need to save
+ * for retirement. Source: P-Fin Index 2026.
+ */
+export const OUTCOMES_BY_BAND: {
+  band: string
+  /** % certain they could come up with $2,000 within a month. */
+  couldRaise2000: number
+  /** % who have tried to work out what they need to retire. */
+  planned: number
+}[] = [
+  { band: 'Under 26%', couldRaise2000: 29, planned: 21 },
+  { band: '26–50%', couldRaise2000: 37, planned: 31 },
+  { band: '51–75%', couldRaise2000: 62, planned: 52 },
+  { band: '76–100%', couldRaise2000: 76, planned: 64 },
+]
+
+/*
+ * Ten years of the same survey. The share of U.S. adults in each band, and
+ * the average share of the 28 questions answered correctly.
+ * Source: P-Fin Index 2017-2026.
+ */
+export const DECADE: {
+  year: number
+  low: number
+  lowMid: number
+  highMid: number
+  high: number
+  average: number
+}[] = [
+  { year: 2017, low: 19.7, lowMid: 31.9, highMid: 32.3, high: 16.1, average: 49.4 },
+  { year: 2018, low: 20.6, lowMid: 28.4, highMid: 34.9, high: 16.2, average: 50.0 },
+  { year: 2019, low: 20.0, lowMid: 26.7, highMid: 35.1, high: 18.2, average: 51.1 },
+  { year: 2020, low: 16.8, lowMid: 30.2, highMid: 33.0, high: 19.9, average: 52.0 },
+  { year: 2021, low: 20.5, lowMid: 28.1, highMid: 33.9, high: 17.5, average: 50.4 },
+  { year: 2022, low: 22.8, lowMid: 26.0, highMid: 32.7, high: 18.4, average: 49.9 },
+  { year: 2023, low: 25.0, lowMid: 26.3, highMid: 32.7, high: 16.0, average: 47.9 },
+  { year: 2024, low: 24.3, lowMid: 27.8, highMid: 31.6, high: 16.3, average: 48.0 },
+  { year: 2025, low: 23.0, lowMid: 27.8, highMid: 31.6, high: 16.3, average: 49.0 },
+  { year: 2026, low: 25.0, lowMid: 29.0, highMid: 32.0, high: 15.0, average: 47.0 },
+]
+
+/*
+ * The full 28-question index by functional area, nine years apart. Seven of
+ * the eight are flat or lower in 2026 than in 2017; only saving rose, by a
+ * point. Source: P-Fin Index 2026 and 2017.
+ */
+export const AREA_THEN_NOW: { area: string; y2017: number; y2026: number }[] = [
+  { area: 'Comprehending risk', y2017: 39, y2026: 36 },
+  { area: 'Insuring', y2017: 44, y2026: 41 },
+  { area: 'Investing', y2017: 46, y2026: 44 },
+  { area: 'Earning', y2017: 49, y2026: 46 },
+  { area: 'Go-to information sources', y2017: 47, y2026: 47 },
+  { area: 'Consuming', y2017: 53, y2026: 48 },
+  { area: 'Saving', y2017: 53, y2026: 54 },
+  { area: 'Borrowing', y2017: 61, y2026: 58 },
+]
+
+/*
+ * The Big Three: the share answering all three questions correctly.
+ * Source: National Financial Capability Study (NFCS) 2024.
+ */
+export const BIG_THREE_ALL_CORRECT: {
+  dimension: 'Age' | 'Education' | 'Gender'
+  rows: { group: string; value: number }[]
+}[] = [
+  {
+    dimension: 'Age',
+    rows: [
+      { group: '18–29', value: 13.4 },
+      { group: '30–44', value: 21.5 },
+      { group: '45–59', value: 30.4 },
+      { group: '60+', value: 42.4 },
+    ],
+  },
+  {
+    dimension: 'Education',
+    rows: [
+      { group: 'High school or less', value: 11.0 },
+      { group: 'Some college', value: 25.7 },
+      { group: 'College degree or more', value: 47.2 },
+    ],
+  },
+  {
+    dimension: 'Gender',
+    rows: [
+      { group: 'Women', value: 20.8 },
+      { group: 'Men', value: 36.5 },
+    ],
+  },
+]
+
+/*
+ * The youngest adults know the least, and the gap is wide at both ends.
+ * Share of each age group in each band, and the group's average.
+ * Source: P-Fin Index 2026.
+ */
+export const BANDS_BY_AGE: {
+  group: string
+  low: number
+  lowMid: number
+  highMid: number
+  high: number
+  average: number
+}[] = [
+  { group: '18–29', low: 37, lowMid: 28, highMid: 26, high: 9, average: 38 },
+  { group: '30–44', low: 28, lowMid: 29, highMid: 28, high: 16, average: 46 },
+  { group: '45–59', low: 22, lowMid: 28, highMid: 34, high: 16, average: 49 },
+  { group: '60+', low: 17, lowMid: 29, highMid: 37, high: 17, average: 52 },
+]
+
+export const SOURCE_DECK =
+  'Lusardi & Lang, "Using Data to Strengthen Teaching", Teaching Personal Finance Conference, September 2026'
+export const SOURCE_NFCS = 'FINRA Investor Education Foundation, National Financial Capability Study, 2024'

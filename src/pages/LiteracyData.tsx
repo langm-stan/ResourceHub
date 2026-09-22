@@ -10,9 +10,28 @@ import {
   OVERALL_BY_RACE,
   OVERALL_BY_GENDER,
   OVERALL_BY_GENERATION,
+  OUTCOMES_BY_BAND,
+  DECADE,
+  AREA_THEN_NOW,
+  BIG_THREE_ALL_CORRECT,
+  BANDS_BY_AGE,
+  BANDS,
+  SOURCE_NFCS,
   type AreaKey,
 } from '../data/literacyData'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+} from 'recharts'
 import { ExternalLink } from 'lucide-react'
 import { Callout, Card, Stat, StepHeader, Tabs, type TabItem } from '../design-system'
 import { fmtPct } from '../lib/format'
@@ -38,6 +57,333 @@ export const LITERACY_DATA_INTRO =
   'How well U.S. adults understand personal finance, by topic, gender, and generation.'
 
 /** The data explorer body, shared by the Resource Hub page and the teacher training section. */
+
+/* ------------------------------------------------------------------ *
+ * What the scores are associated with, how they have moved over ten
+ * years, and the Big Three behind them.
+ * ------------------------------------------------------------------ */
+
+const GRID = <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
+
+/*
+ * The payoff section. Everything above it says how much people know; this
+ * says what knowing it goes with. Two questions from the same survey, both
+ * rising steeply with the score.
+ */
+function OutcomesSection() {
+  const lowest = OUTCOMES_BY_BAND[0]!
+  const highest = OUTCOMES_BY_BAND[OUTCOMES_BY_BAND.length - 1]!
+
+  return (
+    <>
+      <StepHeader
+        title="What the score goes with"
+        hint="The same survey asks people about their own finances. Grouped by how much of the index they answered correctly, 2026."
+      />
+      <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
+        <Stat
+          label="Could certainly raise $2,000 · lowest scores"
+          value={lowest.couldRaise2000}
+          format={(v) => `${v}%`}
+          accentColor="var(--accent)"
+        />
+        <Stat
+          label="Could certainly raise $2,000 · highest scores"
+          value={highest.couldRaise2000}
+          format={(v) => `${v}%`}
+          emphasis
+          accentColor="#1E756A"
+        />
+        <Stat
+          label="Have worked out what they need to retire · lowest"
+          value={lowest.planned}
+          format={(v) => `${v}%`}
+          accentColor="var(--accent)"
+        />
+        <Stat
+          label="Have worked out what they need to retire · highest"
+          value={highest.planned}
+          format={(v) => `${v}%`}
+          emphasis
+          accentColor="#1E756A"
+        />
+      </div>
+      <Card tone="raised">
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={OUTCOMES_BY_BAND} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              {GRID}
+              <XAxis dataKey="band" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <YAxis
+                tick={{ fontSize: 14 }}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                tickFormatter={(v) => `${v}%`}
+              />
+              <Tooltip formatter={(v) => `${Number(v)}%`} />
+              <Legend wrapperStyle={{ fontSize: 14 }} />
+              <Bar
+                dataKey="couldRaise2000"
+                name="Certain they could raise $2,000 in a month"
+                fill="var(--accent)"
+                radius={[6, 6, 0, 0]}
+                isAnimationActive={false}
+              />
+              <Bar
+                dataKey="planned"
+                name="Have worked out what they need to retire"
+                fill="#1E756A"
+                radius={[6, 6, 0, 0]}
+                isAnimationActive={false}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4">
+          <Callout tone="plain" label="Reading this chart">
+            Both are things people report about themselves, not test answers. The people who know
+            the most are {(highest.couldRaise2000 / lowest.couldRaise2000).toFixed(1)} times as
+            likely to say they could raise $2,000 for an emergency, and{' '}
+            {(highest.planned / lowest.planned).toFixed(1)} times as likely to have worked out what
+            retirement costs them. The survey shows they go together; it does not show which one
+            causes the other.
+          </Callout>
+        </div>
+      </Card>
+    </>
+  )
+}
+
+/* Ten years of the same questions, and the answer has not improved. */
+function DecadeSection() {
+  const first = DECADE[0]!
+  const last = DECADE[DECADE.length - 1]!
+
+  return (
+    <>
+      <StepHeader
+        title="Ten years, and it has not improved"
+        hint="The same 28 questions, asked every year since 2017. Each band is the share of U.S. adults answering that many correctly."
+      />
+      <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
+        <Stat
+          label={`Scoring under 26%, ${first.year}`}
+          value={first.low}
+          format={(v) => `${v}%`}
+          accentColor="var(--text-muted)"
+        />
+        <Stat
+          label={`Scoring under 26%, ${last.year}`}
+          value={last.low}
+          format={(v) => `${v}%`}
+          emphasis
+          accentColor="var(--accent)"
+        />
+        <Stat
+          label={`Scoring 76% or better, ${first.year}`}
+          value={first.high}
+          format={(v) => `${v}%`}
+          accentColor="var(--text-muted)"
+        />
+        <Stat
+          label={`Scoring 76% or better, ${last.year}`}
+          value={last.high}
+          format={(v) => `${v}%`}
+          accentColor="#1E756A"
+        />
+      </div>
+      <Card tone="raised">
+        <p className="mb-3 font-semibold text-stone-800">Share of adults in each band</p>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={DECADE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              {GRID}
+              <XAxis dataKey="year" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <YAxis
+                tick={{ fontSize: 14 }}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 40]}
+                tickFormatter={(v) => `${v}%`}
+              />
+              <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
+              <Legend wrapperStyle={{ fontSize: 14 }} />
+              {BANDS.map((b) => (
+                <Line
+                  key={b.key}
+                  type="monotone"
+                  dataKey={b.key}
+                  name={`${b.label} (${b.share})`}
+                  stroke={b.color}
+                  strokeWidth={2.5}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4">
+          <Callout tone="plain" label="Reading this chart">
+            The bottom band has grown from {first.low}% to {last.low}% and the top band has shrunk
+            from {first.high}% to {last.high}%. The average share answered correctly has never
+            exceeded {NATIONAL.fullIndexAvgNeverExceeded}% in the ten years of the survey, and sits
+            at {last.average}% today.
+          </Callout>
+        </div>
+      </Card>
+
+      <div className="mt-6">
+        <Card tone="raised">
+          <p className="mb-3 font-semibold text-stone-800">
+            By functional area, {first.year} against {last.year}
+          </p>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={AREA_THEN_NOW}
+                layout="vertical"
+                margin={{ top: 0, right: 24, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 14 }}
+                  tickLine={false}
+                  axisLine={false}
+                  domain={[0, 70]}
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="area"
+                  tick={{ fontSize: 13 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={175}
+                />
+                <Tooltip formatter={(v) => `${Number(v)}%`} />
+                <Legend wrapperStyle={{ fontSize: 14 }} />
+                <Bar dataKey="y2017" name="2017" fill="var(--border-strong)" radius={[0, 5, 5, 0]} isAnimationActive={false} />
+                <Bar dataKey="y2026" name="2026" fill="var(--accent)" radius={[0, 5, 5, 0]} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4">
+            <Callout tone="plain" label="Reading this chart">
+              Seven of the eight areas are flat or lower than they were nine years earlier. Only
+              saving rose, by a point. Comprehending risk is the lowest of the eight and three
+              points below where it started, which is the same thing the Big Three found twenty
+              years ago.
+            </Callout>
+          </div>
+        </Card>
+      </div>
+    </>
+  )
+}
+
+/* The Big Three, which is the measure the tool next door is built on. */
+function BigThreeSection() {
+  return (
+    <>
+      <StepHeader
+        title="The Big Three, by who is answering"
+        hint="Share answering all three of the Big Three questions correctly. National Financial Capability Study, 2024."
+      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {BIG_THREE_ALL_CORRECT.map((d) => (
+          <Card key={d.dimension} tone="raised">
+            <p className="mb-3 font-semibold text-stone-800">{d.dimension}</p>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={d.rows} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 13 }}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, 60]}
+                    tickFormatter={(v) => `${v}%`}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="group"
+                    tick={{ fontSize: 13 }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={140}
+                  />
+                  <Tooltip formatter={(v) => `${Number(v)}%`} />
+                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <div className="mt-4">
+        <Callout tone="note" label="Three questions, twenty years">
+          One adult in seven under 30 answers all three correctly, against more than four in ten of
+          those over 60. One in nine with a high school education does, against nearly half of
+          those with a degree. The gap between women and men is sixteen points. Source:{' '}
+          {SOURCE_NFCS}.
+        </Callout>
+      </div>
+    </>
+  )
+}
+
+/* The youngest adults know the least, at both ends of the distribution. */
+function AgeBandsSection() {
+  return (
+    <>
+      <StepHeader
+        title="Where each age group lands"
+        hint="Share of each age group in each band of the 28-question index, 2026."
+      />
+      <Card tone="raised">
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={BANDS_BY_AGE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              {GRID}
+              <XAxis dataKey="group" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+              <YAxis
+                tick={{ fontSize: 14 }}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                tickFormatter={(v) => `${v}%`}
+              />
+              <Tooltip formatter={(v) => `${Number(v)}%`} />
+              <Legend wrapperStyle={{ fontSize: 14 }} />
+              {BANDS.map((b) => (
+                <Bar
+                  key={b.key}
+                  dataKey={b.key}
+                  name={`${b.label} (${b.share})`}
+                  stackId="bands"
+                  fill={b.color}
+                  isAnimationActive={false}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4">
+          <Callout tone="plain" label="Reading this chart">
+            Each column is one age group, split into the four bands. More than a third of 18 to 29
+            year-olds answer fewer than eight of the twenty-eight questions correctly, and fewer
+            than one in ten answer twenty-two or more.
+          </Callout>
+        </div>
+      </Card>
+    </>
+  )
+}
+
 export function LiteracyDataContent() {
   const [area, setArea] = useState<AreaKey>('earning')
   const [dimension, setDimension] = useState<Dimension>('gender')
@@ -190,6 +536,19 @@ export function LiteracyDataContent() {
             </div>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-10">
+        <AgeBandsSection />
+      </div>
+      <div className="mt-10">
+        <BigThreeSection />
+      </div>
+      <div className="mt-10">
+        <DecadeSection />
+      </div>
+      <div className="mt-10">
+        <OutcomesSection />
       </div>
     </>
   )
