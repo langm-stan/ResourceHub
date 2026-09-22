@@ -483,6 +483,23 @@ function CaseStudy({ realRatePct }: { realRatePct: number }) {
         />
       </div>
 
+      <div className={styles.caseNotes}>
+        <p>
+          <strong>Stays high.</strong> Spending falls to half the playing lifestyle,{' '}
+          {formatUSDWhole(NFL.trackSpendAfter)} a year, paid for out of savings and then out of
+          borrowing.
+        </p>
+        <p>
+          <strong>Overextends.</strong> Spending stays at the playing lifestyle,{' '}
+          {formatUSDWhole(NFL.trackSpendFull)} a year, on the same savings and then the same
+          borrowing.
+        </p>
+        <p>
+          <strong>Tracks income.</strong> Spending falls when the paycheck does. Nothing is saved
+          during the career and nothing is borrowed after it.
+        </p>
+      </div>
+
       <div className={styles.stats}>
         <Stat label={`Career earnings over ${NFL.careerYears} years`} value={NFL.careerEarnings} format={formatUSDWhole} accentColor="var(--c-series-3)" />
         <Stat label="Smoothing plan, spending for life" value={results.smoothedConsumption} format={formatUSDWhole} emphasis accentColor={GREEN} />

@@ -301,3 +301,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* What each of the three paths actually does, said plainly under the control
+   that switches between them. The charts show the shapes; these say the rule
+   each shape follows. */
+.caseNotes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-5);
+  max-width: 62ch;
+}
+.caseNotes p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+.caseNotes strong {
+  color: var(--text-primary);
+}

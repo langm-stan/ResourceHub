@@ -395,11 +395,26 @@ function texMoney(v: number): string {
  * → evaluated convention.
  */
 function workedRows(reg: TvmRegisters, solveFor: TvmVar, answer: number, errored: boolean): MathRow[] {
+  /*
+   * Both ways of writing it. The first is the annuity formula as a course
+   * writes it, for the mode the reader is actually in. The second is the same
+   * thing folded into one line with an indicator, which is how a calculator
+   * stores it and why the two modes share a single key. A reader who has not
+   * met an indicator variable can stop after the first.
+   */
   const rows: MathRow[] = [
     {
+      tex: reg.due
+        ? `PV\\,(1+i)^{N} + PMT\\,\\dfrac{(1+i)^{N}-1}{i}\\,(1+i) + FV = 0`
+        : `PV\\,(1+i)^{N} + PMT\\,\\dfrac{(1+i)^{N}-1}{i} + FV = 0`,
+      caption: reg.due
+        ? 'Payments at the beginning of each period · the extra (1 + i) grows every payment one period further · i = (I/Y ÷ P/Y) ÷ 100'
+        : 'Payments at the end of each period · i = (I/Y ÷ P/Y) ÷ 100',
+    },
+    {
       tex: `PV\\,(1+i)^{N} + PMT\\,\\dfrac{(1+i)^{N}-1}{i}\\,d + FV = 0`,
-      caption:
-        'The equation every financial calculator solves · i = (I/Y ÷ P/Y) ÷ 100, d = (1 + i) in begin mode, 1 otherwise',
+      caption: 'Both modes as one equation, the way a calculator holds it · d = 1 + i at the beginning, 1 at the end',
+      muted: true,
     },
   ]
   if (errored || !Number.isFinite(answer)) return rows

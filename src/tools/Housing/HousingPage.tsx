@@ -215,7 +215,7 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
             note="payment + property tax + insurance"
           />
           <Stat
-            label="Most home you can afford"
+            label="Most expensive home you can afford"
             value={afford.maxPrice}
             format={formatUSDWhole}
             accentColor={GREEN}
@@ -391,7 +391,7 @@ function AffordView({
           accentColor={afford.binding === 'debts' ? CARDINAL : undefined}
         />
         <Stat
-          label="Most home you can afford"
+          label="Most expensive home you can afford"
           value={afford.maxPrice}
           format={formatUSDWhole}
           emphasis
