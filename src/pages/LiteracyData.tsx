@@ -28,6 +28,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -62,6 +63,16 @@ export const LITERACY_DATA_INTRO =
  * What the scores are associated with, how they have moved over ten
  * years, and the Big Three behind them.
  * ------------------------------------------------------------------ */
+
+/*
+ * Where to stop the axis. Every chart ran to 100% while the values sat
+ * between 30 and 60, so nine tenths of each plot was empty and the
+ * differences that matter were squeezed into a sliver. Bars still start at
+ * zero, because a bar chart that does not is a lie; only the top moves.
+ */
+function topOf(values: number[]): number {
+  return Math.min(100, Math.ceil(Math.max(...values) / 10) * 10 + 10)
+}
 
 const GRID = <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
 
@@ -118,7 +129,10 @@ function OutcomesSection() {
                 tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
-                domain={[0, 100]}
+                domain={[
+                  0,
+                  topOf(OUTCOMES_BY_BAND.flatMap((b) => [b.couldRaise2000, b.planned])),
+                ]}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v)}%`} />
@@ -252,7 +266,7 @@ function DecadeSection() {
                   tick={{ fontSize: 15 }}
                   tickLine={false}
                   axisLine={false}
-                  domain={[0, 70]}
+                  domain={[0, topOf(AREA_THEN_NOW.flatMap((a) => [a.y2017, a.y2026]))]}
                   tickFormatter={(v) => `${v}%`}
                 />
                 <YAxis
@@ -290,22 +304,22 @@ function BigThreeSection() {
     <>
       <StepHeader
         title="The Big Three, by who is answering"
-        hint="Share answering all three of the Big Three questions correctly. National Financial Capability Study, 2024."
+        hint="The fraction who answer all three of the Big Three questions correctly. National Financial Capability Study, 2024."
       />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {BIG_THREE_ALL_CORRECT.map((d) => (
           <Card key={d.dimension} tone="raised">
             <p className="mb-3 text-[17px] font-semibold text-stone-800">{d.dimension}</p>
-            <div className="h-56">
+            <div style={{ height: d.rows.length * 62 + 44 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={d.rows} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+                <BarChart data={d.rows} layout="vertical" margin={{ top: 0, right: 44, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
                   <XAxis
                     type="number"
                     tick={{ fontSize: 15 }}
                     tickLine={false}
                     axisLine={false}
-                    domain={[0, 60]}
+                    domain={[0, topOf(d.rows.map((r) => r.value))]}
                     tickFormatter={(v) => `${v}%`}
                   />
                   <YAxis
@@ -317,7 +331,14 @@ function BigThreeSection() {
                     width={165}
                   />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
+                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
+                    <LabelList
+                      dataKey="value"
+                      position="right"
+                      formatter={(v) => `${Number(v)}%`}
+                      style={{ fontSize: 15, fill: 'var(--text-muted)' }}
+                    />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -440,10 +461,13 @@ function DataHeader() {
 /* Tab 1: what people know, area by area. */
 function AreaSection() {
   const [area, setArea] = useState<AreaKey>('earning')
-  const [dimension, setDimension] = useState<Dimension>('gender')
   const activeArea = AREAS.find((a) => a.key === area)!
-  const dim = AREA_DIMENSIONS.find((d) => d.value === dimension)!
-  const drillData = useMemo(() => dim.data[area], [dim, area])
+  /* One axis across both cuts, so the bars can be read against each other. */
+  const drillTop = useMemo(
+    () =>
+      topOf(AREA_DIMENSIONS.flatMap((d) => d.data[area].map((r) => r.value))),
+    [area],
+  )
 
   return (
     <>
@@ -473,87 +497,126 @@ function AreaSection() {
         })}
       </div>
 
-      <Card tone="raised" className="mb-8">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <div>
-            <h3 className="text-[21px] font-bold tracking-[-0.016em] text-stone-900">{activeArea.label}: breakdown</h3>
-            <p className="text-[15px] text-stone-500">
-              Full 28-question index, % correct in this area, {dim.label.toLowerCase()}
-            </p>
-          </div>
-          <Tabs items={AREA_DIMENSIONS} value={dimension} onChange={setDimension} />
-        </div>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={drillData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-              <XAxis dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
-              <YAxis
-                tick={{ fontSize: 15 }}
-                tickLine={false}
-                axisLine={false}
-                domain={[0, 100]}
-                tickFormatter={(v) => `${v}%`}
-              />
-              <Tooltip formatter={(v) => `${Number(v)}%`} />
-              {/* Animation off so bars show fully in embeds, PNG downloads,
-                  and prints that capture the first frame. */}
-              <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive={false}>
-                {drillData.map((_, i) => (
-                  <Cell key={i} fill={activeArea.color} fillOpacity={0.55 + (0.45 * i) / drillData.length} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="mt-4">
-          <Callout tone="plain" label="Reading this chart">
-            This chart scores all 28 index questions that touch{' '}
-            {activeArea.label.toLowerCase()}. The tile scores one representative question (the
-            &ldquo;P-Fin 8&rdquo;), so the bars can sit above or below the{' '}
-            {activeArea.national}% tile. Compare the bars with each other, not with the tile.
-          </Callout>
-        </div>
-      </Card>
+      {/*
+        Both cuts side by side rather than a switch between them. The
+        question is how the groups differ, and a reader cannot compare two
+        charts they have to click between.
+      */}
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        {AREA_DIMENSIONS.map((d) => {
+          const rows = d.data[area]
+          return (
+            <Card key={d.value} tone="raised">
+              <p className="mb-1 text-[17px] font-semibold text-stone-800">
+                {activeArea.label}, {d.label.replace('By ', 'by ').toLowerCase()}
+              </p>
+              <p className="mb-3 text-[15px] text-stone-500">
+                Full 28-question index, % correct in this area
+              </p>
+              <div className="h-[26rem]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={rows} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
+                    {GRID}
+                    <XAxis dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      tick={{ fontSize: 15 }}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, drillTop]}
+                      tickFormatter={(v) => `${v}%`}
+                    />
+                    <Tooltip formatter={(v) => `${Number(v)}%`} />
+                    {/* Animation off so bars show fully in embeds, PNG downloads,
+                        and prints that capture the first frame. */}
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive={false}>
+                      {rows.map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={activeArea.color}
+                          fillOpacity={0.55 + (0.45 * i) / rows.length}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+
+      <div className="mb-8">
+        <Callout tone="plain" label="Reading these charts">
+          Both score all 28 index questions that touch{' '}
+          {activeArea.label.toLowerCase()}. The tile above scores one representative question (the
+          &ldquo;P-Fin 8&rdquo;), so the bars can sit above or below the {activeArea.national}%
+          tile. Compare the bars with each other, not with the tile. Both charts share an axis, so
+          the two cuts can be read against each other.
+        </Callout>
+      </div>
 
     </>
   )
 }
 
-/* Tab 2, first half: the same score cut by who is answering. */
+/*
+ * Tab 2: the same score cut by who is answering.
+ *
+ * Two to a row, and each chart as tall as its own categories need. One to a
+ * row made them a metre wide and four bars deep, which is the shape that
+ * hides differences rather than showing them.
+ */
 function DemographicSection() {
   return (
     <>
       <StepHeader
         title="Overall financial literacy by demographic"
-        hint="% of the full 28-question P-Fin Index answered correctly, 2026."
+        hint="% of the full 28-question P-Fin Index answered correctly, 2026. Each chart stops just above its own highest bar, so the differences are visible."
       />
-      <div className="grid grid-cols-1 gap-6">
-        {OVERALL_CHARTS.map((c) => (
-          <Card key={c.key} tone="raised">
-            <p className="mb-3 text-[17px] font-semibold text-stone-800">{c.label}</p>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={c.data} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
-                  <XAxis
-                    type="number"
-                    tick={{ fontSize: 15 }}
-                    tickLine={false}
-                    axisLine={false}
-                    domain={[0, 100]}
-                    tickFormatter={(v) => `${v}%`}
-                  />
-                  <YAxis type="category" dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} width={165} />
-                  <Tooltip formatter={(v) => `${Number(v)}%`} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {OVERALL_CHARTS.map((c) => {
+          const top = topOf(c.data.map((r) => r.value))
+          return (
+            <Card key={c.key} tone="raised">
+              <p className="mb-3 text-[17px] font-semibold text-stone-800">{c.label}</p>
+              {/* Height follows the number of bars, so a two-row chart does not
+                  get the same slab as a five-row one. */}
+              <div style={{ height: c.data.length * 62 + 44 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={c.data} layout="vertical" margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 15 }}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, top]}
+                      tickFormatter={(v) => `${v}%`}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="group"
+                      tick={{ fontSize: 15 }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={165}
+                    />
+                    <Tooltip formatter={(v) => `${Number(v)}%`} />
+                    <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
+                      <LabelList
+                        dataKey="value"
+                        position="right"
+                        formatter={(v) => `${Number(v)}%`}
+                        style={{ fontSize: 15, fill: 'var(--text-muted)' }}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          )
+        })}
       </div>
-
     </>
   )
 }
