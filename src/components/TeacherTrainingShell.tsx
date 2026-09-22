@@ -106,7 +106,13 @@ export default function TeacherTrainingShell({
           navigation left after a scroll is the prev/next pair at the foot. */}
       {showBar && (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
-          <div className="max-w-[1680px] mx-auto flex items-center gap-3 px-4 py-2">
+          {/* Filled, the band keeps its contents clear of the top edge, where
+              a browser's own toolbar slides down over them. */}
+          <div
+            className={`max-w-[1680px] mx-auto flex items-center gap-3 px-4 ${
+              isFull ? 'pb-2 pt-8' : 'py-2'
+            }`}
+          >
             <Link
               to="/"
               className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-[15px] font-semibold text-cardinal shadow-sm transition-colors hover:bg-white/90"

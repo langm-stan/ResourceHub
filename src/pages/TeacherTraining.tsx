@@ -306,7 +306,11 @@ export default function TeacherTraining() {
           course scrolls under it. */}
       {isFull ? (
         <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
-          <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
+          {/* Filling the screen puts this against the top edge, where a
+              browser's own toolbar slides down over it and takes the search
+              box with it. The band still reaches the edge; its contents sit
+              clear of it. */}
+          <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-2 pt-8">
             <h1 className="min-w-0 shrink text-[18px] font-bold tracking-[-0.016em] text-white">
               The Personal Finance Toolkit
             </h1>
