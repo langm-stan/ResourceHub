@@ -178,6 +178,46 @@ export function Annotation({
   )
 }
 
+/*
+ * A key for stacked bands: a swatch and a name per band, drawn in the plot.
+ *
+ * Bands do not carry their own labels the way a line can, and a leader line
+ * into each one crowds the very area it is pointing at. A key sits in the
+ * empty corner instead and says the same thing once.
+ */
+export function Legend({
+  items,
+  x = 0,
+  y = 0,
+  gap = 19,
+}: {
+  items: { label: string; fill: string; stroke?: string }[]
+  x?: number
+  y?: number
+  gap?: number
+}) {
+  return (
+    <g transform={`translate(${x}, ${y})`}>
+      {items.map((it, i) => (
+        <g key={it.label} transform={`translate(0, ${i * gap})`}>
+          <rect
+            x={0}
+            y={-6}
+            width={13}
+            height={12}
+            fill={it.fill}
+            stroke={it.stroke ?? 'none'}
+            className={styles.legendSwatch}
+          />
+          <text x={19} y={0} className={styles.legendLabel}>
+            {it.label}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}
+
 export function VMarker({
   x,
   xScale,

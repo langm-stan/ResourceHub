@@ -7,6 +7,7 @@ export {
   LineSeries,
   AreaSeries,
   Annotation,
+  Legend,
   VMarker,
   EndLabel,
   HoverProbe,

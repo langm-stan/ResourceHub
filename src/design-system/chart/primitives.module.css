@@ -146,3 +146,15 @@
   color: var(--text-primary);
   font-weight: var(--fw-medium);
 }
+
+/* A key for stacked bands, drawn inside the plot so it travels into the PNG
+   with the chart rather than sitting in the page around it. */
+.legendSwatch {
+  stroke-width: 1;
+}
+.legendLabel {
+  font-family: var(--ff-ui);
+  font-size: var(--fs-micro);
+  fill: var(--text-muted);
+  dominant-baseline: middle;
+}

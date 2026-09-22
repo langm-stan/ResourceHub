@@ -5,6 +5,7 @@ import {
   AxisBottom,
   AxisLeft,
   Annotation,
+  Legend,
   ChartFrame,
   Gridlines,
   HoverProbe,
@@ -91,14 +92,7 @@ function FvInner({
     [maxY, innerHeight],
   )
 
-  const last = data[data.length - 1]!
   const simpleTop = (d: SeriesPoint) => d.principalContributed + d.simpleInterest
-
-  /* Band thicknesses in pixels at the right edge, for the labels below. */
-  const MIN_BAND_PX = 26
-  const principalPx = y(0) - y(last.principalContributed)
-  const simplePx = y(last.principalContributed) - y(simpleTop(last))
-  const ioiPx = y(simpleTop(last)) - y(last.balance)
 
   return (
     <>
@@ -160,48 +154,20 @@ function FvInner({
       )}
 
       {/*
-        Each band named where it sits, rather than in a sentence underneath
-        the figure. They read as a progression from the bottom up: what you
-        put in, what that earned, and what the earnings earned.
-
-        A band thinner than a label is left alone, because the leader lines
-        would cross and say less than the colours already do. The bands are
-        measured at the right edge, where they are widest.
+        A key rather than three leader lines. A line into a band crowds the
+        area it is pointing at, and with the bands stacked the three of them
+        crossed the same corner. Top left, which a rising balance leaves
+        empty, and below the doubling marker's own label.
       */}
-      {principalPx >= MIN_BAND_PX && (
-        <Annotation
-          x={x(last.t)}
-          y={y(last.principalContributed / 2)}
-          dx={-70}
-          dy={-8}
-          label="money you put in"
-          align="end"
-        />
-      )}
-
-      {simplePx >= MIN_BAND_PX && (
-        <Annotation
-          x={x(last.t)}
-          y={y((last.principalContributed + simpleTop(last)) / 2)}
-          dx={-70}
-          dy={-8}
-          label="interest on that money"
-          tone="mark"
-          align="end"
-        />
-      )}
-
-      {results.interestOnInterest > 1 && ioiPx >= MIN_BAND_PX && (
-        <Annotation
-          x={x(last.t)}
-          y={y((simpleTop(last) + last.balance) / 2)}
-          dx={-70}
-          dy={-8}
-          label="interest on interest"
-          tone="accent"
-          align="end"
-        />
-      )}
+      <Legend
+        x={8}
+        y={30}
+        items={[
+          { label: 'interest on interest', fill: IOI_FILL, stroke: 'var(--c-series-1)' },
+          { label: 'interest on that money', fill: SIMPLE_FILL, stroke: 'var(--c-series-2)' },
+          { label: 'money you put in', fill: PRINCIPAL_FILL, stroke: 'var(--c-series-3)' },
+        ]}
+      />
 
       <HoverProbe
         data={data}
