@@ -180,7 +180,7 @@ export const OVERALL_BY_GENERATION = [
 /** The four bands the P-Fin Index reports, lowest first. */
 export const BANDS = [
   { key: 'low', label: '0–7 correct', share: 'Under 26%', color: '#8C1515' },
-  { key: 'lowMid', label: '8–14 correct', share: '26–50%', color: '#B1040E' },
+  { key: 'lowMid', label: '8–14 correct', share: '26–50%', color: '#C77B2B' },
   { key: 'highMid', label: '15–21 correct', share: '51–75%', color: '#6E7630' },
   { key: 'high', label: '22–28 correct', share: '76–100%', color: '#1E756A' },
 ] as const

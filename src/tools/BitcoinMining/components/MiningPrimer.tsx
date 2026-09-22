@@ -13,7 +13,7 @@ import styles from '../BitcoinMining.module.css'
 export function MiningPrimer() {
   return (
     <details className={styles.guide} open>
-      <summary className={styles.guideSummary}>How bitcoin is actually made</summary>
+      <summary className={styles.guideSummary}>How bitcoin is made</summary>
       <div className={styles.guideBody}>
         <p className={styles.primerLead}>
           Every bitcoin in existence was paid out as a prize for doing the work below. There is no
@@ -49,7 +49,7 @@ export function MiningPrimer() {
         </li>
         </ol>
 
-        <Callout tone="note" label="More miners does not mean more bitcoin">
+        <Callout tone="note" label="Difficulty and the ten-minute target">
         The network watches how fast blocks are arriving and changes how many zeros it demands, so
         a block takes about ten minutes however many machines are guessing. Doubling the computing
         power in the world does not produce bitcoin twice as fast. It makes the puzzle twice as

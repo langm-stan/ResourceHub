@@ -88,7 +88,7 @@ function OutcomesSection() {
   return (
     <>
       <StepHeader
-        title="What the score goes with"
+        title="Financial literacy and financial outcomes"
         hint="The same survey asks people about their own finances. Grouped by how much of the index they answered correctly, 2026."
       />
       <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
@@ -177,7 +177,7 @@ function DecadeSection() {
   return (
     <>
       <StepHeader
-        title="Ten years, and it has not improved"
+        title="The index, 2017 to 2026"
         hint="The same 28 questions, asked every year since 2017. Each band is the share of U.S. adults answering that many correctly."
       />
       <div className="mb-6 flex flex-wrap gap-x-10 gap-y-5">
@@ -303,7 +303,7 @@ function BigThreeSection() {
   return (
     <>
       <StepHeader
-        title="The Big Three, by who is answering"
+        title="The Big Three by demographic"
         hint="The fraction who answer all three of the Big Three questions correctly. National Financial Capability Study, 2024."
       />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -346,7 +346,7 @@ function BigThreeSection() {
         ))}
       </div>
       <div className="mt-4">
-        <Callout tone="note" label="Three questions, twenty years">
+        <Callout tone="note" label="Source">
           One adult in seven under 30 answers all three correctly, against more than four in ten of
           those over 60. One in nine with a high school education does, against nearly half of
           those with a degree. The gap between women and men is sixteen points. Source:{' '}
@@ -357,29 +357,50 @@ function BigThreeSection() {
   )
 }
 
-/* The youngest adults know the least, at both ends of the distribution. */
+/*
+ * How the four bands divide each age group.
+ *
+ * Stacked, because the four shares are one whole and that is the point. Its
+ * own legend rather than the charting library's, which ordered the bands
+ * 0-7, 15-21, 22-28, 8-14, and a value printed in every segment, because
+ * nobody reads a stacked bar off an axis.
+ */
 function AgeBandsSection() {
   return (
     <>
       <StepHeader
-        title="Where each age group lands"
-        hint="Share of each age group in each band of the 28-question index, 2026."
+        title="Scores by age group"
+        hint="Every column is one age group, divided into the four bands of the 28-question index, 2026."
       />
       <Card tone="raised">
-        <div className="h-96">
+        <ul className="mb-4 flex flex-wrap gap-x-6 gap-y-2">
+          {BANDS.map((b) => (
+            <li key={b.key} className="flex items-center gap-2 text-[15px] text-stone-600">
+              <span
+                aria-hidden="true"
+                className="inline-block h-3.5 w-3.5"
+                style={{ backgroundColor: b.color }}
+              />
+              {b.label} <span className="text-stone-400">({b.share})</span>
+            </li>
+          ))}
+        </ul>
+        <div className="h-[28rem]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={BANDS_BY_AGE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <BarChart data={BANDS_BY_AGE} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
               {GRID}
-              <XAxis dataKey="group" tick={{ fontSize: 15 }} tickLine={false} axisLine={false} />
+              <XAxis dataKey="group" tick={{ fontSize: 16 }} tickLine={false} axisLine={false} />
               <YAxis
                 tick={{ fontSize: 15 }}
                 tickLine={false}
                 axisLine={false}
-                domain={[0, 100]}
+                /* One group sums to 101 in the source's own rounding, so the
+                   domain leaves room for it while the ticks stay round. */
+                domain={[0, 101]}
+                ticks={[0, 25, 50, 75, 100]}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v)}%`} />
-              <Legend wrapperStyle={{ fontSize: 15 }} />
               {BANDS.map((b) => (
                 <Bar
                   key={b.key}
@@ -387,17 +408,26 @@ function AgeBandsSection() {
                   name={`${b.label} (${b.share})`}
                   stackId="bands"
                   fill={b.color}
+                  maxBarSize={110}
                   isAnimationActive={false}
-                />
+                >
+                  <LabelList
+                    dataKey={b.key}
+                    position="center"
+                    formatter={(v) => `${Number(v)}%`}
+                    style={{ fontSize: 15, fontWeight: 600, fill: '#ffffff' }}
+                  />
+                </Bar>
               ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-4">
           <Callout tone="plain" label="Reading this chart">
-            Each column is one age group, split into the four bands. More than a third of 18 to 29
-            year-olds answer fewer than eight of the twenty-eight questions correctly, and fewer
-            than one in ten answer twenty-two or more.
+            More than a third of 18 to 29 year-olds answer fewer than eight of the twenty-eight
+            questions correctly, and fewer than one in ten answer twenty-two or more. The bottom
+            band shrinks with every older group and the top band grows. Shares are as the source
+            published them, so one column sums to 101%.
           </Callout>
         </div>
       </Card>

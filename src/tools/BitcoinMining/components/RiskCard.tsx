@@ -53,7 +53,7 @@ export function RiskCard() {
       </div>
 
       <StepHeader
-        title="What holding bitcoin has been like"
+        title="Price history and volatility"
         hint={`Daily prices from ${iso(r.first.date)} to ${iso(r.last.date)}. The comparison with the S&P 500 starts ${iso(r.windowStart)}, where the two records overlap.`}
       />
 
@@ -124,7 +124,7 @@ export function RiskCard() {
         </tbody>
       </table>
 
-      <Callout tone="note" label="A year is not long enough to tell">
+      <Callout tone="note" label="Best and worst twelve months">
         The best twelve months in the record returned{' '}
         <strong>{formatPercent(r.year.best.ret, 0)}</strong> ({iso(r.year.best.from.date)} to{' '}
         {iso(r.year.best.to.date)}). The worst returned{' '}
