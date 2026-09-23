@@ -243,7 +243,10 @@ export function ChartFrame({
               {captionNode}
             </div>
           </div>,
-          document.body,
+          /* Inside whatever fills the screen. In fullscreen the browser draws
+             only that element and what it contains, so an overlay on the body
+             would open unseen. */
+          document.fullscreenElement ?? document.body,
         )}
     </figure>
   )
