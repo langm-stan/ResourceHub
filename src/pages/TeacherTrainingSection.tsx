@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { lazy, Suspense, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import TeacherTrainingShell from '../components/TeacherTrainingShell'
 import InstructorBar from '../components/InstructorBar'
 import { StageControlsRow } from '../components/StageControls'
@@ -11,10 +11,6 @@ import { BigThreeExplainedContent } from './BigThreeExplained'
 import { BigThreeStoriesContent } from './BigThreeStories'
 import { LITERACY_DATA_INTRO, LiteracyDataContent } from './LiteracyData'
 import FinancialStatements from './FinancialStatements'
-
-/* Loaded on its own: the FRED series are most of its weight, and no other
-   page needs them. */
-const HouseholdDataContent = lazy(() => import('./HouseholdData'))
 import { CompoundInterestPage } from '../tools/CompoundInterest/CompoundInterestPage'
 import { InflationPage } from '../tools/Inflation/InflationPage'
 import { TvmPage } from '../tools/Tvm/TvmPage'
@@ -70,16 +66,6 @@ const SECTIONS: Record<string, SectionConfig> = {
   'big-three/explained': { title: 'The Big Three Explained', content: <BigThreeExplainedContent /> },
   'big-three/stories': { title: 'The Big Three Stories', content: <BigThreeStoriesContent /> },
   'literacy-data': { title: 'Financial Literacy Data', intro: LITERACY_DATA_INTRO, content: <LiteracyDataContent /> },
-  'household-data': {
-    title: 'Household Finance Data',
-    toolkit: true,
-    instructor: { label: 'Household Finance Data', path: 'household-data' },
-    content: (
-      <Suspense fallback={null}>
-        <HouseholdDataContent />
-      </Suspense>
-    ),
-  },
   budget: {
     title: 'Financial Budget',
     intro:

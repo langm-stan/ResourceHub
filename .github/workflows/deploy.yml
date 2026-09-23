@@ -3,9 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Nightly, so the FRED figures on Household Finance Data and Bitcoin Mining
-  # stay current without a commit. 11:17 UTC is early morning in the U.S.,
-  # after FRED has posted the previous day's releases.
+  # Nightly, so Bitcoin Mining's FRED price history stays current without a
+  # commit. 11:17 UTC is early morning in the U.S., after FRED has posted
+  # the previous day's releases.
   schedule:
     - cron: '17 11 * * *'
   workflow_dispatch:

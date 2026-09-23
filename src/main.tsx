@@ -21,7 +21,6 @@ const TEACHER_TRAINING_SECTIONS = [
   'big-three/explained',
   'big-three/stories',
   'literacy-data',
-  'household-data',
   'tvm-calculator',
   'budget',
   'compound-interest',

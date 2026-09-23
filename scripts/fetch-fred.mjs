@@ -1,15 +1,12 @@
 #!/usr/bin/env node
 /*
- * Refresh every FRED series the site draws on.
+ * Refresh Bitcoin Mining's price history from FRED (CBBTCUSD and SP500).
  *
  *   node scripts/fetch-fred.mjs
  *
  * Runs before every deploy, including the nightly one (see
  * .github/workflows/deploy.yml), and can be run by hand to commit a fresh
- * snapshot. Writes two files:
- *
- *   src/data/household/fredData.ts         Household Finance Data page
- *   src/tools/BitcoinMining/marketData.ts  Bitcoin Mining's price history
+ * snapshot. Rewrites src/tools/BitcoinMining/marketData.ts.
  *
  * Three rules keep a bad night from reaching the site:
  *
@@ -27,36 +24,12 @@
  * public CSV that fred.stlouisfed.org serves for its own download button.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const HOUSEHOLD_FILE = join(ROOT, 'src/data/household/fredData.ts')
 const MARKET_FILE = join(ROOT, 'src/tools/BitcoinMining/marketData.ts')
-
-/* The Household Finance Data page, in the order the file lists them. */
-const HOUSEHOLD_SERIES = [
-  'MORTGAGE30US', // 30-year fixed mortgage rate, weekly
-  'TERMCBCCINTNS', // credit card rate, accounts assessed interest
-  'RIFLPBCIANM60NM', // 60-month new car loan rate
-  'DRCCLACBS', // credit card delinquency rate
-  'SLOASM', // student loans owned and securitized
-  'CPIAUCSL', // CPI, all items
-  'CUSR0000SEHA', // CPI, rent of primary residence
-  'CUSR0000SAF11', // CPI, food at home
-  'APU000074714', // regular gasoline, dollars per gallon
-  'MSPUS', // median sales price of new houses sold
-  'MEHOINUSA672N', // real median household income
-  'MEHOINUSA646N', // median household income, current dollars
-  'TDSP', // debt service payments, % of disposable income
-  'PSAVERT', // personal saving rate
-  'TB3MS', // 3-month Treasury bill rate
-  'SP500', // S&P 500, kept as month-end closes
-]
-
-/* Series whose recent history is enough, to keep the page light. */
-const MONTH_END_ONLY = new Set(['SP500'])
 
 const today = new Date().toISOString().slice(0, 10)
 const warnings = []
@@ -117,103 +90,12 @@ function validate(id, obs, committedLast) {
   }
 }
 
-/** Fresh values override committed ones on the same key; nothing is dropped. */
-function merge(committed, fresh, keyOf = (d) => d) {
+/** Fresh values override committed ones on the same date; nothing is dropped. */
+function merge(committed, fresh) {
   const byKey = new Map()
-  for (const o of committed) byKey.set(keyOf(o[0]), o)
-  for (const o of fresh) byKey.set(keyOf(o[0]), o)
+  for (const o of committed) byKey.set(o[0], o)
+  for (const o of fresh) byKey.set(o[0], o)
   return [...byKey.values()].sort((a, b) => (a[0] < b[0] ? -1 : 1))
-}
-
-/** The last observation in each calendar month. */
-function monthEnds(obs) {
-  const out = new Map()
-  for (const o of obs) out.set(o[0].slice(0, 7), o)
-  return [...out.values()]
-}
-
-/* ------------------------------------------------------------------ */
-/* Household Finance Data                                              */
-/* ------------------------------------------------------------------ */
-
-function readHousehold() {
-  if (!existsSync(HOUSEHOLD_FILE)) return { series: {}, recessions: [] }
-  const src = readFileSync(HOUSEHOLD_FILE, 'utf8')
-  /* The object literal after "} = ", past the type annotation's braces. */
-  const json = src.slice(src.indexOf('= {', src.indexOf('FRED_DATA')) + 2, src.lastIndexOf('}') + 1)
-  const data = JSON.parse(json)
-  const series = {}
-  for (const [id, s] of Object.entries(data.series)) {
-    series[id] = s.d.map((d, i) => [d, s.v[i]])
-  }
-  return { series, recessions: data.recessions ?? [] }
-}
-
-/*
- * NBER recessions from USREC, as [first month, last month] pairs. Only the
- * postwar ones matter: no series on the page starts before 1947.
- */
-async function recessions(committed) {
-  try {
-    const obs = await download('USREC')
-    validate('USREC', obs)
-    const out = []
-    let start = null
-    let prev = null
-    for (const [d, v] of obs) {
-      if (d < '1947-01-01') continue
-      if (v === 1 && start === null) start = d
-      if (v === 0 && start !== null) {
-        out.push([start, prev])
-        start = null
-      }
-      prev = d
-    }
-    if (start !== null) out.push([start, prev])
-    return out
-  } catch (err) {
-    warn(`USREC: ${err.message}; keeping committed recession dates`)
-    return committed
-  }
-}
-
-function writeHousehold(series, recs, fetched) {
-  const payload = {
-    fetched,
-    recessions: recs,
-    series: Object.fromEntries(
-      HOUSEHOLD_SERIES.filter((id) => series[id]?.length).map((id) => [
-        id,
-        { d: series[id].map((o) => o[0]), v: series[id].map((o) => o[1]) },
-      ]),
-    ),
-  }
-  const body = JSON.stringify(payload)
-    .replace(/"series":\{/, '"series":{\n')
-    .replace(/\},"(?=[A-Z0-9]+":\{"d")/g, '},\n"')
-  writeFileSync(
-    HOUSEHOLD_FILE,
-    `/*
- * GENERATED by scripts/fetch-fred.mjs. Do not edit by hand.
- *
- * Every series on the Household Finance Data page, as FRED publishes it
- * (month-end closes only for SP500). Dates are the observation dates FRED
- * gives, which for monthly and quarterly series are the first day of the
- * period. \`fetched\` is the day the download ran.
- */
-
-export interface RawSeries {
-  d: string[]
-  v: number[]
-}
-
-export const FRED_DATA: {
-  fetched: string
-  recessions: [string, string][]
-  series: Record<string, RawSeries>
-} = ${body}
-`,
-  )
 }
 
 /* ------------------------------------------------------------------ */
@@ -284,61 +166,25 @@ export const SPX = {
 
 /* ------------------------------------------------------------------ */
 
-async function fresh(id, committed, keyOf) {
+async function fresh(id, committed) {
   try {
-    let obs = await download(id)
+    const obs = await download(id)
     validate(id, obs, committed.at(-1)?.[0])
-    if (MONTH_END_ONLY.has(id)) obs = monthEnds(obs)
-    const merged = merge(committed, obs, keyOf)
-    const last = merged.at(-1)
-    console.log(`  ${id.padEnd(16)} ${String(merged.length).padStart(5)} obs, through ${last[0]}`)
-    return { merged, raw: obs }
+    const merged = merge(committed, obs)
+    console.log(`  ${id.padEnd(9)} ${String(merged.length).padStart(5)} obs, through ${merged.at(-1)[0]}`)
+    return merged
   } catch (err) {
     warn(`${id}: ${err.message}; keeping the committed ${committed.length} observations`)
-    return { merged: committed, raw: null }
+    return committed
   }
 }
 
 async function main() {
   console.log(`Refreshing FRED series (${process.env.FRED_API_KEY ? 'API' : 'public CSV'}), ${today}`)
-
-  const household = readHousehold()
-  const series = {}
-  let sp500Daily = null
-  for (const id of HOUSEHOLD_SERIES) {
-    const committed = household.series[id] ?? []
-    if (id === 'SP500') {
-      /* Keep the daily download for the bitcoin page before thinning it. */
-      try {
-        sp500Daily = await download(id)
-        validate(id, sp500Daily)
-      } catch (err) {
-        warn(`SP500 (daily): ${err.message}`)
-        sp500Daily = null
-      }
-      const obs = sp500Daily ? monthEnds(sp500Daily) : []
-      series[id] = obs.length ? merge(committed, obs, (d) => d.slice(0, 7)) : committed
-      console.log(`  ${id.padEnd(16)} ${String(series[id].length).padStart(5)} obs (month-end)`)
-      continue
-    }
-    series[id] = (await fresh(id, committed)).merged
-  }
-  const recs = await recessions(household.recessions)
-  writeHousehold(series, recs, today)
-
   const market = readMarket()
   const btc = await fresh('CBBTCUSD', market.btc)
-  let spx = market.spx
-  if (sp500Daily) {
-    try {
-      validate('SP500', sp500Daily, market.spx.at(-1)?.[0])
-      spx = merge(market.spx, sp500Daily)
-    } catch (err) {
-      warn(`SP500 for bitcoin page: ${err.message}`)
-    }
-  }
-  writeMarket(market, btc.merged, spx, today)
-  console.log(`  bitcoin page: BTC through ${btc.merged.at(-1)[0]}, S&P through ${spx.at(-1)[0]}`)
+  const spx = await fresh('SP500', market.spx)
+  writeMarket(market, btc, spx, today)
 
   if (warnings.length) console.warn(`\n${warnings.length} warning(s); committed data kept for those series.`)
   else console.log('\nAll series refreshed.')

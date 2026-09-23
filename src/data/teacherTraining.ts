@@ -55,16 +55,6 @@ export const COURSE_UNITS: CourseUnit[] = [
         keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
       },
       {
-        slug: 'household-data',
-        label: 'Household Finance Data',
-        description: 'Interest rates, prices, income, and saving for U.S. households, from FRED.',
-        keywords: [
-          'FRED', 'Federal Reserve', 'statistics', 'mortgage rate', 'credit card', 'car loan',
-          'student loans', 'inflation', 'CPI', 'rent', 'gas prices', 'home prices',
-          'median income', 'saving rate', 'Treasury bill', 'S&P 500', 'recession',
-        ],
-      },
-      {
         slug: 'tvm-calculator',
         label: 'TVM Calculator',
         description:

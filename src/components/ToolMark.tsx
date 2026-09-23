@@ -85,15 +85,6 @@ const MARKS: Record<string, ReactElement> = {
     </Frame>
   ),
 
-  // A series through time, the latest reading marked.
-  'household-data': (
-    <Frame>
-      <path d="M7 27 L13 22 L18 25 L24 15 L29 19 L33 11" {...quiet} />
-      <circle cx="33" cy="11" r="3" {...solid} />
-      {base}
-    </Frame>
-  ),
-
   // 2 · Basics of Personal Finance
   // The curve the whole course rests on.
   'compound-interest': (
