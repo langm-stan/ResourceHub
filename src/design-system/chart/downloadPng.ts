@@ -35,6 +35,8 @@ export interface ExportStat {
 }
 
 export interface ExportExtras {
+  /** The chart's title, drawn first so a slide carries the name with the figure. */
+  title?: string
   /** Headline stats drawn above the chart so the PNG is self-contained. */
   stats?: ExportStat[]
   /** Caption text drawn below the chart. */
@@ -96,7 +98,8 @@ export function downloadSvgAsPng(
     const pad = 24 * scale
     const stats = extras.stats ?? []
     const caption = extras.caption?.trim()
-    const hasExtras = stats.length > 0 || !!caption
+    const title = extras.title?.trim()
+    const hasExtras = stats.length > 0 || !!caption || !!title
 
     const canvasWidth = Math.round(width * scale) + (hasExtras ? pad * 2 : 0)
     const contentWidth = canvasWidth - (hasExtras ? pad * 2 : 0)
@@ -107,6 +110,12 @@ export function downloadSvgAsPng(
     const captionFont = `${12 * scale}px ${UI_FONT}`
     measure.font = captionFont
     const captionLines = caption ? wrapText(measure, caption, contentWidth) : []
+
+    const titleFont = `700 ${18 * scale}px ${UI_FONT}`
+    const titleLine = 24 * scale
+    measure.font = titleFont
+    const titleLines = title ? wrapText(measure, title, contentWidth) : []
+    const titleBlock = titleLines.length > 0 ? titleLines.length * titleLine + 14 * scale : 0
 
     const labelFont = `600 ${10 * scale}px ${UI_FONT}`
     const valueFont = `600 ${20 * scale}px ${UI_FONT}`
@@ -140,7 +149,8 @@ export function downloadSvgAsPng(
 
     const canvas = document.createElement('canvas')
     canvas.width = canvasWidth
-    canvas.height = topPad + statsBlock + Math.round(height * scale) + captionBlock + bottomPad
+    canvas.height =
+      topPad + titleBlock + statsBlock + Math.round(height * scale) + captionBlock + bottomPad
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       URL.revokeObjectURL(svgUrl)
@@ -149,11 +159,17 @@ export function downloadSvgAsPng(
     ctx.fillStyle = background
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+    if (titleLines.length > 0) {
+      ctx.font = titleFont
+      ctx.fillStyle = ink
+      titleLines.forEach((line, i) => ctx.fillText(line, pad, topPad + 18 * scale + i * titleLine))
+    }
+
     // Headline stats: small-caps label over a large value, wrapping to new
     // rows as needed so nothing clips.
     for (const { stat: s, x: statX, row } of statRows) {
       const sx = (hasExtras ? pad : 0) + statX
-      const sy = topPad + row * rowHeight
+      const sy = topPad + titleBlock + row * rowHeight
       ctx.font = labelFont
       ctx.fillStyle = 'rgba(120, 113, 108, 0.9)'
       ctx.fillText(s.label.toUpperCase(), sx, sy + 12 * scale)
@@ -165,7 +181,7 @@ export function downloadSvgAsPng(
     ctx.drawImage(
       img,
       hasExtras ? pad : 0,
-      topPad + statsBlock,
+      topPad + titleBlock + statsBlock,
       Math.round(width * scale),
       Math.round(height * scale)
     )
@@ -173,7 +189,7 @@ export function downloadSvgAsPng(
     if (captionLines.length > 0) {
       ctx.font = captionFont
       ctx.fillStyle = 'rgba(120, 113, 108, 1)'
-      let cy = topPad + statsBlock + Math.round(height * scale) + 22 * scale
+      let cy = topPad + titleBlock + statsBlock + Math.round(height * scale) + 22 * scale
       for (const line of captionLines) {
         ctx.fillText(line, hasExtras ? pad : 0, cy)
         cy += 17 * scale

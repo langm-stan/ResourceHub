@@ -35,7 +35,36 @@ export function useChart(): ChartGeometry {
   return ctx
 }
 
+/*
+ * The heading a chart sits under: the nearest visible h1 to h4 before it,
+ * looking back through earlier siblings and then up through each ancestor,
+ * without leaving the tool (.toolkitScope, or main on a page without one).
+ * The sidebar sits beside the tool and is full of headings that are not
+ * this chart's. A chart with no heading of its own above it takes the
+ * page's title, which is then its name. That way an expanded chart or a
+ * downloaded PNG carries the name a reader sees, without every tool
+ * repeating its headings as a prop.
+ */
+const HEADINGS = 'h1, h2, h3, h4'
+const shown = (el: Element) => el.getClientRects().length > 0
+const textOf = (el: Element | null | undefined) => el?.textContent?.trim() || undefined
+
+function headingBefore(start: Element | null): string | undefined {
+  if (!start) return undefined
+  const boundary = start.closest('.toolkitScope') ?? start.closest('main') ?? document.body
+  for (let node: Element | null = start; node && node !== boundary; node = node.parentElement) {
+    for (let sib = node.previousElementSibling; sib; sib = sib.previousElementSibling) {
+      if (sib.matches(HEADINGS) && shown(sib)) return textOf(sib)
+      const inner = Array.from(sib.querySelectorAll(HEADINGS)).filter(shown)
+      if (inner.length > 0) return textOf(inner[inner.length - 1])
+    }
+  }
+  return textOf(document.querySelector('h1'))
+}
+
 interface ChartFrameProps {
+  /** The chart's name, shown when expanded and on the PNG. Defaults to the heading it sits under. */
+  title?: string
   ratio?: number
   height?: number
   /** Cap the ratio-derived height so full-width charts stay presentation-shaped. */
@@ -100,6 +129,7 @@ function MeasuredCanvas({
 }
 
 export function ChartFrame({
+  title,
   ratio = 0.5,
   height,
   maxHeight,
@@ -114,6 +144,12 @@ export function ChartFrame({
 }: ChartFrameProps) {
   const [expanded, setExpanded] = useState(false)
   const shellRef = useRef<HTMLDivElement>(null)
+  const nameOf = () => title ?? headingBefore(shellRef.current?.closest('figure') ?? null)
+  const [shownTitle, setShownTitle] = useState<string | undefined>()
+  const expand = () => {
+    setShownTitle(nameOf())
+    setExpanded(true)
+  }
 
   const download = () => {
     const svg = shellRef.current?.querySelector('svg')
@@ -137,7 +173,12 @@ export function ChartFrame({
           .filter(Boolean)
           .join(' ')
       : undefined
-    downloadSvgAsPng(svg, slugForFilename(ariaLabel), { stats, caption: captionText })
+    const name = nameOf()
+    downloadSvgAsPng(svg, slugForFilename(name ?? ariaLabel), {
+      title: name,
+      stats,
+      caption: captionText,
+    })
   }
 
   useEffect(() => {
@@ -180,7 +221,7 @@ export function ChartFrame({
           <button
             type="button"
             className={styles.expandBtn}
-            onClick={() => setExpanded(true)}
+            onClick={expand}
             aria-label="Expand chart to full screen"
             title="Expand chart"
           >
@@ -196,7 +237,7 @@ export function ChartFrame({
             className={styles.overlay}
             role="dialog"
             aria-modal="true"
-            aria-label="Expanded chart"
+            aria-label={shownTitle ?? 'Expanded chart'}
             onClick={() => setExpanded(false)}
           >
             <div className={styles.overlayPanel} onClick={(e) => e.stopPropagation()}>
@@ -209,6 +250,7 @@ export function ChartFrame({
               >
                 <CloseIcon />
               </button>
+              {shownTitle && <h2 className={styles.overlayTitle}>{shownTitle}</h2>}
               {(overlayHeader || (exportStats && exportStats.length > 0)) && (
                 <div className={styles.overlayHeader}>
                   {overlayHeader ?? (
