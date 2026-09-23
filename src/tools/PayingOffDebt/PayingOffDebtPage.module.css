@@ -74,14 +74,6 @@
   color: var(--text-muted);
 }
 
-/* One line under the controls: where the current card rate is published. */
-.rateSource {
-  margin: var(--space-3) 0 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--text-muted);
-}
-
 .footnote {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);

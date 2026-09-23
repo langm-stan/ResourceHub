@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import styles from './Slider.module.css'
 
 interface SliderProps {
@@ -9,7 +9,8 @@ interface SliderProps {
   max: number
   step?: number
   readout?: string
-  note?: string
+  /** A line under the control; may carry a link. */
+  note?: ReactNode
   /** Replace the text readout with a typed input, committed on blur or Enter and clamped to [min, max]. */
   editable?: boolean
   /** Shown inside the editable input, e.g. "$" or "months". */

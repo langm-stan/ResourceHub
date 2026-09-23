@@ -173,6 +173,17 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             editable
             suffix="%"
             precision={2}
+            note={
+              <a
+                href="https://fred.stlouisfed.org/series/TERMCBCCINTNS"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-cardinal hover:underline"
+              >
+                Latest average card rate on FRED{' '}
+                <ExternalLink size={12} aria-hidden="true" className="inline align-baseline" />
+              </a>
+            }
           />
           {mode === 'payment' ? (
             <Slider
@@ -198,17 +209,6 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             />
           )}
         </div>
-        <p className={styles.rateSource}>
-          For the most recent average interest rate on credit cards, go to{' '}
-          <a
-            href="https://fred.stlouisfed.org/series/TERMCBCCINTNS"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 font-semibold text-cardinal hover:underline"
-          >
-            FRED <ExternalLink size={12} aria-hidden="true" />
-          </a>
-        </p>
 
         <div className={styles.stats}>
           {mode === 'payment' ? (
