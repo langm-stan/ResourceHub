@@ -3,6 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Nightly, so the FRED figures on Household Finance Data and Bitcoin Mining
+  # stay current without a commit. 11:17 UTC is early morning in the U.S.,
+  # after FRED has posted the previous day's releases.
+  schedule:
+    - cron: '17 11 * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +29,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Merges the latest FRED observations into the committed series. It
+      # never fails the build: a series that will not download keeps its
+      # committed data. An optional FRED_API_KEY secret switches it to the
+      # official API.
+      - run: node scripts/fetch-fred.mjs
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

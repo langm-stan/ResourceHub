@@ -36,8 +36,8 @@ export interface CourseUnit {
 export const COURSE_UNITS: CourseUnit[] = [
   {
     id: 'basic-tools',
-    title: 'Basic Tools and Data',
-    short: 'Basic Tools',
+    title: 'Tools and Data',
+    short: 'Tools and Data',
     description:
       'Used throughout the course rather than inside one topic.',
     tools: [
@@ -53,6 +53,16 @@ export const COURSE_UNITS: CourseUnit[] = [
         label: 'Financial Literacy Data',
         description: 'How well U.S. adults understand personal finance, by topic, gender, and generation.',
         keywords: ['survey', 'statistics', 'demographics', 'knowledge'],
+      },
+      {
+        slug: 'household-data',
+        label: 'Household Finance Data',
+        description: 'Interest rates, prices, income, and saving for U.S. households, from FRED.',
+        keywords: [
+          'FRED', 'Federal Reserve', 'statistics', 'mortgage rate', 'credit card', 'car loan',
+          'student loans', 'inflation', 'CPI', 'rent', 'gas prices', 'home prices',
+          'median income', 'saving rate', 'Treasury bill', 'S&P 500', 'recession',
+        ],
       },
       {
         slug: 'tvm-calculator',

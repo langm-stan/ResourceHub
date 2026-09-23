@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
@@ -197,10 +197,10 @@ const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
  *
  * The first unit runs the full width, since its tools are the ones used
  * throughout the course rather than inside one topic. The rest sit two to a
- * row. The top card runs its three across on one line, the mark and the
- * name alone: those three are named plainly enough to need no sentence
- * each, and a description apiece would wrap to five lines in a third of the
- * width.
+ * row. The top card runs its tools across one line, however many there
+ * are, the mark and the name alone: they are named plainly enough to need
+ * no sentence each, and a description apiece would wrap to five lines in a
+ * fraction of the width.
  */
 function UnitCard({
   entry,
@@ -211,7 +211,7 @@ function UnitCard({
   entry: CatalogEntry
   open: boolean
   onToggle: () => void
-  /** The card at the top, whose tools run three across without descriptions. */
+  /** The card at the top, whose tools run across one row without descriptions. */
   wide?: boolean
 }) {
   const panelId = `unit-panel-${entry.id}`
@@ -255,7 +255,12 @@ function UnitCard({
             The tools for this unit are still being built.
           </p>
         ) : (
-          <div className={wide ? 'grid gap-1 sm:grid-cols-3' : 'flex flex-col'}>
+          <div
+            className={
+              wide ? 'grid gap-1 sm:grid-cols-[repeat(var(--tools),auto)] sm:justify-between' : 'flex flex-col'
+            }
+            style={wide ? ({ '--tools': entry.tools.length } as CSSProperties) : undefined}
+          >
             {entry.tools.map((tool) => (
               <ToolRow key={tool.slug} tool={tool} compact={wide} />
             ))}
@@ -274,7 +279,7 @@ export default function TeacherTraining() {
    * closes it and leaves the course folded flat, which is a state worth
    * being able to reach.
    *
-   * Basic Tools and Data starts open: its tools are the ones every other
+   * Tools and Data starts open: its tools are the ones every other
    * unit leans on.
    */
   const [openId, setOpenId] = useState<string | null>(CATALOG[0]?.id ?? null)

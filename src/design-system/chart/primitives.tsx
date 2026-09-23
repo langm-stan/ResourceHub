@@ -255,13 +255,20 @@ export interface HoverTipRow {
  * unreliably in WebKit, leaving ghost copies that trail the cursor.
  */
 export function HoverTip({ px, title, rows }: { px: number; title: string; rows: HoverTipRow[] }) {
-  const { innerWidth, margin, overlayEl } = useChart()
+  const { width, innerWidth, margin, overlayEl } = useChart()
   if (!overlayEl) return null
   const W = 224
-  const flip = px > innerWidth - W - 20
-  const style = flip
-    ? { left: margin.left + px - 14, transform: 'translateX(-100%)' }
-    : { left: margin.left + px + 14 }
+  /* Right of the point if it fits, left if that fits, and otherwise as close
+     to the point as the chart's own edges allow. A narrow chart has room on
+     neither side, and a tip flipped past the left edge lands on whatever
+     sits beside the chart. */
+  const fitsRight = px <= innerWidth - W - 20
+  const fitsLeft = margin.left + px - 14 - W >= 0
+  const style = fitsRight
+    ? { left: margin.left + px + 14 }
+    : fitsLeft
+      ? { left: margin.left + px - 14, transform: 'translateX(-100%)' }
+      : { left: Math.max(0, Math.min(width - W, margin.left + px - W / 2)) }
   return createPortal(
     <div className={styles.tip} style={{ position: 'absolute', top: margin.top + 6, ...style }}>
       <div className={styles.tipTitle}>{title}</div>

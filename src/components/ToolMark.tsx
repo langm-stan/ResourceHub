@@ -54,7 +54,7 @@ function Frame({ children }: { children: ReactElement | ReactElement[] }) {
 const base = <line key="base" x1="6" y1="33" x2="34" y2="33" {...quiet} />
 
 const MARKS: Record<string, ReactElement> = {
-  // 1 · Basic Tools and Data
+  // 1 · Tools and Data
   // Three questions, the first of them answered.
   'big-three': (
     <Frame>
@@ -81,6 +81,15 @@ const MARKS: Record<string, ReactElement> = {
       <line x1="16" y1="17" x2="16" y2="32" {...quiet} />
       <line x1="24" y1="25" x2="24" y2="32" {...quiet} />
       <line x1="32" y1="12" x2="32" y2="32" stroke={ACCENT} />
+      {base}
+    </Frame>
+  ),
+
+  // A series through time, the latest reading marked.
+  'household-data': (
+    <Frame>
+      <path d="M7 27 L13 22 L18 25 L24 15 L29 19 L33 11" {...quiet} />
+      <circle cx="33" cy="11" r="3" {...solid} />
       {base}
     </Frame>
   ),
