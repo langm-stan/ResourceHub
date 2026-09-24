@@ -10,8 +10,7 @@ import {
   Stat,
   StepHeader,
   Toggle,
-  type MathRow,
-} from '../../design-system'
+  type MathRow, textTone } from '../../design-system'
 import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -126,6 +125,11 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
 
   const splitYMax = Math.max(main.payment, ...main.interestPart) * 1.15
 
+  // Stretching the term gets its own row of figures under the original's, so
+  // the cost of the lower payment sits beside it rather than in the caption.
+  const stretched = mode === 'term' && compare && !compare.neverEnds ? compare : null
+  const termSuffix = stretched ? `, ${years} year${years === 1 ? '' : 's'}` : ''
+
   return (
     <div className={styles.page}>
       {intro && (
@@ -210,7 +214,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           )}
         </div>
 
-        <div className={styles.stats}>
+        <div className={stretched ? `${styles.stats} ${styles.statsCompare}` : styles.stats}>
           {mode === 'payment' ? (
             <Stat
               label="Time to pay off"
@@ -229,7 +233,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             />
           ) : (
             <Stat
-              label="Monthly payment"
+              label={`Monthly payment${termSuffix}`}
               value={main.payment}
               format={(v) => `$${v.toFixed(2)}/mo`}
               emphasis
@@ -238,19 +242,47 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             />
           )}
           <Stat
-            label="Total paid"
+            label={`Total paid${termSuffix}`}
             value={main.totalPaid}
             format={(v) => (main.neverEnds ? '–' : formatUSDWhole(v))}
             animate={false}
           />
           <Stat
-            label="Interest paid"
+            label={`Interest paid${termSuffix}`}
             value={main.totalInterest}
             format={(v) => (main.neverEnds ? '–' : formatUSDWhole(v))}
             accentColor={RED}
             note={main.neverEnds ? undefined : `on ${formatUSDWhole(pv)} borrowed`}
             animate={false}
           />
+          {stretched && (
+            <>
+              <Stat
+                label={`Monthly payment, ${stretchYears} years`}
+                value={stretched.payment}
+                format={(v) => `$${v.toFixed(2)}/mo`}
+                emphasis
+                accentColor={GOLD}
+                note={`$${(main.payment - stretched.payment).toFixed(2)} less a month`}
+                animate={false}
+              />
+              <Stat
+                label={`Total paid, ${stretchYears} years`}
+                value={stretched.totalPaid}
+                format={formatUSDWhole}
+                accentColor={GOLD}
+                animate={false}
+              />
+              <Stat
+                label={`Interest paid, ${stretchYears} years`}
+                value={stretched.totalInterest}
+                format={formatUSDWhole}
+                accentColor={GOLD}
+                note={`${formatUSDWhole(stretched.totalInterest - main.totalInterest)} more interest`}
+                animate={false}
+              />
+            </>
+          )}
           {mode === 'payment' && compare && !compare.neverEnds && (
             <Stat
               label={`At ${formatUSDWhole(payment * 2)} a month`}
@@ -286,9 +318,9 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
 
         <div className={styles.chartBar}>
           <div className={styles.legend}>
-            <span style={{ color: RED }}>&#9632; balance at your settings</span>
+            <span style={{ color: textTone(RED) }}>&#9632; balance at your settings</span>
             {compare && (
-              <span style={{ color: compColor }}>&#9476; {compLabel.toLowerCase()}</span>
+              <span style={{ color: textTone(compColor) }}>&#9476; {compLabel.toLowerCase()}</span>
             )}
           </div>
           {canCompare && (
@@ -343,8 +375,8 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           hint="Each installment pays the month's interest first; only the rest reduces the debt."
         />
         <div className={styles.legend}>
-          <span style={{ color: RED }}>&#9632; interest share of the payment</span>
-          <span style={{ color: GREEN }}>&#9632; principal share of the payment</span>
+          <span style={{ color: textTone(RED) }}>&#9632; interest share of the payment</span>
+          <span style={{ color: textTone(GREEN) }}>&#9632; principal share of the payment</span>
         </div>
         <StationChart
           x={main.splitX}

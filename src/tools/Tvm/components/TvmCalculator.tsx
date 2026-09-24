@@ -169,6 +169,18 @@ export function TvmCalculator() {
     clearAnswer()
   }
 
+  /* The five registers to zero, the way a calculator's clear-TVM key works.
+     Payments per year and payment timing are settings, not entries, so they
+     stay as they are. */
+  function clearRegisters() {
+    setN(0)
+    setIy(0)
+    setPv(0)
+    setPmt(0)
+    setFv(0)
+    clearAnswer()
+  }
+
   function saveResult() {
     if (lastSolved == null) return
     setSaved((prev) => [
@@ -286,6 +298,9 @@ export function TvmCalculator() {
           />
         </div>
         <div className={styles.resetSlot}>
+          <Button variant="quiet" size="sm" onClick={clearRegisters}>
+            Clear
+          </Button>
           <Button variant="quiet" size="sm" onClick={reset}>
             Reset
           </Button>

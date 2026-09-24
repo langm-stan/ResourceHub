@@ -548,8 +548,8 @@ function CaseStudy({ realRatePct }: { realRatePct: number }) {
         ]}
         caption={
           goesBankrupt
-            ? `Net worth under each path. The plan (amber) peaks at ${formatUSDWhole(results.peakWealth)} and lasts to ${NFL.endAge}. The ${spending === 'overextend' ? 'overextended' : 'high-spending'} path (red dashed) leaves the league with ${formatUSDWhole(tracked.points.find((p) => p.age === retireAge)?.wealth ?? 0)}, ${spending === 'overextend' ? `and keeps spending ${formatUSDWhole(NFL.trackSpendFull)} a year` : 'burns through it, then borrows'} until bankruptcy at ${tracked.brokeAge}; the filing wipes the debt and net worth resets to zero.`
-            : `Net worth under each path. The plan (amber) peaks at ${formatUSDWhole(results.peakWealth)} and lasts to ${NFL.endAge}. Tracking income saves nothing: the red dashed line never leaves zero.`
+            ? `Net worth under each path. The plan (gold) peaks at ${formatUSDWhole(results.peakWealth)} and lasts to ${NFL.endAge}. The ${spending === 'overextend' ? 'overextended' : 'high-spending'} path (red dashed) leaves the league with ${formatUSDWhole(tracked.points.find((p) => p.age === retireAge)?.wealth ?? 0)}, ${spending === 'overextend' ? `and keeps spending ${formatUSDWhole(NFL.trackSpendFull)} a year` : 'burns through it, then borrows'} until bankruptcy at ${tracked.brokeAge}; the filing wipes the debt and net worth resets to zero.`
+            : `Net worth under each path. The plan (gold) peaks at ${formatUSDWhole(results.peakWealth)} and lasts to ${NFL.endAge}. Tracking income saves nothing: the red dashed line never leaves zero.`
         }
       />
 

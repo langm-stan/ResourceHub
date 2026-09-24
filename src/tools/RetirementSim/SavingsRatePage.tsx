@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Callout, Card, MathSection, SegmentedControl, Slider, Stat } from '../../design-system'
+import { Callout, Card, MathSection, SegmentedControl, Slider, Stat, textTone } from '../../design-system'
 import { formatUSDWhole, texUSD } from '../../lib/format'
 import { usePersistentState } from '../../hooks/usePersistentState'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
@@ -212,8 +212,8 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
 
           <div>
             <div className={styles.legend}>
-              <span style={{ color: GOLD }}>&#9632; retirement age by savings rate</span>
-              <span style={{ color: RED }}>&#9476; your savings rate</span>
+              <span style={{ color: textTone(GOLD) }}>&#9632; retirement age by savings rate</span>
+              <span style={{ color: textTone(RED) }}>&#9476; your savings rate</span>
             </div>
             <StationChart
               x={curveX}

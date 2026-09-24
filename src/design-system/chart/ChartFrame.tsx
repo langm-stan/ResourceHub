@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { createPortal } from 'react-dom'
 import { useResizeObserver } from '../../hooks/useResizeObserver'
 import { downloadSvgAsPng, slugForFilename, type ExportStat } from './downloadPng'
+import { textTone } from '../textTone'
 import styles from './ChartFrame.module.css'
 
 export type { ExportStat }
@@ -160,7 +161,7 @@ export function ChartFrame({
     shellRef.current?.appendChild(probe)
     const stats = (exportStats ?? []).map((s) => {
       if (!s.color) return s
-      probe.style.color = s.color
+      probe.style.color = textTone(s.color)
       return { ...s, color: window.getComputedStyle(probe).color }
     })
     probe.remove()
@@ -260,7 +261,7 @@ export function ChartFrame({
                           <span className={styles.exportStatLabel}>{s.label}</span>
                           <span
                             className={`${styles.exportStatValue} tnum`}
-                            style={s.color ? { color: s.color } : undefined}
+                            style={s.color ? { color: textTone(s.color) } : undefined}
                           >
                             {s.value}
                           </span>

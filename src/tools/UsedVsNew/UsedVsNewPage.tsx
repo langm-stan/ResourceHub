@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, SegmentedControl, Slider, Stat } from '../../design-system'
+import { Callout, Card, MathSection, SegmentedControl, Slider, Stat, textTone } from '../../design-system'
 import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -183,8 +183,8 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               onChange={setPick}
             />
             <div className={styles.legend}>
-              <span style={{ color: GOLD }}>&#9632; what the car is worth</span>
-              <span style={{ color: RED }}>&#9632; what you still owe</span>
+              <span style={{ color: textTone(GOLD) }}>&#9632; what the car is worth</span>
+              <span style={{ color: textTone(RED) }}>&#9632; what you still owe</span>
             </div>
             <StationChart
               x={d.x}

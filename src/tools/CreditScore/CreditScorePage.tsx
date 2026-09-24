@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, FormulaBlock, SegmentedControl, Slider, Stat, StepHeader } from '../../design-system'
+import { Callout, Card, FormulaBlock, SegmentedControl, Slider, Stat, StepHeader, textTone } from '../../design-system'
 import { ChartFrame, useChart } from '../../design-system/chart'
 import { formatUSDWhole, texUSD } from '../../lib/format'
 import { BEST_BAND, INVEST_RATE, SCORE_BANDS, SCORE_FACTORS, bandForScore } from './data'
@@ -190,7 +190,7 @@ export function CreditScorePage({ intro = true }: { intro?: boolean } = {}) {
                 {BEST_BAND.min}+ score, which comes to{' '}
                 <strong>{formatUSDWhole(extraTotal)}</strong> over the {months} months. Invest that
                 monthly difference at {Math.round(INVEST_RATE * 100)}% instead and you would end the
-                loan with <strong style={{ color: GREEN }}>{formatUSDWhole(invested)}</strong>.
+                loan with <strong style={{ color: textTone(GREEN) }}>{formatUSDWhole(invested)}</strong>.
               </Callout>
             )}
             <FormulaBlock

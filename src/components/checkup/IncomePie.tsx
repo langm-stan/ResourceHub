@@ -24,7 +24,7 @@ interface Slice {
   fill: string
 }
 
-/** Expense slice colors: full-strength blends from cardinal to amber, in list order. */
+/** Expense slice colors: full-strength blends from cardinal to gold, in list order. */
 function expenseFill(i: number, n: number): string {
   const p = n > 1 ? 100 - Math.round((i * 100) / (n - 1)) : 100
   return `color-mix(in oklab, ${CARDINAL} ${p}%, var(--c-series-2))`
@@ -32,7 +32,7 @@ function expenseFill(i: number, n: number): string {
 
 /*
  * The planned budget as shares of take-home income: every dollar coming in is
- * an expense slice (cardinal-to-amber), the saving slice (green), or the
+ * an expense slice (cardinal-to-gold), the saving slice (green), or the
  * leftover (slate). The denominator is net income on purpose: a budget can
  * only allocate money that actually lands in the account. When the plan
  * exceeds income there is no valid income pie, so the shares fall back to the

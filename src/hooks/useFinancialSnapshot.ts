@@ -322,6 +322,19 @@ export function useFinancialSnapshot() {
     setSnapshot(EXAMPLE_SNAPSHOT)
   }, [])
 
+  // One statement back to the template's rows at $0, for someone replacing the
+  // numbers on screen with their own. Unlike clearAll it is an edit: it saves,
+  // and the other statement is left as it is.
+  const clearSheet = useCallback((sheet: 'balance-sheet' | 'budget') => {
+    suppressPersist.current = false
+    setIsExampleData(false)
+    setSnapshot((prev) =>
+      sheet === 'balance-sheet'
+        ? { ...prev, assets: STARTER_ASSET_GROUPS, liabilities: STARTER_LIABILITY_GROUPS }
+        : { ...prev, income: STARTER_INCOME, expenses: STARTER_EXPENSES, saving: STARTER_SAVING },
+    )
+  }, [])
+
   // Wipes everything this tool has stored in this browser — the right move before
   // walking away from a shared or public computer.
   const clearAll = useCallback(() => {
@@ -350,6 +363,7 @@ export function useFinancialSnapshot() {
     setSavingItems,
     importFile,
     loadExampleData,
+    clearSheet,
     clearAll,
   }
 }

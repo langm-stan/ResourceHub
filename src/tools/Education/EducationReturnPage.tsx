@@ -8,8 +8,7 @@ import {
   Slider,
   Stat,
   Tabs,
-  type TabItem,
-} from '../../design-system'
+  type TabItem, textTone } from '../../design-system'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { formatPercent, formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { evaluateEducation, npvByIncrease, npvByRate, type CostTiming, type EducationInputs } from './compute'
@@ -269,8 +268,8 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
           {active === 'flows' && (
             <>
               <p className={styles.legend}>
-                <span style={{ color: RED }}>&#9632; tuition and income given up</span>
-                <span style={{ color: GREEN }}>&#9632; the increase in income</span>
+                <span style={{ color: textTone(RED) }}>&#9632; tuition and income given up</span>
+                <span style={{ color: textTone(GREEN) }}>&#9632; the increase in income</span>
               </p>
               <CashFlowChart
                 flows={result.flows}

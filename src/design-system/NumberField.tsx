@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { keepSelectionOnMouseUp, selectOnFocus } from './selectOnFocus'
 import styles from './NumberField.module.css'
 
 interface NumberFieldProps {
@@ -74,7 +75,11 @@ export function NumberField({
           aria-label={label ? undefined : ariaLabel}
           value={draft}
           step={step}
-          onFocus={() => setEditing(true)}
+          onFocus={(e) => {
+            setEditing(true)
+            selectOnFocus(e)
+          }}
+          onMouseUp={keepSelectionOnMouseUp}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={(e) => {
             setEditing(false)

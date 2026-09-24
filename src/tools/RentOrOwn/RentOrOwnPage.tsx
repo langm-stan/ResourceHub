@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, SegmentedControl, Slider, Stat } from '../../design-system'
+import { Callout, Card, SegmentedControl, Slider, Stat, textTone } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared chart canvas from the lesson family.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -141,8 +141,8 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
         </div>
 
         <div className={styles.legend}>
-          <span style={{ color: GOLD }}>&#9632; owner&rsquo;s wealth if sold that year</span>
-          <span style={{ color: GREEN }}>&#9632; renter&rsquo;s invested wealth</span>
+          <span style={{ color: textTone(GOLD) }}>&#9632; owner&rsquo;s wealth if sold that year</span>
+          <span style={{ color: textTone(GREEN) }}>&#9632; renter&rsquo;s invested wealth</span>
         </div>
         <StationChart
           x={x}

@@ -8,8 +8,7 @@ import {
   Slider,
   Stat,
   Tabs,
-  type TabItem,
-} from '../../design-system'
+  type TabItem, textTone } from '../../design-system'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { formatPercent, formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { compareLoans, type LoanInputs } from './loanCompute'
@@ -286,8 +285,8 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
           {active === 'balance' && (
             <>
               <p className={styles.legend}>
-                <span style={{ color: GREEN }}>&#9632; subsidized</span>
-                <span style={{ color: SLATE }}>&#9632; unsubsidized</span>
+                <span style={{ color: textTone(GREEN) }}>&#9632; subsidized</span>
+                <span style={{ color: textTone(SLATE) }}>&#9632; unsubsidized</span>
               </p>
               <StationChart
                 x={years}

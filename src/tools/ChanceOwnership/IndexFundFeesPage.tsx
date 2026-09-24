@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, Slider, Stat } from '../../design-system'
+import { Callout, Card, MathSection, Slider, Stat, textTone } from '../../design-system'
 import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { CHEAP_FEE, DEFAULT_RETURN_PCT, buildFeeSeries } from './compute'
 import { StationChart } from './components/StationChart'
@@ -91,9 +91,9 @@ function IndexFund() {
       </div>
       <div className={styles.chartCol}>
         <div className={styles.legend}>
-          <span style={{ color: GREEN }}>&#9632; {CHEAP_FEE.toFixed(2)}% expense ratio</span>
-          <span style={{ color: GOLD }}>&#9632; {fee.toFixed(2)}% expense ratio</span>
-          <span style={{ color: 'var(--text-muted)' }}>&#9476; total contributed</span>
+          <span style={{ color: textTone(GREEN) }}>&#9632; {CHEAP_FEE.toFixed(2)}% expense ratio</span>
+          <span style={{ color: textTone(GOLD) }}>&#9632; {fee.toFixed(2)}% expense ratio</span>
+          <span style={{ color: textTone('var(--text-muted)') }}>&#9476; total contributed</span>
         </div>
         <StationChart
           x={series.x}

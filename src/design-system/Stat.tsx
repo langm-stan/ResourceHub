@@ -1,4 +1,5 @@
 import { useCountUp } from '../hooks/useCountUp'
+import { textTone } from './textTone'
 import styles from './Stat.module.css'
 
 interface StatProps {
@@ -28,7 +29,7 @@ export function Stat({
       <span className={styles.label}>{label}</span>
       <span
         className={`${styles.value} tnum`}
-        style={accentColor ? { color: accentColor } : undefined}
+        style={accentColor ? { color: textTone(accentColor) } : undefined}
       >
         {format(shown)}
       </span>

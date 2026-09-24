@@ -7,8 +7,7 @@ import {
   Slider,
   Stat,
   StepHeader,
-  type MathRow,
-} from '../../design-system'
+  type MathRow, textTone } from '../../design-system'
 import { formatPercent, formatUSDCompact, formatUSDWhole, texUSD } from '../../lib/format'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
@@ -297,7 +296,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                 <tr>
                   <td>Loss year ({formatPercent(p, 1)})</td>
                   <td className="tnum">{formatUSDWhole(quote.premium)}</td>
-                  <td className="tnum" style={{ color: CARDINAL, fontWeight: 600 }}>
+                  <td className="tnum" style={{ color: textTone(CARDINAL), fontWeight: 600 }}>
                     {formatUSDWhole(lossSize)}
                   </td>
                 </tr>
@@ -329,9 +328,9 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             revealYear >= 1 && (
               <>
                 <div className={styles.legendRow}>
-                  <span style={{ color: GOLD }}>─ every buyer</span>
-                  <span style={{ color: SLATE }}>─ non-buyers, average bill</span>
-                  <span style={{ color: CARDINAL }}>▮ non-buyers hit that year (right axis)</span>
+                  <span style={{ color: textTone(GOLD) }}>─ every buyer</span>
+                  <span style={{ color: textTone(SLATE) }}>─ non-buyers, average bill</span>
+                  <span style={{ color: textTone(CARDINAL) }}>▮ non-buyers hit that year (right axis)</span>
                 </div>
                 <ChartFrame
                   ratio={0.42}
@@ -370,9 +369,9 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
                   {(done ? SIM_YEARS : revealYear) === 1 ? 'year' : 'years'} cost them
                 </p>
                 <div className={styles.legendRow}>
-                  <span style={{ color: GOLD }}>■ all {HOUSEHOLDS.toLocaleString()} buyers</span>
-                  <span style={{ color: SLATE }}>■ non-buyers, never hit</span>
-                  <span style={{ color: CARDINAL }}>■ non-buyers, hit</span>
+                  <span style={{ color: textTone(GOLD) }}>■ all {HOUSEHOLDS.toLocaleString()} buyers</span>
+                  <span style={{ color: textTone(SLATE) }}>■ non-buyers, never hit</span>
+                  <span style={{ color: textTone(CARDINAL) }}>■ non-buyers, hit</span>
                 </div>
                 <OutcomeBars buckets={buckets} buyersPaid={buyersPaidSoFar} lossSize={lossSize} />
               </div>

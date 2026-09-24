@@ -57,7 +57,7 @@ const ASSETS: Record<
     plural: '10-year Treasury bonds',
     short: 'T-bonds',
     color: 'var(--c-series-2)',
-    colorWord: 'amber',
+    colorWord: 'gold',
   },
   bill: {
     menu: 'T-bills',

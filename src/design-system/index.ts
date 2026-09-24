@@ -18,6 +18,8 @@ export { Stat } from './Stat'
 export { Tabs } from './Tabs'
 export type { TabItem } from './Tabs'
 export { Toggle } from './Toggle'
+export { textTone } from './textTone'
+export { keepSelectionOnMouseUp, selectOnFocus } from './selectOnFocus'
 export { ThemeToggle } from './ThemeToggle'
 export { PresentationToggle } from './PresentationToggle'
 export {

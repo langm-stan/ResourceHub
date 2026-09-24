@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, Slider, Stat, StepHeader, Tabs, type TabItem } from '../../design-system'
+import { Callout, Card, MathSection, Slider, Stat, StepHeader, Tabs, type TabItem, textTone } from '../../design-system'
 import { formatUSDWhole } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -92,9 +92,9 @@ function AccountTaxation() {
       </div>
       <div>
         <div className={styles.legend}>
-          <span style={{ color: RED }}>&#9632; Roth</span>
-          <span style={{ color: GOLD }}>&#9632; Traditional 401(k)/IRA</span>
-          <span style={{ color: SLATE }}>&#9632; taxable account</span>
+          <span style={{ color: textTone(RED) }}>&#9632; Roth</span>
+          <span style={{ color: textTone(GOLD) }}>&#9632; Traditional 401(k)/IRA</span>
+          <span style={{ color: textTone(SLATE) }}>&#9632; taxable account</span>
         </div>
         <StationChart
           x={x}
@@ -290,10 +290,10 @@ function EmployerMatching() {
       </div>
       <div>
         <div className={styles.legend}>
-          <span style={{ color: GREEN }}>&#9632; 401(k) + 100% match</span>
-          <span style={{ color: RED }}>&#9632; 401(k) + 50% match</span>
-          <span style={{ color: GOLD }}>&#9632; 401(k), no match</span>
-          <span style={{ color: SLATE }}>&#9632; taxable account</span>
+          <span style={{ color: textTone(GREEN) }}>&#9632; 401(k) + 100% match</span>
+          <span style={{ color: textTone(RED) }}>&#9632; 401(k) + 50% match</span>
+          <span style={{ color: textTone(GOLD) }}>&#9632; 401(k), no match</span>
+          <span style={{ color: textTone(SLATE) }}>&#9632; taxable account</span>
         </div>
         <StationChart
           x={x}
@@ -554,8 +554,8 @@ annual price of the same target from every starting age.
         )}
         <div>
           <div className={styles.legend}>
-            <span style={{ color: GOLD }}>&#9632; annual saving by starting age</span>
-            <span style={{ color: RED }}>&#9476; your starting age</span>
+            <span style={{ color: textTone(GOLD) }}>&#9632; annual saving by starting age</span>
+            <span style={{ color: textTone(RED) }}>&#9476; your starting age</span>
           </div>
           <StationChart
             x={waitX}
@@ -629,8 +629,8 @@ annual price of the same target from every starting age.
         </p>
         <div>
           <div className={styles.legend}>
-            <span style={{ color: GOLD }}>&#9632; planned at {plannedPct}</span>
-            <span style={{ color: actualPct < savePct ? RED : GREEN }}>&#9632; actual at {actualPct}%</span>
+            <span style={{ color: textTone(GOLD) }}>&#9632; planned at {plannedPct}</span>
+            <span style={{ color: textTone(actualPct < savePct ? RED : GREEN) }}>&#9632; actual at {actualPct}%</span>
           </div>
           <StationChart
             x={planX}

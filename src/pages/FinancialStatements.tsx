@@ -61,6 +61,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
     setSavingItems,
     importFile,
     loadExampleData,
+    clearSheet,
     clearAll,
   } = useFinancialSnapshot()
 
@@ -146,7 +147,13 @@ export default function FinancialStatements({ standalone = true }: { standalone?
 
       {tab === 'balance-sheet' && (
         <div className="flex flex-col gap-6">
-          <StorageNotice isExampleData={isExampleData} onLoadExample={loadExampleData} onClear={clearAll} />
+          <StorageNotice
+            isExampleData={isExampleData}
+            onLoadExample={loadExampleData}
+            sheetName="balance sheet"
+            onClearSheet={() => clearSheet('balance-sheet')}
+            onClear={clearAll}
+          />
 
           <StepHeader
             title="What you own and owe"
@@ -233,7 +240,13 @@ export default function FinancialStatements({ standalone = true }: { standalone?
 
       {tab === 'budget' && (
         <div className="flex flex-col gap-6">
-          <StorageNotice isExampleData={isExampleData} onLoadExample={loadExampleData} onClear={clearAll} />
+          <StorageNotice
+            isExampleData={isExampleData}
+            onLoadExample={loadExampleData}
+            sheetName="budget"
+            onClearSheet={() => clearSheet('budget')}
+            onClear={clearAll}
+          />
 
           <Card tone="raised">
             <StepHeader

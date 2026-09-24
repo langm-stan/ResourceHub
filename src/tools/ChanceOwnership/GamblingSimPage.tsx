@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Button, Callout, Card, SegmentedControl, Slider, Stat } from '../../design-system'
+import { Button, Callout, Card, SegmentedControl, Slider, Stat, textTone } from '../../design-system'
 import { formatPercent, formatUSDWhole } from '../../lib/format'
 import { simulateBettors } from './compute'
 import { StationChart } from './components/StationChart'
@@ -144,10 +144,10 @@ function BettingStation() {
 
       <div className={styles.chartCol}>
         <div className={styles.legend}>
-          <span style={{ color: lineColor }}>&#9632; typical player</span>
-          <span style={{ color: 'var(--text-muted)' }}>&#9617; middle 80% of players</span>
-          {isPM && <span style={{ color: SLATE }}>&#9476; typical sportsbook bettor, same bets</span>}
-          <span style={{ color: 'var(--text-muted)' }}>&#9476; starting {formatUSDWhole(start)}</span>
+          <span style={{ color: textTone(lineColor) }}>&#9632; typical player</span>
+          <span style={{ color: textTone('var(--text-muted)') }}>&#9617; middle 80% of players</span>
+          {isPM && <span style={{ color: textTone(SLATE) }}>&#9476; typical sportsbook bettor, same bets</span>}
+          <span style={{ color: textTone('var(--text-muted)') }}>&#9476; starting {formatUSDWhole(start)}</span>
         </div>
         <StationChart
           x={sim.x}

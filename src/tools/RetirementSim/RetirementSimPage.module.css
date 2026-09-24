@@ -144,7 +144,8 @@
 }
 .bracketSeg {
   position: relative;
-  background: var(--c-series-2);
+  /* The darker gold: the rate is printed on it in white. */
+  background: var(--c-series-2-text);
 }
 .bracketSeg + .bracketSeg {
   border-left: 2px solid var(--surface);
@@ -170,7 +171,7 @@
   font-size: var(--fs-micro);
   font-weight: var(--fw-semibold);
   /* The rate sits on the gold "kept" slice: white on the light theme's dark
-     amber, ink on the dark theme's light amber — both clear AA. */
+     gold, ink on the dark theme's light gold. Both clear AA. */
   color: #fff;
   pointer-events: none;
 }

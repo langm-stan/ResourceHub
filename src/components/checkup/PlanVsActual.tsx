@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Callout } from '../../design-system'
+import { Callout, keepSelectionOnMouseUp, selectOnFocus } from '../../design-system'
 import { fmtPct, formatUSDWhole } from '../../lib/format'
 import { hasActuals, sumActuals, sumItems, type LineItem } from '../../data/checkupData'
 import styles from './PlanVsActual.module.css'
@@ -85,6 +85,8 @@ export function PlanVsActual({ income, expenses, saving, onExpensesChange, onSav
                 setDraft({ key: it.key, text: e.target.value })
                 onChange(withActual(items, it.key, e.target.value))
               }}
+              onFocus={selectOnFocus}
+              onMouseUp={keepSelectionOnMouseUp}
               onBlur={() => setDraft(null)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') (e.target as HTMLInputElement).blur()

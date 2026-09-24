@@ -58,6 +58,24 @@
   align-items: baseline;
 }
 
+/* Two rows, the term and the stretched term, in shared columns so each
+   figure sits over its counterpart. */
+.statsCompare {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: start;
+  column-gap: var(--space-8);
+}
+/* Narrow: the term down one column and the stretched term down the next. */
+@media (max-width: 720px) {
+  .statsCompare {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    column-gap: var(--space-5);
+  }
+}
+
 .chartBar {
   display: flex;
   flex-wrap: wrap;

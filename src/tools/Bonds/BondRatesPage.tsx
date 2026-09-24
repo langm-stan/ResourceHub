@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, ScenarioChip, Slider, Stat, StepHeader } from '../../design-system'
+import { Callout, Card, MathSection, ScenarioChip, Slider, Stat, StepHeader, textTone } from '../../design-system'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { priceBond, priceCurve, rateRange } from './compute'
 import styles from './BondsPage.module.css'
@@ -177,9 +177,9 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           hint="All three bonds cross par at the coupon rate. They part ways as the rate moves."
         />
         <div className={styles.legend}>
-          <span style={{ color: GREEN }}>&#9632; 1-year bond</span>
-          <span style={{ color: RED }}>&#9632; your {years}-year bond</span>
-          <span style={{ color: GOLD }}>&#9476; 30-year bond</span>
+          <span style={{ color: textTone(GREEN) }}>&#9632; 1-year bond</span>
+          <span style={{ color: textTone(RED) }}>&#9632; your {years}-year bond</span>
+          <span style={{ color: textTone(GOLD) }}>&#9476; 30-year bond</span>
         </div>
         <StationChart
           x={rates}

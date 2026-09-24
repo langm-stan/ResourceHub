@@ -118,7 +118,7 @@
   margin: 0;
 }
 .stationNumeral {
-  color: var(--c-series-2);
+  color: var(--c-series-2-text);
   margin-right: var(--space-2);
 }
 .stationEv {
@@ -290,7 +290,7 @@
 }
 .ticketSelected,
 .ticketSelected:hover {
-  background: var(--c-series-2);
+  background: var(--c-series-2-text);
   border-color: var(--text-primary);
   color: var(--c-paper-raised);
   font-weight: var(--fw-semibold);
@@ -345,7 +345,7 @@
   margin: 0;
 }
 .pickResultNumber {
-  color: var(--c-series-2);
+  color: var(--c-series-2-text);
 }
 
 .basketSection {

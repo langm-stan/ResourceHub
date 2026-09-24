@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { keepSelectionOnMouseUp, selectOnFocus } from '../../design-system'
 import { fmtPct, formatUSDWhole } from '../../lib/format'
 import { newLineItem, sumItems, type LineItem } from '../../data/checkupData'
 import styles from './LineItemsEditor.module.css'
@@ -78,6 +79,8 @@ export function LineItemsEditor({
                   const n = Number(text.replace(/[^0-9.\-]/g, ''))
                   set(it.key, { value: Number.isFinite(n) ? n : 0 })
                 }}
+                onFocus={selectOnFocus}
+                onMouseUp={keepSelectionOnMouseUp}
                 onBlur={() => setDraft(null)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') (e.target as HTMLInputElement).blur()

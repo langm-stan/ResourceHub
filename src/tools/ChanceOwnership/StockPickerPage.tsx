@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Button, Callout, Card, SegmentedControl, Stat } from '../../design-system'
+import { Button, Callout, Card, SegmentedControl, Stat, textTone } from '../../design-system'
 import { REAL_BOARDS } from './realBoards'
 import { drawBasket, sampleBasketReturns } from './compute'
 import { StationChart } from './components/StationChart'
@@ -62,7 +62,7 @@ function ReturnBars({
           <div key={r.h}>
             <div className={styles.returnHead}>
               <span className={styles.returnHorizon}>{r.h}</span>
-              <span className={styles.returnVerdict} style={{ color: beat ? GREEN : RED }}>
+              <span className={styles.returnVerdict} style={{ color: textTone(beat ? GREEN : RED) }}>
                 {beat ? 'beat the index' : 'lost to the index'}
               </span>
             </div>
@@ -78,7 +78,7 @@ function ReturnBars({
                     style={{ width: `${barW(b.v)}%`, background: b.color, opacity: b.bold ? 1 : 0.45 }}
                   />
                 </div>
-                <span className={`${styles.returnBarValue} tnum`} style={{ color: b.color }}>
+                <span className={`${styles.returnBarValue} tnum`} style={{ color: textTone(b.color) }}>
                   {fmtSignedPct(b.v)}
                 </span>
               </div>
@@ -231,7 +231,7 @@ function StockPicker() {
         ].map((r) => (
           <span key={r.h} className={styles.indexStripItem}>
             {r.h}{' '}
-            <strong className="tnum" style={{ color: r.v >= 0 ? GREEN : RED }}>
+            <strong className="tnum" style={{ color: textTone(r.v >= 0 ? GREEN : RED) }}>
               {fmtSignedPct(r.v)}
             </strong>
           </span>
@@ -411,7 +411,7 @@ function StockPicker() {
               {(['r1', 'r5', 'r10'] as const).map((k) => {
                 const v = basketAvg(k)
                 return (
-                  <span key={k} className={`${styles.compareValue} tnum`} style={{ color: v >= 0 ? GREEN : RED }}>
+                  <span key={k} className={`${styles.compareValue} tnum`} style={{ color: textTone(v >= 0 ? GREEN : RED) }}>
                     {fmtSignedPct(v)}
                   </span>
                 )
@@ -419,7 +419,7 @@ function StockPicker() {
 
               <span className={styles.compareLabel}>The market (S&amp;P 500)</span>
               {[sp.r1, sp.r5, sp.r10].map((v, i) => (
-                <span key={i} className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                <span key={i} className={`${styles.compareValue} tnum`} style={{ color: textTone(SLATE) }}>
                   {fmtSignedPct(v)}
                 </span>
               ))}
@@ -430,7 +430,7 @@ function StockPicker() {
               {gaps.map((g) => {
                 const r = Math.round(g.v)
                 return (
-                  <span key={g.h} className={`${styles.compareValue} tnum`} style={{ color: g.v >= 0 ? GREEN : RED }}>
+                  <span key={g.h} className={`${styles.compareValue} tnum`} style={{ color: textTone(g.v >= 0 ? GREEN : RED) }}>
                     {`${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}`}
                   </span>
                 )
@@ -549,7 +549,7 @@ function StockPicker() {
                       <span className={styles.compareLabel}>{label}</span>
                       <span
                         className={`${styles.compareValue} tnum`}
-                        style={{ color: s.mean >= 0 ? GREEN : RED }}
+                        style={{ color: textTone(s.mean >= 0 ? GREEN : RED) }}
                       >
                         {fmtSignedPct(Math.round(s.mean))}
                       </span>
@@ -563,14 +563,14 @@ function StockPicker() {
                   <span className={styles.compareRule} />
 
                   <span className={styles.compareLabel}>All 100 tickets, equal amounts</span>
-                  <span className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                  <span className={`${styles.compareValue} tnum`} style={{ color: textTone(SLATE) }}>
                     {fmtSignedPct(Math.round(boardMean))}
                   </span>
                   <span className={styles.compareValueSm}>one result</span>
                   <span className={`${styles.compareValueSm} tnum`}>0 pts</span>
 
                   <span className={styles.compareLabel}>The market (S&amp;P 500)</span>
-                  <span className={`${styles.compareValue} tnum`} style={{ color: SLATE }}>
+                  <span className={`${styles.compareValue} tnum`} style={{ color: textTone(SLATE) }}>
                     {fmtSignedPct(sp.r10)}
                   </span>
                   <span className={styles.compareValueSm}>one result</span>

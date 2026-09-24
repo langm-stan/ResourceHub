@@ -32,7 +32,13 @@
 
   /* Data series — friendly and clear inside charts. */
   --c-series-1: #127a43; /* green (growth / interest-on-interest) — AA as text on white */
-  --c-series-2: #b45309; /* amber (simple interest) — dark enough for AA text on white */
+  /* Gold, lighter than the cardinal it usually sits beside. The old amber
+     (#b45309) was close to cardinal for every reader and to the green for
+     red-green colour blindness; this one clears both. It is a line and fill
+     colour (3.25:1 on white): text in this hue uses the darker
+     --c-series-2-text, which clears AA. */
+  --c-series-2: #b8860b; /* gold (simple interest) */
+  --c-series-2-text: #866300; /* gold as text, or as a fill under white text */
   /* Darkened from #8a94a6, which was the one series color that failed AA
      as text: the chart legends print the series name in its own color. */
   --c-series-3: #5d6a7d; /* slate (principal contributed) — AA as text on white */
@@ -171,7 +177,8 @@
   --c-cardinal-wash: #3a211e;
 
   --c-series-1: #34c27a;
-  --c-series-2: #f0a93a;
+  --c-series-2: #e8b923;
+  --c-series-2-text: #e8b923;
   --c-series-3: #98a1b0;
   --c-series-4: #e2564f;
   --c-series-5: #a78bef;

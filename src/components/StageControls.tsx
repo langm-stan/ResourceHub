@@ -10,8 +10,21 @@ import styles from './StageControls.module.css'
  * view, above the tool on the full site.
  */
 
+/*
+ * Left out on a phone. There the button can at best fill a small screen that
+ * is already full, and inside an iframe it only fills the frame and steps the
+ * text up, which is what the size control beside it already does. A phone is
+ * a touch screen whose short side is under 600px, in either orientation;
+ * tablets and computers keep the button.
+ */
+const onPhone =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(pointer: coarse)').matches === true &&
+  Math.min(window.screen.width, window.screen.height) < 600
+
 export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const { isFull, canFullscreen, toggle } = useFullscreen()
+  const showFill = isFull || !onPhone
 
   return (
     <div className={styles.group}>
@@ -28,21 +41,23 @@ export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
         Text size
       </span>
       <PresentationToggle tone={tone} />
-      <button
-        type="button"
-        onClick={toggle}
-        className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
-        title={
-          isFull
-            ? 'Back to the page'
-            : canFullscreen
-              ? 'Fill the screen'
-              : 'Fill the frame. This page cannot reach full screen unless the site it sits in allows it.'
-        }
-      >
-        {isFull ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-        {isFull ? 'Exit full screen' : canFullscreen ? 'Full screen' : 'Expand'}
-      </button>
+      {showFill && (
+        <button
+          type="button"
+          onClick={toggle}
+          className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
+          title={
+            isFull
+              ? 'Back to the page'
+              : canFullscreen
+                ? 'Fill the screen'
+                : 'Fill the frame. This page cannot reach full screen unless the site it sits in allows it.'
+          }
+        >
+          {isFull ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          {isFull ? 'Exit full screen' : canFullscreen ? 'Full screen' : 'Expand'}
+        </button>
+      )}
     </div>
   )
 }
