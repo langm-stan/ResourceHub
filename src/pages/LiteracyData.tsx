@@ -177,10 +177,73 @@ function OutcomesSection() {
   )
 }
 
+/*
+ * The four bands, lowest first, as a key of our own. The charting library's
+ * legend ordered them 0-7, 15-21, 22-28, 8-14. Lines get a short stroke,
+ * bars a square. Given `hidden` and `onToggle`, each entry is a button that
+ * takes its line off the chart and puts it back.
+ */
+type BandKeyName = (typeof BANDS)[number]['key']
+
+function BandKey({
+  mark,
+  hidden,
+  onToggle,
+}: {
+  mark: 'line' | 'square'
+  hidden?: ReadonlySet<BandKeyName>
+  onToggle?: (key: BandKeyName) => void
+}) {
+  return (
+    <ul className="mb-4 flex flex-wrap gap-x-6 gap-y-2">
+      {BANDS.map((b) => {
+        const off = hidden?.has(b.key) ?? false
+        const content = (
+          <>
+            <span
+              aria-hidden="true"
+              className={mark === 'line' ? 'inline-block h-[3px] w-5 rounded-full' : 'inline-block h-3.5 w-3.5'}
+              style={{ backgroundColor: b.color }}
+            />
+            {b.label} <span className="text-stone-400">({b.share})</span>
+          </>
+        )
+        return (
+          <li key={b.key} className="text-[15px] text-stone-600">
+            {onToggle ? (
+              <button
+                type="button"
+                aria-pressed={!off}
+                title={off ? 'Show this band' : 'Hide this band'}
+                onClick={() => onToggle(b.key)}
+                className={`flex items-center gap-2 rounded-md px-1.5 py-0.5 hover:bg-stone-100 ${
+                  off ? 'opacity-40 line-through' : ''
+                }`}
+              >
+                {content}
+              </button>
+            ) : (
+              <span className="flex items-center gap-2">{content}</span>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 /* Ten years of the same questions, and the answer has not improved. */
 function DecadeSection() {
   const first = DECADE[0]!
   const last = DECADE[DECADE.length - 1]!
+  const [hidden, setHidden] = useState<ReadonlySet<BandKeyName>>(new Set())
+  const toggleBand = (key: BandKeyName) =>
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
 
   return (
     <>
@@ -217,6 +280,7 @@ function DecadeSection() {
       </div>
       <Card tone="raised">
         <p className="mb-3 text-[17px] font-semibold text-stone-800">Share of adults in each band</p>
+        <BandKey mark="line" hidden={hidden} onToggle={toggleBand} />
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={DECADE} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
@@ -230,7 +294,6 @@ function DecadeSection() {
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
-              <Legend wrapperStyle={{ fontSize: 15 }} />
               {BANDS.map((b) => (
                 <Line
                   key={b.key}
@@ -239,6 +302,7 @@ function DecadeSection() {
                   name={`${b.label} (${b.share})`}
                   stroke={b.color}
                   strokeWidth={2.5}
+                  hide={hidden.has(b.key)}
                   dot={false}
                   isAnimationActive={false}
                 />
@@ -381,18 +445,7 @@ function AgeBandsSection() {
         hint="Share of each age group in each band of the 28-question index, 2026."
       />
       <Card tone="raised">
-        <ul className="mb-4 flex flex-wrap gap-x-6 gap-y-2">
-          {BANDS.map((b) => (
-            <li key={b.key} className="flex items-center gap-2 text-[15px] text-stone-600">
-              <span
-                aria-hidden="true"
-                className="inline-block h-3.5 w-3.5"
-                style={{ backgroundColor: b.color }}
-              />
-              {b.label} <span className="text-stone-400">({b.share})</span>
-            </li>
-          ))}
-        </ul>
+        <BandKey mark="square" />
         <div className="h-[28rem]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={BANDS_BY_AGE} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
