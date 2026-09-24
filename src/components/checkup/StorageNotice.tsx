@@ -1,16 +1,17 @@
-import { Eraser, ShieldCheck, Trash2 } from 'lucide-react'
+import { Eraser, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react'
 
 export default function StorageNotice({
   isExampleData,
-  onLoadExample,
   sheetName,
+  onReloadSheet,
   onClearSheet,
   onClear,
 }: {
   isExampleData: boolean
-  onLoadExample: () => void
   /** The statement on screen, e.g. "balance sheet", for its own clear button. */
   sheetName: string
+  /** This statement back to the example's numbers. */
+  onReloadSheet: () => void
   onClearSheet: () => void
   onClear: () => void
 }) {
@@ -22,11 +23,7 @@ export default function StorageNotice({
           {isExampleData ? (
             <>
               <span className="font-semibold text-stone-800">You're looking at example numbers.</span>{' '}
-              Edit any field to make it yours. You can{' '}
-              <button onClick={onLoadExample} className="underline hover:text-cardinal">
-                reload the example
-              </button>{' '}
-              at any time.
+              Edit any field to make it yours.
             </>
           ) : (
             <>Your numbers save automatically in this browser.</>
@@ -34,6 +31,23 @@ export default function StorageNotice({
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 shrink-0">
+        {/* Back to the example's numbers: the default, for a class that has
+            wandered off it. */}
+        <button
+          type="button"
+          onClick={() => {
+            if (
+              isExampleData ||
+              confirm(`This replaces every amount on the ${sheetName} with the example's. Continue?`)
+            ) {
+              onReloadSheet()
+            }
+          }}
+          className="flex items-center gap-1.5 rounded-md border border-stone-300 bg-white px-3 py-1.5 text-[13px] font-semibold text-stone-700 hover:border-cardinal hover:text-cardinal"
+        >
+          <RotateCcw size={13} />
+          Reload the example
+        </button>
         {/* Every amount on this statement to $0, rows kept, so someone can
             type their own numbers without deleting the example's first. */}
         <button

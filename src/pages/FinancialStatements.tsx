@@ -60,7 +60,7 @@ export default function FinancialStatements({ standalone = true }: { standalone?
     setExpenseItems,
     setSavingItems,
     importFile,
-    loadExampleData,
+    loadExampleSheet,
     clearSheet,
     clearAll,
   } = useFinancialSnapshot()
@@ -149,8 +149,8 @@ export default function FinancialStatements({ standalone = true }: { standalone?
         <div className="flex flex-col gap-6">
           <StorageNotice
             isExampleData={isExampleData}
-            onLoadExample={loadExampleData}
             sheetName="balance sheet"
+            onReloadSheet={() => loadExampleSheet('balance-sheet')}
             onClearSheet={() => clearSheet('balance-sheet')}
             onClear={clearAll}
           />
@@ -242,8 +242,8 @@ export default function FinancialStatements({ standalone = true }: { standalone?
         <div className="flex flex-col gap-6">
           <StorageNotice
             isExampleData={isExampleData}
-            onLoadExample={loadExampleData}
             sheetName="budget"
+            onReloadSheet={() => loadExampleSheet('budget')}
             onClearSheet={() => clearSheet('budget')}
             onClear={clearAll}
           />

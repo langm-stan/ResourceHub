@@ -335,6 +335,29 @@ export function useFinancialSnapshot() {
     )
   }, [])
 
+  // One statement back to the example's numbers, the other left as it is. The
+  // example banner returns only when both statements are the example again.
+  const loadExampleSheet = useCallback(
+    (sheet: 'balance-sheet' | 'budget') => {
+      const next: Snapshot =
+        sheet === 'balance-sheet'
+          ? { ...snapshot, assets: EXAMPLE_SNAPSHOT.assets, liabilities: EXAMPLE_SNAPSHOT.liabilities }
+          : {
+              ...snapshot,
+              income: EXAMPLE_SNAPSHOT.income,
+              expenses: EXAMPLE_SNAPSHOT.expenses,
+              saving: EXAMPLE_SNAPSHOT.saving,
+            }
+      const allExample = (Object.keys(EXAMPLE_SNAPSHOT) as (keyof Snapshot)[]).every(
+        (k) => next[k] === EXAMPLE_SNAPSHOT[k],
+      )
+      suppressPersist.current = false
+      setIsExampleData(allExample)
+      setSnapshot(next)
+    },
+    [snapshot],
+  )
+
   // Wipes everything this tool has stored in this browser — the right move before
   // walking away from a shared or public computer.
   const clearAll = useCallback(() => {
@@ -363,6 +386,7 @@ export function useFinancialSnapshot() {
     setSavingItems,
     importFile,
     loadExampleData,
+    loadExampleSheet,
     clearSheet,
     clearAll,
   }
