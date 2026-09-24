@@ -5,6 +5,7 @@ import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { NEW_APR, USED_APR, carValue, dealPath, fastPayoffMonths } from './compute'
 import styles from './UsedVsNewPage.module.css'
+import { FredLink } from '../../components/FredLink'
 
 /*
  * Used vs. New: the same model bought new or a few years old. The used loan
@@ -112,6 +113,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               editable
               suffix="%"
               precision={2}
+              note={<FredLink series="newCar" />}
             />
             <Slider
               label="Rate on the used loan"

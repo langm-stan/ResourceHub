@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
 import {
   Callout,
   Card,
@@ -16,6 +15,7 @@ import { formatUSDWhole, texNumber, texUSD } from '../../lib/format'
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import { buildSchedule, firstMonthInterest, padTo, paymentFor } from './compute'
 import styles from './PayingOffDebtPage.module.css'
+import { FredLink } from '../../components/FredLink'
 
 /*
  * Paying off Debt: installment loans for the Debt Management & FICO Scores
@@ -177,17 +177,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
             editable
             suffix="%"
             precision={2}
-            note={
-              <a
-                href="https://fred.stlouisfed.org/series/TERMCBCCINTNS"
-                target="_blank"
-                rel="noreferrer"
-                className="font-semibold text-cardinal hover:underline"
-              >
-                Latest average card rate on FRED{' '}
-                <ExternalLink size={12} aria-hidden="true" className="inline align-baseline" />
-              </a>
-            }
+            note={<FredLink series="cardRate" />}
           />
           {mode === 'payment' ? (
             <Slider

@@ -15,6 +15,7 @@ import {
   type Growth,
 } from './compute'
 import styles from './RentOrOwnPage.module.css'
+import { FredLink } from '../../components/FredLink'
 
 /*
  * Rent or Own: the year-one cost test from the housing session, then the
@@ -110,6 +111,7 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
             editable
             suffix="%"
             precision={1}
+            note={<FredLink series="mortgage30" />}
           />
         </div>
         <SegmentedControl

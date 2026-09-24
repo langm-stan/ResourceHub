@@ -27,6 +27,7 @@ import { AmortizationChart } from './components/AmortizationChart'
 import { RateSensitivityChart } from './components/RateSensitivityChart'
 import { TermInterestChart, TermLengthChart } from './components/TermLengthChart'
 import styles from './HousingPage.module.css'
+import { FredLink } from '../../components/FredLink'
 
 type Surface = 'payment' | 'afford' | 'rate' | 'term' | 'taxes' | 'math'
 
@@ -146,7 +147,14 @@ export function HousingPage({ intro = true }: { intro?: boolean } = {}) {
             editable
             suffix="%"
             precision={2}
-            note={ratePct == null ? 'Follows the credit score and term until you set it.' : undefined}
+            note={
+              <>
+                {ratePct == null && (
+                  <span className="block">Follows the credit score and term until you set it.</span>
+                )}
+                <FredLink series={term === 15 ? 'mortgage15' : 'mortgage30'} />
+              </>
+            }
           />
           <Slider
             label="Property tax (% of value/yr)"
