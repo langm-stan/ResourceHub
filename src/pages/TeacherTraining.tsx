@@ -352,7 +352,7 @@ export default function TeacherTraining() {
             >
               The Personal Finance Toolkit
             </h1>
-            <p className="mx-auto mt-4 max-w-3xl text-[20px] leading-relaxed text-white/85">
+            <p className="mx-auto mt-4 max-w-3xl text-[22px] leading-snug text-white/90 md:text-[26px]">
               Interactive tools for teaching personal finance.
             </p>
             <div className="relative mx-auto mt-6 max-w-md">
@@ -444,6 +444,16 @@ export default function TeacherTraining() {
                 </div>
               </div>
             )}
+            <p className="mt-10 border-t border-stone-200 pt-5 text-[17px] leading-relaxed text-stone-600">
+              To ask about the toolkit or tell us how you use it in your classroom, write to{' '}
+              <a
+                href="mailto:stanfordifdm@stanford.edu"
+                className="font-semibold text-cardinal hover:underline"
+              >
+                stanfordifdm@stanford.edu
+              </a>
+              .
+            </p>
             <ExitFullScreenFooter />
           </div>
         </div>
