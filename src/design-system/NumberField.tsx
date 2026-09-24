@@ -14,6 +14,8 @@ interface NumberFieldProps {
   prefix?: string
   suffix?: string
   precision?: number
+  /** Thousands separators in the display (money: 1,000). Off for years and counts. */
+  grouped?: boolean
 }
 
 /**
@@ -31,13 +33,14 @@ export function NumberField({
   prefix,
   suffix,
   precision = 2,
+  grouped = false,
 }: NumberFieldProps) {
   const id = useId()
-  const [draft, setDraft] = useState<string>(format(value, precision))
+  const [draft, setDraft] = useState<string>(format(value, precision, grouped))
   const [editing, setEditing] = useState(false)
 
   useEffect(() => {
-    if (!editing) setDraft(format(value, precision))
+    if (!editing) setDraft(format(value, precision, grouped))
   }, [value, precision, editing])
 
   function commit(raw: string) {
@@ -46,7 +49,7 @@ export function NumberField({
     // An empty or unparseable entry reverts to the previous value rather than
     // committing 0 (Number('') is 0).
     if (cleaned === '' || Number.isNaN(parsed)) {
-      setDraft(format(value, precision))
+      setDraft(format(value, precision, grouped))
       return
     }
     let next = parsed
@@ -56,7 +59,7 @@ export function NumberField({
     const factor = 10 ** precision
     next = Math.round(next * factor) / factor
     onChange(next)
-    setDraft(format(next, precision))
+    setDraft(format(next, precision, grouped))
   }
 
   return (
@@ -95,7 +98,12 @@ export function NumberField({
   )
 }
 
-function format(value: number, precision: number): string {
-  if (Number.isInteger(value)) return String(value)
-  return value.toFixed(precision)
+function format(value: number, precision: number, grouped: boolean): string {
+  const text = Number.isInteger(value) ? String(value) : value.toFixed(precision)
+  if (!grouped) return text
+  /* Commas in the whole-number part only. Typed commas are stripped when the
+     entry is committed, so an edited value never keeps a stray one. */
+  const [int, frac] = text.split('.')
+  const withCommas = int!.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return frac != null ? `${withCommas}.${frac}` : withCommas
 }

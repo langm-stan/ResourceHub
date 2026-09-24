@@ -254,6 +254,7 @@ export function TvmCalculator() {
                 prefix={MONEY_VARS.includes(k.var) ? '$' : undefined}
                 suffix={k.var === 'iy' ? '%' : undefined}
                 precision={k.var === 'iy' ? 3 : 2}
+                grouped={MONEY_VARS.includes(k.var)}
               />
               <Button
                 className={styles.keyBtn}
