@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Callout, Card, MathSection, Slider, Stat, StepHeader, Tabs, type TabItem, textTone } from '../../design-system'
-import { formatUSDWhole } from '../../lib/format'
+import { formatUSDWhole, texUSD } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
 import {
@@ -40,7 +40,6 @@ const CHART_MAX_HEIGHT = 560
 const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`
 
 /* KaTeX fragments for the worked math: whole dollars and decimal rates. */
-const texUSD = (v: number) => `\\$${Math.round(v).toLocaleString('en-US')}`
 const texRate = (p: number) => String(p / 100)
 
 /* ================= Part 2: Account Taxation ================= */

@@ -1,13 +1,11 @@
 import { MathSection } from '../../../design-system'
+import { texNumber } from '../../../lib/format'
 import { freqOf, rateOf, type Scenario } from '../state'
 import type { Results } from '../compute'
 
-function tex(value: number, decimals = 2): string {
-  const fixed = value.toFixed(decimals)
-  const [int, frac] = fixed.split('.')
-  const grouped = int!.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return frac ? `${grouped}.${frac}` : grouped
-}
+/* Thousands grouped as {,}: a bare comma in math mode is punctuation and
+   gets a space after it, which printed 1,000 as "1, 000". */
+const tex = (value: number, decimals = 2) => texNumber(value, decimals)
 
 interface MathReportProps {
   scenario: Scenario
