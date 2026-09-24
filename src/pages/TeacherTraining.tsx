@@ -306,35 +306,42 @@ export default function TeacherTraining() {
   return (
     <div>
       {/* Filling the screen, the banner and the bar would be two cardinal
-          bands stacked on each other, so they become one: the name, the
-          search, and the controls on a single row that stays put while the
-          course scrolls under it. */}
+          bands stacked on each other, so they become one: the search and the
+          controls on a row at the top, and the title and tagline under them
+          at the size the page shows them otherwise. */}
       {isFull ? (
-        <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
+        <div className="border-b border-white/15 bg-cardinal">
           {/* Filling the screen puts this against the top edge, where a
               browser's own toolbar slides down over it and takes the search
               box with it. The band still reaches the edge; its contents sit
               clear of it. */}
-          <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-2 pt-8">
-            <h1 className="min-w-0 shrink text-[18px] font-bold tracking-[-0.016em] text-white">
-              The Personal Finance Toolkit
-            </h1>
-            <div className="relative ml-auto w-full max-w-[15rem] shrink">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-              />
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search the tools"
-                aria-label="Search the tools"
-                className="w-full border-0 bg-white py-2 pl-9 pr-3 text-[16px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
-              />
+          <div className="mx-auto max-w-[1680px] px-4 pb-9 pt-8">
+            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+              <div className="relative w-full max-w-[15rem] shrink">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search the tools"
+                  aria-label="Search the tools"
+                  className="w-full border-0 bg-white py-2 pl-9 pr-3 text-[16px] text-stone-900 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60"
+                />
+              </div>
+              <div className="shrink-0">
+                <StageControls tone="dark" />
+              </div>
             </div>
-            <div className="shrink-0">
-              <StageControls tone="dark" />
+            <div className="mt-4 text-center">
+              <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-[-0.016em] text-white md:text-5xl">
+                The Personal Finance Toolkit
+              </h1>
+              <p className="mx-auto mt-4 max-w-3xl text-[24px] leading-snug text-white/90 md:text-[30px]">
+                Interactive tools for teaching personal finance.
+              </p>
             </div>
           </div>
         </div>
@@ -352,7 +359,7 @@ export default function TeacherTraining() {
             >
               The Personal Finance Toolkit
             </h1>
-            <p className="mx-auto mt-4 max-w-3xl text-[22px] leading-snug text-white/90 md:text-[26px]">
+            <p className="mx-auto mt-4 max-w-3xl text-[24px] leading-snug text-white/90 md:text-[30px]">
               Interactive tools for teaching personal finance.
             </p>
             <div className="relative mx-auto mt-6 max-w-md">
