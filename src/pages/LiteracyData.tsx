@@ -82,6 +82,52 @@ function topOf(values: number[]): number {
   return Math.min(100, Math.ceil(Math.max(...values) / 10) * 10 + 10)
 }
 
+/*
+ * Category labels on the horizontal bar charts. The label column is 165px,
+ * and "College degree or more" and "Some college / associate" run past it at
+ * 15px, so a label over 19 characters goes onto two lines, split where the
+ * two come out most even, never starting a line with a slash.
+ */
+const WRAP_AT = 19
+
+function splitLabel(label: string): string[] {
+  if (label.length <= WRAP_AT) return [label]
+  const words = label.split(' ')
+  let best: string[] = [label]
+  let bestLongest = Infinity
+  for (let i = 1; i < words.length; i++) {
+    const second = words.slice(i).join(' ')
+    if (second.startsWith('/')) continue
+    const first = words.slice(0, i).join(' ')
+    const longest = Math.max(first.length, second.length)
+    /* On a tie the later split wins: "College degree / or more" keeps the
+       noun phrase together where "College / degree or more" does not. */
+    if (longest <= bestLongest) {
+      best = [first, second]
+      bestLongest = longest
+    }
+  }
+  return best
+}
+
+function CategoryTick({ x, y, payload }: { x?: number; y?: number; payload?: { value: string } }) {
+  const lines = splitLabel(String(payload?.value ?? ''))
+  const lineHeight = 17
+  return (
+    <text x={x} y={y} textAnchor="end" fontSize={15} fill="#666">
+      {lines.map((line, i) => (
+        <tspan
+          key={i}
+          x={x}
+          dy={i === 0 ? `${0.355 - ((lines.length - 1) * lineHeight) / 2 / 15}em` : lineHeight}
+        >
+          {line}
+        </tspan>
+      ))}
+    </text>
+  )
+}
+
 const GRID = <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
 
 /*
@@ -397,7 +443,7 @@ function BigThreeSection() {
                   <YAxis
                     type="category"
                     dataKey="group"
-                    tick={{ fontSize: 15 }}
+                    tick={<CategoryTick />}
                     tickLine={false}
                     axisLine={false}
                     width={165}
@@ -687,7 +733,7 @@ function DemographicSection() {
                     <YAxis
                       type="category"
                       dataKey="group"
-                      tick={{ fontSize: 15 }}
+                      tick={<CategoryTick />}
                       tickLine={false}
                       axisLine={false}
                       width={165}
