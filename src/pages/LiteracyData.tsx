@@ -449,7 +449,7 @@ function BigThreeSection() {
                     width={165}
                   />
                   <Tooltip formatter={(v) => `${Number(v)}%`} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
+                  <Bar dataKey="value" name="Answered all three correctly" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
                     <LabelList
                       dataKey="value"
                       position="right"
@@ -665,7 +665,7 @@ function AreaSection() {
                     <Tooltip formatter={(v) => `${Number(v)}%`} />
                     {/* Animation off so bars show fully in embeds, PNG downloads,
                         and prints that capture the first frame. */}
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive={false}>
+                    <Bar dataKey="value" name="Answered correctly in this area" radius={[6, 6, 0, 0]} isAnimationActive={false}>
                       {rows.map((_, i) => (
                         <Cell
                           key={i}
@@ -739,7 +739,7 @@ function DemographicSection() {
                       width={165}
                     />
                     <Tooltip formatter={(v) => `${Number(v)}%`} />
-                    <Bar dataKey="value" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
+                    <Bar dataKey="value" name="Share of the 28 questions answered correctly" fill="var(--accent)" radius={[0, 6, 6, 0]} isAnimationActive={false}>
                       <LabelList
                         dataKey="value"
                         position="right"
