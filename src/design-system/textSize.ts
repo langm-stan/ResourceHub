@@ -24,7 +24,7 @@ export const DEFAULT_SIZE: TextSize = 100
  * squinting; the sizes above this one are there for when that is still not
  * enough.
  */
-export const FULL_SCREEN_SIZE: TextSize = 150
+export const FULL_SCREEN_SIZE: TextSize = 125
 
 const KEY = 'ifdm-present'
 
