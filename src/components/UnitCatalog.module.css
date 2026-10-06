@@ -1,0 +1,321 @@
+/*
+ * The front page's unit cards (see UnitCatalog.tsx). Colour and spacing come
+ * from the tokens; the one departure from the rest of the site is the serif
+ * on unit names, which is the face Stanford's own identity uses.
+ */
+
+/* ---- The cards ---------------------------------------------------------- */
+
+.catalog {
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  /* The window is not the width: text size is a zoom on <main>, and the
+     page sits in an iframe as often as not. The cards size themselves from
+     the room this element really has. */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(var(--per-row), minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px clamp(12px, 1.5cqi, 18px) 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 3px solid var(--accent);
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-popover);
+  transform: translateY(-2px);
+}
+
+.card[data-open='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow-popover);
+}
+
+.card:has(button:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.unitFigure {
+  flex: none;
+  display: block;
+  width: 150px;
+  max-width: 48%;
+  height: auto;
+}
+
+.cardTitle {
+  /* Two lines held for every card, so a row keeps one height. */
+  flex: 1;
+  min-height: 2.24em;
+  font-family: var(--serif);
+  font-weight: 600;
+  /* Four across in the 880px iframe leaves about 160px for a name. */
+  font-size: clamp(17.5px, 2.05cqi, 23px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.cardTitle button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.cardTitle button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.cardTitle button:focus-visible {
+  outline: none;
+}
+
+.card:hover .cardTitle button,
+.card[data-open='true'] .cardTitle button {
+  color: var(--accent);
+}
+
+.chevron {
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.card[data-open='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+/* ---- A unit opened ----------------------------------------------------- */
+
+.stage {
+  grid-column: 1 / -1;
+  padding: 14px 24px 18px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 3px solid var(--accent);
+  box-shadow: var(--shadow-popover);
+  scroll-margin: 96px 0 24px;
+  animation: open var(--dur-med) var(--ease-out) both;
+}
+
+.stageHead {
+  /* The name is centred on the panel, with the way out set to one side. */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 0 clamp(0px, 9cqi, 110px) 10px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.stageTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(22px, 2.5cqi, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.stageTitle:focus {
+  outline: none;
+}
+
+.close {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.close:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.close:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.unitNo {
+  font-family: var(--ff-ui);
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tools {
+  --gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+  max-width: 1000px;
+  margin: 12px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tools li {
+  flex: 0 0 calc((100% - (var(--per-row) - 1) * var(--gap)) / var(--per-row));
+  max-width: 300px;
+}
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 12px 10px 12px;
+  border: 1px solid var(--border-hairline);
+  text-align: center;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+.tool:hover {
+  background: var(--surface-sunken);
+  border-color: var(--accent);
+}
+
+.toolMark {
+  flex: none;
+}
+
+.toolName {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.016em;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+.tool:hover .toolName {
+  color: var(--accent);
+}
+
+/* ---- Motion ------------------------------------------------------------ */
+
+/* Every drawn path is given pathLength 1, so one dash rule fits them all. */
+.draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.in .draw {
+  animation: draw var(--dur-draw) var(--ease-out) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .in .draw,
+  .stage {
+    animation: none;
+  }
+  .card,
+  .chevron {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
+
+/* ---- Narrow rooms ------------------------------------------------------ */
+
+@container (max-width: 560px) {
+  /* The way out drops under the name, where there is no room beside it. */
+  .stageHead {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 10px;
+  }
+  .close {
+    position: static;
+  }
+}

@@ -215,7 +215,7 @@ export default function TeacherTrainingShell({
               >
               {COURSE_UNITS.map((u, i) => {
                 // A unit with no tools yet stays in the list as a muted row,
-                // so the course numbering reads 1–10 without a gap.
+                // so the course numbering reads on without a gap.
                 if (u.tools.length === 0)
                   return (
                     <div

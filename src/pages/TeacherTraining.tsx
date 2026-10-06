@@ -1,20 +1,18 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronDown, Search } from 'lucide-react'
+import { ArrowRight, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
 import { useFullscreen } from '../components/FullscreenProvider'
 import { ExitFullScreenFooter, StageControls } from '../components/StageControls'
 import { ToolMark } from '../components/ToolMark'
+import { UnitCatalog } from '../components/UnitCatalog'
 import { useFramed } from '../hooks/useFramed'
-import styles from './TeacherTraining.module.css'
 
 /*
- * The Personal Finance Teaching Toolkit landing page: the fifteen units in
- * teaching order as one vertical list, each showing what is in it. Nothing is
- * folded away, because fifteen closed rows tell a first-time reader nothing
- * about the thirty tools behind them. Searching from the hero replaces the
- * list with the matching tools.
+ * The Personal Finance Teaching Toolkit landing page: the units in teaching
+ * order as cards (see UnitCatalog), each opening onto its tools. Searching
+ * from the banner replaces the cards with the matching tools.
  */
 
 interface SearchHit {
@@ -83,11 +81,19 @@ function searchEntry(tool: TrainingTool, badge: string, unitText: string): Searc
   }
 }
 
-const SEARCH_INDEX: SearchEntry[] = [
-  ...COURSE_UNITS.flatMap((u, i) =>
-    u.tools.map((t) => searchEntry(t, `Unit ${i + 1} · ${u.short}`, `unit ${i + 1} ${u.title} ${u.short}`)),
+/*
+ * The names of the topics combined into each unit stay searchable, so
+ * "FICO score" still finds its tool though no unit carries that name.
+ */
+const SEARCH_INDEX: SearchEntry[] = COURSE_UNITS.flatMap((u, i) =>
+  u.tools.map((t) =>
+    searchEntry(
+      t,
+      `Unit ${i + 1} · ${u.short}`,
+      `unit ${i + 1} ${u.title} ${u.short} ${u.topics.join(' ')}`,
+    ),
   ),
-]
+)
 
 function runSearch(query: string): SearchHit[] {
   const tokens = normalize(query).split(' ').filter(Boolean)
@@ -117,31 +123,7 @@ function runSearch(query: string): SearchHit[] {
 }
 
 /** One tool as a row: its name, its one-line description, and where it sits. */
-function ToolRow({
-  tool,
-  badge,
-  compact = false,
-}: {
-  tool: TrainingTool
-  badge?: string
-  /** The mark and the name alone, for the three-across row at the top. */
-  compact?: boolean
-}) {
-  if (compact)
-    return (
-      <Link
-        to={`/${tool.slug}`}
-        className="group flex items-center gap-2.5 px-3 py-2 transition-all hover:bg-white hover:shadow-card"
-      >
-        <span className="shrink-0">
-          <ToolMark slug={tool.slug} />
-        </span>
-        <span className="min-w-0 text-[18px] font-bold leading-snug tracking-[-0.016em] text-stone-900 transition-colors group-hover:text-cardinal">
-          {tool.label}
-        </span>
-      </Link>
-    )
-
+function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
   return (
     <Link
       to={`/${tool.slug}`}
@@ -171,118 +153,8 @@ function ToolRow({
   )
 }
 
-interface CatalogEntry {
-  id: string
-  title: string
-  description: string
-  tools: TrainingTool[]
-  /** Position in the course. */
-  number: number
-}
-
-/** The units in teaching order, numbered from one. */
-const CATALOG: CatalogEntry[] = COURSE_UNITS.map((u, i) => ({
-  id: u.id,
-  title: u.title,
-  description: u.description,
-  tools: u.tools,
-  number: i + 1,
-}))
-
-/*
- * One unit of the course, as a card that opens onto its tools. Folded, the
- * card is the unit's name alone, so the whole course fits on one screen;
- * open, it gives what the unit covers and lists its tools with what each one
- * does, the part a reader cannot guess from a name like "Your FICO Score".
- *
- * The first unit runs the full width, since its tools are the ones used
- * throughout the course rather than inside one topic. The rest sit two to a
- * row. The top card runs its tools across one line, however many there
- * are, the mark and the name alone: they are named plainly enough to need
- * no sentence each, and a description apiece would wrap to five lines in a
- * fraction of the width.
- */
-function UnitCard({
-  entry,
-  open,
-  onToggle,
-  wide = false,
-}: {
-  entry: CatalogEntry
-  open: boolean
-  onToggle: () => void
-  /** The card at the top, whose tools run across one row without descriptions. */
-  wide?: boolean
-}) {
-  const panelId = `unit-panel-${entry.id}`
-
-  return (
-    /* Square, with a hairline and a soft drop: the treatment Stanford's own
-       su-card uses on the Resource Hub pages this sits beside. */
-    <div className="overflow-hidden border border-stone-200 bg-white shadow-card">
-      <h2>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          aria-controls={panelId}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-stone-50"
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cardinal/10 text-[15px] font-bold text-cardinal">
-            {entry.number}
-          </span>
-          <span className="min-w-0 flex-1 text-[20px] font-bold leading-snug tracking-[-0.016em] text-stone-900">
-            {entry.title}
-          </span>
-          <ChevronDown
-            size={16}
-            className={`shrink-0 text-stone-400 transition-transform ${open ? 'rotate-180' : ''}`}
-          />
-        </button>
-      </h2>
-      {/* The panel stays in the document and hides, so the button's
-          aria-controls always resolves to a real element. */}
-      <div
-        id={panelId}
-        hidden={!open}
-        className="border-t border-stone-100 bg-stone-50/60 px-3 pb-2 pt-2"
-      >
-        <p className="px-3 pb-3 text-[17px] leading-relaxed text-stone-600">
-          {entry.description}
-        </p>
-        {entry.tools.length === 0 ? (
-          <p className="px-3 py-2 text-[17px] text-stone-500">
-            The tools for this unit are still being built.
-          </p>
-        ) : (
-          <div
-            className={
-              wide ? 'grid gap-1 sm:grid-cols-[repeat(var(--tools),auto)] sm:justify-between' : 'flex flex-col'
-            }
-            style={wide ? ({ '--tools': entry.tools.length } as CSSProperties) : undefined}
-          >
-            {entry.tools.map((tool) => (
-              <ToolRow key={tool.slug} tool={tool} compact={wide} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
-  /*
-   * One unit is open at a time, so the list never pushes itself past the
-   * frame, and opening a second closes the first. Clicking the open one
-   * closes it and leaves the course folded flat, which is a state worth
-   * being able to reach.
-   *
-   * Tools and Data starts open: its tools are the ones every other
-   * unit leans on.
-   */
-  const [openId, setOpenId] = useState<string | null>(CATALOG[0]?.id ?? null)
   const framed = useFramed()
   const { isFull } = useFullscreen()
 
@@ -298,10 +170,6 @@ export default function TeacherTraining() {
 
   const q = normalize(query)
   const hits = useMemo<SearchHit[] | null>(() => (q ? runSearch(q) : null), [q])
-
-  const toggle = (id: string) => setOpenId((current) => (current === id ? null : id))
-
-  const [lead, ...others] = CATALOG
 
   return (
     <div>
@@ -424,28 +292,7 @@ export default function TeacherTraining() {
             ) : (
               /* Nothing sits between the search box and the cards, so Tab from
                  the search lands on the first unit. */
-              <div className={`flex flex-col gap-3 ${styles.units}`}>
-                {lead && (
-                  <UnitCard
-                    entry={lead}
-                    open={openId === lead.id}
-                    onToggle={() => toggle(lead.id)}
-                    wide
-                  />
-                )}
-                {/* Two to a row, each card its own height, so opening one does
-                    not stretch the one beside it. */}
-                <div className={styles.grid}>
-                  {others.map((entry) => (
-                    <UnitCard
-                      key={entry.id}
-                      entry={entry}
-                      open={openId === entry.id}
-                      onToggle={() => toggle(entry.id)}
-                    />
-                  ))}
-                </div>
-              </div>
+              <UnitCatalog />
             )}
             <p className="mt-10 border-t border-stone-200 pt-5 text-[17px] leading-relaxed text-stone-600">
               To ask about the toolkit or tell us how you use it in your classroom, write to{' '}
