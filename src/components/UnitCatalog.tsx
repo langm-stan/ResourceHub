@@ -19,13 +19,15 @@ import styles from './UnitCatalog.module.css'
  * there is room, which includes the 880px iframe, then three, then one.
  */
 
-interface Entry {
+export interface Entry {
   unit: CourseUnit
   /** Position in the course, from one. */
   number: number
+  /** What the number counts: "Unit" unless a prototype says otherwise. */
+  kind?: string
 }
 
-const ENTRIES: Entry[] = COURSE_UNITS.map((unit, i) => ({ unit, number: i + 1 }))
+export const ENTRIES: Entry[] = COURSE_UNITS.map((unit, i) => ({ unit, number: i + 1 }))
 
 function UnitCard({
   entry,
@@ -39,7 +41,7 @@ function UnitCard({
   /** Position in the row, for staggering the figures as they draw. */
   order: number
 }) {
-  const { unit, number } = entry
+  const { unit, number, kind = 'Unit' } = entry
   const { tools } = unit
 
   return (
@@ -48,7 +50,9 @@ function UnitCard({
       data-open={open}
       style={{ '--stagger': `${order * 90}ms` } as CSSProperties}
     >
-      <span className={styles.unitNo}>Unit {number}</span>
+      <span className={styles.unitNo}>
+        {kind} {number}
+      </span>
       <h2 className={styles.cardTitle}>
         {/* The button is the title; its ::after covers the card, so the
             whole card is the target while the name stays the label. */}
@@ -75,7 +79,7 @@ function UnitCard({
 }
 
 /** The open unit's tools, under its row. */
-function OpenUnit({
+export function OpenUnit({
   entry,
   perRow,
   onClose,
@@ -85,7 +89,7 @@ function OpenUnit({
   perRow: number
   onClose: () => void
 }) {
-  const { unit, number } = entry
+  const { unit, number, kind = 'Unit' } = entry
   const { tools } = unit
   const heading = useRef<HTMLHeadingElement>(null)
   // The tools can sit below other cards, a long way in tab order from the
@@ -104,7 +108,10 @@ function OpenUnit({
     <section id="unit-open" className={styles.stage} aria-labelledby={`unit-open-${unit.id}`}>
       <header className={styles.stageHead}>
         <h2 ref={heading} id={`unit-open-${unit.id}`} tabIndex={-1} className={styles.stageTitle}>
-          <span className={styles.unitNo}>Unit {number}</span> {unit.title}
+          <span className={styles.unitNo}>
+            {kind} {number}
+          </span>{' '}
+          {unit.title}
         </h2>
         <button type="button" onClick={onClose} className={styles.close}>
           <X size={16} aria-hidden="true" />
@@ -127,15 +134,23 @@ function OpenUnit({
   )
 }
 
-export function UnitCatalog() {
+export function UnitCatalog({
+  entries = ENTRIES,
+  across = 5,
+}: {
+  /** The cards to show. The course's fifteen units unless a prototype passes its own. */
+  entries?: Entry[]
+  /** Cards in a row where there is room. */
+  across?: number
+} = {}) {
   const [openId, setOpenId] = useState<string | null>(null)
   const [ref, { width }] = useResizeObserver<HTMLDivElement>()
   // Before the first measurement the width reads zero; assume the wide case.
   // Fifteen units: five across and three down where there is room, which
   // includes the 880px iframe, then three across and five down, then one.
-  const perRow = width === 0 || width >= 760 ? 5 : width >= 460 ? 3 : 1
+  const perRow = width === 0 || width >= 760 ? across : width >= 460 ? Math.min(across, 3) : 1
   const rows: Entry[][] = []
-  for (let i = 0; i < ENTRIES.length; i += perRow) rows.push(ENTRIES.slice(i, i + perRow))
+  for (let i = 0; i < entries.length; i += perRow) rows.push(entries.slice(i, i + perRow))
 
   // Closing puts focus back on the unit that was open.
   const lastOpen = useRef<string | null>(null)

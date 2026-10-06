@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
 import { COURSE_UNITS, type TrainingTool } from '../data/teacherTraining'
 import ResourceHubNav from '../components/ResourceHubNav'
@@ -7,6 +7,7 @@ import { useFullscreen } from '../components/FullscreenProvider'
 import { ExitFullScreenFooter, StageControls } from '../components/StageControls'
 import { ToolMark } from '../components/ToolMark'
 import { UnitCatalog } from '../components/UnitCatalog'
+import { EIGHT_ENTRIES, TopicCatalog } from '../components/TopicCatalog'
 import { useFramed } from '../hooks/useFramed'
 
 /*
@@ -156,6 +157,14 @@ function ToolRow({ tool, badge }: { tool: TrainingTool; badge?: string }) {
 export default function TeacherTraining() {
   const [query, setQuery] = useState('')
   const framed = useFramed()
+  // Prototypes: /?layout=topics, /?layout=eight and /?layout=eight-cards
+  // show other groupings in place of the fifteen unit cards (see
+  // TopicCatalog). Everything else on
+  // the page is the same.
+  const [searchParams] = useSearchParams()
+  const layout = searchParams.get('layout')
+  const preview = layout === 'topics' || layout === 'eight' ? layout : null
+  const eightCards = layout === 'eight-cards'
   const { isFull } = useFullscreen()
 
   // A distinct document title for the course overview (WCAG 2.4.2).
@@ -292,7 +301,13 @@ export default function TeacherTraining() {
             ) : (
               /* Nothing sits between the search box and the cards, so Tab from
                  the search lands on the first unit. */
-              <UnitCatalog />
+              preview ? (
+                <TopicCatalog layout={preview} />
+              ) : eightCards ? (
+                <UnitCatalog entries={EIGHT_ENTRIES} across={4} />
+              ) : (
+                <UnitCatalog />
+              )
             )}
             <p className="mt-10 border-t border-stone-200 pt-5 text-center text-[17px] leading-relaxed text-stone-600">
               To ask about the toolkit or tell us how you use it in your classroom, write to{' '}

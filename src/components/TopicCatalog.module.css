@@ -1,0 +1,160 @@
+/*
+ * The topic cards (see TopicCatalog.tsx): the same paper, rule and serif as
+ * the unit cards, at a size that leaves room for three unit names each.
+ */
+
+.catalog {
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* A short last row (two cards under three) sits in the middle. */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.card {
+  flex: 0 0 calc((100% - 16px * (var(--per-row) - 1)) / var(--per-row));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px clamp(10px, 1.2cqi, 18px) 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 3px solid var(--accent);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+/* The topic's figure only: the unit rows carry small icons of their own. */
+.card > svg {
+  width: 150px;
+  max-width: 70%;
+  height: auto;
+}
+
+.cardNo {
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title {
+  /* Two lines held for every card, so the unit lists start level. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.3em;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(19px, 1.9cqi, 25px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.units {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 6px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border-hairline);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+
+.unit:last-child {
+  border-bottom: 0;
+}
+
+.unit:hover {
+  background: var(--surface-sunken);
+}
+
+.unit:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.unit[aria-expanded='true'] {
+  background: var(--accent);
+}
+
+.unitNo {
+  flex: none;
+  width: 1.5em;
+  font-size: 13.5px;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.unitName {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(14.5px, 1.25cqi, 17px);
+  font-weight: var(--fw-medium);
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.unit:hover .unitIcon {
+  color: var(--accent);
+}
+
+.unit:hover .unitName {
+  color: var(--accent);
+}
+
+.unitIcon {
+  flex: none;
+  color: var(--text-faint);
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.unit[aria-expanded='true'] .unitNo,
+.unit[aria-expanded='true'] .unitName,
+.unit[aria-expanded='true'] .unitIcon {
+  color: var(--text-on-accent);
+}
+
+.unit[aria-expanded='true'] .unitIcon {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unit,
+  .unitIcon {
+    transition: none;
+  }
+}
