@@ -103,7 +103,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           ))}
         </div>
 
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Coupon rate (the rate when you bought)"
             value={coupon}

@@ -67,7 +67,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
         <p className={styles.lede}>
           Use the defaults or numbers from real listings. Nothing down on either loan.
         </p>
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
             <Slider
               label="Price new"
               value={price}

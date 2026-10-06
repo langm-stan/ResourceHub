@@ -99,6 +99,18 @@ textarea {
    changing font sizes alone would cause. Above 100% it reads from across a
    room; below it, more fits on screen. PresentationToggle sets the attribute
    on <html>; targeting <main> leaves the Stanford header and footer alone. */
+/*
+ * A band of fields: the row of sliders, button groups and selects across the
+ * top of a tool. Every field in a band is laid on the same three rows (its
+ * label, its control, its note), so the labels sit level and so do the
+ * controls, however many lines one label runs to. The fields take the rows
+ * through subgrid (see the design-system field components); anything else in
+ * the band simply spans all three.
+ */
+.fieldBand > * {
+  grid-row: span 3;
+}
+
 html[data-present='75'] main {
   zoom: 0.75;
 }

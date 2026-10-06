@@ -35,58 +35,60 @@ export function ParameterPanel({ scenario, onChange }: ParameterPanelProps) {
   const isPv = scenario.mode === 'pv'
 
   return (
-    <div className={styles.panel}>
-      <SegmentedControl
-        label="Solve for"
-        options={MODE_OPTIONS}
-        value={scenario.mode}
-        onChange={(mode) =>
-          onChange({ mode, contribution: mode === 'pv' ? null : scenario.contribution })
-        }
-      />
+    <div className={styles.root}>
+      <div className={`${styles.panel} fieldBand`}>
+        <SegmentedControl
+          label="Solve for"
+          options={MODE_OPTIONS}
+          value={scenario.mode}
+          onChange={(mode) =>
+            onChange({ mode, contribution: mode === 'pv' ? null : scenario.contribution })
+          }
+        />
 
-      <Slider
-        label={isPv ? 'Future amount' : 'Initial amount'}
-        value={scenario.principal}
-        onChange={(principal) => onChange({ principal })}
-        min={0}
-        max={100_000}
-        step={500}
-        editable
-        inputMax={Number.MAX_SAFE_INTEGER}
-        prefix="$"
-      />
-      <Slider
-        label="Annual rate"
-        value={scenario.ratePct}
-        onChange={(ratePct) => onChange({ ratePct })}
-        min={0}
-        max={20}
-        step={0.1}
-        editable
-        inputMax={40}
-        suffix="%"
-        precision={1}
-        note={earNote}
-      />
-      <Slider
-        label={isPv ? 'Time until paid' : 'Time horizon'}
-        value={scenario.years}
-        onChange={(years) => onChange({ years })}
-        min={1}
-        max={60}
-        step={1}
-        editable
-        inputMax={100}
-        suffix="years"
-      />
+        <Slider
+          label={isPv ? 'Future amount' : 'Initial amount'}
+          value={scenario.principal}
+          onChange={(principal) => onChange({ principal })}
+          min={0}
+          max={100_000}
+          step={500}
+          editable
+          inputMax={Number.MAX_SAFE_INTEGER}
+          prefix="$"
+        />
+        <Slider
+          label="Annual rate"
+          value={scenario.ratePct}
+          onChange={(ratePct) => onChange({ ratePct })}
+          min={0}
+          max={20}
+          step={0.1}
+          editable
+          inputMax={40}
+          suffix="%"
+          precision={1}
+          note={earNote}
+        />
+        <Slider
+          label={isPv ? 'Time until paid' : 'Time horizon'}
+          value={scenario.years}
+          onChange={(years) => onChange({ years })}
+          min={1}
+          max={60}
+          step={1}
+          editable
+          inputMax={100}
+          suffix="years"
+        />
 
-      <SegmentedControl
-        label="Compounding"
-        options={FREQ_OPTIONS}
-        value={scenario.frequency}
-        onChange={(frequency) => onChange({ frequency })}
-      />
+        <SegmentedControl
+          label="Compounding"
+          options={FREQ_OPTIONS}
+          value={scenario.frequency}
+          onChange={(frequency) => onChange({ frequency })}
+        />
+      </div>
 
       {!isPv && (
         <div className={styles.contrib}>

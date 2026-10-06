@@ -66,7 +66,7 @@ function AccountTaxation() {
         taxable account is taxed going in and on every year&rsquo;s returns, the traditional
         401(k) once at withdrawal, the Roth once going in.
       </p>
-      <div className={styles.controlsRow}>
+      <div className={`${styles.controlsRow} fieldBand`}>
         <Slider
           label="Contribution per year"
           value={earn}
@@ -258,7 +258,7 @@ function EmployerMatching() {
         The employer adds 50 cents (or a dollar) for each dollar you contribute, on the first{' '}
         {pct(MATCH_CAP)} of salary.
       </p>
-      <div className={styles.controlsRow}>
+      <div className={`${styles.controlsRow} fieldBand`}>
         <Slider label="Salary" value={salary} onChange={setSalary} min={25000} max={150000} step={1000} editable prefix="$" inputMax={500_000} />
         <Slider
           label="Your contribution"
@@ -444,7 +444,7 @@ at {pct(retiredPct / 100, 1)} growth in retirement.
                 </>
               }
             />
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Retirement income goal"
             value={income}
@@ -495,7 +495,7 @@ annual price of the same target from every starting age.
                 </>
               }
             />
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Age saving starts"
             value={startAge}
@@ -594,7 +594,7 @@ annual price of the same target from every starting age.
                 </>
               }
             />
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Actual return while saving"
             value={actualPct}

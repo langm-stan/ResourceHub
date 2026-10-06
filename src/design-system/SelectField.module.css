@@ -11,6 +11,10 @@
   letter-spacing: 0.12em;
   color: var(--text-faint);
   font-weight: var(--fw-medium);
+  /* Level with the labels of the fields beside it (see tokens.css). */
+  display: flex;
+  align-items: center;
+  min-height: var(--field-label-line);
 }
 
 .selectWrap {
@@ -48,4 +52,24 @@
   pointer-events: none;
   color: var(--text-faint);
   font-size: var(--fs-ui);
+}
+
+/* In a band of fields the three parts take the band's shared rows (see
+   .fieldBand in toolkitBase.css). */
+:global(.fieldBand) > .field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  row-gap: var(--space-2);
+}
+:global(.fieldBand) > .field > * {
+  grid-row: 3;
+}
+:global(.fieldBand) > .field > .label {
+  grid-row: 1;
+  align-self: end;
+}
+:global(.fieldBand) > .field > .selectWrap {
+  grid-row: 2;
+  align-self: start;
 }

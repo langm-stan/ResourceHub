@@ -141,7 +141,7 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
         </div>
 
         <Card tone="raised" className={styles.panel}>
-          <div className={styles.controls}>
+          <div className={`${styles.controls} fieldBand`}>
             <Slider
               label="Years in the program"
               value={inputs.programYears}
@@ -212,14 +212,14 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
               precision={1}
               note="What the money could earn elsewhere."
             />
-            <div className={styles.controlsSplit}>
-              <SegmentedControl
-                label="Tuition is paid at the"
-                options={TIMING}
-                value={inputs.costTiming}
-                onChange={(costTiming) => set({ costTiming })}
-              />
-            </div>
+          </div>
+          <div className={styles.controlsSplit}>
+            <SegmentedControl
+              label="Tuition is paid at the"
+              options={TIMING}
+              value={inputs.costTiming}
+              onChange={(costTiming) => set({ costTiming })}
+            />
           </div>
         </Card>
 

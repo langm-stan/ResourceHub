@@ -94,6 +94,9 @@
   --space-8: 64px;
   --space-9: 96px;
   --baseline: 28px;
+  /* The line a field's label sits on, as tall as a slider's typed input, so
+     labels and the controls under them sit level across a row of fields. */
+  --field-label-line: 34px;
 
   --content-max: 1200px;
   --rail-width: 320px;

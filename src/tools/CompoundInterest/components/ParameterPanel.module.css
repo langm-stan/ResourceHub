@@ -1,22 +1,78 @@
-/* Controls flow horizontally across the top band and wrap as needed. */
+/*
+ * The band of controls across the top of the tool.
+ *
+ * The columns are set outright for each width rather than left to auto-fit.
+ * Five controls in an auto-fit grid leave an empty track at the right at
+ * some widths and wrap one control alone at others; counted columns fill the
+ * row at every width. Compounding, with six options, is the last control and
+ * takes whatever the others leave, so its options sit on one line.
+ *
+ * The widths are the band's own (a container query), since text size is a
+ * zoom on <main> and the page sits in an iframe as often as not.
+ */
+.root {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4) var(--space-5);
   align-items: start;
 }
 
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+/* Two across: the four short controls in two rows, Compounding under them. */
+@container (min-width: 560px) {
+  .panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .panel > :last-child {
+    grid-column: 1 / -1;
+  }
 }
 
-/* Contributions take a full row of their own beneath the main controls,
-   with the toggle, the amount, and the timing side by side, so switching
-   them on widens the band rather than adding a tall column at the left. */
+/* Three across: Compounding fills the second row beside the time horizon. */
+@container (min-width: 840px) {
+  .panel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .panel > :last-child {
+    grid-column: span 2;
+  }
+}
+
+/* Four across, Compounding on a row of its own. */
+@container (min-width: 1080px) {
+  .panel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .panel > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Everything on one row. */
+@container (min-width: 1680px) {
+  .panel {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .panel > :last-child {
+    grid-column: span 2;
+  }
+}
+
+/* The columns here are wide enough for every label to keep to one line. */
+.panel label {
+  white-space: nowrap;
+}
+
+/* Contributions take a row of their own beneath the main controls, with the
+   toggle, the amount, and the timing side by side. They sit outside the grid
+   above: a full-width row inside it would keep its empty tracks open. */
 .contrib {
-  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-4) var(--space-5);

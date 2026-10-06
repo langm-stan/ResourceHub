@@ -137,7 +137,7 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           ))}
         </div>
 
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Face value"
             value={face}

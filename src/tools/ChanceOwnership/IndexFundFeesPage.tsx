@@ -35,7 +35,7 @@ function IndexFund() {
         The same monthly amount goes into a fund holding all 500 companies and compounds over
         decades. The remaining variable is the fund's <strong>expense ratio</strong>.
       </p>
-      <div className={styles.slidersRowWide}>
+      <div className={`${styles.slidersRowWide} fieldBand`}>
         <Slider
           label="Invested per month"
           value={monthly}

@@ -209,7 +209,7 @@ export function InsurancePage({ intro = true }: { intro?: boolean } = {}) {
             />
           ))}
         </div>
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Chance of the loss this year"
             value={lossChancePct}

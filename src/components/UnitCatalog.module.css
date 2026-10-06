@@ -28,10 +28,13 @@
 
 .card {
   position: relative;
+  /* Everything on the card sits on its centre line. */
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
   padding: 12px clamp(12px, 1.5cqi, 18px) 12px;
+  text-align: center;
   background: var(--surface-raised);
   border: 1px solid var(--border-hairline);
   border-top: 3px solid var(--accent);
@@ -59,9 +62,10 @@
 
 .cardFoot {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
 }
 
 .count {
@@ -78,13 +82,17 @@
   flex: none;
   display: block;
   width: 150px;
-  max-width: 48%;
+  max-width: 80%;
   height: auto;
 }
 
 .cardTitle {
-  /* Two lines held for every card, so a row keeps one height. */
+  /* Two lines held for every card, so a row keeps one height. The name
+     sits in the middle of the room it is given. */
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 2.24em;
   font-family: var(--serif);
   font-weight: 600;
@@ -101,7 +109,8 @@
   background: none;
   font: inherit;
   letter-spacing: inherit;
-  text-align: left;
+  text-align: center;
+  text-wrap: balance;
   color: var(--text-primary);
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-standard);

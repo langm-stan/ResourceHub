@@ -112,7 +112,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
             choice.
           </p>
 
-          <div className={styles.controlsRow}>
+          <div className={`${styles.controlsRow} fieldBand`}>
             <Slider
               label="After-tax income"
               value={income}
@@ -146,7 +146,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
               plain
             />
           </div>
-          <div className={styles.controlsRow}>
+          <div className={`${styles.controlsRow} fieldBand`}>
             <SegmentedControl
               label="Savings in retirement"
               options={[

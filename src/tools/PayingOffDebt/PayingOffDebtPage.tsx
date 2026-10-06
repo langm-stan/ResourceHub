@@ -165,7 +165,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           value={mode}
           onChange={setMode}
         />
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider label="Amount borrowed" value={pv} onChange={setPv} min={500} max={100000} step={500} editable prefix="$" />
           <Slider
             label="Interest rate (APR)"

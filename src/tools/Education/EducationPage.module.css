@@ -58,8 +58,11 @@
   gap: var(--space-4) var(--space-5);
   align-items: start;
 }
+/* A row of its own under the band. It sits outside the grid above: a
+   full-width row inside it would keep the grid's empty tracks open and
+   leave a gap at the right. */
 .controlsSplit {
-  grid-column: 1 / -1;
+  margin-top: var(--space-4);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: var(--space-4) var(--space-5);

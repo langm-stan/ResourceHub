@@ -108,7 +108,7 @@ export function TaxPage({ intro = true }: { intro?: boolean } = {}) {
 
       <Card tone="raised" className={styles.controls}>
         <StepHeader title="Your situation" />
-        <div className={styles.controlsGrid}>
+        <div className={`${styles.controlsGrid} fieldBand`}>
           <NumberField label="Income (wages, $/yr)" value={gross} onChange={setGross} min={0} max={2_000_000} prefix="$" precision={0} />
           <SegmentedControl
             label="Filing status"

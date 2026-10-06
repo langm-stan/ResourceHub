@@ -18,6 +18,7 @@ export function TvmParameters({
   return (
     // One compact row: every number is a slider with a typed input beside it.
     <div
+      className="fieldBand"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',

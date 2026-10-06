@@ -294,7 +294,7 @@ export default function TeacherTraining() {
                  the search lands on the first unit. */
               <UnitCatalog />
             )}
-            <p className="mt-10 border-t border-stone-200 pt-5 text-[17px] leading-relaxed text-stone-600">
+            <p className="mt-10 border-t border-stone-200 pt-5 text-center text-[17px] leading-relaxed text-stone-600">
               To ask about the toolkit or tell us how you use it in your classroom, write to{' '}
               <a
                 href="mailto:stanfordifdm@stanford.edu"

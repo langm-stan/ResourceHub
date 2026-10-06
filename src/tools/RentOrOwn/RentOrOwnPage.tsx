@@ -69,7 +69,7 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
           Set the price, the rent for the same home, the down payment, and the mortgage rate,
           from real listings and rate quotes when you can.
         </p>
-        <div className={styles.controlsRow}>
+        <div className={`${styles.controlsRow} fieldBand`}>
           <Slider
             label="Home price"
             value={price}

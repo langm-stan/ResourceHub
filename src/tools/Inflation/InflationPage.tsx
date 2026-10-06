@@ -146,7 +146,7 @@ export function InflationPage({ intro = true }: { intro?: boolean } = {}) {
         <aside className={styles.rail}>
           <div className={styles.railSticky}>
             <StepHeader title="Set up your scenario" />
-            <div className={styles.controlsRow}>
+            <div className={`${styles.controlsRow} fieldBand`}>
               <NumberField
                 label="Today's price"
                 value={price}

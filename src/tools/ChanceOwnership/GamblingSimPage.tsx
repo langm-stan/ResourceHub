@@ -113,7 +113,7 @@ function BettingStation() {
         />
         <Button onClick={() => setSeed((s) => s + 1)}>Re-run 1,000 players</Button>
       </div>
-      <div className={styles.slidersRow}>
+      <div className={`${styles.slidersRow} fieldBand`}>
         <Slider label="Starting amount" value={start} onChange={setStart} min={100} max={10000} step={100} editable prefix="$" />
         <Slider label="Bet size" value={stake} onChange={setStake} min={1} max={500} step={1} editable prefix="$" />
         <Slider label="Number of bets" value={bets} onChange={setBets} min={10} max={1000} step={10} editable inputMax={10000} />

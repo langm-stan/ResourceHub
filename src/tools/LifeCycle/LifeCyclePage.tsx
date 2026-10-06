@@ -94,7 +94,7 @@ export function LifeCyclePage({ intro = true }: { intro?: boolean } = {}) {
             Reset to defaults
           </Button>
         </div>
-        <div className={styles.controlsGrid}>
+        <div className={`${styles.controlsGrid} fieldBand`}>
           <Slider
             label="Start working at age"
             value={state.startAge}

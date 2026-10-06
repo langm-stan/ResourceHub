@@ -7,7 +7,10 @@
 .top {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  /* Centred on one shared line (see tokens.css), so a slider's label sits
+     level with the label of a button group or a select beside it. */
+  align-items: center;
+  min-height: var(--field-label-line);
   gap: var(--space-3);
 }
 
@@ -116,4 +119,24 @@
 }
 .range:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+/* In a band of fields the three parts take the band's shared rows (see
+   .fieldBand in toolkitBase.css). */
+:global(.fieldBand) > .field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  row-gap: var(--space-2);
+}
+:global(.fieldBand) > .field > * {
+  grid-row: 3;
+}
+:global(.fieldBand) > .field > .top {
+  grid-row: 1;
+  align-self: end;
+}
+:global(.fieldBand) > .field > .range {
+  grid-row: 2;
+  align-self: start;
 }

@@ -87,7 +87,7 @@ export function GamblingPage({ intro = true }: { intro?: boolean } = {}) {
             Reset to defaults
           </Button>
         </div>
-        <div className={styles.controlsGrid}>
+        <div className={`${styles.controlsGrid} fieldBand`}>
           <NumberField
             label="Money at stake ($/week)"
             value={weekly}

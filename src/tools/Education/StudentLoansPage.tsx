@@ -112,7 +112,7 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
         </div>
 
         <Card tone="raised" className={styles.panel}>
-          <div className={styles.controls}>
+          <div className={`${styles.controls} fieldBand`}>
             <Slider
               label="Amount borrowed"
               value={inputs.principal}

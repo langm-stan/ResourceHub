@@ -166,7 +166,7 @@ export function StocksBondsContent({ figure = 'Figure 1.' }: { figure?: string }
         title="Stocks and bonds by holding period"
         hint={`Every rolling window of market history, drawn at the year it ends. The start year sets the chart's left edge; each window still looks back its full length. Lengthen the window and the stock line settles down.`}
       />
-      <div className={styles.rollingControls}>
+      <div className={`${styles.rollingControls} fieldBand`}>
         <Slider
           label="Start year"
           value={start}
