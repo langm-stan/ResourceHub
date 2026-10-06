@@ -23,6 +23,7 @@
     "d3-shape": "^3.2.0",
     "katex": "^0.17.0",
     "lucide-react": "^1.22.0",
+    "pptxgenjs": "^4.0.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

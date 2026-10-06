@@ -84,6 +84,12 @@ interface ChartFrameProps {
    * PNG together with the caption, so the exported figure stands alone.
    */
   exportStats?: ExportStat[]
+  /**
+   * Opens the expanded view from outside the chart: each time this number
+   * changes to a new value above zero, the chart opens as if its expand
+   * button had been pressed.
+   */
+  expandSignal?: number
   children: ReactNode
 }
 
@@ -141,6 +147,7 @@ export function ChartFrame({
   expandable = true,
   overlayHeader,
   exportStats,
+  expandSignal,
   children,
 }: ChartFrameProps) {
   const [expanded, setExpanded] = useState(false)
@@ -151,6 +158,11 @@ export function ChartFrame({
     setShownTitle(nameOf())
     setExpanded(true)
   }
+
+  useEffect(() => {
+    if (expandSignal) expand()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandSignal])
 
   const download = () => {
     const svg = shellRef.current?.querySelector('svg')

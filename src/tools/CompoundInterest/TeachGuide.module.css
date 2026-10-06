@@ -1,0 +1,923 @@
+/*
+ * The teaching guide (see TeachGuide.tsx). Written for a projector and for a
+ * teacher who is not at home on a computer: large type, one step on screen,
+ * one clearly marked thing to press.
+ */
+
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.top {
+  scroll-margin-top: 96px;
+}
+
+.summary {
+  max-width: 60ch;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ---- The five steps, as a row ------------------------------------------ */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepTab {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 4px solid var(--border-strong);
+  text-align: center;
+  cursor: pointer;
+}
+
+.stepTab:hover {
+  border-top-color: var(--accent);
+}
+
+.stepTab:focus-visible,
+.setUp:focus-visible,
+.next:focus-visible,
+.back:focus-visible,
+.revealButton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.stepTab[data-done='true'] {
+  border-top-color: var(--accent);
+}
+
+.stepTab[aria-current='step'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.stepNo {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-wash);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stepName {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.stepTab[aria-current='step'] .stepNo {
+  background: var(--text-on-accent);
+}
+
+.stepTab[aria-current='step'] .stepName {
+  color: var(--text-on-accent);
+}
+
+/* ---- The step on screen ------------------------------------------------ */
+
+.card {
+  padding: 28px 28px 24px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 4px solid var(--accent);
+  box-shadow: var(--shadow-card);
+}
+
+.stepCount {
+  text-align: center;
+  font-size: 15px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.stepTitle {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+.lead {
+  max-width: 60ch;
+  margin: 14px auto 0;
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.part {
+  margin-top: 24px;
+}
+
+.partLabel {
+  text-align: center;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* Centred, so a short paragraph leaves the same room on both sides
+   instead of an open stretch at the right. */
+.partBody {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 1.375rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.partBody p {
+  max-width: 62ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+.partBody p + p {
+  margin-top: 0.5em;
+}
+
+/* A sentence to a line: the reading-width cap comes off, so a sentence
+   wraps only where the step itself is too narrow for it. */
+.lines p {
+  max-width: none;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.choices li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 12px;
+  border: 1px solid var(--border-strong);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.choices span {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  font-size: 18px;
+  color: var(--text-on-accent);
+}
+
+.revealButton {
+  padding: 10px 22px;
+  background: none;
+  border: 2px dashed var(--border-strong);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.revealButton:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.result {
+  margin-top: 22px;
+}
+
+.resultButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 14px;
+}
+
+.seeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-on-accent);
+  cursor: pointer;
+}
+
+.seeButton:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+
+.seeButton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.result .answer {
+  margin-top: 14px;
+}
+
+.answer {
+  padding: 14px 18px;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent);
+}
+
+/* ---- The three examples in step 3 -------------------------------------- */
+
+.examples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+/* Two problems: narrower, so the pair sits in the middle of the step. */
+.examplesTwo {
+  grid-template-columns: repeat(2, minmax(0, 320px));
+  justify-content: center;
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-top: 4px solid var(--border-strong);
+  text-align: center;
+  cursor: pointer;
+}
+
+.example:hover {
+  border-top-color: var(--accent);
+}
+
+.example:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.example[aria-expanded='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.exampleTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+.example[aria-expanded='true'] .stepNo {
+  background: var(--text-on-accent);
+}
+
+.example[aria-expanded='true'] .exampleTitle {
+  color: var(--text-on-accent);
+}
+
+.examplePanel {
+  margin-top: 14px;
+  padding: 4px 24px 24px;
+  border: 1px solid var(--border-strong);
+  border-top: 4px solid var(--accent);
+  animation: openExample var(--dur-med) var(--ease-out) both;
+}
+
+@keyframes openExample {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .examplePanel {
+    animation: none;
+  }
+}
+
+/* ---- The problems in step 4 -------------------------------------------- */
+
+.tries {
+  display: grid;
+  /* Three across in the 880px iframe, so no try is left alone on a row. */
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.try {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--border-strong);
+}
+
+.try .part {
+  margin-top: 16px;
+}
+
+.try .partBody {
+  font-size: 1.125rem;
+}
+
+.tryTitle {
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.setUp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 16px;
+  background: var(--accent);
+  border: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-on-accent);
+  cursor: pointer;
+}
+
+.setUp:hover {
+  background: var(--accent-soft);
+}
+
+/* ---- The slides -------------------------------------------------------- */
+
+.slideFrame {
+  margin: 0;
+}
+
+/* The preview and its expand button, which sits at the corner as on a chart. */
+.slideShell {
+  position: relative;
+  cursor: zoom-in;
+}
+
+.slideExpand {
+  position: absolute;
+  top: 12px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.slideExpand:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.slideExpand:focus-visible,
+.slideClose:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slideShell:hover .slide {
+  border-color: var(--accent);
+}
+
+.slideOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--c-ink) 55%, transparent);
+}
+
+.slideOverlayPanel {
+  position: relative;
+  /* As large as the screen allows at slide proportions. */
+  width: min(1500px, 96vw, calc((100vh - 120px) * 16 / 9));
+  box-shadow: var(--shadow-popover);
+}
+
+.slideClose {
+  position: absolute;
+  top: 20px;
+  right: 14px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Under the open slide: back, where you are, forward. */
+.slideNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 10px 0 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-top: 0;
+}
+
+.slideArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.slideArrow:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.slideArrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.slideArrow:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slideCount {
+  min-width: 7.5em;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.slideClose:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.slide {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 5% 5%;
+  text-align: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-top: 8px solid var(--accent);
+  container-type: inline-size;
+}
+
+.slideTitle {
+  /* No floor on the sizes in a slide: the same slide is drawn large in step
+     1 and as a small preview in the other steps. */
+  font-size: min(4.6cqi, 52px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+
+.slideBody {
+  font-size: min(2.9cqi, 32px);
+  line-height: 1.4;
+}
+
+.slideTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.slideTable th,
+.slideTable td {
+  padding: 0.35em 0.4em;
+  border-bottom: 1px solid var(--border-strong);
+  text-align: center;
+  font-weight: 400;
+}
+
+.slideTable thead th {
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/*
+ * Sized from the slide's width so each sentence keeps to one line. The note
+ * is as wide as its longer sentence and is centred on the slide by its own
+ * midpoint, so it can run past the slide's side padding and still sit evenly
+ * between the edges. 3.2cqi is the most at which that sentence fits.
+ */
+/* Named through the slide so these win over the step's paragraph rules,
+   whose centring margins would otherwise push a short note off centre. */
+.slide .slideNote {
+  position: relative;
+  left: 50%;
+  width: max-content;
+  max-width: none;
+  margin: 0.8em 0 0;
+  transform: translateX(-50%);
+  font-size: min(3.2cqi, 44px);
+  line-height: 1.45;
+  letter-spacing: -0.012em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.slideNote span {
+  display: block;
+  white-space: nowrap;
+}
+
+.formula {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.slideLine + .slideLine {
+  margin-top: 0.45em;
+}
+
+.slideChoices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.4cqi;
+  margin: 1.1em 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slideChoices li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4cqi;
+  padding: 1.8cqi 1cqi;
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}
+
+.slideChoices span {
+  flex: none;
+  width: 2.1em;
+  height: 2.1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  font-size: 0.72em;
+  color: var(--text-on-accent);
+}
+
+/* A step's slides: a toggle, then the previews side by side and centred. */
+.stepSlides {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-hairline);
+  text-align: center;
+}
+
+.slidesToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid var(--border-strong);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.slidesToggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.slidesToggle:focus-visible,
+.slidesLink button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.slidesChevron {
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.slidesToggle[aria-expanded='true'] .slidesChevron {
+  transform: rotate(180deg);
+}
+
+.slidesSmall {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+/* A little larger than a thumbnail: up to 400px each, or as wide as fits
+   the step's slides on one row. */
+.slidesSmall .slideFrame {
+  width: min(400px, calc((100% - 16px * (var(--slides) - 1)) / var(--slides)));
+  min-width: 220px;
+}
+
+.slidesSmall .slide {
+  border-top-width: 5px;
+}
+
+.slidesLink {
+  margin-top: 14px;
+}
+
+.slidesLink button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.download {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.downloadButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  background: var(--surface-raised);
+  border: 2px solid var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.downloadButton:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.downloadButton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.downloadButton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.downloadNote {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.slideCaption {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--text-faint);
+}
+
+/* ---- Back and next ----------------------------------------------------- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* The first step has no way back, so its one button sits in the middle. */
+.nav > span:empty {
+  display: none;
+}
+
+.nav:has(> span:empty) {
+  justify-content: center;
+}
+
+.next,
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 28px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.next {
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  color: var(--text-on-accent);
+}
+
+.next:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+
+.back {
+  background: none;
+  border: 2px solid var(--border-strong);
+  color: var(--text-primary);
+}
+
+.back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---- The tool ---------------------------------------------------------- */
+
+.tool {
+  scroll-margin-top: 96px;
+}
+
+.toolLabel {
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.toolCard {
+  padding: 22px 26px 18px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-card);
+}
+
+.toolBand {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  align-items: start;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.toolStats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-5) var(--space-7);
+  align-items: baseline;
+  margin-bottom: var(--space-5);
+}
+
+.toolLabel span {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ---- Narrow rooms ------------------------------------------------------ */
+
+@media (max-width: 700px) {
+  .steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .stepName {
+    font-size: 13px;
+  }
+  .card {
+    padding: 20px 16px;
+  }
+  .choices,
+  .examples,
+  .examplesTwo,
+  .toolBand {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* A phone is too narrow for a sentence to a line at any readable size. */
+  .slide .slideNote {
+    position: static;
+    width: auto;
+    transform: none;
+  }
+  .slideNote span {
+    white-space: normal;
+  }
+  .next,
+  .back {
+    padding: 14px 16px;
+    font-size: 1.05rem;
+  }
+}

@@ -12,6 +12,7 @@ import { BigThreeStoriesContent } from './BigThreeStories'
 import { LITERACY_DATA_INTRO, LiteracyDataContent } from './LiteracyData'
 import FinancialStatements from './FinancialStatements'
 import { CompoundInterestPage } from '../tools/CompoundInterest/CompoundInterestPage'
+import { CompoundInterestGuide } from '../tools/CompoundInterest/TeachGuide'
 import { InflationPage } from '../tools/Inflation/InflationPage'
 import { TvmPage } from '../tools/Tvm/TvmPage'
 import { TvmCalculatorPage } from '../tools/Tvm/TvmCalculatorPage'
@@ -51,6 +52,8 @@ interface SectionConfig {
   toolkit?: boolean
   /** Embed pointers for the instructor bar. Omitted for pages that are not embeddable tools. */
   instructor?: { label: string; route?: string; toolKey?: string; path?: string }
+  /** The slug of this tool's teaching guide, where it has one. */
+  guide?: string
   content: ReactNode
 }
 
@@ -82,7 +85,14 @@ const SECTIONS: Record<string, SectionConfig> = {
     title: 'Compound Interest Scenario',
     toolkit: true,
     instructor: { label: 'Compound Interest', path: 'compound-interest' },
+    guide: 'compound-interest/teach',
     content: <CompoundInterestPage intro={false} />,
+  },
+  'compound-interest/teach': {
+    title: 'Teaching Compound Interest',
+    intro: 'A lesson plan for the classroom, with the tool built in.',
+    toolkit: true,
+    content: <CompoundInterestGuide />,
   },
   inflation: {
     title: 'The Effect of Inflation',
@@ -267,7 +277,7 @@ export default function TeacherTrainingSection({ slug }: { slug: keyof typeof SE
         </>
       )}
       {section.instructor && (
-        <InstructorBar toolLabel={section.instructor.label} />
+        <InstructorBar toolLabel={section.instructor.label} guide={section.guide} />
       )}
     </TeacherTrainingShell>
   )

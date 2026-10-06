@@ -29,17 +29,29 @@ interface GrowthChartProps {
   results: Results
   /** Headline stats to repeat above the chart in the expanded view. */
   overlayHeader?: ReactNode
+  /** The chart's name in the expanded view, where no heading above supplies it. */
+  title?: string
+  /** Opens the expanded view from outside (see ChartFrame). */
+  expandSignal?: number
 }
 
-export function GrowthChart({ scenario, results, overlayHeader }: GrowthChartProps) {
+export function GrowthChart({ scenario, results, overlayHeader, title, expandSignal }: GrowthChartProps) {
   if (results.mode === 'pv') {
     return <PvChart scenario={scenario} results={results} overlayHeader={overlayHeader} />
   }
-  return <FvChart scenario={scenario} results={results} overlayHeader={overlayHeader} />
+  return (
+    <FvChart
+      scenario={scenario}
+      results={results}
+      overlayHeader={overlayHeader}
+      title={title}
+      expandSignal={expandSignal}
+    />
+  )
 }
 
 /* ---- Future-value growth: three stacked teaching bands ----------------- */
-function FvChart({ scenario, results, overlayHeader }: GrowthChartProps) {
+function FvChart({ scenario, results, overlayHeader, title, expandSignal }: GrowthChartProps) {
   const data = results.series
   const maxY = results.final.balance || 1
 
@@ -66,6 +78,8 @@ function FvChart({ scenario, results, overlayHeader }: GrowthChartProps) {
       caption={caption}
       overlayHeader={overlayHeader}
       exportStats={exportStats}
+      title={title}
+      expandSignal={expandSignal}
       ariaLabel="Stacked area chart of account growth decomposed into principal, simple interest, and interest on interest"
     >
       <FvInner data={data} maxY={maxY} years={scenario.years} results={results} />

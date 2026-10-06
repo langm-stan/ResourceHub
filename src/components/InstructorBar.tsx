@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+
 /*
  * Classroom notes for a tool page.
  *
@@ -9,7 +12,14 @@
  * each chart, both of which stay inside the frame.
  */
 
-export default function InstructorBar({ toolLabel }: { toolLabel: string }) {
+export default function InstructorBar({
+  toolLabel,
+  guide,
+}: {
+  toolLabel: string
+  /** The slug of the tool's teaching guide, where it has one. */
+  guide?: string
+}) {
   return (
     <div className="mt-10 rounded-xl border border-stone-200 bg-white p-5">
       <p className="text-[13px] font-semibold uppercase tracking-widest text-stone-400 mb-1.5">
@@ -20,6 +30,15 @@ export default function InstructorBar({ toolLabel }: { toolLabel: string }) {
         to fit more on screen. Each chart has an expand button for full width, and downloads as a
         PNG for a slide.
       </p>
+      {guide && (
+        <Link
+          to={`/${guide}`}
+          className="mt-4 inline-flex items-center gap-2 bg-cardinal px-5 py-3 text-[17px] font-bold text-white hover:bg-cardinal/90"
+        >
+          Teach this in class: a step-by-step guide
+          <ArrowRight size={18} aria-hidden="true" />
+        </Link>
+      )}
     </div>
   )
 }
