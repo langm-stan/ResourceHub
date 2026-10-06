@@ -16,7 +16,7 @@
   flex-direction: column;
   gap: 14px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -33,7 +33,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 12px clamp(12px, 1.5cqi, 18px) 12px;
+  padding: 12px clamp(10px, 1.3cqi, 18px) 12px;
   text-align: center;
   background: var(--surface-raised);
   border: 1px solid var(--border-hairline);
@@ -96,8 +96,8 @@
   min-height: 2.24em;
   font-family: var(--serif);
   font-weight: 600;
-  /* Four across in the 880px iframe leaves about 160px for a name. */
-  font-size: clamp(17.5px, 2.05cqi, 23px);
+  /* Five across in the 880px iframe leaves about 130px for a name. */
+  font-size: clamp(15.5px, 1.75cqi, 21px);
   line-height: 1.12;
   letter-spacing: -0.01em;
   text-wrap: balance;

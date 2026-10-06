@@ -1,5 +1,5 @@
 /*
- * The Personal Finance Teaching Toolkit: the eight units of the personal
+ * The Personal Finance Teaching Toolkit: the fifteen units of the personal
  * finance course and the tools each unit uses, in teaching order. This
  * drives the landing page, the section shell's sidebar, the banner's sibling
  * tools and the previous and next links, so they can never drift apart.
@@ -26,7 +26,7 @@ export interface CourseUnit {
   tools: TrainingTool[]
   /** The key of the small figure on the unit's card (see UnitFigure). */
   figure: string
-  /** The names of the topics combined into this unit, kept searchable. */
+  /** Other names the unit should be found by in search. Empty for now. */
   topics: string[]
 }
 
@@ -39,13 +39,7 @@ interface Topic {
   tools: TrainingTool[]
 }
 
-/**
- * The course outline's fifteen topics in teaching order, each with its
- * tools. Until October 2026 each of these was a unit of its own. Seven of
- * them hold a single tool, which is not much of a unit, so they are combined
- * into the eight units of COURSE_UNITS below. New tools still go here, under
- * their topic.
- */
+/** The course outline's fifteen topics in teaching order, each with its tools. */
 const TOPICS: Topic[] = [
   {
     id: 'basic-tools',
@@ -371,94 +365,17 @@ const TOPICS: Topic[] = [
   },
 ]
 
-/** How the topics combine into units. */
-const UNIT_PLAN: {
-  id: string
-  title: string
-  short: string
-  description: string
-  topics: string[]
-  figure: string
-}[] = [
-  {
-    id: 'data',
-    title: 'Tools and Data',
-    short: 'Tools and Data',
-    description: 'Used throughout the course rather than inside one topic.',
-    topics: ['basic-tools'],
-    figure: 'basic-tools',
-  },
-  {
-    id: 'basics',
-    title: 'Basics of Personal Finance',
-    short: 'The Basics',
-    description: 'Compound interest, inflation, the time value of money, the balance sheet, and the budget.',
-    topics: ['basics', 'budgeting'],
-    figure: 'basics',
-  },
-  {
-    id: 'saving-debt',
-    title: 'Saving, Debt and Credit',
-    short: 'Saving & Debt',
-    description: 'Saving and borrowing over a lifetime, the cost of a loan, and the credit score.',
-    topics: ['savings-decisions', 'debt', 'fico'],
-    figure: 'savings-decisions',
-  },
-  {
-    id: 'purchases',
-    title: 'Major Purchases: Car, House and Education',
-    short: 'Major Purchases',
-    description: 'Financing a car, buying or renting a home, and paying for education.',
-    topics: ['car', 'home', 'education'],
-    figure: 'home',
-  },
-  {
-    id: 'markets',
-    title: 'Investing: Bonds, Stocks and Mutual Funds',
-    short: 'Bonds & Stocks',
-    description: 'Returns and risk for stocks and bonds, diversification, and fees.',
-    topics: ['markets'],
-    figure: 'markets',
-  },
-  {
-    id: 'special-topics',
-    title: 'Special Topics: Gambling, Bitcoin and Crypto',
-    short: 'Special Topics',
-    description: 'Betting and crypto: the odds, the prices, and how each compares with investing.',
-    topics: ['special-topics'],
-    figure: 'special-topics',
-  },
-  {
-    id: 'taxes',
-    title: 'Taxes and Employer Benefits',
-    short: 'Taxes & Benefits',
-    description: 'How income is taxed, how retirement accounts are taxed, and what an employer match is worth.',
-    topics: ['taxes', 'employer-benefits'],
-    figure: 'taxes',
-  },
-  {
-    id: 'retirement',
-    title: 'Insurance and Retirement',
-    short: 'Insurance & Retirement',
-    description: 'How insurance works, and how much to save for retirement.',
-    topics: ['insurance', 'retirement'],
-    figure: 'retirement',
-  },
-]
-
-/** The course's eight units in teaching order. */
-export const COURSE_UNITS: CourseUnit[] = UNIT_PLAN.map((plan) => {
-  const topics = plan.topics.flatMap((id) => TOPICS.find((t) => t.id === id) ?? [])
-  return {
-    id: plan.id,
-    title: plan.title,
-    short: plan.short,
-    description: plan.description,
-    tools: topics.flatMap((t) => t.tools),
-    figure: plan.figure,
-    topics: topics.flatMap((t) => [t.title, t.short]),
-  }
-})
+/**
+ * The course's fifteen units in teaching order, one for each topic of the
+ * course outline. For a day in October 2026 the seven single-tool topics were
+ * combined with their neighbours into eight units; the director asked for the
+ * fifteen back.
+ */
+export const COURSE_UNITS: CourseUnit[] = TOPICS.map((topic) => ({
+  ...topic,
+  figure: topic.id,
+  topics: [],
+}))
 
 /** The unit a section page belongs to ('big-three/quiz' matches 'big-three'). */
 export function unitForSlug(slug: string): CourseUnit | undefined {

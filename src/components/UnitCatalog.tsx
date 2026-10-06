@@ -15,8 +15,8 @@ import styles from './UnitCatalog.module.css'
  * time, and pressing it again closes it.
  *
  * The same component serves the full site, the IFDM iframe and a filled
- * screen. It lays out from the width it is given: four cards across where
- * there is room, which includes the 880px iframe, then two, then one.
+ * screen. It lays out from the width it is given: five cards across where
+ * there is room, which includes the 880px iframe, then three, then one.
  */
 
 interface Entry {
@@ -66,7 +66,7 @@ function UnitCard({
       <span className={styles.cardFoot}>
         <UnitFigure id={unit.figure} />
         <span className={styles.count}>
-          {tools.length} tools
+          {tools.length === 1 ? '1 tool' : `${tools.length} tools`}
           <ChevronDown size={16} aria-hidden="true" className={styles.chevron} />
         </span>
       </span>
@@ -98,7 +98,7 @@ function OpenUnit({
 
   // Up to four tools sit in one row; five or six break into rows of three,
   // so the block stays centred and even either way.
-  const toolsPerRow = Math.min(tools.length <= 4 ? tools.length : 3, Math.max(perRow, 2))
+  const toolsPerRow = perRow === 1 ? 1 : Math.min(tools.length <= 4 ? tools.length : 3, perRow)
 
   return (
     <section id="unit-open" className={styles.stage} aria-labelledby={`unit-open-${unit.id}`}>
@@ -131,7 +131,9 @@ export function UnitCatalog() {
   const [openId, setOpenId] = useState<string | null>(null)
   const [ref, { width }] = useResizeObserver<HTMLDivElement>()
   // Before the first measurement the width reads zero; assume the wide case.
-  const perRow = width === 0 || width >= 800 ? 4 : width >= 420 ? 2 : 1
+  // Fifteen units: five across and three down where there is room, which
+  // includes the 880px iframe, then three across and five down, then one.
+  const perRow = width === 0 || width >= 760 ? 5 : width >= 460 ? 3 : 1
   const rows: Entry[][] = []
   for (let i = 0; i < ENTRIES.length; i += perRow) rows.push(ENTRIES.slice(i, i + perRow))
 
