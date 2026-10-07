@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { onPhone, useAppView } from '../hooks/useAppView'
+import { useFullscreen } from './FullscreenProvider'
 
 /*
  * The top of the app view (see useAppView): the Stanford wordmark and the
@@ -6,6 +8,17 @@ import { Link } from 'react-router-dom'
  * for its own name, with the toolkit's mark at the far side. The whole band
  * leads back to the list of tools.
  */
+/*
+ * The band wherever the app view is on, and also on a phone that has filled
+ * its screen from inside the IFDM site's iframe, which is the same sight
+ * reached another way.
+ */
+export function AppHeaderSlot() {
+  const appView = useAppView()
+  const { isFull } = useFullscreen()
+  return appView || (isFull && onPhone) ? <AppHeader /> : null
+}
+
 export default function AppHeader() {
   return (
     <header className="border-b border-stone-200 bg-white">

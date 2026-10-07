@@ -31,12 +31,31 @@ import styles from './StageControls.module.css'
  * button is a link instead: it replaces the host page with the toolkit on
  * its own, already in the app view, and Exit there goes back to the IFDM
  * page. The app itself is always in the app view and has no button.
+ *
+ * Where the phone's browser does offer real full screen (Android; an iPhone
+ * does not), the button takes it as well, which is the only way a web page
+ * can be rid of the browser's address bar. Inside the iframe that fills the
+ * screen in place, with no need to leave the IFDM page at all.
  */
 function PhoneExpandButton({ tone }: { tone: 'light' | 'dark' }) {
   const expanded = usePhoneExpanded()
   const framed = useFramed()
   const { pathname } = useLocation()
+  const { isFull, canFullscreen, enter, exit, toggle } = useFullscreen()
   if (isNativeApp) return null
+  if (inIframe && (canFullscreen || isFull)) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
+        title={isFull ? 'Back to the page' : 'Fill the screen'}
+      >
+        {isFull ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+        {isFull ? 'Exit' : 'Expand'}
+      </button>
+    )
+  }
   if (inIframe) {
     return (
       <a
@@ -55,8 +74,14 @@ function PhoneExpandButton({ tone }: { tone: 'light' | 'dark' }) {
     <button
       type="button"
       onClick={() => {
-        if (expanded && cameFromHost) exitToHost()
-        else setPhoneExpanded(!expanded)
+        if (expanded && cameFromHost) {
+          exitToHost()
+          return
+        }
+        setPhoneExpanded(!expanded)
+        // Straight out of the tap, while the browser still counts it as one.
+        if (expanded) exit()
+        else if (canFullscreen) enter()
       }}
       className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
       title={
@@ -75,7 +100,7 @@ function PhoneExpandButton({ tone }: { tone: 'light' | 'dark' }) {
 
 export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const { isFull, canFullscreen, toggle } = useFullscreen()
-  const showFill = isFull || !onPhone
+  const showFill = !onPhone
 
   return (
     <div className={styles.group}>
@@ -92,7 +117,7 @@ export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
         Text size
       </span>
       <PresentationToggle tone={tone} />
-      {onPhone && !isFull && <PhoneExpandButton tone={tone} />}
+      {onPhone && <PhoneExpandButton tone={tone} />}
       {showFill && (
         <button
           type="button"

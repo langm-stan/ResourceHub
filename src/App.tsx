@@ -2,10 +2,9 @@ import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import AppHeader from './components/AppHeader'
+import { AppHeaderSlot } from './components/AppHeader'
 import { FullscreenProvider } from './components/FullscreenProvider'
 import { useFramed } from './hooks/useFramed'
-import { useAppView } from './hooks/useAppView'
 import { useSafariTabStops } from './hooks/useSafariTabStops'
 
 /*
@@ -65,9 +64,6 @@ function App() {
   // ?frame=1 (see useFramed) drops the header and footer too: the host
   // page on ifdm.stanford.edu provides both around the iframe.
   const framed = useFramed()
-  // The app, and a phone's browser after Expand, put the Stanford lockup
-  // above the framed page (see useAppView).
-  const appView = useAppView()
   // Put every control back in Safari's tab sequence (see the hook).
   useSafariTabStops()
   useFocusMainOnNavigation()
@@ -83,7 +79,7 @@ function App() {
             keyboard visitor gets the same way past it. The embed view has no
             chrome at all, but the link costs nothing and stays consistent. */}
         <SkipLink />
-        {appView && !embed && <AppHeader />}
+        {!embed && <AppHeaderSlot />}
         <main id="main" tabIndex={-1} className="outline-none">
           <Outlet />
         </main>

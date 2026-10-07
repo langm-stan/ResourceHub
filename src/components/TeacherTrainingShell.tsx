@@ -10,6 +10,7 @@ import ResourceHubNav from './ResourceHubNav'
 import { useFullscreen } from './FullscreenProvider'
 import { ExitFullScreenFooter, StageControls } from './StageControls'
 import { useFramed } from '../hooks/useFramed'
+import { onPhone } from '../hooks/useAppView'
 
 /*
  * The teaching toolkit counterpart to ResourceHubShell, styled to match the
@@ -127,10 +128,11 @@ export default function TeacherTrainingShell({
       {showBar && (
         <div ref={bar} className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
           {/* Filled, the band keeps its contents clear of the top edge, where
-              a browser's own toolbar slides down over them. */}
+              a browser's own toolbar slides down over them. A phone's browser
+              has no such toolbar, and no height to give away. */}
           <div
             className={`max-w-[1680px] mx-auto flex items-center gap-2 px-3 sm:gap-3 sm:px-4 ${
-              isFull ? 'pb-2 pt-8' : 'py-2'
+              isFull && !onPhone ? 'pb-2 pt-8' : 'py-2'
             }`}
           >
             <Link

@@ -15,6 +15,7 @@ import {
   setTextSize,
   subscribeTextSize,
 } from '../design-system'
+import { onPhone } from '../hooks/useAppView'
 import styles from './FullscreenProvider.module.css'
 
 /*
@@ -97,6 +98,8 @@ export function FullscreenProvider({
   }
   useEffect(() => {
     if (isFull) {
+      // A phone filling its own screen is one reader, not a room.
+      if (onPhone) return
       if (getTextSize() >= FULL_SCREEN_SIZE) return
       sizeBeforeFull.current = getTextSize()
       moveSize(FULL_SCREEN_SIZE)
