@@ -129,7 +129,7 @@ export default function TeacherTrainingShell({
           {/* Filled, the band keeps its contents clear of the top edge, where
               a browser's own toolbar slides down over them. */}
           <div
-            className={`max-w-[1680px] mx-auto flex items-center gap-3 px-4 ${
+            className={`max-w-[1680px] mx-auto flex items-center gap-2 px-3 sm:gap-3 sm:px-4 ${
               isFull ? 'pb-2 pt-8' : 'py-2'
             }`}
           >

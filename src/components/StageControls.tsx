@@ -1,7 +1,16 @@
 import { Maximize2, Minimize2 } from 'lucide-react'
 import { PresentationToggle } from '../design-system'
 import { useFramed } from '../hooks/useFramed'
-import { onPhone, setPhoneExpanded, usePhoneExpanded } from '../hooks/useAppView'
+import { useLocation } from 'react-router-dom'
+import {
+  cameFromHost,
+  exitToHost,
+  inIframe,
+  onPhone,
+  setPhoneExpanded,
+  standaloneAppUrl,
+  usePhoneExpanded,
+} from '../hooks/useAppView'
 import { isNativeApp } from '../lib/nativeApp'
 import { useFullscreen } from './FullscreenProvider'
 import styles from './StageControls.module.css'
@@ -18,20 +27,45 @@ import styles from './StageControls.module.css'
  * helps there is losing the IFDM site's header and footer, so on a phone the
  * button opens the app view instead (see useAppView) and closes it again.
  *
- * It is left out where there is nothing for it to do: in the app itself,
- * which is always in that view, and inside the IFDM site's iframe, where the
- * host page owns the chrome.
+ * Inside the IFDM site's iframe the page cannot grow past its frame, so the
+ * button is a link instead: it replaces the host page with the toolkit on
+ * its own, already in the app view, and Exit there goes back to the IFDM
+ * page. The app itself is always in the app view and has no button.
  */
 function PhoneExpandButton({ tone }: { tone: 'light' | 'dark' }) {
   const expanded = usePhoneExpanded()
   const framed = useFramed()
-  if (isNativeApp || (framed && !expanded)) return null
+  const { pathname } = useLocation()
+  if (isNativeApp) return null
+  if (inIframe) {
+    return (
+      <a
+        href={standaloneAppUrl(pathname)}
+        target="_top"
+        className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
+        title="Open the toolkit on its own, outside this page"
+      >
+        <Maximize2 size={14} />
+        Expand
+      </a>
+    )
+  }
+  if (framed && !expanded) return null
   return (
     <button
       type="button"
-      onClick={() => setPhoneExpanded(!expanded)}
+      onClick={() => {
+        if (expanded && cameFromHost) exitToHost()
+        else setPhoneExpanded(!expanded)
+      }}
       className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
-      title={expanded ? 'Back to the full site' : 'Show the toolkit on its own'}
+      title={
+        expanded
+          ? cameFromHost
+            ? 'Back to the IFDM site'
+            : 'Back to the full site'
+          : 'Show the toolkit on its own'
+      }
     >
       {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
       {expanded ? 'Exit' : 'Expand'}

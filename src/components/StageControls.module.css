@@ -25,6 +25,8 @@
   font-family: var(--ff-ui);
   font-size: var(--fs-caption);
   white-space: nowrap;
+  /* The button is a link where it leads out of an iframe. */
+  text-decoration: none;
   transition:
     color var(--dur-fast) var(--ease-standard),
     border-color var(--dur-fast) var(--ease-standard),
@@ -78,4 +80,16 @@
   color: var(--accent);
   border-color: var(--accent);
   background: var(--surface-sunken);
+}
+
+/* A phone's bar holds the way back, the size control and this button on one
+   row with nothing to spare, so the button gives up some of its padding. */
+@media (max-width: 480px) {
+  .group {
+    gap: 6px;
+  }
+  .button {
+    gap: 4px;
+    padding: 0 9px;
+  }
 }
