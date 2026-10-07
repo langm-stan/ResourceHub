@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Download, Maximize2, X } from 'lucide-react'
 import { ruleOf72 } from '../../lib/finance'
+import { isNativeApp, saveFile } from '../../lib/nativeApp'
 import { formatUSD, formatUSDWhole, formatYears } from '../../lib/format'
 import { Slider, Stat } from '../../design-system'
 import { GrowthChart } from './components/GrowthChart'
@@ -304,6 +305,11 @@ export async function buildDeck() {
 /** Writes the deck to a file and hands it to the browser to save. */
 async function downloadDeck() {
   const pptx = await buildDeck()
+  if (isNativeApp) {
+    const blob = (await pptx.write({ outputType: 'blob' })) as Blob
+    await saveFile(blob, 'Compound interest lesson.pptx')
+    return
+  }
   await pptx.writeFile({ fileName: 'Compound interest lesson.pptx' })
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { area as d3area, line as d3line, curveMonotoneX } from 'd3-shape'
 import type { ScaleLinear } from 'd3-scale'
@@ -51,13 +51,28 @@ export function AxisBottom({
   ticks?: number
   format: (v: number) => string
 }) {
-  const { innerHeight } = useChart()
-  const values = x.ticks(ticks)
+  const { innerHeight, innerWidth, margin } = useChart()
+  // On a narrow chart the labels run into each other ("8y10y12y"). Drop
+  // every other tick until the widest label has room; 7px a character is
+  // close enough at the axis type size.
+  let values = x.ticks(ticks)
+  const room = Math.max(...values.map((v) => format(v).length), 1) * 7 + 10
+  while (values.length > 2 && Math.abs(x(values[1]) - x(values[0])) < room) {
+    values = values.filter((_, i) => i % 2 === 0)
+  }
   return (
     <g className={styles.axis} aria-hidden="true">
       <line x1={0} x2={x.range()[1]} y1={innerHeight} y2={innerHeight} className={styles.axisLine} />
       {values.map((v) => (
-        <text key={v} x={x(v)} y={innerHeight + 20} textAnchor="middle" className={styles.tickLabel}>
+        <text
+          key={v}
+          // A long last label ("200 bets") is centred on the plot's edge and
+          // would run off the chart; it stops at the edge instead.
+          x={Math.min(x(v), innerWidth + margin.right - (format(v).length * 7) / 2 - 2)}
+          y={innerHeight + 20}
+          textAnchor="middle"
+          className={styles.tickLabel}
+        >
           {format(v)}
         </text>
       ))}
@@ -165,13 +180,21 @@ export function Annotation({
   align?: 'start' | 'middle' | 'end'
   tone?: 'ink' | 'mark' | 'accent'
 }) {
+  // Keep the label on the chart. On a phone-width plot a long note centred
+  // near either side would be cut off, so it slides in just far enough.
+  const { innerWidth, margin } = useChart()
+  const w = label.length * 6.8
+  const before = align === 'middle' ? w / 2 : align === 'end' ? w : 0
+  const lo = -margin.left + 4 + before
+  const hi = innerWidth + margin.right - 4 - (w - before)
+  const lx = hi < lo ? x + dx : Math.max(lo, Math.min(hi, x + dx))
   const toneClass =
     tone === 'mark' ? styles.annMark : tone === 'accent' ? styles.annAccent : styles.annInk
   return (
     <g className={`${styles.annotation} ${toneClass}`}>
       <line x1={x} y1={y} x2={x + dx} y2={y + dy} className={styles.leader} />
       <circle cx={x} cy={y} r={3} className={styles.annDot} />
-      <text x={x + dx} y={y + dy - 6} textAnchor={align} className={styles.annLabel}>
+      <text x={lx} y={y + dy - 6} textAnchor={align} className={styles.annLabel}>
         {label}
       </text>
     </g>
@@ -196,8 +219,17 @@ export function Legend({
   y?: number
   gap?: number
 }) {
+  const { narrow, reserveLegend, margin } = useChart()
+  // A phone-width plot has no empty corner to spare, so the key moves to a
+  // strip of its own above the plot, which the frame makes room for.
+  const rows = items.length
+  useEffect(() => {
+    reserveLegend(rows * gap + 10)
+    return () => reserveLegend(0)
+  }, [reserveLegend, rows, gap])
+  const origin = narrow ? `translate(${14 - margin.left}, ${14 - margin.top})` : `translate(${x}, ${y})`
   return (
-    <g transform={`translate(${x}, ${y})`}>
+    <g transform={origin}>
       {items.map((it, i) => (
         <g key={it.label} transform={`translate(0, ${i * gap})`}>
           <rect
@@ -227,13 +259,20 @@ export function VMarker({
   xScale: Scale
   label?: string
 }) {
-  const { innerHeight } = useChart()
+  const { innerHeight, innerWidth, margin } = useChart()
   const px = xScale(x)
+  const fits = px + 5 + (label?.length ?? 0) * 6.8 <= innerWidth + margin.right - 2
   return (
     <g className={styles.marker}>
       <line x1={px} x2={px} y1={0} y2={innerHeight} className={styles.markerLine} />
       {label && (
-        <text x={px + 5} y={12} className={styles.markerLabel}>
+        <text
+          // Flip to the left of the line when the label would run off the right edge.
+          x={fits ? px + 5 : px - 5}
+          y={12}
+          textAnchor={fits ? 'start' : 'end'}
+          className={styles.markerLabel}
+        >
           {label}
         </text>
       )}

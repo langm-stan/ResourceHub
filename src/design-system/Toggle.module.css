@@ -53,3 +53,13 @@
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+/* On a touch screen the switch keeps its size and takes taps from the
+   space around it as well. */
+@media (pointer: coarse) {
+  .track::before {
+    content: '';
+    position: absolute;
+    inset: -11px -4px;
+  }
+}

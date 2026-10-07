@@ -89,6 +89,10 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
+  /* Air above an in-page bar that sticks while the page scrolls (a tool's
+     tab strip, a side rail). A phone has none to spare, so it sits flush
+     under the app's own bar, whose height the shell publishes as --bar-h. */
+  --sticky-gap: var(--space-5);
   --space-6: 32px;
   --space-7: 48px;
   --space-8: 64px;
@@ -190,4 +194,10 @@
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.45);
   --shadow-popover: 0 4px 10px rgba(0, 0, 0, 0.5), 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --sticky-gap: 0px;
+  }
 }

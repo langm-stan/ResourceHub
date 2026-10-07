@@ -41,6 +41,11 @@
   border-color: var(--accent);
 }
 
+/* The wrapper is there for touch screens (below); with a mouse it is not a box at all. */
+.tools {
+  display: contents;
+}
+
 /* The PNG-download control sits just left of the expand control. */
 .downloadBtn {
   right: calc(var(--space-3) + 38px);
@@ -176,4 +181,101 @@
   font-size: var(--fs-h3, 1.35rem);
   font-weight: var(--fw-semibold);
   color: var(--text-primary);
+}
+
+/*
+ * Touch screens. Nothing hovers, so the two controls would never appear:
+ * they move into a row above the chart, always shown and finger-sized.
+ */
+@media (hover: none) {
+  .canvasShell {
+    display: flex;
+    flex-direction: column;
+  }
+  .tools {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    order: -1;
+    margin-bottom: var(--space-2);
+  }
+  .expandBtn,
+  .downloadBtn {
+    position: static;
+    opacity: 1;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/*
+ * A phone, held either way (the same query as PHONE_QUERY in ChartFrame.tsx).
+ * The expanded chart is the whole screen: no dimmed margin, no rounded panel,
+ * and the chart takes every pixel the title, stats and caption leave.
+ */
+.canvasFill {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+.canvasFill .svg {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+@media (max-width: 640px), (max-height: 520px) and (pointer: coarse) {
+  .overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+  .overlayPanel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--space-4);
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  }
+  .overlayTitle {
+    margin-bottom: var(--space-3);
+    font-size: 1.25rem;
+  }
+  .overlayHeader {
+    margin-bottom: var(--space-3);
+    padding-right: 0;
+  }
+  .overlayCanvas {
+    flex: 1;
+    min-height: 220px;
+    display: flex;
+  }
+  .closeBtn {
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Held sideways there is no height to spare: the chart and its name only. */
+@media (max-height: 520px) and (pointer: coarse) {
+  .overlayPanel {
+    padding: var(--space-3);
+  }
+  .overlayTitle {
+    margin-bottom: var(--space-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .overlayHeader,
+  .overlayPanel .caption {
+    display: none;
+  }
+  .overlayCanvas {
+    min-height: 0;
+  }
 }

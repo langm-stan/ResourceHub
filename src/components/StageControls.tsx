@@ -1,6 +1,8 @@
 import { Maximize2, Minimize2 } from 'lucide-react'
 import { PresentationToggle } from '../design-system'
 import { useFramed } from '../hooks/useFramed'
+import { onPhone, setPhoneExpanded, usePhoneExpanded } from '../hooks/useAppView'
+import { isNativeApp } from '../lib/nativeApp'
 import { useFullscreen } from './FullscreenProvider'
 import styles from './StageControls.module.css'
 
@@ -11,16 +13,31 @@ import styles from './StageControls.module.css'
  */
 
 /*
- * Left out on a phone. There the button can at best fill a small screen that
- * is already full, and inside an iframe it only fills the frame and steps the
- * text up, which is what the size control beside it already does. A phone is
- * a touch screen whose short side is under 600px, in either orientation;
- * tablets and computers keep the button.
+ * A phone has no full screen to give (an iPhone's browser offers none), and
+ * filling a small screen that is already full only steps the text up. What
+ * helps there is losing the IFDM site's header and footer, so on a phone the
+ * button opens the app view instead (see useAppView) and closes it again.
+ *
+ * It is left out where there is nothing for it to do: in the app itself,
+ * which is always in that view, and inside the IFDM site's iframe, where the
+ * host page owns the chrome.
  */
-const onPhone =
-  typeof window !== 'undefined' &&
-  window.matchMedia?.('(pointer: coarse)').matches === true &&
-  Math.min(window.screen.width, window.screen.height) < 600
+function PhoneExpandButton({ tone }: { tone: 'light' | 'dark' }) {
+  const expanded = usePhoneExpanded()
+  const framed = useFramed()
+  if (isNativeApp || (framed && !expanded)) return null
+  return (
+    <button
+      type="button"
+      onClick={() => setPhoneExpanded(!expanded)}
+      className={`${styles.button} ${tone === 'dark' ? styles.dark : ''}`}
+      title={expanded ? 'Back to the full site' : 'Show the toolkit on its own'}
+    >
+      {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+      {expanded ? 'Exit' : 'Expand'}
+    </button>
+  )
+}
 
 export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const { isFull, canFullscreen, toggle } = useFullscreen()
@@ -41,6 +58,7 @@ export function StageControls({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
         Text size
       </span>
       <PresentationToggle tone={tone} />
+      {onPhone && !isFull && <PhoneExpandButton tone={tone} />}
       {showFill && (
         <button
           type="button"

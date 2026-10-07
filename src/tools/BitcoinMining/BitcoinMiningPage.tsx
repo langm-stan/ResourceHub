@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
+import { saveWorkbook } from '../../lib/exportExcel'
 import '@fontsource/source-serif-4/700.css'
 import '@fontsource/source-sans-3/400.css'
 import '@fontsource/source-sans-3/600.css'
@@ -298,7 +299,7 @@ function MiningCard() {
     const wsMove = XLSX.utils.aoa_to_sheet(data.movement)
     wsMove['!cols'] = [{ wch: 18 }, ...data.movement[0]!.slice(1).map(() => ({ wch: 10 }))]
     XLSX.utils.book_append_sheet(wb, wsMove, 'Movement')
-    XLSX.writeFile(wb, `ifdm-bitcoin-mining-${new Date().toISOString().slice(0, 10)}.xlsx`)
+    saveWorkbook(wb, `ifdm-bitcoin-mining-${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
   return (

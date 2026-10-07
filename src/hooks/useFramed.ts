@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { useAppView } from './useAppView'
 
 /*
  * Framed mode: the toolkit inside an <iframe> on ifdm.stanford.edu, where the
@@ -10,6 +11,10 @@ import { useLocation } from 'react-router-dom'
  * carry query strings, so the choice is remembered for the tab in
  * sessionStorage; the iframe has its own storage, so a visitor's other tabs
  * on the toolkit are unaffected.
+ *
+ * The app view (the iPhone and iPad app, and a phone's browser after Expand;
+ * see useAppView) is framed too: it has its own top band, and the IFDM site
+ * navigation would only lead out of it.
  *
  * Distinct from ?embed=1, which strips a single tool bare (no banner) for a
  * slide or a course page.
@@ -38,6 +43,11 @@ function storeFrame(on: boolean) {
 /** Whether the current page should render for the IFDM site's iframe. */
 export function useFramed(): boolean {
   const { search } = useLocation()
+  const appView = useAppView()
+  return useHostFramed(search) || appView
+}
+
+function useHostFramed(search: string): boolean {
   const param = new URLSearchParams(search).get('frame')
   if (param === '1') {
     storeFrame(true)

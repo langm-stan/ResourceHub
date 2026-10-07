@@ -25,6 +25,10 @@ export interface ChartGeometry {
    * unreliably in WebKit (ghost tooltips trail the cursor), so tips portal here.
    */
   overlayEl: HTMLDivElement | null
+  /** Too narrow for a key inside the plot (a phone): the key sits above it instead. */
+  narrow: boolean
+  /** A key tells the frame how much room it needs above the plot when narrow. */
+  reserveLegend: (px: number) => void
 }
 
 const ChartContext = createContext<ChartGeometry | null>(null)
@@ -95,6 +99,36 @@ interface ChartFrameProps {
 
 const DEFAULT_MARGIN: ChartMargin = { top: 20, right: 24, bottom: 36, left: 64 }
 
+/*
+ * A phone, held either way: a narrow window, or a short one on a touch
+ * screen. The same query is repeated in ChartFrame.module.css, where the
+ * expanded view takes the whole screen; keep the two in step.
+ */
+const PHONE_QUERY = '(max-width: 640px), (max-height: 520px) and (pointer: coarse)'
+
+function usePhoneScreen(): boolean {
+  const [phone, setPhone] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia?.(PHONE_QUERY).matches === true,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia?.(PHONE_QUERY)
+    if (!mq) return
+    const onChange = () => setPhone(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return phone
+}
+
+/*
+ * The charts are drawn wide and short, for a laptop or a projector. At a
+ * phone's width that shape leaves a strip too shallow to read, so a narrow
+ * chart is never flatter than this.
+ */
+const NARROW_WIDTH = 480
+const NARROW_MIN_RATIO = 0.72
+
 /** The measured, responsive SVG canvas. Provides plot geometry to chart marks. */
 function MeasuredCanvas({
   ratio = 0.5,
@@ -102,21 +136,38 @@ function MeasuredCanvas({
   maxHeight,
   margin: marginOverride,
   ariaLabel,
+  fill = false,
   children,
-}: Pick<ChartFrameProps, 'ratio' | 'height' | 'maxHeight' | 'margin' | 'ariaLabel' | 'children'>) {
+}: Pick<ChartFrameProps, 'ratio' | 'height' | 'maxHeight' | 'margin' | 'ariaLabel' | 'children'> & {
+  /** Take the height of the box the canvas sits in, instead of deriving one from the width. */
+  fill?: boolean
+}) {
   const [ref, size] = useResizeObserver<HTMLDivElement>()
   const [overlayEl, setOverlayEl] = useState<HTMLDivElement | null>(null)
-  const margin = { ...DEFAULT_MARGIN, ...marginOverride }
+  const [legendRoom, setLegendRoom] = useState(0)
+  const base = { ...DEFAULT_MARGIN, ...marginOverride }
 
   const width = size.width || 720
-  const h = height ?? Math.min(Math.round(width * ratio), maxHeight ?? Number.POSITIVE_INFINITY)
+  const narrow = width < NARROW_WIDTH
+  // Room for the key comes off the top; the plot keeps its shape below it.
+  const keyRoom = narrow ? legendRoom : 0
+  const margin = { ...base, top: base.top + keyRoom }
+  const shape = width < NARROW_WIDTH ? Math.max(ratio, NARROW_MIN_RATIO) : ratio
+  const h = fill
+    ? Math.floor(size.height)
+    : (height ?? Math.min(Math.round(width * shape), maxHeight ?? Number.POSITIVE_INFINITY)) + keyRoom
   const innerWidth = Math.max(0, width - margin.left - margin.right)
   const innerHeight = Math.max(0, h - margin.top - margin.bottom)
-  const geometry: ChartGeometry = { width, height: h, margin, innerWidth, innerHeight, overlayEl }
+  const geometry: ChartGeometry = { width, height: h, margin, innerWidth,
+    innerHeight,
+    overlayEl,
+    narrow,
+    reserveLegend: setLegendRoom,
+  }
 
   return (
-    <div ref={ref} className={styles.canvas}>
-      {size.width > 0 && (
+    <div ref={ref} className={fill ? `${styles.canvas} ${styles.canvasFill}` : styles.canvas}>
+      {size.width > 0 && h > 0 && (
         <svg
           width={width}
           height={h}
@@ -151,6 +202,7 @@ export function ChartFrame({
   children,
 }: ChartFrameProps) {
   const [expanded, setExpanded] = useState(false)
+  const phone = usePhoneScreen()
   const shellRef = useRef<HTMLDivElement>(null)
   const nameOf = () => title ?? headingBefore(shellRef.current?.closest('figure') ?? null)
   const [shownTitle, setShownTitle] = useState<string | undefined>()
@@ -221,6 +273,9 @@ export function ChartFrame({
         <MeasuredCanvas ratio={ratio} height={height} maxHeight={maxHeight} margin={margin} ariaLabel={ariaLabel}>
           {children}
         </MeasuredCanvas>
+        {/* On a touch screen there is no hover to reveal these, so they sit
+            in a row of their own above the chart (see the stylesheet). */}
+        <div className={styles.tools}>
         <button
           type="button"
           className={`${styles.expandBtn} ${styles.downloadBtn}`}
@@ -241,6 +296,7 @@ export function ChartFrame({
             <ExpandIcon />
           </button>
         )}
+        </div>
       </div>
       {captionNode}
 
@@ -285,8 +341,11 @@ export function ChartFrame({
               )}
               <div className={styles.overlayCanvas}>
                 {/* Fill the wide panel, but never taller than the viewport
-                    leaves room for (header, caption, padding). */}
+                    leaves room for (header, caption, padding). On a phone
+                    the panel is the screen, and the chart takes all of it
+                    that the words around it leave. */}
                 <MeasuredCanvas
+                  fill={phone}
                   ratio={0.46}
                   maxHeight={Math.max(360, Math.round(window.innerHeight * 0.66))}
                   margin={margin}

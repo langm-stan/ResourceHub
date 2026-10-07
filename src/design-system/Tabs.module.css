@@ -37,3 +37,26 @@
   color: var(--text-on-accent);
   font-weight: var(--fw-medium);
 }
+
+/*
+ * A phone. Wrapped, five tabs stack three rows deep, and where the strip
+ * sticks to the top of the page that is a sixth of the screen. They stay on
+ * one row instead and the row scrolls sideways.
+ */
+@media (max-width: 640px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-block: var(--space-1);
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    flex: none;
+  }
+  .lg .tab {
+    padding: 10px 18px;
+  }
+}

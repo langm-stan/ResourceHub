@@ -65,7 +65,7 @@ interface MergedPoint {
 }
 
 function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries }) {
-  const { innerWidth, innerHeight } = useChart()
+  const { innerWidth, innerHeight, narrow } = useChart()
 
   const merged = useMemo(() => {
     const byEnd = new Map<number, MergedPoint>()
@@ -145,7 +145,17 @@ function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries
         fill="var(--text-faint)"
         textAnchor="end"
       >
-        below this line, the {windowWord(stocks)} lost money
+        {narrow ? (
+          // Too long for one line at a phone's width.
+          <>
+            <tspan x={innerWidth - 6}>below this line,</tspan>
+            <tspan x={innerWidth - 6} dy="1.2em">
+              the {windowWord(stocks)} lost money
+            </tspan>
+          </>
+        ) : (
+          <>below this line, the {windowWord(stocks)} lost money</>
+        )}
       </text>
 
       {compare && (

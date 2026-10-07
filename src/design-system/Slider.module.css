@@ -140,3 +140,10 @@
   grid-row: 2;
   align-self: start;
 }
+
+/* A finger needs more to land on than a mouse pointer does. */
+@media (pointer: coarse) {
+  .readInput {
+    min-height: 40px;
+  }
+}

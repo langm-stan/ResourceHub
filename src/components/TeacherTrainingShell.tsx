@@ -88,6 +88,26 @@ export default function TeacherTrainingShell({
     return () => io.disconnect()
   }, [showBar, title])
 
+  /*
+   * The bar sticks to the top of the page, and so do things inside the tools
+   * (a tab strip, a side rail). They would slide in behind it, so the bar
+   * publishes its height as --bar-h and they stop that far down instead.
+   */
+  const bar = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = bar.current
+    const root = document.documentElement
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const publish = () => root.style.setProperty('--bar-h', `${el.offsetHeight}px`)
+    publish()
+    const ro = new ResizeObserver(publish)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      root.style.removeProperty('--bar-h')
+    }
+  }, [showBar])
+
   // Each page gets its own distinct document title (WCAG 2.4.2).
   useEffect(() => {
     const prior = document.title
@@ -105,7 +125,7 @@ export default function TeacherTrainingShell({
           host page's own scrollbar is far off, and without this the only
           navigation left after a scroll is the prev/next pair at the foot. */}
       {showBar && (
-        <div className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
+        <div ref={bar} className="sticky top-0 z-30 border-b border-white/15 bg-cardinal">
           {/* Filled, the band keeps its contents clear of the top edge, where
               a browser's own toolbar slides down over them. */}
           <div

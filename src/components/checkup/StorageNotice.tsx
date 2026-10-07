@@ -105,7 +105,7 @@ export default function StorageNotice({
           <button
             type="button"
             onClick={() => setPending('wipe')}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-stone-500 hover:text-cardinal"
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-stone-500 hover:text-cardinal [@media(pointer:coarse)]:py-2.5"
           >
             <Trash2 size={13} />
             Clear my data from this browser

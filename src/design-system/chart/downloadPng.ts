@@ -8,6 +8,8 @@
  * the page background color so it looks right on a light slide.
  */
 
+import { saveFile } from '../../lib/nativeApp'
+
 const STYLE_PROPS = [
   'fill',
   'fill-opacity',
@@ -200,12 +202,7 @@ export function downloadSvgAsPng(
 
     canvas.toBlob((blob) => {
       if (!blob) return
-      const pngUrl = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = pngUrl
-      a.download = filename.endsWith('.png') ? filename : `${filename}.png`
-      a.click()
-      URL.revokeObjectURL(pngUrl)
+      void saveFile(blob, filename.endsWith('.png') ? filename : `${filename}.png`)
     }, 'image/png')
   }
   img.src = svgUrl

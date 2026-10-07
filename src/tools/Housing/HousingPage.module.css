@@ -43,7 +43,7 @@
 }
 .tabBar {
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--bar-h, 0px) + var(--sticky-gap));
   z-index: 5;
   background: var(--surface);
   padding-top: var(--space-1);

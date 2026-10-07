@@ -44,7 +44,7 @@
 }
 .railSticky {
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--bar-h, 0px) + var(--sticky-gap));
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -63,7 +63,7 @@
 }
 .tabBar {
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--bar-h, 0px) + var(--sticky-gap));
   z-index: 5;
   background: var(--surface);
   padding-top: var(--space-1);
@@ -288,5 +288,27 @@
 @media (max-width: 640px) {
   .controlsGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* A phone: the bar is too short beside the rate and the tax to hold its
+   range ("$105,700 - $201,775"), so it takes a line of its own under them. */
+@media (max-width: 640px) {
+  .bracketRow {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'rate tax'
+      'track track';
+    row-gap: var(--space-1);
+  }
+  .bracketRate {
+    grid-area: rate;
+    text-align: left;
+  }
+  .bracketTrack {
+    grid-area: track;
+  }
+  .bracketTax {
+    grid-area: tax;
   }
 }

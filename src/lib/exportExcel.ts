@@ -1,9 +1,25 @@
 import * as XLSX from 'xlsx'
 import { hasActuals, sumActuals, sumItems, type AccountGroup, type LineItem } from '../data/checkupData'
 import { sumGroups } from '../hooks/useFinancialSnapshot'
+import { isNativeApp, saveFile } from './nativeApp'
 
 function groupSubtotal(g: AccountGroup) {
   return g.items.reduce((s, i) => s + i.value, 0)
+}
+
+/** Save a workbook as .xlsx, through the share sheet in the app. */
+export function saveWorkbook(wb: XLSX.WorkBook, filename: string): void {
+  if (!isNativeApp) {
+    XLSX.writeFile(wb, filename)
+    return
+  }
+  const bytes = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer
+  void saveFile(
+    new Blob([bytes], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename
+  )
 }
 
 // Mirrors the structure of the original "Balance Sheet Template" workbook:
@@ -81,7 +97,7 @@ export function exportBalanceSheetXlsx(assets: AccountGroup[], liabilities: Acco
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Balance Sheet')
-  XLSX.writeFile(wb, `ifdm-balance-sheet-${new Date().toISOString().slice(0, 10)}.xlsx`)
+  saveWorkbook(wb, `ifdm-balance-sheet-${new Date().toISOString().slice(0, 10)}.xlsx`)
 }
 
 export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], saving: LineItem[]) {
@@ -129,5 +145,5 @@ export function exportBudgetXlsx(income: LineItem[], expenses: LineItem[], savin
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Budget')
-  XLSX.writeFile(wb, `ifdm-budget-${new Date().toISOString().slice(0, 10)}.xlsx`)
+  saveWorkbook(wb, `ifdm-budget-${new Date().toISOString().slice(0, 10)}.xlsx`)
 }

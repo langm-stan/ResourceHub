@@ -890,12 +890,25 @@
 /* ---- Narrow rooms ------------------------------------------------------ */
 
 @media (max-width: 700px) {
+  /* Five across leaves each tab about 66px, and "Introducing" alone needs
+     more than that. Three over two gives every name room on one or two
+     lines: the grid is six columns, the first three tabs take two each and
+     the last two take three. */
   .steps {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .steps > * {
+    grid-column: span 2;
+  }
+  .steps > *:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+  .stepTab {
+    padding: 10px 6px;
   }
   .stepName {
-    font-size: 13px;
+    font-size: 14px;
   }
   .card {
     padding: 20px 16px;
