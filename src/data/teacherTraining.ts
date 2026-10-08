@@ -314,9 +314,9 @@ const TOPICS: Topic[] = [
     tools: [
 {
         slug: 'account-taxation',
-        label: 'Account Taxation',
+        label: 'Tax-Advantaged Accounts',
         description: 'The after-tax value of the same contribution in a taxable account, a traditional 401(k), and a Roth account.',
-        keywords: ['401k', '401(k)', 'Roth', 'traditional', 'IRA', 'retirement accounts', 'tax shelter', 'contributions', 'tax now', 'tax later'],
+        keywords: ['401k', '401(k)', 'Roth', 'traditional', 'IRA', 'retirement accounts', 'tax shelter', 'contributions', 'tax now', 'tax later', 'account taxation'],
       },
 {
         slug: 'employer-match',

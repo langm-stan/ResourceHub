@@ -191,9 +191,9 @@ const SECTIONS: Record<string, SectionConfig> = {
     content: <BondRatesPage intro={false} />,
   },
   'account-taxation': {
-    title: 'Account Taxation',
+    title: 'Tax-Advantaged Accounts',
     toolkit: true,
-    instructor: { label: 'Account Taxation', path: 'account-taxation' },
+    instructor: { label: 'Tax-Advantaged Accounts', path: 'account-taxation' },
     content: <AccountTaxationPage intro={false} />,
   },
   'employer-match': {

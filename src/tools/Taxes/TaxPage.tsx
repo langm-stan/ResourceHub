@@ -761,7 +761,7 @@ function TaxMathView({
         <strong>{formatPercent(p.marginalIncomeTaxRate, 1)}</strong> here (
         {formatPercent(fedMarginal, 0)} federal
         {p.state.hasTax ? ` plus ${formatPercent(stateMarginal, 1)} state` : ', no state tax'}
-        ). The Account Taxation lesson compares Roth and traditional accounts with the income-tax
+        ). The Tax-Advantaged Accounts lesson compares Roth and traditional accounts with the income-tax
         rate for that reason: payroll tax is paid either way.
       </Callout>
     </>

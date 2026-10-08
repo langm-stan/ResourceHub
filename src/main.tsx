@@ -154,7 +154,8 @@ createRoot(document.getElementById('root')!).render(
           />
           <Route path="faculty-insights" element={<Navigate to="/" replace />} />
 
-          {/* Tax Advantages (Aug 2026) split into Account Taxation and
+          {/* Tax Advantages (Aug 2026) split into Tax-Advantaged Accounts (at
+              /account-taxation, its name until October 2026) and
               Employer Matching; its paycheck part merged into Understanding
               Taxes. Shared links land on the first of the new pages. */}
           <Route path="tax-advantages" element={<LegacyRedirect to="/account-taxation" />} />

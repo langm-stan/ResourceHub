@@ -42,7 +42,7 @@ const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`
 /* KaTeX fragments for the worked math: whole dollars and decimal rates. */
 const texRate = (p: number) => String(p / 100)
 
-/* ================= Part 2: Account Taxation ================= */
+/* ================= Part 2: Tax-Advantaged Accounts ================= */
 
 function AccountTaxation() {
   const [earn, setEarn] = useState(3600)
@@ -722,7 +722,7 @@ annual price of the same target from every starting age.
 
 /*
  * The lesson family split into three tools that share the helpers above:
- * Account Taxation and Employer Matching (the tax side, formerly the Tax
+ * Tax-Advantaged Accounts (once Account Taxation) and Employer Matching (the tax side, formerly the Tax
  * Advantages tabs; its Take-Home Pay part merged into Understanding Taxes)
  * and the Retirement Planning Simulator (the timing side).
  */
@@ -734,7 +734,7 @@ export function AccountTaxationPage({ intro = true }: { intro?: boolean } = {}) 
       {intro && (
         <header className={styles.intro}>
           <p className={styles.eyebrow}>Lesson · Taxes &amp; tax-advantaged saving</p>
-          <h1 className={styles.h1}>Account Taxation</h1>
+          <h1 className={styles.h1}>Tax-Advantaged Accounts</h1>
         </header>
       )}
 
