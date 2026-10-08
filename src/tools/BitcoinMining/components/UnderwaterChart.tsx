@@ -4,6 +4,7 @@ import {
   AreaSeries,
   AxisBottom,
   AxisLeft,
+  ChartData,
   ChartFrame,
   Gridlines,
   useChart,
@@ -59,8 +60,25 @@ function Inner() {
     [innerHeight],
   )
 
+  /* A day-by-day table would run to thousands of rows; a year a row keeps
+     what the picture shows: how deep it went, and where the year ended. */
+  const byYear = () => {
+    const years = new Map<number, { worst: number; end: number }>()
+    for (const p of path) {
+      const yr = p.date.getUTCFullYear()
+      const row = years.get(yr)
+      years.set(yr, { worst: Math.min(row?.worst ?? 0, p.depth), end: p.depth })
+    }
+    const pct = (v: number) => `${Math.round(v * 100)}%`
+    return [...years].map(([yr, r]) => [String(yr), pct(r.worst), pct(r.end)])
+  }
+
   return (
     <>
+      <ChartData
+        columns={['Year', 'Furthest below the previous high', 'Below the previous high at year end']}
+        rows={byYear}
+      />
       <Gridlines y={y} ticks={5} />
       <AxisLeft y={y} ticks={5} format={(v) => `${Math.round(v * 100)}%`} />
       <AxisBottom x={x} ticks={6} format={(v) => yearAt(v)} />

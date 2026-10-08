@@ -193,6 +193,7 @@ function Inner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `Age ${Math.round(v)}`}
+        xName="Age"
         series={[
           {
             label: compare ? 'Net worth, smoothing plan' : 'Net worth',

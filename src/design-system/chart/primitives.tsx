@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { area as d3area, line as d3line, curveMonotoneX } from 'd3-shape'
 import type { ScaleLinear } from 'd3-scale'
 import { useChart } from './ChartFrame'
+import { DataTable } from './DataTable'
 import styles from './primitives.module.css'
 
 type Scale = ScaleLinear<number, number>
@@ -349,6 +350,7 @@ export function HoverProbe<T>({
   yScale,
   series,
   xLabel,
+  xName,
 }: {
   data: T[]
   x: (d: T) => number
@@ -357,6 +359,8 @@ export function HoverProbe<T>({
   series: HoverSeries<T>[]
   /** Format the hovered x value for the tooltip title, e.g. "Age 45". */
   xLabel: (v: number) => string
+  /** What the x values are, as the heading of the table's first column, e.g. "Age". */
+  xName: string
 }) {
   const { innerWidth, innerHeight } = useChart()
   const [idx, setIdx] = useState<number | null>(null)
@@ -407,6 +411,24 @@ export function HoverProbe<T>({
           rows={visible.map((s) => ({ label: s.label, value: s.format(s.value), color: s.color }))}
         />
       )}
+      {/* Every point and its wording is already here for the hover readout,
+          so the same rows serve a reader who asks for the chart as a table. */}
+      <ChartData
+        columns={[xName, ...series.map((s) => s.label)]}
+        rows={() =>
+          data
+            .map((p) => [
+              xLabel(x(p)),
+              ...series.map((s) => {
+                const v = s.y(p)
+                return Number.isFinite(v) ? s.format(v) : ''
+              }),
+            ])
+            // A series finer than its labels (weekly points named by year)
+            // would repeat a heading; the last row of each run stands for it.
+            .filter((row, i, all) => row[0] !== all[i + 1]?.[0])
+        }
+      />
       <rect
         x={0}
         y={0}
@@ -418,6 +440,30 @@ export function HoverProbe<T>({
       />
     </>
   )
+}
+
+/**
+ * The chart's numbers for a reader who cannot use the picture. Placed inside
+ * a frame, it adds a table control to the chart and writes the rows out
+ * below it while the table is open. A chart with a HoverProbe has this
+ * already; a chart without one (bars, a histogram) names its own rows.
+ */
+export function ChartData({
+  columns,
+  rows,
+}: {
+  /** Column headings; the first names what each row is (a year, an age). */
+  columns: string[]
+  /** One row per point, first cell its heading. Only called while the table is open. */
+  rows: () => string[][]
+}) {
+  const { tableEl, offerTable } = useChart()
+  useEffect(() => {
+    offerTable(true)
+    return () => offerTable(false)
+  }, [offerTable])
+  if (!tableEl) return null
+  return createPortal(<DataTable columns={columns} rows={rows()} />, tableEl)
 }
 
 export function EndLabel({

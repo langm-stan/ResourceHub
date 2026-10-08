@@ -296,6 +296,7 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                 xRefLabel={`${formatUSDWhole(result.breakEvenIncrease)} breaks even`}
                 xTickFormat={(v) => formatUSDWhole(v)}
                 xHoverLabel={(v: number) => `An increase of ${formatUSDWhole(v)}`}
+                xName="Increase in income"
                 ariaLabel="Net present value against the size of the increase in income"
                 caption={`Net present value as the increase in income changes. The line crosses zero at ${formatUSDWhole(result.breakEvenIncrease)} a year.`}
               />
@@ -319,6 +320,7 @@ export function EducationReturnPage({ intro = true }: { intro?: boolean } = {}) 
                 xRefLabel={result.irr != null ? `${formatPercent(result.irr, 1)} return` : undefined}
                 xTickFormat={(v) => `${v.toFixed(0)}%`}
                 xHoverLabel={(v: number) => `At a rate of ${v.toFixed(1)}%`}
+                xName="Discount rate"
                 ariaLabel="Net present value against the discount rate"
                 caption={`Net present value as the discount rate changes. ${result.irr != null ? `The line crosses zero at ${formatPercent(result.irr, 2)}.` : 'The line does not cross zero over this range.'}`}
               />

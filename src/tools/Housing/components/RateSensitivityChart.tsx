@@ -125,6 +125,7 @@ function Inner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `${formatPercent(v, 1)} APR`}
+        xName="APR"
         series={[
           {
             label: 'Monthly P&I',

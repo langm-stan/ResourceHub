@@ -107,6 +107,7 @@ function AccountTaxation() {
           ]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          xName="Year"
           figure="Figure 1."
           caption={`After-tax value of ${formatUSDWhole(earn)} of earnings saved each year in each account. The taxable account's returns are taxed every year at the retirement rate, a simplification: real brokerage accounts pay lower capital-gains rates and defer tax on gains until sale.`}
           ariaLabel="After-tax value of taxable, traditional, and Roth accounts over time"
@@ -307,6 +308,7 @@ function EmployerMatching() {
           ]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          xName="Year"
           figure="Figure 1."
           caption={`After-tax value of saving ${pct(contribPct / 100)} of a ${formatUSDWhole(salary)} salary each year at a ${pct(retPct / 100, retPct % 1 ? 1 : 0)} return, with a ${pct(MATCH_TAX)} tax rate today and at withdrawal. The taxable account's returns are taxed every year; the 401(k) scenarios are taxed once, at withdrawal.`}
           ariaLabel="After-tax value of a taxable account and a 401(k) with no match, a 50% match, and a 100% match over time"
@@ -566,6 +568,7 @@ annual price of the same target from every starting age.
             lines={[{ ys: waitY, color: GOLD, width: 3, label: 'Annual saving needed' }]}
             xTickFormat={(v) => `age ${Math.round(v)}`}
             xHoverLabel={(v) => `Start at ${Math.round(v)}`}
+            xName="Starting age"
             figure="Figure 1."
             caption={`Annual saving that reaches ${formatUSDWhole(plan.target)} by ${retireAge} at a ${plannedPct} return, by starting age${saved > 0 ? `, after what the ${formatUSDWhole(saved)} already saved grows to from each age` : ''}. ${
               priceAt(25) > 0
@@ -644,6 +647,7 @@ annual price of the same target from every starting age.
             ]}
             xTickFormat={(v) => `age ${Math.round(v)}`}
             xHoverLabel={(v) => `Age ${Math.round(v)}`}
+            xName="Age"
             figure="Figure 2."
             caption={`Saving ${formatUSDWhole(plan.saving)} a year from ${startAge} to ${retireAge}${saved > 0 ? `, on top of the ${formatUSDWhole(saved)} starting balance` : ''}, compounded at the planned ${plannedPct} and at ${actualPct}%. The withdrawal portfolio is assumed to move by the same margin in the same direction (${pct(plan.retiredR, 1)} instead of ${pct(retiredPct / 100, 1)}), so the income the balance funds moves even more than the balance.`}
             ariaLabel="Accumulation under the planned return versus the actual return"

@@ -149,6 +149,7 @@ function Inner({ points, n, noun }: { points: PortfolioPoint[]; n: number; noun:
         xScale={x}
         yScale={y}
         xLabel={(v) => `${Math.round(v)} ${Math.round(v) === 1 ? noun : `${noun}s`}`}
+        xName={`Number of ${noun}s`}
         series={[
           {
             label: 'Real stocks, moving together',

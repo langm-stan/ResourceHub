@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Callout, Card, FormulaBlock, SegmentedControl, Slider, Stat, StepHeader, textTone } from '../../design-system'
-import { ChartFrame, useChart } from '../../design-system/chart'
+import { ChartData, ChartFrame, useChart } from '../../design-system/chart'
 import { formatUSDWhole, texUSD } from '../../lib/format'
 import { BEST_BAND, INVEST_RATE, SCORE_BANDS, SCORE_FACTORS, bandForScore } from './data'
 import { fvOfMonthly, loanCost } from './compute'
@@ -235,6 +235,10 @@ function DonutSlices({ selected, onSelect }: { selected: string; onSelect: (key:
   let angle = -TAU / 4
   return (
     <g>
+      <ChartData
+        columns={['Factor', 'Share of the score']}
+        rows={() => SCORE_FACTORS.map((f) => [f.label, `${f.weight}%`])}
+      />
       {SCORE_FACTORS.map((f) => {
         const a0 = angle
         const a1 = a0 + (f.weight / 100) * TAU
@@ -322,6 +326,17 @@ function BandBarsMarks({ costs, selectedKey }: { costs: BandCost[]; selectedKey:
   const maxInterest = Math.max(...costs.map((c) => c.cost.totalInterest))
   return (
     <g>
+      <ChartData
+        columns={['Score band', 'Scores', 'Monthly payment', 'Total interest']}
+        rows={() =>
+          costs.map((c) => [
+            c.band.label,
+            `${c.band.min} to ${c.band.max}`,
+            formatUSDWhole(c.cost.payment),
+            formatUSDWhole(c.cost.totalInterest),
+          ])
+        }
+      />
       {costs.map((c, idx) => {
         const y = idx * rowH + (rowH - barH) / 2
         const w = Math.max(2, (c.cost.totalInterest / maxInterest) * (innerWidth - 78))

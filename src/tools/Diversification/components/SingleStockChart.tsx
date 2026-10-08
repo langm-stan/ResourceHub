@@ -3,12 +3,13 @@ import { scaleLinear, scaleLog } from 'd3-scale'
 import type { ScaleLinear } from 'd3-scale'
 import {
   AxisBottom,
+  ChartData,
   ChartFrame,
   LineSeries,
   useChart,
   type ExportStat,
 } from '../../../design-system/chart'
-import { formatUSDCompact } from '../../../lib/format'
+import { formatUSDCompact, formatUSDWhole } from '../../../lib/format'
 import type { SingleStockSim } from '../compute'
 
 /**
@@ -67,8 +68,26 @@ function Inner({ sim }: { sim: SingleStockSim }) {
 
   const data = (values: number[]) => values.map((v, i) => ({ i, v: v * START }))
 
+  // Sixty grey lines do not fit a table; their middle and their extremes do.
+  const byYear = () =>
+    sim.index.values.map((indexValue, i) => {
+      const at = sim.stocks.map((s) => s.values[i]!).sort((a, b) => a - b)
+      const usd = (v: number) => formatUSDWhole(v * START)
+      return [
+        i === 0 ? 'Start' : `Year ${i}`,
+        usd(indexValue),
+        usd(at[Math.floor(at.length / 2)]!),
+        usd(at[at.length - 1]!),
+        usd(at[0]!),
+      ]
+    })
+
   return (
     <>
+      <ChartData
+        columns={['Year', 'Index', 'Median single stock', 'Best single stock', 'Worst single stock']}
+        rows={byYear}
+      />
       {ticks.map((v) => (
         <g key={v}>
           <line x1={0} x2={innerWidth} y1={y(v)} y2={y(v)} stroke="var(--border-hairline)" />

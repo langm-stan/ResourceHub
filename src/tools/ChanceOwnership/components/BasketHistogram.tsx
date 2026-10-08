@@ -3,6 +3,7 @@ import { scaleLinear } from 'd3-scale'
 import {
   AxisBottom,
   AxisLeft,
+  ChartData,
   ChartFrame,
   Gridlines,
   useChart,
@@ -125,6 +126,20 @@ function Inner({ a, b, market }: { a: HistogramPile; b?: HistogramPile; market: 
 
   return (
     <>
+      <ChartData
+        columns={[
+          '10-year return',
+          `Share of baskets of ${a.size}`,
+          ...(b ? [`Share of baskets of ${b.size}`] : []),
+        ]}
+        rows={() =>
+          sharesA.map((s, i) => [
+            `${lo + i * step}% to ${lo + (i + 1) * step}%`,
+            formatPercent(s, 1),
+            ...(sharesB ? [formatPercent(sharesB[i]!, 1)] : []),
+          ])
+        }
+      />
       <Gridlines y={y} ticks={5} />
       <AxisLeft y={y} ticks={5} format={(v) => formatPercent(v, 0)} />
       <AxisBottom x={x} ticks={6} format={(v) => `${Math.round(v)}%`} />

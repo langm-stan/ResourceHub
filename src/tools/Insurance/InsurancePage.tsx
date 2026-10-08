@@ -565,6 +565,7 @@ function BillsAndHits({
         yScale={yd}
         series={hover}
         xLabel={(v) => `Year ${Math.round(v)}`}
+        xName="Year"
       />
     </>
   )

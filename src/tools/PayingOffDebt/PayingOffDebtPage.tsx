@@ -341,6 +341,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
           xTickFormat={(v) => `${Math.round(v)} mo`}
           xHoverLabel={(v) => `Month ${Math.round(v)}`}
+          xName="Month"
           ratio={0.42}
           maxHeight={480}
           figure="Figure 1."
@@ -377,6 +378,7 @@ export function PayingOffDebtPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
           xTickFormat={(v) => `${Math.round(v)} mo`}
           xHoverLabel={(v) => `Payment ${Math.round(v)}`}
+          xName="Payment"
           figure="Figure 2."
           caption={
             main.paymentBelowInterest

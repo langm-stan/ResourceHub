@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { AxisBottom, AxisLeft, ChartFrame, Gridlines, useChart } from '../../../design-system/chart'
-import { formatUSDCompact } from '../../../lib/format'
+import { AxisBottom, AxisLeft, ChartData, ChartFrame, Gridlines, useChart } from '../../../design-system/chart'
+import { formatUSDCompact, formatUSDWhole } from '../../../lib/format'
 import type { CashFlow } from '../compute'
 
 /*
@@ -57,6 +57,10 @@ function Bars({ flows }: { flows: CashFlow[] }) {
 
   return (
     <>
+      <ChartData
+        columns={['Year', 'Cash flow']}
+        rows={() => flows.map((f) => [`Year ${f.t}`, formatUSDWhole(f.amount)])}
+      />
       <Gridlines y={ys} ticks={5} />
       {flows.map((f) => {
         const yTop = f.amount >= 0 ? ys(f.amount) : zero

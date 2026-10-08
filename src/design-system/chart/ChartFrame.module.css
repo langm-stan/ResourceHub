@@ -51,6 +51,65 @@
   right: calc(var(--space-3) + 38px);
 }
 
+/* And the table control left of that. It stays in view while its table is open. */
+.tableBtn {
+  right: calc(var(--space-3) + 76px);
+}
+.tableBtnOn {
+  opacity: 1;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/*
+ * The chart's numbers, written out. A long series scrolls inside its own
+ * box, under headings that stay put, so the page keeps its length.
+ */
+.tableWrap {
+  margin-top: var(--space-3);
+  max-height: 22rem;
+  overflow: auto;
+  border: var(--hairline) solid var(--border-hairline);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+}
+.tableWrap[hidden] {
+  display: none;
+}
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ff-ui);
+  font-size: var(--fs-caption);
+  color: var(--text-primary);
+}
+.dataTable th,
+.dataTable td {
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: var(--hairline) solid var(--border-hairline);
+}
+.dataTable th:first-child {
+  text-align: left;
+}
+.dataTable thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-raised);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  white-space: normal;
+  vertical-align: bottom;
+}
+.dataTable tbody th {
+  font-weight: var(--fw-medium, 500);
+}
+.dataTable tbody tr:last-child th,
+.dataTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -200,7 +259,8 @@
     margin-bottom: var(--space-2);
   }
   .expandBtn,
-  .downloadBtn {
+  .downloadBtn,
+  .tableBtn {
     position: static;
     opacity: 1;
     width: 44px;

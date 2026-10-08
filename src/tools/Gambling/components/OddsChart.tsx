@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { scaleLinear } from 'd3-scale'
-import { ChartFrame, useChart, type ExportStat } from '../../../design-system/chart'
+import { ChartData, ChartFrame, useChart, type ExportStat } from '../../../design-system/chart'
 import { ODDS } from '../compute'
 
 /**
@@ -42,6 +42,10 @@ function Inner() {
 
   return (
     <>
+      <ChartData
+        columns={['Game', 'Returned for each $1 staked']}
+        rows={() => ODDS.map((row) => [row.label, fmtPayback(row.payback)])}
+      />
       {ODDS.map((row, i) => {
         const yTop = i * rowH + rowH * 0.2
         const barH = rowH * 0.6

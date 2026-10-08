@@ -197,6 +197,7 @@ export function UsedVsNewPage({ intro = true }: { intro?: boolean } = {}) {
               ]}
               xTickFormat={(v) => `${Math.round(v)} yr`}
               xHoverLabel={(v) => `Car age ${v.toFixed(1)} yrs`}
+              xName="Car age"
               ratio={0.42}
               maxHeight={460}
               figure="Figure 1."

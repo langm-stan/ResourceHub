@@ -172,6 +172,7 @@ function PaymentInner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `${Math.round(v)}-year loan`}
+        xName="Loan term"
         series={[
           {
             label: 'Monthly P&I',
@@ -319,6 +320,7 @@ function InterestInner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `${Math.round(v)}-year loan`}
+        xName="Loan term"
         series={[
           {
             label: 'Total interest',

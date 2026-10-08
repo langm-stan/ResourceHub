@@ -113,6 +113,7 @@ function Inner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `Year ${Math.round(v)}`}
+        xName="Year"
         series={[
           {
             label: 'Interest paid',

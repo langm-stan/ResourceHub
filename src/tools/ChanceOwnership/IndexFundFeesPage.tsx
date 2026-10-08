@@ -107,6 +107,7 @@ function IndexFund() {
           extraHover={[{ label: 'Contributed so far', ys: series.x.map((t) => monthly * 12 * t) }]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          xName="Year"
           figure="Figure 1."
           caption={`The same ${formatUSDWhole(monthly)} a month at a ${ret.toFixed(1)}% average yearly return, held steady for illustration. Real markets swing; the average only shows up if you stay in.`}
           ariaLabel="Growth of a monthly index fund habit at two expense ratios"

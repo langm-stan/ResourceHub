@@ -189,6 +189,7 @@ function FvInner({
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 0 ? 'Start' : `After ${formatYears(v)}`)}
+        xName="Time"
         series={[
           { label: 'Balance', color: 'var(--c-series-1)', y: (d: SeriesPoint) => d.balance, format: formatUSDWhole },
           { label: 'Principal put in', color: 'var(--c-series-3)', y: (d: SeriesPoint) => d.principalContributed, format: formatUSDWhole },
@@ -289,6 +290,7 @@ function PvInner({ results, years }: { results: Results; years: number }) {
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 0 ? 'Received today' : `Received in ${formatYears(v)}`)}
+        xName="When received"
         series={[
           { label: 'Worth today', color: 'var(--c-series-1)', y: (d) => d.value, format: formatUSDWhole },
         ]}

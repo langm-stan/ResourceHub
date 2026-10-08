@@ -98,6 +98,7 @@ function Inner({ points }: { points: AheadPoint[] }) {
         xScale={x}
         yScale={y}
         xLabel={(v) => `After ${Math.round(v)} ${Math.round(v) === 1 ? 'year' : 'years'}`}
+        xName="Years"
         series={[
           {
             label: 'Investor ahead',

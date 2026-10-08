@@ -100,7 +100,8 @@ function Inner({ points, gameLabel }: { points: PathPoint[]; gameLabel: string }
         x={(d: PathPoint) => d.year}
         xScale={x}
         yScale={y}
-        xLabel={(v) => `${Math.round(v)}`}
+        xLabel={(v) => `${Math.floor(v)}`}
+        xName="Year"
         series={[
           {
             label: 'SPY balance',

@@ -81,7 +81,7 @@ export default function StorageNotice({
           </button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 min-w-0">
           {/* Back to the example's numbers: the default, for a class that has
               wandered off it. */}
           <button

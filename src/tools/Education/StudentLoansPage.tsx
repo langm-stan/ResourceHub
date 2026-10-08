@@ -309,6 +309,7 @@ export function StudentLoansPage({ intro = true }: { intro?: boolean } = {}) {
                 xRefLabel="repayment starts"
                 xTickFormat={(v) => `yr ${v.toFixed(0)}`}
                 xHoverLabel={(v: number) => `Year ${v.toFixed(0)}`}
+                xName="Year"
                 ariaLabel="What is owed on each loan, year by year"
                 caption={`What is owed from the day the money arrives to the last payment. The subsidized balance holds at ${formatUSDWhole(inputs.principal)} for ${c.deferYears} ${c.deferYears === 1 ? 'year' : 'years'}; the unsubsidized balance reaches ${formatUSDWhole(c.unsubsidized.balanceAtRepayment)}.`}
               />

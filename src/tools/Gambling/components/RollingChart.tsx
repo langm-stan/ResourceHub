@@ -198,6 +198,7 @@ function Inner({ stocks, compare }: { stocks: ChartSeries; compare?: ChartSeries
         xScale={x}
         yScale={y}
         xLabel={(v) => `Windows ending ${Math.round(v)}`}
+        xName="Window ending"
         series={[
           {
             label: `${stocks.label}, ${windowWord(stocks)}`,

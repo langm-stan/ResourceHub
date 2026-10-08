@@ -195,6 +195,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           xRefLabel={`Today's rate ${rate}%`}
           xTickFormat={(v) => `${Math.round(v)}%`}
           xHoverLabel={(v) => `Market rate ${v.toFixed(2)}%`}
+          xName="Market rate"
           ratio={0.42}
           maxHeight={460}
           figure="Figure 1."
@@ -221,6 +222,7 @@ export function BondRatesPage({ intro = true }: { intro?: boolean } = {}) {
           xRefLabel={`Your bond: ${years} yrs`}
           xTickFormat={(v) => `${Math.round(v)} yrs`}
           xHoverLabel={(v) => `${v} years remaining`}
+          xName="Years remaining"
           ratio={0.42}
           maxHeight={460}
           figure="Figure 2."

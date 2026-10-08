@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { scaleLog } from 'd3-scale'
 import type { ScaleLinear } from 'd3-scale'
-import { ChartFrame, useChart, type ExportStat } from '../../../design-system/chart'
+import { ChartData, ChartFrame, useChart, type ExportStat } from '../../../design-system/chart'
 import { formatUSDWhole } from '../../../lib/format'
 import { STAKE, type Cohort } from '../data'
 
@@ -68,6 +68,15 @@ function Inner({
 
   return (
     <>
+      <ChartData
+        columns={['Stock', 'What the $1,000 became']}
+        rows={() =>
+          rows.map((row) => [
+            row.key === picked ? `${row.label} (your pick)` : row.label,
+            row.value < CLAMP ? 'wiped out' : formatUSDWhole(row.value),
+          ])
+        }
+      />
       {rows.map((row, i) => {
         const yTop = i * rowH + rowH * 0.16
         const barH = rowH * 0.62

@@ -542,6 +542,7 @@ function OutrunLines({
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 1 ? 'After 1 year' : `After ${Math.round(v)} years`)}
+        xName="Time"
         series={[
           {
             label: vehicle.label,
@@ -650,6 +651,7 @@ function RateLines({
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 1 ? 'After 1 year' : `After ${Math.round(v)} years`)}
+        xName="Time"
         series={[
           {
             label: `Your ${rate}%`,

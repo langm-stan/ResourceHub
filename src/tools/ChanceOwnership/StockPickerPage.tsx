@@ -381,6 +381,7 @@ function StockPicker() {
               refLabel="the $1,000"
               xTickFormat={(v) => (v === 0 ? 'buy' : `${v} yr`)}
               xHoverLabel={(v) => (v === 0 ? 'At purchase, January ' + year : `After ${v} year${v === 1 ? '' : 's'}`)}
+              xName="Time held"
               caption={`Your $1,000 from January ${year}: ${
                 basketSize === 1
                   ? `all of it on ticket #${pick! + 1}`

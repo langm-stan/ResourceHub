@@ -152,6 +152,7 @@ function Inner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `Age ${Math.round(v)}`}
+        xName="Age"
         series={[
           { label: 'Income', color: 'var(--c-series-3)', y: (d: LifeCyclePoint) => d.income, format: formatUSDWhole },
           {

@@ -49,6 +49,8 @@ interface StationChartProps {
   yTickFormat?: (v: number) => string
   /** Title of the hover readout, e.g. "After 120 bets". Defaults to xTickFormat. */
   xHoverLabel?: (v: number) => string
+  /** What the x values are, heading the first column when the chart is read as a table. */
+  xName: string
   /** Value formatting inside the hover readout. */
   hoverValueFormat?: (v: number) => string
   extraHover?: HoverExtra[]
@@ -103,6 +105,7 @@ function Inner({
   xTickFormat,
   yTickFormat = formatUSDCompact,
   xHoverLabel,
+  xName,
   hoverValueFormat = formatUSDWhole,
   extraHover,
 }: Omit<StationChartProps, 'figure' | 'caption' | 'ariaLabel' | 'exportStats'>) {
@@ -212,6 +215,7 @@ function Inner({
         yScale={ys}
         series={hoverSeries}
         xLabel={xHoverLabel ?? xTickFormat}
+        xName={xName}
       />
     </>
   )

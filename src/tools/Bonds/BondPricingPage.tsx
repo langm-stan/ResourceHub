@@ -303,6 +303,7 @@ export function BondPricingPage({ intro = true }: { intro?: boolean } = {}) {
           xRefLabel={`Market rate ${market}%`}
           xTickFormat={(v) => `${Math.round(v)}%`}
           xHoverLabel={(v) => `Market rate ${v.toFixed(2)}%`}
+          xName="Market rate"
           ratio={0.42}
           maxHeight={460}
           figure="Figure 2."

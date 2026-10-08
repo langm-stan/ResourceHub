@@ -140,7 +140,9 @@
 
 .stationGrid {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  /* The board is ten tickets across, and each has to stay a 24px target
+     (WCAG 2.5.8): ten of them and nine 4px gaps is 276px. */
+  grid-template-columns: minmax(276px, 2fr) minmax(0, 3fr);
   gap: var(--space-6);
   align-items: start;
 }
@@ -174,7 +176,9 @@
 }
 .slidersRowWide {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* As many columns as fit a label beside its typed value; four across in a
+     narrow column pushed the last input past the edge of the page. */
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: var(--space-4) var(--space-5);
   align-items: start;
 }
@@ -270,8 +274,18 @@
   gap: 4px;
   margin-top: var(--space-4);
 }
+/* On the narrowest phones ten 24px tickets do not fit the card's text
+   column, so the board tightens its gaps and borrows from the card's own
+   padding. Each ticket stays a 24px target (WCAG 2.5.8). */
+@media (max-width: 400px) {
+  .board {
+    gap: 2px;
+    margin-inline: -20px;
+  }
+}
 .ticket {
   aspect-ratio: 1;
+  min-height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;

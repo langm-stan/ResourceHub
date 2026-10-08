@@ -4,12 +4,13 @@ import {
   AreaSeries,
   AxisBottom,
   AxisLeft,
+  ChartData,
   ChartFrame,
   Gridlines,
   LineSeries,
   useChart,
 } from '../../design-system/chart'
-import { formatUSDCompact } from '../../lib/format'
+import { formatUSDCompact, formatUSDWhole } from '../../lib/format'
 import type { SeriesPoint } from '../../lib/finance'
 
 export function GoalChart({
@@ -43,8 +44,19 @@ function Inner({ points, years }: { points: SeriesPoint[]; years: number }) {
     [max, innerHeight],
   )
 
+  // The series is finer than a year; the table keeps the whole years.
+  const byYear = () => {
+    const whole = points.filter((p) => Math.abs(p.t - Math.round(p.t)) < 1e-6)
+    return (whole.length > 1 ? whole : points).map((p) => [
+      p.t === 0 ? 'Start' : `Year ${Math.round(p.t * 100) / 100}`,
+      formatUSDWhole(p.principalContributed),
+      formatUSDWhole(p.balance),
+    ])
+  }
+
   return (
     <>
+      <ChartData columns={['Time', 'Contributed', 'Balance']} rows={byYear} />
       <Gridlines y={y} ticks={5} />
       <AxisLeft y={y} ticks={5} format={(v) => formatUSDCompact(v)} />
       <AxisBottom x={x} ticks={Math.min(8, years)} format={(v) => (v === 0 ? '0' : `${v}y`)} />

@@ -3,6 +3,7 @@ import { scaleLinear } from 'd3-scale'
 import {
   AxisBottom,
   AxisLeft,
+  ChartData,
   ChartFrame,
   Gridlines,
   useChart,
@@ -60,6 +61,10 @@ function Inner({ outcomes, n }: { outcomes: CoinOutcome[]; n: number }) {
 
   return (
     <>
+      <ChartData
+        columns={['Net result', 'Probability']}
+        rows={() => outcomes.map((o) => [formatUSD(o.net), formatPercent(o.probability, 1)])}
+      />
       <Gridlines y={y} ticks={5} />
       <AxisLeft y={y} ticks={5} format={(v) => formatPercent(v, 0)} />
       <AxisBottom x={x} ticks={5} format={(v) => formatUSD(v)} />

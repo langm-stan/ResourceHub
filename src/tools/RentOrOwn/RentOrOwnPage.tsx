@@ -156,6 +156,7 @@ export function RentOrOwnPage({ intro = true }: { intro?: boolean } = {}) {
           ]}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
+          xName="Year"
           ratio={0.42}
           maxHeight={460}
           figure="Figure 1."

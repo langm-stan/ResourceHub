@@ -1,11 +1,12 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useResizeObserver } from '../../hooks/useResizeObserver'
 import { downloadSvgAsPng, slugForFilename, type ExportStat } from './downloadPng'
 import { textTone } from '../textTone'
+import type { ChartTable } from './DataTable'
 import styles from './ChartFrame.module.css'
 
-export type { ExportStat }
+export type { ExportStat, ChartTable }
 
 export interface ChartMargin {
   top: number
@@ -29,6 +30,13 @@ export interface ChartGeometry {
   narrow: boolean
   /** A key tells the frame how much room it needs above the plot when narrow. */
   reserveLegend: (px: number) => void
+  /**
+   * Where the chart's numbers are written out as a table while a reader has
+   * the table open, and null otherwise. ChartData portals its rows here.
+   */
+  tableEl: HTMLDivElement | null
+  /** ChartData tells the frame it has a table to offer. */
+  offerTable: (has: boolean) => void
 }
 
 const ChartContext = createContext<ChartGeometry | null>(null)
@@ -137,10 +145,14 @@ function MeasuredCanvas({
   margin: marginOverride,
   ariaLabel,
   fill = false,
+  tableEl = null,
+  offerTable = noTable,
   children,
 }: Pick<ChartFrameProps, 'ratio' | 'height' | 'maxHeight' | 'margin' | 'ariaLabel' | 'children'> & {
   /** Take the height of the box the canvas sits in, instead of deriving one from the width. */
   fill?: boolean
+  tableEl?: HTMLDivElement | null
+  offerTable?: (has: boolean) => void
 }) {
   const [ref, size] = useResizeObserver<HTMLDivElement>()
   const [overlayEl, setOverlayEl] = useState<HTMLDivElement | null>(null)
@@ -163,6 +175,8 @@ function MeasuredCanvas({
     overlayEl,
     narrow,
     reserveLegend: setLegendRoom,
+    tableEl,
+    offerTable,
   }
 
   return (
@@ -186,6 +200,9 @@ function MeasuredCanvas({
   )
 }
 
+/* The expanded copy of a chart leaves the table to the copy on the page. */
+const noTable = () => {}
+
 export function ChartFrame({
   title,
   ratio = 0.5,
@@ -202,6 +219,11 @@ export function ChartFrame({
   children,
 }: ChartFrameProps) {
   const [expanded, setExpanded] = useState(false)
+  const [tableOpen, setTableOpen] = useState(false)
+  const [offered, setOffered] = useState(false)
+  const [tableEl, setTableEl] = useState<HTMLDivElement | null>(null)
+  const tableId = useId()
+  const hasTable = offered
   const phone = usePhoneScreen()
   const shellRef = useRef<HTMLDivElement>(null)
   const nameOf = () => title ?? headingBefore(shellRef.current?.closest('figure') ?? null)
@@ -209,6 +231,11 @@ export function ChartFrame({
   const expand = () => {
     setShownTitle(nameOf())
     setExpanded(true)
+  }
+
+  const toggleTable = () => {
+    setShownTitle(nameOf())
+    setTableOpen((open) => !open)
   }
 
   useEffect(() => {
@@ -270,12 +297,33 @@ export function ChartFrame({
   return (
     <figure className={styles.frame}>
       <div ref={shellRef} className={styles.canvasShell}>
-        <MeasuredCanvas ratio={ratio} height={height} maxHeight={maxHeight} margin={margin} ariaLabel={ariaLabel}>
+        <MeasuredCanvas
+          ratio={ratio}
+          height={height}
+          maxHeight={maxHeight}
+          margin={margin}
+          ariaLabel={ariaLabel}
+          tableEl={tableOpen ? tableEl : null}
+          offerTable={setOffered}
+        >
           {children}
         </MeasuredCanvas>
         {/* On a touch screen there is no hover to reveal these, so they sit
             in a row of their own above the chart (see the stylesheet). */}
         <div className={styles.tools}>
+        {hasTable && (
+          <button
+            type="button"
+            className={`${styles.expandBtn} ${styles.tableBtn} ${tableOpen ? styles.tableBtnOn : ''}`}
+            onClick={toggleTable}
+            aria-expanded={tableOpen}
+            aria-controls={tableId}
+            aria-label="Show this chart's numbers as a table"
+            title={tableOpen ? 'Hide the table' : 'Show the numbers as a table'}
+          >
+            <TableIcon />
+          </button>
+        )}
         <button
           type="button"
           className={`${styles.expandBtn} ${styles.downloadBtn}`}
@@ -299,6 +347,18 @@ export function ChartFrame({
         </div>
       </div>
       {captionNode}
+      {/* Always in the document, so the button's aria-controls has a target. */}
+      {hasTable && (
+        <div
+          id={tableId}
+          ref={setTableEl}
+          className={styles.tableWrap}
+          hidden={!tableOpen}
+          role="region"
+          aria-label={`${shownTitle ?? 'Chart'}, as a table`}
+          tabIndex={0}
+        />
+      )}
 
       {expanded &&
         createPortal(
@@ -363,6 +423,20 @@ export function ChartFrame({
           document.fullscreenElement ?? document.body,
         )}
     </figure>
+  )
+}
+
+function TableIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+      <path
+        d="M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 

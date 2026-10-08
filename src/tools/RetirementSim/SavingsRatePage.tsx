@@ -227,6 +227,7 @@ export function SavingsRatePage({ intro = true }: { intro?: boolean } = {}) {
               xTickFormat={(v) => `${Math.round(v)}%`}
               yTickFormat={(v) => `${Math.round(v)}`}
               xHoverLabel={(v) => `${Math.round(v)}% savings rate`}
+              xName="Savings rate"
               hoverValueFormat={(v) => `age ${Math.round(v)}`}
               figure="Figure 1."
               caption={`Savings grow at ${workingR} while working and ${retiredRLabel} in retirement, starting at ${startAge}; the goal ${mode === 'returns' ? 'covers current spending from returns alone, forever' : `funds ${retYears} years of current spending`}. The curve bends: early points of savings rate buy the most years.`}

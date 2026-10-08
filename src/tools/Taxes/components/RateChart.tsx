@@ -219,6 +219,7 @@ function Inner({
         xScale={x}
         yScale={y}
         xLabel={(v) => `${formatUSDCompact(v)} gross income`}
+        xName="Gross income"
         series={[
           { label: 'Marginal rate', color: 'var(--c-accent)', y: (d: RatePoint) => d.marginal, format: (v) => formatPercent(v, 1) },
           { label: 'Effective rate', color: 'var(--c-series-1)', y: (d: RatePoint) => d.effective, format: (v) => formatPercent(v, 1) },

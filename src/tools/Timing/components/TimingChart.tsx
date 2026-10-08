@@ -121,6 +121,7 @@ function Inner({ points, bottoms }: { points: TimingPoint[]; bottoms: Bottom[] }
         xScale={x}
         yScale={y}
         xLabel={(v) => `${Math.floor(v)}`}
+        xName="Year"
         series={[
           {
             label: 'Buys every month',

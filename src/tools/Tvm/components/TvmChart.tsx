@@ -125,6 +125,7 @@ function Inner({ results, years }: { results: TvmResults; years: number }) {
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 0 ? 'Start' : `After ${formatYears(v)}`)}
+        xName="Time"
         series={[
           {
             label: isLoan ? 'Still owed' : 'Saved so far',

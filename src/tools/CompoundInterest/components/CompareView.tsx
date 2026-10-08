@@ -218,6 +218,7 @@ function CompareInner({
         xScale={x}
         yScale={y}
         xLabel={(v) => (v === 0 ? 'Start' : `After ${formatYears(v)}`)}
+        xName="Time"
         series={curves.map((c) => ({
           label: c.label,
           color: c.color,

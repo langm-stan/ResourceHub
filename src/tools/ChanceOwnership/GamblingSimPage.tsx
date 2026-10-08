@@ -164,6 +164,7 @@ function BettingStation() {
           ]}
           xTickFormat={(v) => `${Math.round(v)} bets`}
           xHoverLabel={(v) => (isPM ? `After ${Math.round(v)} trades` : `After ${Math.round(v)} bets`)}
+          xName={isPM ? 'Trades' : 'Bets'}
           ratio={0.42}
           maxHeight={520}
           figure="Figure 1."
