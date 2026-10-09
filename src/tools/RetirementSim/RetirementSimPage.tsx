@@ -45,7 +45,7 @@ const texRate = (p: number) => String(p / 100)
 /* ================= Part 2: Tax-Advantaged Accounts ================= */
 
 function AccountTaxation() {
-  const [earn, setEarn] = useState(3600)
+  const [earn, setEarn] = useState(7500)
   const [years, setYears] = useState(40)
   const [ret, setRet] = useState(6)
   const [taxNow, setTaxNow] = useState(30)
