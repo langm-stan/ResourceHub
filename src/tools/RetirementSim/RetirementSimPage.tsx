@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Callout, Card, MathSection, Slider, Stat, StepHeader, Tabs, type TabItem, textTone } from '../../design-system'
+import { Callout, Card, MathSection, SegmentedControl, Slider, Stat, StepHeader, Tabs, type TabItem, textTone } from '../../design-system'
 import { formatUSDWhole, texUSD } from '../../lib/format'
 // Shared with Chance & Ownership: same lesson family, same chart canvas.
 import { StationChart } from '../ChanceOwnership/components/StationChart'
@@ -44,7 +44,26 @@ const texRate = (p: number) => String(p / 100)
 
 /* ================= Part 2: Tax-Advantaged Accounts ================= */
 
+type AccountKey = 'taxable' | 'traditional' | 'roth'
+type AccountView = 'all' | 'trad-roth' | 'trad-taxable' | 'roth-taxable'
+
+/* Which accounts each comparison draws. */
+const ACCOUNT_VIEWS: Record<AccountView, AccountKey[]> = {
+  all: ['taxable', 'traditional', 'roth'],
+  'trad-roth': ['traditional', 'roth'],
+  'trad-taxable': ['taxable', 'traditional'],
+  'roth-taxable': ['taxable', 'roth'],
+}
+
+const ACCOUNTS: Record<AccountKey, { stat: string; legend: string; line: string; short: string; color: string; width: number }> = {
+  taxable: { stat: 'Taxable (taxed twice)', legend: 'taxable account', line: 'Taxable account', short: 'Taxable', color: SLATE, width: 2 },
+  traditional: { stat: 'Traditional (taxed on exit)', legend: 'Traditional 401(k)/IRA', line: 'Traditional 401(k)/IRA', short: 'Traditional', color: GOLD, width: 3 },
+  roth: { stat: 'Roth (taxed on entry)', legend: 'Roth', line: 'Roth', short: 'Roth', color: RED, width: 3 },
+}
+
 function AccountTaxation() {
+  const [view, setView] = useState<AccountView>('all')
+  const shown = ACCOUNT_VIEWS[view]
   const [earn, setEarn] = useState(7500)
   const [years, setYears] = useState(40)
   const [ret, setRet] = useState(6)
@@ -84,44 +103,61 @@ function AccountTaxation() {
         <Slider label="Tax rate today" value={taxNow} onChange={setTaxNow} min={0} max={50} step={1} editable suffix="%" />
         <Slider label="Tax rate in retirement" value={taxLater} onChange={setTaxLater} min={0} max={50} step={1} editable suffix="%" />
       </div>
+      <SegmentedControl
+        label="Accounts to compare"
+        options={[
+          { value: 'all', label: 'All three' },
+          { value: 'trad-roth', label: 'Traditional vs. Roth' },
+          { value: 'trad-taxable', label: 'Traditional vs. taxable' },
+          { value: 'roth-taxable', label: 'Roth vs. taxable' },
+        ]}
+        value={view}
+        onChange={setView}
+      />
       <div className={styles.stats}>
-        <Stat label="Taxable (taxed twice)" value={last.taxable} format={formatUSDWhole} accentColor={SLATE} animate={false} />
-        <Stat label="Traditional (taxed on exit)" value={last.traditional} format={formatUSDWhole} accentColor={GOLD} animate={false} />
-        <Stat label="Roth (taxed on entry)" value={last.roth} format={formatUSDWhole} accentColor={RED} animate={false} />
+        {shown.map((k) => (
+          <Stat key={k} label={ACCOUNTS[k].stat} value={last[k]} format={formatUSDWhole} accentColor={ACCOUNTS[k].color} animate={false} />
+        ))}
       </div>
       <div>
         <div className={styles.legend}>
-          <span style={{ color: textTone(RED) }}>&#9632; Roth</span>
-          <span style={{ color: textTone(GOLD) }}>&#9632; Traditional 401(k)/IRA</span>
-          <span style={{ color: textTone(SLATE) }}>&#9632; taxable account</span>
+          {[...shown].reverse().map((k) => (
+            <span key={k} style={{ color: textTone(ACCOUNTS[k].color) }}>&#9632; {ACCOUNTS[k].legend}</span>
+          ))}
         </div>
         <StationChart
           x={x}
           yMax={yMax}
           ratio={CHART_RATIO}
           maxHeight={CHART_MAX_HEIGHT}
-          lines={[
-            { ys: rows.map((r) => r.taxable), color: SLATE, width: 2, label: 'Taxable account' },
-            { ys: rows.map((r) => r.traditional), color: GOLD, width: 3, label: 'Traditional 401(k)/IRA' },
-            { ys: rows.map((r) => r.roth), color: RED, width: 3, label: 'Roth' },
-          ]}
+          lines={shown.map((k) => ({ ys: rows.map((r) => r[k]), color: ACCOUNTS[k].color, width: ACCOUNTS[k].width, label: ACCOUNTS[k].line }))}
           xTickFormat={(v) => `${Math.round(v)} yr`}
           xHoverLabel={(v) => `Year ${Math.round(v)}`}
           xName="Year"
           figure="Figure 1."
-          caption={`After-tax value of ${formatUSDWhole(earn)} of earnings saved each year in each account. The taxable account's returns are taxed every year at the retirement rate, a simplification: real brokerage accounts pay lower capital-gains rates and defer tax on gains until sale.`}
-          ariaLabel="After-tax value of taxable, traditional, and Roth accounts over time"
-          exportStats={[
-            { label: 'Taxable', value: formatUSDWhole(last.taxable), color: SLATE },
-            { label: 'Traditional', value: formatUSDWhole(last.traditional), color: GOLD },
-            { label: 'Roth', value: formatUSDWhole(last.roth), color: RED },
-          ]}
+          caption={`After-tax value of ${formatUSDWhole(earn)} of earnings saved each year in each account.${shown.includes('taxable') ? ` The taxable account's returns are taxed every year at the retirement rate, a simplification: real brokerage accounts pay lower capital-gains rates and defer tax on gains until sale.` : ''}`}
+          ariaLabel={`After-tax value of ${shown.map((k) => ACCOUNTS[k].short.toLowerCase()).join(' and ')} accounts over time`}
+          exportStats={shown.map((k) => ({ label: ACCOUNTS[k].short, value: formatUSDWhole(last[k]), color: ACCOUNTS[k].color }))}
         />
       </div>
-      <Callout tone="mark" label="Comparing the three accounts">
-        With equal tax rates today and in retirement, traditional and Roth tie; whichever period
-        has the lower rate favors that account. The taxable account trails both because yearly
-        taxes slow its compounding.
+      <Callout tone="mark" label={view === 'all' ? 'Comparing the three accounts' : 'Comparing the two accounts'}>
+        {view === 'all' ? (
+          <>
+            With equal tax rates today and in retirement, traditional and Roth tie; whichever period
+            has the lower rate favors that account. The taxable account trails both because yearly
+            taxes slow its compounding.
+          </>
+        ) : view === 'trad-roth' ? (
+          <>
+            With equal tax rates today and in retirement, traditional and Roth tie; whichever period
+            has the lower rate favors that account.
+          </>
+        ) : (
+          <>
+            The taxable account trails the {view === 'roth-taxable' ? 'Roth' : 'traditional'} account
+            because yearly taxes slow its compounding.
+          </>
+        )}
       </Callout>
 
       <div>
