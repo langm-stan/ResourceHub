@@ -241,7 +241,7 @@ const MARKS: Record<string, ReactElement> = {
     </Frame>
   ),
 
-  // 11 · Special Topics: Gambling, Bitcoin and Crypto
+  // 11 · Sports Betting and Gambling
   'gambling-sim': (
     <Frame>
       <rect x="8" y="8" width="24" height="24" {...quiet} />

@@ -264,10 +264,10 @@ const TOPICS: Topic[] = [
   },
   {
     id: 'special-topics',
-    title: 'Special Topics: Gambling, Bitcoin and Crypto',
-    short: 'Special Topics',
+    title: 'Sports Betting and Gambling',
+    short: 'Betting and Gambling',
     description:
-      'Betting and crypto: the odds, the prices, and how each compares with investing.',
+      'The odds of betting, and how gambling compares with investing.',
     tools: [
 {
         slug: 'gambling-sim',
@@ -281,13 +281,8 @@ const TOPICS: Topic[] = [
         description: 'The same weekly amount spent on gambling versus invested in an index fund.',
         keywords: ['gambling', 'investing', 'expected value', 'SPY', 'lottery', 'parlay', 'index fund', 'weekly habit'],
       },
-{
-        slug: 'bitcoin-mining',
-        label: 'Bitcoin Mining',
-        description:
-          "Bitcoin's price and volatility against the S&P 500, and a simulation of where new bitcoin comes from.",
-        keywords: ['bitcoin', 'blockchain', 'crypto', 'cryptocurrency', 'mining', 'hash', 'SHA-256', 'nonce', 'proof of work', 'ledger', 'digital currency', 'halving'],
-      },
+// Bitcoin Mining is hidden from the course. Its page still answers at
+      // /bitcoin-mining; put the entry back here to list it again.
     ],
   },
   {

@@ -49,7 +49,7 @@ const EIGHT: Topic[] = [
   },
   { title: 'Investing: Bonds, Stocks and Mutual Funds', units: ['markets'], figure: 'markets' },
   {
-    title: 'Special Topics: Gambling, Bitcoin and Crypto',
+    title: 'Sports Betting and Gambling',
     units: ['special-topics'],
     figure: 'special-topics',
   },
