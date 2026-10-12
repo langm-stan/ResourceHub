@@ -17,7 +17,7 @@ export interface Scenario {
 
 export const DEFAULT_SCENARIO: Scenario = {
   principal: 1000,
-  ratePct: 8,
+  ratePct: 6,
   years: 18,
   frequency: 'annual',
   mode: 'fv',
