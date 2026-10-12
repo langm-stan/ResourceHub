@@ -85,6 +85,13 @@
   align-items: start;
 }
 
+/* Tax-Advantaged Accounts: a label and its typed box share one line, and the
+   widest pair ("Contribution per year") needs 300px. Below that the box ran
+   into the next column, which is what 125% text size produced. */
+.controlsRowWide {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
 .controlStack {
   display: flex;
   flex-direction: column;
@@ -104,6 +111,14 @@
   flex-wrap: wrap;
   gap: var(--space-4) var(--space-6);
   align-items: baseline;
+}
+
+/* Equal columns, so the totals hold one row at larger text sizes and the
+   figures stay level when a label wraps. */
+.statsEven {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
 }
 
 .legend {

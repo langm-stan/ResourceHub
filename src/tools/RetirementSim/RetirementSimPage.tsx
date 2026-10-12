@@ -85,7 +85,7 @@ function AccountTaxation() {
         taxable account is taxed going in and on every year&rsquo;s returns, the traditional
         401(k) once at withdrawal, the Roth once going in.
       </p>
-      <div className={`${styles.controlsRow} fieldBand`}>
+      <div className={`${styles.controlsRow} ${styles.controlsRowWide} fieldBand`}>
         <Slider
           label="Contribution per year"
           value={earn}
@@ -114,7 +114,7 @@ function AccountTaxation() {
         value={view}
         onChange={setView}
       />
-      <div className={styles.stats}>
+      <div className={`${styles.stats} ${styles.statsEven}`}>
         {shown.map((k) => (
           <Stat key={k} label={ACCOUNTS[k].stat} value={last[k]} format={formatUSDWhole} accentColor={ACCOUNTS[k].color} animate={false} />
         ))}
