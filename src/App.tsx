@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from './components/Header'
-import Footer from './components/Footer'
+import Footer, { Disclaimer } from './components/Footer'
 import { AppHeaderSlot } from './components/AppHeader'
 import { FullscreenProvider } from './components/FullscreenProvider'
 import { useFramed } from './hooks/useFramed'
@@ -83,6 +83,9 @@ function App() {
         <main id="main" tabIndex={-1} className="outline-none">
           <Outlet />
         </main>
+        <footer className="max-w-7xl mx-auto px-6 pt-4 pb-6">
+          <Disclaimer />
+        </footer>
       </FullscreenProvider>
     )
   }

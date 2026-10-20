@@ -40,6 +40,24 @@ const POLICY_LINKS = [
   },
 ]
 
+/**
+ * The financial-advice disclaimer. The full site carries it in the footer;
+ * the framed and embedded views, which have no footer, carry it under the
+ * page. Draft wording, pending review by Stanford's Office of the General
+ * Counsel.
+ */
+export function Disclaimer({ className = '' }: { className?: string }) {
+  return (
+    <p className={`max-w-3xl text-xs leading-relaxed text-stone-600 ${className}`}>
+      The Personal Finance Toolkit is provided for educational purposes only and does not
+      constitute financial, investment, tax, or legal advice. Results are illustrations based on
+      simplified assumptions and the inputs you provide, and may not reflect your circumstances.
+      Tax rules, limits, and rates are as of 2026 and may change. Consult a qualified
+      professional before making financial decisions.
+    </p>
+  )
+}
+
 export function GlobalFooter() {
   return (
     <footer className="bg-cardinal text-white">
@@ -98,15 +116,7 @@ export default function Footer() {
               Initiative for Financial Decision-Making
             </span>
           </div>
-          {/* Draft wording, pending review by Stanford's Office of the
-              General Counsel. */}
-          <p className="mt-3 max-w-3xl text-xs leading-relaxed text-stone-600">
-            The Personal Finance Toolkit is provided for educational purposes only and does not
-            constitute financial, investment, tax, or legal advice. Results are illustrations based
-            on simplified assumptions and the inputs you provide, and may not reflect your
-            circumstances. Tax rules, limits, and rates are as of 2026 and may change. Consult a
-            qualified professional before making financial decisions.
-          </p>
+          <Disclaimer className="mt-3" />
         </div>
       </div>
       <GlobalFooter />
