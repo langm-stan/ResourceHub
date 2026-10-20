@@ -98,6 +98,15 @@ export default function Footer() {
               Initiative for Financial Decision-Making
             </span>
           </div>
+          {/* Draft wording, pending review by Stanford's Office of the
+              General Counsel. */}
+          <p className="mt-3 max-w-3xl text-xs leading-relaxed text-stone-600">
+            The Personal Finance Toolkit is provided for educational purposes only and does not
+            constitute financial, investment, tax, or legal advice. Results are illustrations based
+            on simplified assumptions and the inputs you provide, and may not reflect your
+            circumstances. Tax rules, limits, and rates are as of 2026 and may change. Consult a
+            qualified professional before making financial decisions.
+          </p>
         </div>
       </div>
       <GlobalFooter />

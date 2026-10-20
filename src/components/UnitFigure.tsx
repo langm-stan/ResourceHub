@@ -89,14 +89,16 @@ const FIGURES: Record<string, ReactElement[]> = {
     />,
     base,
   ],
-  // The same idea with the swings turned up.
+  // A bettor's balance at house odds: wins along the way, but the edge
+  // takes it down below the stake it started from.
   'special-topics': [
-    <path key="q" d="M8 56 L232 36" {...quiet} />,
+    <path key="q" d="M8 16 H232" strokeDasharray="3 5" {...quiet} />,
     <path
       key="a"
-      d="M8 50 L26 30 L40 56 L60 14 L78 48 L100 22 L118 60 L140 10 L160 44 L184 20 L206 52 L232 16"
+      d="M8 16 L22 26 L34 12 L50 30 L64 22 L80 38 L94 28 L110 44 L126 36 L142 50 L158 42 L176 56 L194 50 L212 60 L232 58"
       {...accent}
     />,
+    base,
   ],
   // The brackets, as steps.
   taxes: [
