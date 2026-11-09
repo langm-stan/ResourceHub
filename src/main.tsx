@@ -12,6 +12,7 @@ import App from './App.tsx'
 import FinancialStatements from './pages/FinancialStatements.tsx'
 import TeacherTraining from './pages/TeacherTraining.tsx'
 import TeacherTrainingSection from './pages/TeacherTrainingSection.tsx'
+import { countPage } from './lib/visitCounter'
 
 // One route per teacher training section; the component maps slugs to the
 // shared tool content.
@@ -103,10 +104,20 @@ function ScrollToTop() {
   return null
 }
 
+/* Count a visit each time the visitor opens a page (see lib/visitCounter). */
+function CountPageViews() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    countPage(pathname)
+  }, [pathname])
+  return null
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
       <ScrollToTop />
+      <CountPageViews />
       <Routes>
         <Route element={<App />}>
           <Route index element={<TeacherTraining />} />
