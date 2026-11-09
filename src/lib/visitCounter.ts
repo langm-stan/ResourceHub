@@ -12,7 +12,7 @@
 import { isNativeApp } from './nativeApp'
 
 /** The site code chosen at signup (the "xxx" in xxx.goatcounter.com). Empty turns counting off. */
-const GOATCOUNTER_CODE = 'ifdm-toolkit'
+const GOATCOUNTER_CODE: string = 'ifdm-toolkit'
 
 declare global {
   interface Window {
