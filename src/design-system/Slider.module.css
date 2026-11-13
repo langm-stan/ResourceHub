@@ -141,6 +141,20 @@
   align-self: start;
 }
 
+/* On a phone a field can be narrower than its label and typed box together.
+   The box then drops to its own line under the label, at the right edge,
+   instead of running past the edge of the field. */
+@media (max-width: 480px) {
+  .top {
+    flex-wrap: wrap;
+    row-gap: var(--space-1);
+  }
+  .inputWrap,
+  .readout {
+    margin-left: auto;
+  }
+}
+
 /* A finger needs more to land on than a mouse pointer does. */
 @media (pointer: coarse) {
   .readInput {

@@ -78,18 +78,22 @@
   padding: var(--space-5);
 }
 
+/* A label and its typed box share one line, and the widest pair needs 300px
+   ("Retirement income goal" beside "$ 70,000 /yr"). At the old 220px floor a
+   laptop-width window made three columns of about 230px, and each box ran
+   into the next column. The min() keeps a phone narrower than 300px from
+   scrolling sideways. */
 .controlsRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: var(--space-4) var(--space-6);
   align-items: start;
 }
 
-/* Tax-Advantaged Accounts: a label and its typed box share one line, and the
-   widest pair ("Contribution per year") needs 300px. Below that the box ran
-   into the next column, which is what 125% text size produced. */
+/* Kept for Tax-Advantaged Accounts, which asked for the 300px floor first;
+   every band in this file now has it. */
 .controlsRowWide {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 }
 
 .controlStack {
