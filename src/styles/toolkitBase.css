@@ -111,6 +111,16 @@ textarea {
   grid-row: span 3;
 }
 
+/* A safety net for narrow columns. A word too long for its box (a label, a
+   tab, a table cell) breaks inside the box instead of running into the next
+   column. It changes nothing where the word fits. */
+main label,
+main button,
+main th,
+main td {
+  overflow-wrap: break-word;
+}
+
 html[data-present='75'] main {
   zoom: 0.75;
 }

@@ -91,6 +91,22 @@
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-primary);
+  /* Never wider than its tab: a word that still doesn't fit breaks inside. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Five tabs across a narrow column leave "Introducing" no room at 17px. */
+.steps {
+  container-type: inline-size;
+}
+@container (max-width: 560px) {
+  .stepTab {
+    padding: 10px 4px;
+  }
+  .stepName {
+    font-size: 13px;
+  }
 }
 
 .stepTab[aria-current='step'] .stepNo {

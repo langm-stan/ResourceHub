@@ -46,6 +46,12 @@ export function Slider({
   // While the user types, the field shows their raw draft; otherwise the
   // committed value, grouped for readability.
   const [draft, setDraft] = useState<string | null>(null)
+  // The typed box is as wide as the longest value it accepts (years: 3
+  // digits, not 9), so a label and its box fit in a narrower column.
+  const cap = Math.floor(inputMax ?? max)
+  const longest =
+    (plain ? String(cap) : cap.toLocaleString('en-US')).length + (precision > 0 ? precision + 1 : 0)
+  const inputWidth = `${Math.min(9, Math.max(3, longest)) + 0.5}ch`
 
   function commit(raw: string) {
     setDraft(null)
@@ -69,6 +75,7 @@ export function Slider({
             <input
               className={`${styles.readInput} tnum`}
               inputMode="decimal"
+              style={{ width: inputWidth }}
               value={draft ?? (plain ? String(value) : value.toLocaleString('en-US'))}
               aria-label={label}
               onFocus={(e) => {
